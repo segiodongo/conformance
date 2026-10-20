@@ -1,0 +1,2007 @@
+{
+  "about": "Step 9 review of uncertain rules. Keyed by file and text_digest, so decisions survive ID renumbering. Groups: A found only through capitals, B testable with no actor, C business rule on an MCP/A2A/embedded page, E attributed to 'the extension' or 'implementations'.",
+  "reviewed_against": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1",
+  "confirmed": "2026-10-20",
+  "decisions": [
+    {
+      "file": "docs/specification/shopping/cart/embedded.md",
+      "text_digest": "6d177cbebb",
+      "id_at_review": "REQ-SHOPPING-CART-EP-PER-CART-CONFIGURATION-01",
+      "groups": "C",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible in REST cart responses; applies only to businesses that offer embedded cart"
+    },
+    {
+      "file": "docs/specification/shopping/cart/embedded.md",
+      "text_digest": "3bfce93152",
+      "id_at_review": "REQ-SHOPPING-CART-EP-LOADING-AN-EMBEDDED-CART-01",
+      "groups": "C",
+      "verdict": "rule",
+      "actor": "HOST",
+      "testable": false,
+      "reason": "permission for the host, the sentence's subject"
+    },
+    {
+      "file": "docs/specification/shopping/cart/index.md",
+      "text_digest": "94c63ccb74",
+      "id_at_review": "REQ-SHOPPING-CART-CART-TO-CHECKOUT-01",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform"
+    },
+    {
+      "file": "docs/specification/shopping/cart/index.md",
+      "text_digest": "f2b0ac0e44",
+      "id_at_review": "REQ-SHOPPING-CART-CART-TO-CHECKOUT-02",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform",
+      "note": "spec typo: cart/index.md repeats 'array (`\"line_items\": []`).' across lines 68-69"
+    },
+    {
+      "file": "docs/specification/shopping/cart/index.md",
+      "text_digest": "cbf1d2e8f8",
+      "id_at_review": "REQ-SHOPPING-CART-CART-TO-CHECKOUT-03",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "a checkout created from a cart reflects the cart's contents"
+    },
+    {
+      "file": "docs/specification/shopping/cart/index.md",
+      "text_digest": "224effb21d",
+      "id_at_review": "REQ-SHOPPING-CART-CART-TO-CHECKOUT-04",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible: conflicting checkout fields are ignored"
+    },
+    {
+      "file": "docs/specification/shopping/cart/index.md",
+      "text_digest": "806cb9a689",
+      "id_at_review": "REQ-SHOPPING-CART-CART-TO-CHECKOUT-05",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible: the same checkout ID comes back"
+    },
+    {
+      "file": "docs/specification/shopping/cart/index.md",
+      "text_digest": "7bceaecc6b",
+      "id_at_review": "REQ-SHOPPING-CART-CART-TO-CHECKOUT-06",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "business behaviour, but 'linked' is only visible indirectly (through the next rule)"
+    },
+    {
+      "file": "docs/specification/shopping/cart/index.md",
+      "text_digest": "c0e93a9c7b",
+      "id_at_review": "REQ-SHOPPING-CART-CART-TO-CHECKOUT-07",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible: the cart reflects checkout changes"
+    },
+    {
+      "file": "docs/specification/shopping/cart/index.md",
+      "text_digest": "eb1bb7f6a1",
+      "id_at_review": "REQ-SHOPPING-CART-CART-TO-CHECKOUT-08",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "permission; visible when used"
+    },
+    {
+      "file": "docs/specification/shopping/cart/index.md",
+      "text_digest": "1376be1e26",
+      "id_at_review": "REQ-SHOPPING-CART-CREATE-CART-01",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "permission; visible when used"
+    },
+    {
+      "file": "docs/specification/shopping/cart/index.md",
+      "text_digest": "6e0bf927e2",
+      "id_at_review": "REQ-SHOPPING-CART-CANCEL-CART-01",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible in the cancel response"
+    },
+    {
+      "file": "docs/specification/shopping/cart/index.md",
+      "text_digest": "0fbda2ac13",
+      "id_at_review": "REQ-SHOPPING-CART-CANCEL-CART-02",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible: later calls return not_found"
+    },
+    {
+      "file": "docs/specification/shopping/cart/index.md",
+      "text_digest": "d17ebc6153",
+      "id_at_review": "REQ-SHOPPING-CART-SIGNALS-01",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "signals are supplied by the platform ('platforms provide signals', checkout page)"
+    },
+    {
+      "file": "docs/specification/shopping/cart/index.md",
+      "text_digest": "e0b70c9533",
+      "id_at_review": "REQ-SHOPPING-CART-TOTAL-01",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "permission on the totals the business returns"
+    },
+    {
+      "file": "docs/specification/shopping/cart/index.md",
+      "text_digest": "c4f79c54ee",
+      "id_at_review": "REQ-SHOPPING-CART-TOTAL-02",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform"
+    },
+    {
+      "file": "docs/specification/shopping/cart/rest.md",
+      "text_digest": "017f445b50",
+      "id_at_review": "REQ-SHOPPING-CART-REST-CONTENT-TYPES-01",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "binds both sides; the response half is visible"
+    },
+    {
+      "file": "docs/specification/shopping/cart/rest.md",
+      "text_digest": "86f31bc40b",
+      "id_at_review": "REQ-SHOPPING-CART-REST-TRANSPORT-SECURITY-01",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible: the endpoint's TLS version",
+      "note": "the local sample server serves plain HTTP, so it fails this"
+    },
+    {
+      "file": "docs/specification/shopping/cart/rest.md",
+      "text_digest": "9655f6d29f",
+      "id_at_review": "REQ-SHOPPING-CART-REST-AUTHENTICATION-01",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": false,
+      "reason": "a menu of allowed authentication methods; nothing a test can fail"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/index.md",
+      "text_digest": "40b521f2a3",
+      "id_at_review": "REQ-SHOPPING-CATALOG-RELATIONSHIP-TO-CHECKOUT-01",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "about consumers reusing responses"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/index.md",
+      "text_digest": "96e978ebd7",
+      "id_at_review": "REQ-SHOPPING-CATALOG-CONTEXT-01",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/index.md",
+      "text_digest": "35b444ee45",
+      "id_at_review": "REQ-SHOPPING-CATALOG-CONTEXT-02",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible in results when no address is given (weakly)"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/index.md",
+      "text_digest": "e137bb0b98",
+      "id_at_review": "REQ-SHOPPING-CATALOG-CONTEXT-03",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": false,
+      "reason": "an internal ranking decision; nothing visible to check"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/index.md",
+      "text_digest": "d647a85835",
+      "id_at_review": "REQ-SHOPPING-CATALOG-CONTEXT-04",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": false,
+      "reason": "about where the business enforces policy; no specific response to check"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/index.md",
+      "text_digest": "d33d7257de",
+      "id_at_review": "REQ-SHOPPING-CATALOG-CONTEXT-05",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible: price filters in another currency"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/index.md",
+      "text_digest": "d17ebc6153",
+      "id_at_review": "REQ-SHOPPING-CATALOG-SIGNALS-01",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "signals are supplied by the platform"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/index.md",
+      "text_digest": "50fd9f9ad5",
+      "id_at_review": "REQ-SHOPPING-CATALOG-MEDIA-02",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "'it' is the platform presenting media"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/index.md",
+      "text_digest": "972c1b040c",
+      "id_at_review": "REQ-SHOPPING-CATALOG-EXTERNAL-VIDEO-02",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "'it' is the platform embedding a video"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/index.md",
+      "text_digest": "9525c6155e",
+      "id_at_review": "REQ-SHOPPING-CATALOG-ACTIONS-02",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "SPEC_AUTHORS",
+      "testable": false,
+      "reason": "aimed at authors of Action-type contracts"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/index.md",
+      "text_digest": "1532082837",
+      "id_at_review": "REQ-SHOPPING-CATALOG-ACTIONS-03",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "SPEC_AUTHORS",
+      "testable": false,
+      "reason": "aimed at authors of Action-type contracts"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/index.md",
+      "text_digest": "950a55324b",
+      "id_at_review": "REQ-SHOPPING-CATALOG-MESSAGE-TYPES-01",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "AGENT",
+      "testable": false,
+      "reason": "aimed at agents"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/index.md",
+      "text_digest": "440c8529d2",
+      "id_at_review": "REQ-SHOPPING-CATALOG-IDENTIFIERS-NOT-FOUND-01",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "permission on response content",
+      "note": "the same sentence appears 4 more times on catalog rest.md and mcp.md"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/lookup.md",
+      "text_digest": "05e08eb33c",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-OPERATIONS-01",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "permission; a table-cell restatement of the lookup identifier rules"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/lookup.md",
+      "text_digest": "4d7409c0dd",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-SUPPORTED-IDENTIFIERS-01",
+      "groups": "AE",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "'implementations' are the business's server"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/lookup.md",
+      "text_digest": "bb0139a517",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-SUPPORTED-IDENTIFIERS-02",
+      "groups": "AE",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "permission; visible when used"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/lookup.md",
+      "text_digest": "fddacf45d0",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-SUPPORTED-IDENTIFIERS-03",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "the server deduplicates; visible in the response"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/lookup.md",
+      "text_digest": "1976ef2539",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-SUPPORTED-IDENTIFIERS-04",
+      "groups": "AE",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "permission; visible when used"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/lookup.md",
+      "text_digest": "25191003c1",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-SUPPORTED-IDENTIFIERS-05",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible in the response"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/lookup.md",
+      "text_digest": "67d7d28db3",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-CLIENT-CORRELATION-01",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible in the response"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/lookup.md",
+      "text_digest": "0bedb69a17",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-BATCH-SIZE-01",
+      "groups": "AE",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible: send 10 identifiers"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/lookup.md",
+      "text_digest": "1531d8ed95",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-BATCH-SIZE-02",
+      "groups": "AE",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "permission; visible through the error"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/lookup.md",
+      "text_digest": "160c793a93",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-BATCH-SIZE-03",
+      "groups": "AE",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible: HTTP 400 request_too_large"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/lookup.md",
+      "text_digest": "2d2516174f",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-RESOLUTION-BEHAVIOR-01",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "response content"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/lookup.md",
+      "text_digest": "00e5f417b1",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-RESOLUTION-BEHAVIOR-02",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "response content"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/lookup.md",
+      "text_digest": "50e0b6763f",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-INPUT-01",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "constrains the `selected` input the client sends"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/lookup.md",
+      "text_digest": "f39f08283c",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-OUTPUT-EFFECTIVE-01",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "response content"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/lookup.md",
+      "text_digest": "cc0f65f541",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-OUTPUT-EFFECTIVE-02",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "permission on response content"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/lookup.md",
+      "text_digest": "515545af2a",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-OUTPUT-AVAILABILITY-01",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "response content"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/mcp.md",
+      "text_digest": "440c8529d2",
+      "id_at_review": "REQ-SHOPPING-CATALOG-MCP-PARTIAL-SUCCESS-01",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": false,
+      "reason": "MCP binding; the REST page states the same rule"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/mcp.md",
+      "text_digest": "440c8529d2",
+      "id_at_review": "REQ-SHOPPING-CATALOG-MCP-EXAMPLE-ALL-PRODUCTS-NOT-01",
+      "groups": "AC",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": false,
+      "reason": "MCP binding; the REST page states the same rule"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/mcp.md",
+      "text_digest": "6e5b8536e3",
+      "id_at_review": "REQ-SHOPPING-CATALOG-MCP-CONFORMANCE-02",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": false,
+      "reason": "MCP binding"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/mcp.md",
+      "text_digest": "f9a2cc0384",
+      "id_at_review": "REQ-SHOPPING-CATALOG-MCP-CONFORMANCE-03",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": false,
+      "reason": "MCP binding"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/rest.md",
+      "text_digest": "440c8529d2",
+      "id_at_review": "REQ-SHOPPING-CATALOG-REST-EXAMPLE-PARTIAL-SUCCESS-01",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "permission on REST response content"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/rest.md",
+      "text_digest": "440c8529d2",
+      "id_at_review": "REQ-SHOPPING-CATALOG-REST-EXAMPLE-ALL-PRODUCTS-NOT-01",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "permission on REST response content"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/rest.md",
+      "text_digest": "350f72606a",
+      "id_at_review": "REQ-SHOPPING-CATALOG-REST-CONFORMANCE-01",
+      "groups": "E",
+      "verdict": "not a rule",
+      "actor": "BUSINESS",
+      "testable": false,
+      "reason": "lead-in to a list; the obligations are the list items"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/rest.md",
+      "text_digest": "35a3e3f4dd",
+      "id_at_review": "REQ-SHOPPING-CATALOG-REST-CONFORMANCE-02",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible: both endpoints respond"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/rest.md",
+      "text_digest": "f52390f942",
+      "id_at_review": "REQ-SHOPPING-CATALOG-REST-CONFORMANCE-03",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible: HTTP 200 with fewer products",
+      "level": "MUST",
+      "note": "the list's lead-in makes this a MUST; extracted as MAY"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/search.md",
+      "text_digest": "40c24b8fcb",
+      "id_at_review": "REQ-SHOPPING-CATALOG-SEARCH-SEARCH-SEARCH-INPUTS-01",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "constrains the request"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/search.md",
+      "text_digest": "00372ac58e",
+      "id_at_review": "REQ-SHOPPING-CATALOG-SEARCH-SEARCH-SEARCH-INPUTS-02",
+      "groups": "AE",
+      "verdict": "rule",
+      "actor": "SPEC_AUTHORS",
+      "testable": false,
+      "reason": "aimed at extension authors"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/search.md",
+      "text_digest": "eb6fa97298",
+      "id_at_review": "REQ-SHOPPING-CATALOG-SEARCH-SEARCH-SEARCH-INPUTS-03",
+      "groups": "AE",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible: an empty request is rejected"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/search.md",
+      "text_digest": "b25650806a",
+      "id_at_review": "REQ-SHOPPING-CATALOG-SEARCH-SEARCH-SEARCH-INPUTS-04",
+      "groups": "AE",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible: an error for an empty or invalid request"
+    },
+    {
+      "file": "docs/specification/shopping/catalog/search.md",
+      "text_digest": "a4f12b4af8",
+      "id_at_review": "REQ-SHOPPING-CATALOG-SEARCH-SEARCH-SEARCH-FILTERS-01",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "permission; visible when used"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/embedded.md",
+      "text_digest": "d3a16bd983",
+      "id_at_review": "REQ-CHECKOUT-EP-PER-CHECKOUT-01",
+      "groups": "C",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible in REST checkout responses; applies only to businesses that offer embedded checkout"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/embedded.md",
+      "text_digest": "81afb6fb27",
+      "id_at_review": "REQ-CHECKOUT-EP-AUTHENTICATION-01",
+      "groups": "C",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": false,
+      "reason": "documentation; not visible through the API"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/embedded.md",
+      "text_digest": "e5b5268361",
+      "id_at_review": "REQ-CHECKOUT-EP-AUTHENTICATION-02",
+      "groups": "C",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": false,
+      "reason": "internal policy in the embedded flow"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/embedded.md",
+      "text_digest": "1e3b81573d",
+      "id_at_review": "REQ-CHECKOUT-EP-COLOR-SCHEME-04",
+      "groups": "C",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": false,
+      "reason": "embedded checkout UI behaviour"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/embedded.md",
+      "text_digest": "2c534b146e",
+      "id_at_review": "REQ-CHECKOUT-EP-DELEGATION-NEGOTIATION-02",
+      "groups": "C",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": false,
+      "reason": "embedded protocol negotiation, not REST"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/embedded.md",
+      "text_digest": "bf3f2784f2",
+      "id_at_review": "REQ-CHECKOUT-EP-DELEGATION-NEGOTIATION-03",
+      "groups": "C",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": false,
+      "reason": "embedded protocol message"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/embedded.md",
+      "text_digest": "99e001b8a5",
+      "id_at_review": "REQ-CHECKOUT-EP-EC-TOTALS-CHANGE-01",
+      "groups": "C",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": false,
+      "reason": "embedded protocol message"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/embedded.md",
+      "text_digest": "5023f77e0f",
+      "id_at_review": "REQ-CHECKOUT-EP-EC-TOTALS-CHANGE-02",
+      "groups": "C",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": false,
+      "reason": "embedded protocol message"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/embedded.md",
+      "text_digest": "8f97f24d67",
+      "id_at_review": "REQ-CHECKOUT-EP-PREVENTION-OF-01",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "HOST",
+      "testable": false,
+      "reason": "aimed at the host"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "369ccf093d",
+      "id_at_review": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-07",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "permission on response content"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "dec45589b9",
+      "id_at_review": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-10",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "response content when the business revises a quantity"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "8becb2a472",
+      "id_at_review": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-13",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "response content"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "da38167665",
+      "id_at_review": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-18",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "permission; visible when used"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "bbea25f035",
+      "id_at_review": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-20",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "permission on response content"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "af51ddc764",
+      "id_at_review": "REQ-CHECKOUT-STATUS-VALUES-01",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "response content"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "68730700a3",
+      "id_at_review": "REQ-CHECKOUT-ERROR-HANDLING-01",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "message severity in responses"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "f88ead9106",
+      "id_at_review": "REQ-CHECKOUT-THE-PATH-FIELD-01",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "message path in responses"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "a3efff7283",
+      "id_at_review": "REQ-CHECKOUT-THE-PATH-FIELD-02",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "message path in responses"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "90b3974648",
+      "id_at_review": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-02",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible: completion is blocked until claims resolve"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "ab6a714be7",
+      "id_at_review": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-03",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible: the checkout isn't blocked"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "7ace1fe265",
+      "id_at_review": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-06",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible: error code eligibility_invalid"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "daf94805c3",
+      "id_at_review": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-11",
+      "groups": "E",
+      "verdict": "rule",
+      "actor": "SPEC_AUTHORS",
+      "testable": false,
+      "reason": "defers to each extension's own rules; nothing to check here"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "c00cb541a5",
+      "id_at_review": "REQ-CHECKOUT-EXAMPLE-RESOLVING-A-01",
+      "groups": "B",
+      "verdict": "not a rule",
+      "actor": "BUSINESS",
+      "testable": false,
+      "reason": "narration inside a worked example"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "f1104000fd",
+      "id_at_review": "REQ-CHECKOUT-WARNING-PRESENTATION-02",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "Warning Presentation table: how platforms render warnings"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "2c5d9d6629",
+      "id_at_review": "REQ-CHECKOUT-WARNING-PRESENTATION-03",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "Warning Presentation table: how platforms render warnings"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "16da19e571",
+      "id_at_review": "REQ-CHECKOUT-WARNING-PRESENTATION-04",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "Warning Presentation table: how platforms render warnings"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "3214a8b4f3",
+      "id_at_review": "REQ-CHECKOUT-WARNING-PRESENTATION-05",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "Warning Presentation table: how platforms render warnings"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "f2580192f4",
+      "id_at_review": "REQ-CHECKOUT-WARNING-PRESENTATION-06",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "Warning Presentation table: how platforms render warnings"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "454e178f36",
+      "id_at_review": "REQ-CHECKOUT-WARNING-PRESENTATION-07",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "Warning Presentation table: how platforms render warnings"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "164a7d0bf1",
+      "id_at_review": "REQ-CHECKOUT-WARNING-PRESENTATION-08",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "Warning Presentation table: how platforms render warnings"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "22696563a2",
+      "id_at_review": "REQ-CHECKOUT-WARNING-PRESENTATION-09",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "Warning Presentation table: how platforms render warnings"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "1d6897ff8a",
+      "id_at_review": "REQ-CHECKOUT-WARNING-PRESENTATION-10",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "Warning Presentation table: how platforms render warnings"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "93029fc74c",
+      "id_at_review": "REQ-CHECKOUT-WARNING-PRESENTATION-11",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "Warning Presentation table: how platforms render warnings"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "d8320eb452",
+      "id_at_review": "REQ-CHECKOUT-WARNING-PRESENTATION-12",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "Warning Presentation table: how platforms render warnings"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "6f25efb860",
+      "id_at_review": "REQ-CHECKOUT-DISCLOSURE-01",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "rendering contract for platforms"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "0263f18adb",
+      "id_at_review": "REQ-CHECKOUT-DISCLOSURE-07",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "rendering priority for platforms"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "ec3bac66a2",
+      "id_at_review": "REQ-CHECKOUT-AVAILABILITY-03",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "response content"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "e6f81fd0dd",
+      "id_at_review": "REQ-CHECKOUT-FORMAT-01",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "response content"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "a1b795b70e",
+      "id_at_review": "REQ-CHECKOUT-FORMAT-02",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": false,
+      "reason": "needs a browser handoff; not visible in API responses"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "0c5c2c4998",
+      "id_at_review": "REQ-CHECKOUT-COMPLETE-CHECKOUT-06",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "the platform chooses idempotency keys"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "56dd9d5db0",
+      "id_at_review": "REQ-CHECKOUT-COMPLETE-CHECKOUT-07",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": false,
+      "reason": "describes how the business may build the order; nothing a test can fail"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "1929627a42",
+      "id_at_review": "REQ-CHECKOUT-CANCEL-CHECKOUT-02",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible: cancel succeeds"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "35b444ee45",
+      "id_at_review": "REQ-CHECKOUT-CONTEXT-01",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible in results when no address is given (weakly)"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "e137bb0b98",
+      "id_at_review": "REQ-CHECKOUT-CONTEXT-02",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": false,
+      "reason": "an internal ranking decision; nothing visible to check"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "d647a85835",
+      "id_at_review": "REQ-CHECKOUT-CONTEXT-03",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": false,
+      "reason": "about where the business enforces policy; no specific response to check"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "916a488164",
+      "id_at_review": "REQ-CHECKOUT-SIGNALS-01",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "platforms provide signals (the extractor read 'buyer')"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "633738379e",
+      "id_at_review": "REQ-CHECKOUT-RENDERING-CONTRACT-01",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "9686f34d66",
+      "id_at_review": "REQ-CHECKOUT-RENDERING-CONTRACT-02",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "ed6e5e1a5e",
+      "id_at_review": "REQ-CHECKOUT-RENDERING-CONTRACT-03",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "78eb4e97bf",
+      "id_at_review": "REQ-CHECKOUT-RENDERING-CONTRACT-04",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "debd639454",
+      "id_at_review": "REQ-CHECKOUT-RENDERING-CONTRACT-05",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "totals content"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "d725369b04",
+      "id_at_review": "REQ-CHECKOUT-RENDERING-CONTRACT-06",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "totals content"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "749321cc43",
+      "id_at_review": "REQ-CHECKOUT-RENDERING-CONTRACT-07",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "totals content"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "bcc53c3234",
+      "id_at_review": "REQ-CHECKOUT-VERIFICATION-01",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "8771b7a275",
+      "id_at_review": "REQ-CHECKOUT-VERIFICATION-02",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "287b81954f",
+      "id_at_review": "REQ-CHECKOUT-VERIFICATION-03",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "594b999c87",
+      "id_at_review": "REQ-CHECKOUT-VERIFICATION-04",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "b43edb9f37",
+      "id_at_review": "REQ-CHECKOUT-VERIFICATION-05",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "67b450f295",
+      "id_at_review": "REQ-CHECKOUT-WELL-KNOWN-TYPES-01",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "6e36252844",
+      "id_at_review": "REQ-CHECKOUT-WELL-KNOWN-TYPES-02",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "df0becb156",
+      "id_at_review": "REQ-CHECKOUT-WELL-KNOWN-TYPES-03",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "totals content"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "cf4dce95bc",
+      "id_at_review": "REQ-CHECKOUT-WELL-KNOWN-TYPES-04",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "totals content"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "26a6f1432c",
+      "id_at_review": "REQ-CHECKOUT-WELL-KNOWN-TYPES-05",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "permission on totals content"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "3ff1a76ae8",
+      "id_at_review": "REQ-CHECKOUT-WELL-KNOWN-TYPES-06",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "totals content",
+      "note": "same rule as REQ-CHECKOUT-RENDERING-CONTRACT-05"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "2440b50ae1",
+      "id_at_review": "REQ-CHECKOUT-REPEATING-TYPES-01",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "permission on totals content"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "c933a8a798",
+      "id_at_review": "REQ-CHECKOUT-SUB-LINES-LINES-01",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "permission on totals content"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "c49ea1cbba",
+      "id_at_review": "REQ-CHECKOUT-SUB-LINES-LINES-02",
+      "groups": "AB",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "totals content"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "880a06d004",
+      "id_at_review": "REQ-CHECKOUT-SUB-LINES-LINES-03",
+      "groups": "A",
+      "verdict": "not a rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "describes the rendering split; the obligations are the platform rendering rules"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "57a1e5693e",
+      "id_at_review": "REQ-CHECKOUT-SUB-LINES-LINES-04",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/mcp.md",
+      "text_digest": "35bccf4f4a",
+      "id_at_review": "REQ-CHECKOUT-MCP-UPDATE-CHECKOUT-02",
+      "groups": "C",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": false,
+      "reason": "MCP binding; the REST page states the same rule"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/rest.md",
+      "text_digest": "017f445b50",
+      "id_at_review": "REQ-CHECKOUT-REST-CONTENT-TYPES-01",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "binds both sides; the response half is visible"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/rest.md",
+      "text_digest": "86f31bc40b",
+      "id_at_review": "REQ-CHECKOUT-REST-TRANSPORT-SECURITY-01",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible: the endpoint's TLS version",
+      "note": "the local sample server serves plain HTTP, so it fails this"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/rest.md",
+      "text_digest": "2b1505e5e0",
+      "id_at_review": "REQ-CHECKOUT-REST-REQUEST-SIGNING-01",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "about the requests the platform signs"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/rest.md",
+      "text_digest": "833d001a11",
+      "id_at_review": "REQ-CHECKOUT-REST-RESPONSE-SIGNING-01",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible: response signature headers"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/rest.md",
+      "text_digest": "eb1ea646bd",
+      "id_at_review": "REQ-CHECKOUT-REST-RESPONSE-SIGNING-02",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "permission; visible when used"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/rest.md",
+      "text_digest": "9655f6d29f",
+      "id_at_review": "REQ-CHECKOUT-REST-AUTHENTICATION-01",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": false,
+      "reason": "a menu of allowed authentication methods; nothing a test can fail"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/buyer-consent.md",
+      "text_digest": "e83d2886ae",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-SCHEMA-COMPOSITION-01",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/buyer-consent.md",
+      "text_digest": "c9f256df93",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-DATA-DEPENDENCIES-01",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "warning messages in responses"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/buyer-consent.md",
+      "text_digest": "847433efb5",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-DATA-DEPENDENCIES-02",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible: completion is refused"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/buyer-consent.md",
+      "text_digest": "ad6ce21b41",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-DATA-DEPENDENCIES-03",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "the business surfaces them (the extractor read 'buyer')"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/buyer-consent.md",
+      "text_digest": "0a45016c80",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-01",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "the advertisement is visible; its completeness can't be verified"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/buyer-consent.md",
+      "text_digest": "226370a92e",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-02",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/buyer-consent.md",
+      "text_digest": "13c85fda79",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-03",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/buyer-consent.md",
+      "text_digest": "0251ef1234",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-04",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/buyer-consent.md",
+      "text_digest": "4bdc908f46",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-05",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "about the consent map the platform submits (the extractor read 'buyer')"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/buyer-consent.md",
+      "text_digest": "7affd65168",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-06",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible: unadvertised entries are ignored"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/buyer-consent.md",
+      "text_digest": "7918cf85e6",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-07",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/buyer-consent.md",
+      "text_digest": "9ea5b9f143",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-08",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/buyer-consent.md",
+      "text_digest": "d0e9b52bdd",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-09",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/buyer-consent.md",
+      "text_digest": "72244fd689",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-10",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/buyer-consent.md",
+      "text_digest": "6b49f63890",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-11",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/buyer-consent.md",
+      "text_digest": "40c2df7171",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-12",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/buyer-consent.md",
+      "text_digest": "047c97c48a",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-13",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/discount.md",
+      "text_digest": "75a607ee1b",
+      "id_at_review": "REQ-SHOPPING-DISCOUNT-DISCOUNT-DISCOVERY-01",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "permission; visible in discovery"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/discount.md",
+      "text_digest": "15ac700129",
+      "id_at_review": "REQ-SHOPPING-DISCOUNT-DISCOUNT-DISCOVERY-02",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "aimed at the platform"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/discount.md",
+      "text_digest": "cf1b7d46ea",
+      "id_at_review": "REQ-SHOPPING-DISCOUNT-DISCOUNT-OPERATIONS-01",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible: codes carried into the checkout"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/discount.md",
+      "text_digest": "99931074ea",
+      "id_at_review": "REQ-SHOPPING-DISCOUNT-DISCOUNT-OPERATIONS-02",
+      "groups": "AE",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "messages in responses"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/discount.md",
+      "text_digest": "05ed0d297c",
+      "id_at_review": "REQ-SHOPPING-DISCOUNT-DISCOUNT-REJECTED-CODES-01",
+      "groups": "E",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "warning type in responses"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/discount.md",
+      "text_digest": "b7f23c4704",
+      "id_at_review": "REQ-SHOPPING-DISCOUNT-DISCOUNT-VERIFICATION-AT-CHECKOUT-01",
+      "groups": "E",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "completion behaviour",
+      "note": "restates REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-02"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/fulfillment.md",
+      "text_digest": "eb39670f05",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-DESTINATIONS-01",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "SPEC_AUTHORS",
+      "testable": false,
+      "reason": "the MAY is for the method's defining contract"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/fulfillment.md",
+      "text_digest": "3049f1a8c3",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-DESTINATIONS-03",
+      "groups": "E",
+      "verdict": "rule",
+      "actor": "SPEC_AUTHORS",
+      "testable": false,
+      "reason": "aimed at future spec revisions and extensions"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/fulfillment.md",
+      "text_digest": "09193f5629",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-DESTINATIONS-04",
+      "groups": "AE",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "constrains the request"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/fulfillment.md",
+      "text_digest": "62c051ee37",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-SELECTION-AND-LOCATION-01",
+      "groups": "E",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "about which IDs the platform may send"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/fulfillment.md",
+      "text_digest": "bdf46e29a3",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-SELECTION-AND-LOCATION-02",
+      "groups": "E",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "response content"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/fulfillment.md",
+      "text_digest": "ac1221953c",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-SELECTION-AND-LOCATION-03",
+      "groups": "E",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "response content"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/fulfillment.md",
+      "text_digest": "2cf57b7024",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-METHODS-02",
+      "groups": "AE",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "'consumers' are platforms"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/fulfillment.md",
+      "text_digest": "443d2106bc",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-METHODS-03",
+      "groups": "AE",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "'consumers' are platforms"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/fulfillment.md",
+      "text_digest": "2212f639d3",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-OPTIONS-01",
+      "groups": "AE",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "permission on catalog response content"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/fulfillment.md",
+      "text_digest": "a1a4de15f2",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-OPTIONS-03",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "permission; visible when used"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/fulfillment.md",
+      "text_digest": "185fc4c8c0",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-OPTIONS-04",
+      "groups": "AE",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "permission on catalog response content"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/fulfillment.md",
+      "text_digest": "ae3b66a72c",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-PLATFORM-PROFILE-01",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "about the platform profile"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/fulfillment.md",
+      "text_digest": "37e1ff580a",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-PLATFORM-PROFILE-02",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "permission; visible when used"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/fulfillment.md",
+      "text_digest": "378c4f8068",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-METHOD-TYPES-05",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "permission; visible when used"
+    },
+    {
+      "file": "docs/specification/shopping/order/index.md",
+      "text_digest": "db110c82c0",
+      "id_at_review": "REQ-SHOPPING-ORDER-KEY-CONCEPTS-01",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "order response content"
+    },
+    {
+      "file": "docs/specification/shopping/order/index.md",
+      "text_digest": "5e0b5a836c",
+      "id_at_review": "REQ-SHOPPING-ORDER-ATTRIBUTION-01",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "permission on order content"
+    },
+    {
+      "file": "docs/specification/shopping/order/index.md",
+      "text_digest": "f650fb481d",
+      "id_at_review": "REQ-SHOPPING-ORDER-POLICIES-01",
+      "groups": "A",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "permission on order content"
+    },
+    {
+      "file": "docs/specification/shopping/order/index.md",
+      "text_digest": "b3887dba91",
+      "id_at_review": "REQ-SHOPPING-ORDER-EXAMPLE-COUNT-SOLD-01",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "order adjustment content (measure-priced items only)"
+    },
+    {
+      "file": "docs/specification/shopping/order/index.md",
+      "text_digest": "7e7fe0b12a",
+      "id_at_review": "REQ-SHOPPING-ORDER-EXAMPLE-COUNT-SOLD-02",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "order adjustment content (measure-priced items only)"
+    },
+    {
+      "file": "docs/specification/shopping/order/index.md",
+      "text_digest": "d79ebec396",
+      "id_at_review": "REQ-SHOPPING-ORDER-OPERATIONS-GUIDELINES-01",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "listed under 'Platform:'"
+    },
+    {
+      "file": "docs/specification/shopping/order/index.md",
+      "text_digest": "8fb9d0d3c3",
+      "id_at_review": "REQ-SHOPPING-ORDER-OPERATIONS-GUIDELINES-02",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "listed under 'Platform:'"
+    },
+    {
+      "file": "docs/specification/shopping/order/index.md",
+      "text_digest": "e3b0e4d162",
+      "id_at_review": "REQ-SHOPPING-ORDER-OPERATIONS-GUIDELINES-03",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "listed under 'Platform:'"
+    },
+    {
+      "file": "docs/specification/shopping/order/index.md",
+      "text_digest": "af7faa7edc",
+      "id_at_review": "REQ-SHOPPING-ORDER-OPERATIONS-GUIDELINES-04",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible: unauthenticated requests are refused"
+    },
+    {
+      "file": "docs/specification/shopping/order/index.md",
+      "text_digest": "6b50b563f9",
+      "id_at_review": "REQ-SHOPPING-ORDER-WEBHOOK-SIGNATURE-01",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible: webhook signatures (verifying them is the platform's half)"
+    },
+    {
+      "file": "docs/specification/shopping/order/index.md",
+      "text_digest": "f7fb88a8ea",
+      "id_at_review": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-01",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "listed under 'Platform:'"
+    },
+    {
+      "file": "docs/specification/shopping/order/index.md",
+      "text_digest": "cd10b52eeb",
+      "id_at_review": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-02",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "listed under 'Business:'; visible in webhooks"
+    },
+    {
+      "file": "docs/specification/shopping/order/index.md",
+      "text_digest": "a5e8107f1f",
+      "id_at_review": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-03",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "listed under 'Business:'; visible in webhooks"
+    },
+    {
+      "file": "docs/specification/shopping/order/index.md",
+      "text_digest": "103d1048ca",
+      "id_at_review": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-04",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "listed under 'Business:'; visible in webhooks"
+    },
+    {
+      "file": "docs/specification/shopping/order/index.md",
+      "text_digest": "4b626e6827",
+      "id_at_review": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-05",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "listed under 'Business:'; visible in webhooks"
+    },
+    {
+      "file": "docs/specification/shopping/order/index.md",
+      "text_digest": "1f2d85ce9c",
+      "id_at_review": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-06",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "listed under 'Business:'; visible in webhooks"
+    },
+    {
+      "file": "docs/specification/shopping/order/index.md",
+      "text_digest": "fbd2ccba30",
+      "id_at_review": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-07",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "listed under 'Business:'; visible in webhooks"
+    },
+    {
+      "file": "docs/specification/shopping/order/rest.md",
+      "text_digest": "de72b2d0de",
+      "id_at_review": "REQ-SHOPPING-ORDER-REST-CONTENT-TYPES-01",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "response bodies"
+    },
+    {
+      "file": "docs/specification/shopping/order/rest.md",
+      "text_digest": "86f31bc40b",
+      "id_at_review": "REQ-SHOPPING-ORDER-REST-TRANSPORT-SECURITY-01",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible: the endpoint's TLS version",
+      "note": "the local sample server serves plain HTTP, so it fails this"
+    },
+    {
+      "file": "docs/specification/shopping/order/rest.md",
+      "text_digest": "15463fa061",
+      "id_at_review": "REQ-SHOPPING-ORDER-REST-CONFORMANCE-01",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "listed under 'Platforms implementing the REST binding:'"
+    },
+    {
+      "file": "docs/specification/shopping/order/rest.md",
+      "text_digest": "c299106814",
+      "id_at_review": "REQ-SHOPPING-ORDER-REST-CONFORMANCE-02",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "listed under 'Platforms implementing the REST binding:'"
+    },
+    {
+      "file": "docs/specification/shopping/order/rest.md",
+      "text_digest": "a6262d6e2e",
+      "id_at_review": "REQ-SHOPPING-ORDER-REST-CONFORMANCE-03",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "listed under 'Platforms implementing the REST binding:'"
+    },
+    {
+      "file": "docs/specification/shopping/order/rest.md",
+      "text_digest": "10eaedb9f9",
+      "id_at_review": "REQ-SHOPPING-ORDER-REST-CONFORMANCE-04",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible: the endpoint's TLS version",
+      "note": "same rule as REQ-SHOPPING-ORDER-REST-TRANSPORT-SECURITY-01"
+    },
+    {
+      "file": "docs/specification/shopping/order/rest.md",
+      "text_digest": "f797370582",
+      "id_at_review": "REQ-SHOPPING-ORDER-REST-CONFORMANCE-05",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": true,
+      "reason": "visible: response signature headers"
+    }
+  ]
+}
