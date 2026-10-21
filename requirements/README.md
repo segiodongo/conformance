@@ -15,6 +15,7 @@
 | `catalog/extraction_report.json` | The extractor's diagnostics for the run                                               |
 | `review.json`                    | A person's decisions on 199 rules the automatic pass couldn't settle                  |
 | `tools/build_catalog.py`         | Regenerates the `catalog/` folder from the inputs below                               |
+| `tools/suggest_rules.py`         | Suggests rules for each test, in a worksheet under `reports/`, which isn't committed  |
 
 ## How it was built
 
