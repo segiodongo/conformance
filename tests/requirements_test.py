@@ -1,0 +1,257 @@
+#   Copyright 2026 UCP Authors
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+
+"""Unit tests for the catalog loader in framework.requirements.
+
+Most use a small catalog written to a temporary directory; the last class
+reads this repository's catalog.
+"""
+
+import json
+from pathlib import Path
+import tempfile
+from typing import Any
+import unittest
+
+from framework import requirements
+from framework.requirements import (
+  DEFAULT_CATALOG_DIR,
+  ID_RE,
+  INDEX_FILE,
+  LOCK_FILE,
+  CatalogError,
+  Rule,
+  load_catalog,
+)
+
+PAGE = "docs/specification/shopping/cart/index.md"
+TESTABLE = {"testable": True, "testable_reason": "aimed at the business"}
+
+
+def record(
+  rule_id: str, level: str = "MUST", demo: dict[str, Any] | None = None
+) -> dict[str, Any]:
+  """Return a catalog record with the fields the loader reads."""
+  return {
+    "id": rule_id,
+    "level": level,
+    "clause": f"The business **{level}** keep {rule_id}.",
+    "capabilities": ["dev.ucp.shopping.cart"],
+    "source": {
+      "file": PAGE,
+      "start_line": 12,
+      "page": "specification/shopping/cart/",
+      "anchor": "cart-lifecycle",
+    },
+    "demo": TESTABLE if demo is None else demo,
+  }
+
+
+class SmallCatalogTest(unittest.TestCase):
+  """Tests against a small catalog in a temporary directory."""
+
+  def setUp(self):
+    """Create an empty catalog directory, with nothing cached."""
+    super().setUp()
+    requirements._load.cache_clear()
+    temporary = tempfile.TemporaryDirectory()
+    self.addCleanup(temporary.cleanup)
+    self.catalog_dir = Path(temporary.name)
+
+  def write(
+    self,
+    records: list[dict[str, Any]],
+    lock: dict[str, str],
+    page: str = "cart/index.json",
+  ) -> None:
+    """Write one page of records and a lock of IDs and their statuses."""
+    path = self.catalog_dir / "shopping" / page
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"requirements": records}), encoding="utf-8")
+    entries = [{"id": i, "status": status} for i, status in lock.items()]
+    (self.catalog_dir / LOCK_FILE).write_text(
+      json.dumps({"lock_version": 1, "entries": entries}), encoding="utf-8"
+    )
+
+  def test_looks_up_a_rule(self):
+    """Test that a rule's fields come from its catalog record."""
+    self.write(
+      [record("REQ-SHOPPING-CART-0001")], {"REQ-SHOPPING-CART-0001": "active"}
+    )
+    self.assertEqual(
+      load_catalog(self.catalog_dir).rules["REQ-SHOPPING-CART-0001"],
+      Rule(
+        id="REQ-SHOPPING-CART-0001",
+        level="MUST",
+        clause="The business **MUST** keep REQ-SHOPPING-CART-0001.",
+        capabilities=("dev.ucp.shopping.cart",),
+        source_file=PAGE,
+        line=12,
+        link="specification/shopping/cart/#cart-lifecycle",
+        testable=True,
+        testable_reason="aimed at the business",
+        is_rule=True,
+      ),
+    )
+
+  def test_level_follows_the_review(self):
+    """Test that a level corrected by the review replaces the extracted one."""
+    demo = {**TESTABLE, "review": {"level": "MUST"}}
+    self.write(
+      [record("REQ-SHOPPING-CART-0001", level="MAY", demo=demo)],
+      {"REQ-SHOPPING-CART-0001": "active"},
+    )
+    rule = load_catalog(self.catalog_dir).rules["REQ-SHOPPING-CART-0001"]
+    self.assertEqual(rule.level, "MUST")
+
+  def test_status_of_each_kind_of_id(self):
+    """Test the four statuses: rule, not a rule, retired and unknown."""
+    excluded = {"testable": False, "excluded": True}
+    self.write(
+      [
+        record("REQ-SHOPPING-CART-0001"),
+        record("REQ-SHOPPING-CART-0002", demo=excluded),
+      ],
+      {
+        "REQ-SHOPPING-CART-0001": "active",
+        "REQ-SHOPPING-CART-0002": "active",
+        "REQ-SHOPPING-CART-0003": "retired",
+      },
+    )
+    catalog = load_catalog(self.catalog_dir)
+    self.assertEqual(
+      [
+        catalog.status(rule_id)
+        for rule_id in (
+          "REQ-SHOPPING-CART-0001",
+          "REQ-SHOPPING-CART-0002",
+          "REQ-SHOPPING-CART-0003",
+          "REQ-SHOPPING-CART-0004",
+        )
+      ],
+      ["rule", "not a rule", "retired", "unknown"],
+    )
+
+  def test_extension_parents(self):
+    """Test that extensions' parents come from the capability index."""
+    self.write(
+      [record("REQ-SHOPPING-CART-0001")], {"REQ-SHOPPING-CART-0001": "active"}
+    )
+    index = {
+      "capabilities": [
+        {
+          "name": "dev.ucp.shopping.discount",
+          "extends": ["dev.ucp.shopping.cart"],
+        },
+        {"name": "dev.ucp.shopping.cart", "extends": []},
+      ]
+    }
+    (self.catalog_dir / INDEX_FILE).write_text(
+      json.dumps(index), encoding="utf-8"
+    )
+    catalog = load_catalog(self.catalog_dir)
+    self.assertEqual(
+      catalog.with_parents({"dev.ucp.shopping.discount"}),
+      {"dev.ucp.shopping.discount", "dev.ucp.shopping.cart"},
+    )
+    self.assertEqual(
+      catalog.with_parents({"dev.ucp.shopping.order"}),
+      {"dev.ucp.shopping.order"},
+    )
+
+  def test_reads_the_disk_once(self):
+    """Test that later loads of the same directory reuse the first read."""
+    self.write(
+      [record("REQ-SHOPPING-CART-0001")], {"REQ-SHOPPING-CART-0001": "active"}
+    )
+    first = load_catalog(self.catalog_dir)
+    (self.catalog_dir / LOCK_FILE).unlink()
+    self.assertIs(load_catalog(str(self.catalog_dir)), first)
+
+  def test_rejects_a_bad_catalog(self):
+    """Test that a missing, inconsistent or malformed catalog is an error."""
+    cases = {
+      "missing": lambda: None,
+      "rule missing from the lock": lambda: self.write(
+        [record("REQ-SHOPPING-CART-0001")], {}
+      ),
+      "active ID missing from the pages": lambda: self.write(
+        [], {"REQ-SHOPPING-CART-0001": "active"}
+      ),
+      "malformed record": lambda: self.write(
+        [{"id": "REQ-SHOPPING-CART-0001"}], {"REQ-SHOPPING-CART-0001": "active"}
+      ),
+      "malformed ID": lambda: self.write(
+        [record("REQ-SHOPPING-CART")], {"REQ-SHOPPING-CART": "active"}
+      ),
+    }
+    for name, write in cases.items():
+      with self.subTest(name), tempfile.TemporaryDirectory() as directory:
+        self.catalog_dir = Path(directory)
+        write()
+        with self.assertRaises(CatalogError):
+          load_catalog(self.catalog_dir)
+
+  def test_rejects_an_id_on_two_pages(self):
+    """Test that an ID repeated across pages is an error."""
+    self.write([record("REQ-SHOPPING-CART-0001")], {}, page="cart/rest.json")
+    self.write(
+      [record("REQ-SHOPPING-CART-0001")], {"REQ-SHOPPING-CART-0001": "active"}
+    )
+    with self.assertRaises(CatalogError):
+      load_catalog(self.catalog_dir)
+
+
+class RepositoryCatalogTest(unittest.TestCase):
+  """Tests against this repository's catalog."""
+
+  def setUp(self):
+    """Load the repository's catalog."""
+    super().setUp()
+    self.catalog = load_catalog()
+
+  def test_matches_its_lock(self):
+    """Test that every rule fits the ID pattern and has an active lock ID."""
+    lock = json.loads((DEFAULT_CATALOG_DIR / LOCK_FILE).read_text("utf-8"))
+    active = {e["id"] for e in lock["entries"] if e["status"] == "active"}
+    self.assertEqual(set(self.catalog.rules), active)
+    self.assertTrue(all(ID_RE.match(rule_id) for rule_id in active))
+
+  def test_known_rules(self):
+    """Test what a few stable IDs name, and an extension's parents."""
+    self.assertIn(
+      "dev.ucp.shopping.checkout",
+      self.catalog.extends["dev.ucp.shopping.fulfillment"],
+    )
+    subtotal = self.catalog.rules["REQ-SHOPPING-CHECKOUT-0133"]
+    self.assertEqual(subtotal.level, "MUST")
+    self.assertIn("subtotal", subtotal.clause)
+    self.assertEqual(subtotal.capabilities, ("dev.ucp.shopping.checkout",))
+    self.assertTrue(subtotal.testable)
+    # Extracted as MAY; the review corrected it to MUST.
+    self.assertEqual(
+      self.catalog.rules["REQ-SHOPPING-CATALOG-0046"].level, "MUST"
+    )
+    # The review found this sentence states no requirement.
+    self.assertEqual(
+      self.catalog.status("REQ-SHOPPING-CATALOG-0044"), "not a rule"
+    )
+    # Positional IDs from before the lock are no longer valid citations.
+    self.assertEqual(
+      self.catalog.status("REQ-CHECKOUT-RENDERING-CONTRACT-05"), "unknown"
+    )
+
+
+if __name__ == "__main__":
+  unittest.main()

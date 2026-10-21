@@ -73,6 +73,32 @@ These IDs are stable within this demo only. Official IDs will be issued in
 the `ucp` repository, in a different order. Every lock entry records its
 `text_digest`, so demo IDs can be mapped to official ones.
 
+## Linking tests to rules
+
+Each shopping test says which rules it checks, with one marker from
+`framework/decorators.py`:
+
+- `@spec_assert("REQ-SHOPPING-CHECKOUT-0133", ...)`: the rules its assertions
+  check, by stable ID, each with a comment giving the rule's wording;
+- `@no_rule("...")`: the spec describes the behaviour without an RFC 2119
+  keyword, so there is no rule to cite;
+- `@scenario("...")`: the test checks a store's own data, such as a
+  free-shipping threshold, rather than a rule.
+
+`framework/requirements.py` looks rules up in the catalog. Before any test
+runs, the runner checks every shopping test's marker against it, and so does
+pytest:
+
+- **Problems** stop the run: a test with no marker, or an ID that isn't in the
+  catalog, was retired, or the review found isn't a rule.
+- **Warnings** don't: a rule this suite can't test, or one outside the
+  capabilities the test requires.
+
+`--dry-run` runs the check without a server. `--requirements_check=warn`
+(`--requirements-check=warn` with pytest) reports problems without stopping,
+and `off` skips the check. Unit tests for the markers, the loader and the
+check are in `tests/`: run `python -m pytest tests`.
+
 ## Numbers at `f2626c28`
 
 - 510 rules extracted: 395 bold and 115 found through capitals. The review
