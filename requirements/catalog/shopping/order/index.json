@@ -50,11 +50,11 @@
       "capability-from-bullet-or-path",
       "count-capitals"
     ],
-    "ids": "provisional"
+    "ids": "stable, from requirements.lock.json"
   },
   "requirements": [
     {
-      "id": "REQ-SHOPPING-ORDER-KEY-CONCEPTS-01",
+      "id": "REQ-SHOPPING-ORDER-0001",
       "text_digest": "db110c82c0",
       "scope": "capability",
       "capabilities": [
@@ -79,6 +79,7 @@
         "anchor": "key-concepts"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-KEY-CONCEPTS-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -93,7 +94,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-KEY-CONCEPTS-02",
+      "id": "REQ-SHOPPING-ORDER-0002",
       "text_digest": "cc3d0c0f7a",
       "scope": "capability",
       "capabilities": [
@@ -118,6 +119,7 @@
         "anchor": "key-concepts"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-KEY-CONCEPTS-02",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -126,7 +128,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-KEY-CONCEPTS-03",
+      "id": "REQ-SHOPPING-ORDER-0003",
       "text_digest": "680173e292",
       "scope": "capability",
       "capabilities": [
@@ -155,6 +157,7 @@
         "anchor": "key-concepts"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-KEY-CONCEPTS-03",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -163,7 +166,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-ATTRIBUTION-01",
+      "id": "REQ-SHOPPING-ORDER-0004",
       "text_digest": "5e0b5a836c",
       "scope": "capability",
       "capabilities": [
@@ -190,6 +193,7 @@
         "anchor": "attribution"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-ATTRIBUTION-01",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -204,7 +208,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-POLICIES-01",
+      "id": "REQ-SHOPPING-ORDER-0005",
       "text_digest": "f650fb481d",
       "scope": "capability",
       "capabilities": [
@@ -229,6 +233,7 @@
         "anchor": "policies"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-POLICIES-01",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -243,7 +248,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-EXAMPLE-COUNT-SOLD-01",
+      "id": "REQ-SHOPPING-ORDER-0006",
       "text_digest": "b3887dba91",
       "scope": "capability",
       "capabilities": [
@@ -270,6 +275,7 @@
         "anchor": "example-count-sold-measure-priced-settlement"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-EXAMPLE-COUNT-SOLD-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -284,7 +290,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-EXAMPLE-COUNT-SOLD-02",
+      "id": "REQ-SHOPPING-ORDER-0007",
       "text_digest": "7e7fe0b12a",
       "scope": "capability",
       "capabilities": [
@@ -312,6 +318,7 @@
         "anchor": "example-count-sold-measure-priced-settlement"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-EXAMPLE-COUNT-SOLD-02",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -326,7 +333,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-OPERATIONS-01",
+      "id": "REQ-SHOPPING-ORDER-0008",
       "text_digest": "8259428a26",
       "scope": "capability",
       "capabilities": [
@@ -351,6 +358,7 @@
         "anchor": "operations"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-OPERATIONS-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -359,7 +367,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-AUTHORIZATION-01",
+      "id": "REQ-SHOPPING-ORDER-0009",
       "text_digest": "5f3bf1ba25",
       "scope": "capability",
       "capabilities": [
@@ -384,6 +392,7 @@
         "anchor": "authorization"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-AUTHORIZATION-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -392,7 +401,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-AUTHORIZATION-02",
+      "id": "REQ-SHOPPING-ORDER-0010",
       "text_digest": "68f3d605bf",
       "scope": "capability",
       "capabilities": [
@@ -417,6 +426,7 @@
         "anchor": "authorization"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-AUTHORIZATION-02",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -425,7 +435,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-AUTHORIZATION-03",
+      "id": "REQ-SHOPPING-ORDER-0011",
       "text_digest": "7562bd96a3",
       "scope": "capability",
       "capabilities": [
@@ -450,6 +460,7 @@
         "anchor": "authorization"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-AUTHORIZATION-03",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -458,7 +469,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-OPERATIONS-GUIDELINES-01",
+      "id": "REQ-SHOPPING-ORDER-0012",
       "text_digest": "d79ebec396",
       "scope": "capability",
       "capabilities": [
@@ -483,6 +494,7 @@
         "anchor": "operations-guidelines"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-OPERATIONS-GUIDELINES-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -497,7 +509,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-OPERATIONS-GUIDELINES-02",
+      "id": "REQ-SHOPPING-ORDER-0013",
       "text_digest": "8fb9d0d3c3",
       "scope": "capability",
       "capabilities": [
@@ -522,6 +534,7 @@
         "anchor": "operations-guidelines"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-OPERATIONS-GUIDELINES-02",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -536,7 +549,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-OPERATIONS-GUIDELINES-03",
+      "id": "REQ-SHOPPING-ORDER-0014",
       "text_digest": "e3b0e4d162",
       "scope": "capability",
       "capabilities": [
@@ -561,6 +574,7 @@
         "anchor": "operations-guidelines"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-OPERATIONS-GUIDELINES-03",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -575,7 +589,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-OPERATIONS-GUIDELINES-04",
+      "id": "REQ-SHOPPING-ORDER-0015",
       "text_digest": "af7faa7edc",
       "scope": "capability",
       "capabilities": [
@@ -600,6 +614,7 @@
         "anchor": "operations-guidelines"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-OPERATIONS-GUIDELINES-04",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -614,7 +629,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-WEBHOOK-SIGNATURE-01",
+      "id": "REQ-SHOPPING-ORDER-0016",
       "text_digest": "6b50b563f9",
       "scope": "capability",
       "capabilities": [
@@ -639,6 +654,7 @@
         "anchor": "webhook-signature-verification"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-WEBHOOK-SIGNATURE-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -653,7 +669,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-WEBHOOK-SIGNATURE-02",
+      "id": "REQ-SHOPPING-ORDER-0017",
       "text_digest": "22a6667ade",
       "scope": "capability",
       "capabilities": [
@@ -678,6 +694,7 @@
         "anchor": "webhook-signature-verification"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-WEBHOOK-SIGNATURE-02",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -686,7 +703,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-WEBHOOK-SIGNATURE-03",
+      "id": "REQ-SHOPPING-ORDER-0018",
       "text_digest": "2bc16e17be",
       "scope": "capability",
       "capabilities": [
@@ -711,6 +728,7 @@
         "anchor": "webhook-signature-verification"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-WEBHOOK-SIGNATURE-03",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -719,7 +737,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-VERIFICATION-PLATFORM-01",
+      "id": "REQ-SHOPPING-ORDER-0019",
       "text_digest": "0392cffe09",
       "scope": "capability",
       "capabilities": [
@@ -744,6 +762,7 @@
         "anchor": "verification-platform"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-VERIFICATION-PLATFORM-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -752,7 +771,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-01",
+      "id": "REQ-SHOPPING-ORDER-0020",
       "text_digest": "f7fb88a8ea",
       "scope": "capability",
       "capabilities": [
@@ -777,6 +796,7 @@
         "anchor": "events-guidelines"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -791,7 +811,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-02",
+      "id": "REQ-SHOPPING-ORDER-0021",
       "text_digest": "cd10b52eeb",
       "scope": "capability",
       "capabilities": [
@@ -816,6 +836,7 @@
         "anchor": "events-guidelines"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-02",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -830,7 +851,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-03",
+      "id": "REQ-SHOPPING-ORDER-0022",
       "text_digest": "a5e8107f1f",
       "scope": "capability",
       "capabilities": [
@@ -855,6 +876,7 @@
         "anchor": "events-guidelines"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-03",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -869,7 +891,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-04",
+      "id": "REQ-SHOPPING-ORDER-0023",
       "text_digest": "103d1048ca",
       "scope": "capability",
       "capabilities": [
@@ -894,6 +916,7 @@
         "anchor": "events-guidelines"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-04",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -908,7 +931,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-05",
+      "id": "REQ-SHOPPING-ORDER-0024",
       "text_digest": "4b626e6827",
       "scope": "capability",
       "capabilities": [
@@ -933,6 +956,7 @@
         "anchor": "events-guidelines"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-05",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -947,7 +971,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-06",
+      "id": "REQ-SHOPPING-ORDER-0025",
       "text_digest": "1f2d85ce9c",
       "scope": "capability",
       "capabilities": [
@@ -972,6 +996,7 @@
         "anchor": "events-guidelines"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-06",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -986,7 +1011,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-07",
+      "id": "REQ-SHOPPING-ORDER-0026",
       "text_digest": "fbd2ccba30",
       "scope": "capability",
       "capabilities": [
@@ -1011,6 +1036,7 @@
         "anchor": "events-guidelines"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-07",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",

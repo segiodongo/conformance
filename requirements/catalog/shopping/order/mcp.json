@@ -49,11 +49,11 @@
       "capability-from-bullet-or-path",
       "count-capitals"
     ],
-    "ids": "provisional"
+    "ids": "stable, from requirements.lock.json"
   },
   "requirements": [
     {
-      "id": "REQ-SHOPPING-ORDER-MCP-REQUEST-METADATA-01",
+      "id": "REQ-SHOPPING-ORDER-0027",
       "text_digest": "7d9d798bfd",
       "scope": "capability",
       "capabilities": [
@@ -80,6 +80,7 @@
         "anchor": "request-metadata"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-MCP-REQUEST-METADATA-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "mcp",
@@ -88,7 +89,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-MCP-REQUEST-METADATA-02",
+      "id": "REQ-SHOPPING-ORDER-0028",
       "text_digest": "160daf898a",
       "scope": "capability",
       "capabilities": [
@@ -113,6 +114,7 @@
         "anchor": "request-metadata"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-MCP-REQUEST-METADATA-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "mcp",
@@ -121,7 +123,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-MCP-ERROR-HANDLING-01",
+      "id": "REQ-SHOPPING-ORDER-0029",
       "text_digest": "dfdf1af93d",
       "scope": "capability",
       "capabilities": [
@@ -148,6 +150,7 @@
         "anchor": "error-handling"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-MCP-ERROR-HANDLING-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "mcp",
@@ -156,7 +159,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-MCP-CONFORMANCE-01",
+      "id": "REQ-SHOPPING-ORDER-0030",
       "text_digest": "50d0db61d3",
       "scope": "capability",
       "capabilities": [
@@ -181,6 +184,7 @@
         "anchor": "conformance"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-MCP-CONFORMANCE-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "mcp",
@@ -189,7 +193,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-MCP-CONFORMANCE-02",
+      "id": "REQ-SHOPPING-ORDER-0031",
       "text_digest": "61b7633392",
       "scope": "capability",
       "capabilities": [
@@ -216,6 +220,7 @@
         "anchor": "conformance"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-MCP-CONFORMANCE-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "mcp",
@@ -224,7 +229,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-MCP-CONFORMANCE-03",
+      "id": "REQ-SHOPPING-ORDER-0032",
       "text_digest": "a8dce026f4",
       "scope": "capability",
       "capabilities": [
@@ -251,6 +256,7 @@
         "anchor": "conformance"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-MCP-CONFORMANCE-03",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "mcp",
@@ -259,7 +265,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-MCP-CONFORMANCE-04",
+      "id": "REQ-SHOPPING-ORDER-0033",
       "text_digest": "62046948e1",
       "scope": "capability",
       "capabilities": [
@@ -286,6 +292,7 @@
         "anchor": "conformance"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-MCP-CONFORMANCE-04",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "mcp",

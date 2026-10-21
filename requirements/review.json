@@ -6,7 +6,7 @@
     {
       "file": "docs/specification/shopping/cart/embedded.md",
       "text_digest": "6d177cbebb",
-      "id_at_review": "REQ-SHOPPING-CART-EP-PER-CART-CONFIGURATION-01",
+      "id_at_review": "REQ-SHOPPING-CART-0030",
       "groups": "C",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -16,7 +16,7 @@
     {
       "file": "docs/specification/shopping/cart/embedded.md",
       "text_digest": "3bfce93152",
-      "id_at_review": "REQ-SHOPPING-CART-EP-LOADING-AN-EMBEDDED-CART-01",
+      "id_at_review": "REQ-SHOPPING-CART-0031",
       "groups": "C",
       "verdict": "rule",
       "actor": "HOST",
@@ -26,7 +26,7 @@
     {
       "file": "docs/specification/shopping/cart/index.md",
       "text_digest": "94c63ccb74",
-      "id_at_review": "REQ-SHOPPING-CART-CART-TO-CHECKOUT-01",
+      "id_at_review": "REQ-SHOPPING-CART-0001",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -36,7 +36,7 @@
     {
       "file": "docs/specification/shopping/cart/index.md",
       "text_digest": "f2b0ac0e44",
-      "id_at_review": "REQ-SHOPPING-CART-CART-TO-CHECKOUT-02",
+      "id_at_review": "REQ-SHOPPING-CART-0002",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -47,7 +47,7 @@
     {
       "file": "docs/specification/shopping/cart/index.md",
       "text_digest": "cbf1d2e8f8",
-      "id_at_review": "REQ-SHOPPING-CART-CART-TO-CHECKOUT-03",
+      "id_at_review": "REQ-SHOPPING-CART-0003",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -57,7 +57,7 @@
     {
       "file": "docs/specification/shopping/cart/index.md",
       "text_digest": "224effb21d",
-      "id_at_review": "REQ-SHOPPING-CART-CART-TO-CHECKOUT-04",
+      "id_at_review": "REQ-SHOPPING-CART-0004",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -67,7 +67,7 @@
     {
       "file": "docs/specification/shopping/cart/index.md",
       "text_digest": "806cb9a689",
-      "id_at_review": "REQ-SHOPPING-CART-CART-TO-CHECKOUT-05",
+      "id_at_review": "REQ-SHOPPING-CART-0005",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -77,7 +77,7 @@
     {
       "file": "docs/specification/shopping/cart/index.md",
       "text_digest": "7bceaecc6b",
-      "id_at_review": "REQ-SHOPPING-CART-CART-TO-CHECKOUT-06",
+      "id_at_review": "REQ-SHOPPING-CART-0006",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -87,7 +87,7 @@
     {
       "file": "docs/specification/shopping/cart/index.md",
       "text_digest": "c0e93a9c7b",
-      "id_at_review": "REQ-SHOPPING-CART-CART-TO-CHECKOUT-07",
+      "id_at_review": "REQ-SHOPPING-CART-0007",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -97,7 +97,7 @@
     {
       "file": "docs/specification/shopping/cart/index.md",
       "text_digest": "eb1bb7f6a1",
-      "id_at_review": "REQ-SHOPPING-CART-CART-TO-CHECKOUT-08",
+      "id_at_review": "REQ-SHOPPING-CART-0008",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -107,7 +107,7 @@
     {
       "file": "docs/specification/shopping/cart/index.md",
       "text_digest": "1376be1e26",
-      "id_at_review": "REQ-SHOPPING-CART-CREATE-CART-01",
+      "id_at_review": "REQ-SHOPPING-CART-0023",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -117,7 +117,7 @@
     {
       "file": "docs/specification/shopping/cart/index.md",
       "text_digest": "6e0bf927e2",
-      "id_at_review": "REQ-SHOPPING-CART-CANCEL-CART-01",
+      "id_at_review": "REQ-SHOPPING-CART-0025",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -127,7 +127,7 @@
     {
       "file": "docs/specification/shopping/cart/index.md",
       "text_digest": "0fbda2ac13",
-      "id_at_review": "REQ-SHOPPING-CART-CANCEL-CART-02",
+      "id_at_review": "REQ-SHOPPING-CART-0026",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -137,7 +137,7 @@
     {
       "file": "docs/specification/shopping/cart/index.md",
       "text_digest": "d17ebc6153",
-      "id_at_review": "REQ-SHOPPING-CART-SIGNALS-01",
+      "id_at_review": "REQ-SHOPPING-CART-0027",
       "groups": "AB",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -147,7 +147,7 @@
     {
       "file": "docs/specification/shopping/cart/index.md",
       "text_digest": "e0b70c9533",
-      "id_at_review": "REQ-SHOPPING-CART-TOTAL-01",
+      "id_at_review": "REQ-SHOPPING-CART-0028",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -157,7 +157,7 @@
     {
       "file": "docs/specification/shopping/cart/index.md",
       "text_digest": "c4f79c54ee",
-      "id_at_review": "REQ-SHOPPING-CART-TOTAL-02",
+      "id_at_review": "REQ-SHOPPING-CART-0029",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -167,7 +167,7 @@
     {
       "file": "docs/specification/shopping/cart/rest.md",
       "text_digest": "017f445b50",
-      "id_at_review": "REQ-SHOPPING-CART-REST-CONTENT-TYPES-01",
+      "id_at_review": "REQ-SHOPPING-CART-0062",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -177,7 +177,7 @@
     {
       "file": "docs/specification/shopping/cart/rest.md",
       "text_digest": "86f31bc40b",
-      "id_at_review": "REQ-SHOPPING-CART-REST-TRANSPORT-SECURITY-01",
+      "id_at_review": "REQ-SHOPPING-CART-0063",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -188,7 +188,7 @@
     {
       "file": "docs/specification/shopping/cart/rest.md",
       "text_digest": "9655f6d29f",
-      "id_at_review": "REQ-SHOPPING-CART-REST-AUTHENTICATION-01",
+      "id_at_review": "REQ-SHOPPING-CART-0064",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -198,7 +198,7 @@
     {
       "file": "docs/specification/shopping/catalog/index.md",
       "text_digest": "40b521f2a3",
-      "id_at_review": "REQ-SHOPPING-CATALOG-RELATIONSHIP-TO-CHECKOUT-01",
+      "id_at_review": "REQ-SHOPPING-CATALOG-0001",
       "groups": "B",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -208,7 +208,7 @@
     {
       "file": "docs/specification/shopping/catalog/index.md",
       "text_digest": "96e978ebd7",
-      "id_at_review": "REQ-SHOPPING-CATALOG-CONTEXT-01",
+      "id_at_review": "REQ-SHOPPING-CATALOG-0012",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -218,7 +218,7 @@
     {
       "file": "docs/specification/shopping/catalog/index.md",
       "text_digest": "35b444ee45",
-      "id_at_review": "REQ-SHOPPING-CATALOG-CONTEXT-02",
+      "id_at_review": "REQ-SHOPPING-CATALOG-0013",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -228,7 +228,7 @@
     {
       "file": "docs/specification/shopping/catalog/index.md",
       "text_digest": "e137bb0b98",
-      "id_at_review": "REQ-SHOPPING-CATALOG-CONTEXT-03",
+      "id_at_review": "REQ-SHOPPING-CATALOG-0014",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -238,7 +238,7 @@
     {
       "file": "docs/specification/shopping/catalog/index.md",
       "text_digest": "d647a85835",
-      "id_at_review": "REQ-SHOPPING-CATALOG-CONTEXT-04",
+      "id_at_review": "REQ-SHOPPING-CATALOG-0015",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -248,7 +248,7 @@
     {
       "file": "docs/specification/shopping/catalog/index.md",
       "text_digest": "d33d7257de",
-      "id_at_review": "REQ-SHOPPING-CATALOG-CONTEXT-05",
+      "id_at_review": "REQ-SHOPPING-CATALOG-0016",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -258,7 +258,7 @@
     {
       "file": "docs/specification/shopping/catalog/index.md",
       "text_digest": "d17ebc6153",
-      "id_at_review": "REQ-SHOPPING-CATALOG-SIGNALS-01",
+      "id_at_review": "REQ-SHOPPING-CATALOG-0019",
       "groups": "AB",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -268,7 +268,7 @@
     {
       "file": "docs/specification/shopping/catalog/index.md",
       "text_digest": "50fd9f9ad5",
-      "id_at_review": "REQ-SHOPPING-CATALOG-MEDIA-02",
+      "id_at_review": "REQ-SHOPPING-CATALOG-0025",
       "groups": "B",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -278,7 +278,7 @@
     {
       "file": "docs/specification/shopping/catalog/index.md",
       "text_digest": "972c1b040c",
-      "id_at_review": "REQ-SHOPPING-CATALOG-EXTERNAL-VIDEO-02",
+      "id_at_review": "REQ-SHOPPING-CATALOG-0030",
       "groups": "B",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -288,7 +288,7 @@
     {
       "file": "docs/specification/shopping/catalog/index.md",
       "text_digest": "9525c6155e",
-      "id_at_review": "REQ-SHOPPING-CATALOG-ACTIONS-02",
+      "id_at_review": "REQ-SHOPPING-CATALOG-0032",
       "groups": "B",
       "verdict": "rule",
       "actor": "SPEC_AUTHORS",
@@ -298,7 +298,7 @@
     {
       "file": "docs/specification/shopping/catalog/index.md",
       "text_digest": "1532082837",
-      "id_at_review": "REQ-SHOPPING-CATALOG-ACTIONS-03",
+      "id_at_review": "REQ-SHOPPING-CATALOG-0033",
       "groups": "B",
       "verdict": "rule",
       "actor": "SPEC_AUTHORS",
@@ -308,7 +308,7 @@
     {
       "file": "docs/specification/shopping/catalog/index.md",
       "text_digest": "950a55324b",
-      "id_at_review": "REQ-SHOPPING-CATALOG-MESSAGE-TYPES-01",
+      "id_at_review": "REQ-SHOPPING-CATALOG-0034",
       "groups": "A",
       "verdict": "rule",
       "actor": "AGENT",
@@ -318,7 +318,7 @@
     {
       "file": "docs/specification/shopping/catalog/index.md",
       "text_digest": "440c8529d2",
-      "id_at_review": "REQ-SHOPPING-CATALOG-IDENTIFIERS-NOT-FOUND-01",
+      "id_at_review": "REQ-SHOPPING-CATALOG-0035",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -329,7 +329,7 @@
     {
       "file": "docs/specification/shopping/catalog/lookup.md",
       "text_digest": "05e08eb33c",
-      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-OPERATIONS-01",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-0001",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -339,7 +339,7 @@
     {
       "file": "docs/specification/shopping/catalog/lookup.md",
       "text_digest": "4d7409c0dd",
-      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-SUPPORTED-IDENTIFIERS-01",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-0002",
       "groups": "AE",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -349,7 +349,7 @@
     {
       "file": "docs/specification/shopping/catalog/lookup.md",
       "text_digest": "bb0139a517",
-      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-SUPPORTED-IDENTIFIERS-02",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-0003",
       "groups": "AE",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -359,7 +359,7 @@
     {
       "file": "docs/specification/shopping/catalog/lookup.md",
       "text_digest": "fddacf45d0",
-      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-SUPPORTED-IDENTIFIERS-03",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-0004",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -369,7 +369,7 @@
     {
       "file": "docs/specification/shopping/catalog/lookup.md",
       "text_digest": "1976ef2539",
-      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-SUPPORTED-IDENTIFIERS-04",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-0005",
       "groups": "AE",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -379,7 +379,7 @@
     {
       "file": "docs/specification/shopping/catalog/lookup.md",
       "text_digest": "25191003c1",
-      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-SUPPORTED-IDENTIFIERS-05",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-0006",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -389,7 +389,7 @@
     {
       "file": "docs/specification/shopping/catalog/lookup.md",
       "text_digest": "67d7d28db3",
-      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-CLIENT-CORRELATION-01",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-0007",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -399,7 +399,7 @@
     {
       "file": "docs/specification/shopping/catalog/lookup.md",
       "text_digest": "0bedb69a17",
-      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-BATCH-SIZE-01",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-0008",
       "groups": "AE",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -409,7 +409,7 @@
     {
       "file": "docs/specification/shopping/catalog/lookup.md",
       "text_digest": "1531d8ed95",
-      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-BATCH-SIZE-02",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-0009",
       "groups": "AE",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -419,7 +419,7 @@
     {
       "file": "docs/specification/shopping/catalog/lookup.md",
       "text_digest": "160c793a93",
-      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-BATCH-SIZE-03",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-0010",
       "groups": "AE",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -429,7 +429,7 @@
     {
       "file": "docs/specification/shopping/catalog/lookup.md",
       "text_digest": "2d2516174f",
-      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-RESOLUTION-BEHAVIOR-01",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-0011",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -439,7 +439,7 @@
     {
       "file": "docs/specification/shopping/catalog/lookup.md",
       "text_digest": "00e5f417b1",
-      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-RESOLUTION-BEHAVIOR-02",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-0012",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -449,7 +449,7 @@
     {
       "file": "docs/specification/shopping/catalog/lookup.md",
       "text_digest": "50e0b6763f",
-      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-INPUT-01",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-0013",
       "groups": "AB",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -459,7 +459,7 @@
     {
       "file": "docs/specification/shopping/catalog/lookup.md",
       "text_digest": "f39f08283c",
-      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-OUTPUT-EFFECTIVE-01",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-0014",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -469,7 +469,7 @@
     {
       "file": "docs/specification/shopping/catalog/lookup.md",
       "text_digest": "cc0f65f541",
-      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-OUTPUT-EFFECTIVE-02",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-0015",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -479,7 +479,7 @@
     {
       "file": "docs/specification/shopping/catalog/lookup.md",
       "text_digest": "515545af2a",
-      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-OUTPUT-AVAILABILITY-01",
+      "id_at_review": "REQ-SHOPPING-CATALOG-LOOKUP-0016",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -489,7 +489,7 @@
     {
       "file": "docs/specification/shopping/catalog/mcp.md",
       "text_digest": "440c8529d2",
-      "id_at_review": "REQ-SHOPPING-CATALOG-MCP-PARTIAL-SUCCESS-01",
+      "id_at_review": "REQ-SHOPPING-CATALOG-0037",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -499,7 +499,7 @@
     {
       "file": "docs/specification/shopping/catalog/mcp.md",
       "text_digest": "440c8529d2",
-      "id_at_review": "REQ-SHOPPING-CATALOG-MCP-EXAMPLE-ALL-PRODUCTS-NOT-01",
+      "id_at_review": "REQ-SHOPPING-CATALOG-0038",
       "groups": "AC",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -509,7 +509,7 @@
     {
       "file": "docs/specification/shopping/catalog/mcp.md",
       "text_digest": "6e5b8536e3",
-      "id_at_review": "REQ-SHOPPING-CATALOG-MCP-CONFORMANCE-02",
+      "id_at_review": "REQ-SHOPPING-CATALOG-0040",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -519,7 +519,7 @@
     {
       "file": "docs/specification/shopping/catalog/mcp.md",
       "text_digest": "f9a2cc0384",
-      "id_at_review": "REQ-SHOPPING-CATALOG-MCP-CONFORMANCE-03",
+      "id_at_review": "REQ-SHOPPING-CATALOG-0041",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -529,7 +529,7 @@
     {
       "file": "docs/specification/shopping/catalog/rest.md",
       "text_digest": "440c8529d2",
-      "id_at_review": "REQ-SHOPPING-CATALOG-REST-EXAMPLE-PARTIAL-SUCCESS-01",
+      "id_at_review": "REQ-SHOPPING-CATALOG-0042",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -539,7 +539,7 @@
     {
       "file": "docs/specification/shopping/catalog/rest.md",
       "text_digest": "440c8529d2",
-      "id_at_review": "REQ-SHOPPING-CATALOG-REST-EXAMPLE-ALL-PRODUCTS-NOT-01",
+      "id_at_review": "REQ-SHOPPING-CATALOG-0043",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -549,7 +549,7 @@
     {
       "file": "docs/specification/shopping/catalog/rest.md",
       "text_digest": "350f72606a",
-      "id_at_review": "REQ-SHOPPING-CATALOG-REST-CONFORMANCE-01",
+      "id_at_review": "REQ-SHOPPING-CATALOG-0044",
       "groups": "E",
       "verdict": "not a rule",
       "actor": "BUSINESS",
@@ -559,7 +559,7 @@
     {
       "file": "docs/specification/shopping/catalog/rest.md",
       "text_digest": "35a3e3f4dd",
-      "id_at_review": "REQ-SHOPPING-CATALOG-REST-CONFORMANCE-02",
+      "id_at_review": "REQ-SHOPPING-CATALOG-0045",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -569,7 +569,7 @@
     {
       "file": "docs/specification/shopping/catalog/rest.md",
       "text_digest": "f52390f942",
-      "id_at_review": "REQ-SHOPPING-CATALOG-REST-CONFORMANCE-03",
+      "id_at_review": "REQ-SHOPPING-CATALOG-0046",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -581,7 +581,7 @@
     {
       "file": "docs/specification/shopping/catalog/search.md",
       "text_digest": "40c24b8fcb",
-      "id_at_review": "REQ-SHOPPING-CATALOG-SEARCH-SEARCH-SEARCH-INPUTS-01",
+      "id_at_review": "REQ-SHOPPING-CATALOG-SEARCH-0001",
       "groups": "AB",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -591,7 +591,7 @@
     {
       "file": "docs/specification/shopping/catalog/search.md",
       "text_digest": "00372ac58e",
-      "id_at_review": "REQ-SHOPPING-CATALOG-SEARCH-SEARCH-SEARCH-INPUTS-02",
+      "id_at_review": "REQ-SHOPPING-CATALOG-SEARCH-0002",
       "groups": "AE",
       "verdict": "rule",
       "actor": "SPEC_AUTHORS",
@@ -601,7 +601,7 @@
     {
       "file": "docs/specification/shopping/catalog/search.md",
       "text_digest": "eb6fa97298",
-      "id_at_review": "REQ-SHOPPING-CATALOG-SEARCH-SEARCH-SEARCH-INPUTS-03",
+      "id_at_review": "REQ-SHOPPING-CATALOG-SEARCH-0003",
       "groups": "AE",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -611,7 +611,7 @@
     {
       "file": "docs/specification/shopping/catalog/search.md",
       "text_digest": "b25650806a",
-      "id_at_review": "REQ-SHOPPING-CATALOG-SEARCH-SEARCH-SEARCH-INPUTS-04",
+      "id_at_review": "REQ-SHOPPING-CATALOG-SEARCH-0004",
       "groups": "AE",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -621,7 +621,7 @@
     {
       "file": "docs/specification/shopping/catalog/search.md",
       "text_digest": "a4f12b4af8",
-      "id_at_review": "REQ-SHOPPING-CATALOG-SEARCH-SEARCH-SEARCH-FILTERS-01",
+      "id_at_review": "REQ-SHOPPING-CATALOG-SEARCH-0005",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -631,7 +631,7 @@
     {
       "file": "docs/specification/shopping/checkout/embedded.md",
       "text_digest": "d3a16bd983",
-      "id_at_review": "REQ-CHECKOUT-EP-PER-CHECKOUT-01",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0152",
       "groups": "C",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -641,7 +641,7 @@
     {
       "file": "docs/specification/shopping/checkout/embedded.md",
       "text_digest": "81afb6fb27",
-      "id_at_review": "REQ-CHECKOUT-EP-AUTHENTICATION-01",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0158",
       "groups": "C",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -651,7 +651,7 @@
     {
       "file": "docs/specification/shopping/checkout/embedded.md",
       "text_digest": "e5b5268361",
-      "id_at_review": "REQ-CHECKOUT-EP-AUTHENTICATION-02",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0159",
       "groups": "C",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -661,7 +661,7 @@
     {
       "file": "docs/specification/shopping/checkout/embedded.md",
       "text_digest": "1e3b81573d",
-      "id_at_review": "REQ-CHECKOUT-EP-COLOR-SCHEME-04",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0163",
       "groups": "C",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -671,7 +671,7 @@
     {
       "file": "docs/specification/shopping/checkout/embedded.md",
       "text_digest": "2c534b146e",
-      "id_at_review": "REQ-CHECKOUT-EP-DELEGATION-NEGOTIATION-02",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0165",
       "groups": "C",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -681,7 +681,7 @@
     {
       "file": "docs/specification/shopping/checkout/embedded.md",
       "text_digest": "bf3f2784f2",
-      "id_at_review": "REQ-CHECKOUT-EP-DELEGATION-NEGOTIATION-03",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0166",
       "groups": "C",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -691,7 +691,7 @@
     {
       "file": "docs/specification/shopping/checkout/embedded.md",
       "text_digest": "99e001b8a5",
-      "id_at_review": "REQ-CHECKOUT-EP-EC-TOTALS-CHANGE-01",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0206",
       "groups": "C",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -701,7 +701,7 @@
     {
       "file": "docs/specification/shopping/checkout/embedded.md",
       "text_digest": "5023f77e0f",
-      "id_at_review": "REQ-CHECKOUT-EP-EC-TOTALS-CHANGE-02",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0207",
       "groups": "C",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -711,7 +711,7 @@
     {
       "file": "docs/specification/shopping/checkout/embedded.md",
       "text_digest": "8f97f24d67",
-      "id_at_review": "REQ-CHECKOUT-EP-PREVENTION-OF-01",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0228",
       "groups": "A",
       "verdict": "rule",
       "actor": "HOST",
@@ -721,7 +721,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "369ccf093d",
-      "id_at_review": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-07",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0007",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -731,7 +731,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "dec45589b9",
-      "id_at_review": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-10",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0010",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -741,7 +741,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "8becb2a472",
-      "id_at_review": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-13",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0013",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -751,7 +751,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "da38167665",
-      "id_at_review": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-18",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0018",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -761,7 +761,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "bbea25f035",
-      "id_at_review": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-20",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0020",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -771,7 +771,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "af51ddc764",
-      "id_at_review": "REQ-CHECKOUT-STATUS-VALUES-01",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0021",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -781,7 +781,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "68730700a3",
-      "id_at_review": "REQ-CHECKOUT-ERROR-HANDLING-01",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0040",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -791,7 +791,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "f88ead9106",
-      "id_at_review": "REQ-CHECKOUT-THE-PATH-FIELD-01",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0044",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -801,7 +801,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "a3efff7283",
-      "id_at_review": "REQ-CHECKOUT-THE-PATH-FIELD-02",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0045",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -811,7 +811,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "90b3974648",
-      "id_at_review": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-02",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0047",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -821,7 +821,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "ab6a714be7",
-      "id_at_review": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-03",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0048",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -831,7 +831,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "7ace1fe265",
-      "id_at_review": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-06",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0051",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -841,7 +841,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "daf94805c3",
-      "id_at_review": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-11",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0056",
       "groups": "E",
       "verdict": "rule",
       "actor": "SPEC_AUTHORS",
@@ -851,7 +851,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "c00cb541a5",
-      "id_at_review": "REQ-CHECKOUT-EXAMPLE-RESOLVING-A-01",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0058",
       "groups": "B",
       "verdict": "not a rule",
       "actor": "BUSINESS",
@@ -861,7 +861,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "f1104000fd",
-      "id_at_review": "REQ-CHECKOUT-WARNING-PRESENTATION-02",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0061",
       "groups": "B",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -871,7 +871,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "2c5d9d6629",
-      "id_at_review": "REQ-CHECKOUT-WARNING-PRESENTATION-03",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0062",
       "groups": "B",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -881,7 +881,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "16da19e571",
-      "id_at_review": "REQ-CHECKOUT-WARNING-PRESENTATION-04",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0063",
       "groups": "B",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -891,7 +891,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "3214a8b4f3",
-      "id_at_review": "REQ-CHECKOUT-WARNING-PRESENTATION-05",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0064",
       "groups": "B",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -901,7 +901,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "f2580192f4",
-      "id_at_review": "REQ-CHECKOUT-WARNING-PRESENTATION-06",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0065",
       "groups": "B",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -911,7 +911,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "454e178f36",
-      "id_at_review": "REQ-CHECKOUT-WARNING-PRESENTATION-07",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0066",
       "groups": "B",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -921,7 +921,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "164a7d0bf1",
-      "id_at_review": "REQ-CHECKOUT-WARNING-PRESENTATION-08",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0067",
       "groups": "B",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -931,7 +931,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "22696563a2",
-      "id_at_review": "REQ-CHECKOUT-WARNING-PRESENTATION-09",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0068",
       "groups": "B",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -941,7 +941,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "1d6897ff8a",
-      "id_at_review": "REQ-CHECKOUT-WARNING-PRESENTATION-10",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0069",
       "groups": "B",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -951,7 +951,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "93029fc74c",
-      "id_at_review": "REQ-CHECKOUT-WARNING-PRESENTATION-11",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0070",
       "groups": "B",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -961,7 +961,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "d8320eb452",
-      "id_at_review": "REQ-CHECKOUT-WARNING-PRESENTATION-12",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0071",
       "groups": "B",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -971,7 +971,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "6f25efb860",
-      "id_at_review": "REQ-CHECKOUT-DISCLOSURE-01",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0075",
       "groups": "B",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -981,7 +981,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "0263f18adb",
-      "id_at_review": "REQ-CHECKOUT-DISCLOSURE-07",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0081",
       "groups": "B",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -991,7 +991,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "ec3bac66a2",
-      "id_at_review": "REQ-CHECKOUT-AVAILABILITY-03",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0093",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1001,7 +1001,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "e6f81fd0dd",
-      "id_at_review": "REQ-CHECKOUT-FORMAT-01",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0094",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1011,7 +1011,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "a1b795b70e",
-      "id_at_review": "REQ-CHECKOUT-FORMAT-02",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0095",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1021,7 +1021,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "0c5c2c4998",
-      "id_at_review": "REQ-CHECKOUT-COMPLETE-CHECKOUT-06",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0117",
       "groups": "B",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1031,7 +1031,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "56dd9d5db0",
-      "id_at_review": "REQ-CHECKOUT-COMPLETE-CHECKOUT-07",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0118",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1041,7 +1041,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "1929627a42",
-      "id_at_review": "REQ-CHECKOUT-CANCEL-CHECKOUT-02",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0120",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1051,7 +1051,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "35b444ee45",
-      "id_at_review": "REQ-CHECKOUT-CONTEXT-01",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0121",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1061,7 +1061,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "e137bb0b98",
-      "id_at_review": "REQ-CHECKOUT-CONTEXT-02",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0122",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1071,7 +1071,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "d647a85835",
-      "id_at_review": "REQ-CHECKOUT-CONTEXT-03",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0123",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1081,7 +1081,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "916a488164",
-      "id_at_review": "REQ-CHECKOUT-SIGNALS-01",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0124",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1091,7 +1091,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "633738379e",
-      "id_at_review": "REQ-CHECKOUT-RENDERING-CONTRACT-01",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0128",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1101,7 +1101,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "9686f34d66",
-      "id_at_review": "REQ-CHECKOUT-RENDERING-CONTRACT-02",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0129",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1111,7 +1111,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "ed6e5e1a5e",
-      "id_at_review": "REQ-CHECKOUT-RENDERING-CONTRACT-03",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0130",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1121,7 +1121,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "78eb4e97bf",
-      "id_at_review": "REQ-CHECKOUT-RENDERING-CONTRACT-04",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0131",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1131,7 +1131,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "debd639454",
-      "id_at_review": "REQ-CHECKOUT-RENDERING-CONTRACT-05",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0132",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1141,7 +1141,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "d725369b04",
-      "id_at_review": "REQ-CHECKOUT-RENDERING-CONTRACT-06",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0133",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1151,7 +1151,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "749321cc43",
-      "id_at_review": "REQ-CHECKOUT-RENDERING-CONTRACT-07",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0134",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1161,7 +1161,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "bcc53c3234",
-      "id_at_review": "REQ-CHECKOUT-VERIFICATION-01",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0135",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1171,7 +1171,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "8771b7a275",
-      "id_at_review": "REQ-CHECKOUT-VERIFICATION-02",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0136",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1181,7 +1181,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "287b81954f",
-      "id_at_review": "REQ-CHECKOUT-VERIFICATION-03",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0137",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1191,7 +1191,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "594b999c87",
-      "id_at_review": "REQ-CHECKOUT-VERIFICATION-04",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0138",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1201,7 +1201,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "b43edb9f37",
-      "id_at_review": "REQ-CHECKOUT-VERIFICATION-05",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0139",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1211,7 +1211,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "67b450f295",
-      "id_at_review": "REQ-CHECKOUT-WELL-KNOWN-TYPES-01",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0140",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1221,7 +1221,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "6e36252844",
-      "id_at_review": "REQ-CHECKOUT-WELL-KNOWN-TYPES-02",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0141",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1231,7 +1231,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "df0becb156",
-      "id_at_review": "REQ-CHECKOUT-WELL-KNOWN-TYPES-03",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0142",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1241,7 +1241,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "cf4dce95bc",
-      "id_at_review": "REQ-CHECKOUT-WELL-KNOWN-TYPES-04",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0143",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1251,7 +1251,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "26a6f1432c",
-      "id_at_review": "REQ-CHECKOUT-WELL-KNOWN-TYPES-05",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0144",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1261,18 +1261,18 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "3ff1a76ae8",
-      "id_at_review": "REQ-CHECKOUT-WELL-KNOWN-TYPES-06",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0145",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
       "testable": true,
       "reason": "totals content",
-      "note": "same rule as REQ-CHECKOUT-RENDERING-CONTRACT-05"
+      "note": "same rule as REQ-SHOPPING-CHECKOUT-0132"
     },
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "2440b50ae1",
-      "id_at_review": "REQ-CHECKOUT-REPEATING-TYPES-01",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0146",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1282,7 +1282,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "c933a8a798",
-      "id_at_review": "REQ-CHECKOUT-SUB-LINES-LINES-01",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0147",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1292,7 +1292,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "c49ea1cbba",
-      "id_at_review": "REQ-CHECKOUT-SUB-LINES-LINES-02",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0148",
       "groups": "AB",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1302,7 +1302,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "880a06d004",
-      "id_at_review": "REQ-CHECKOUT-SUB-LINES-LINES-03",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0149",
       "groups": "A",
       "verdict": "not a rule",
       "actor": "PLATFORM",
@@ -1312,7 +1312,7 @@
     {
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "57a1e5693e",
-      "id_at_review": "REQ-CHECKOUT-SUB-LINES-LINES-04",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0150",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1322,7 +1322,7 @@
     {
       "file": "docs/specification/shopping/checkout/mcp.md",
       "text_digest": "35bccf4f4a",
-      "id_at_review": "REQ-CHECKOUT-MCP-UPDATE-CHECKOUT-02",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0233",
       "groups": "C",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1332,7 +1332,7 @@
     {
       "file": "docs/specification/shopping/checkout/rest.md",
       "text_digest": "017f445b50",
-      "id_at_review": "REQ-CHECKOUT-REST-CONTENT-TYPES-01",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0241",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1342,7 +1342,7 @@
     {
       "file": "docs/specification/shopping/checkout/rest.md",
       "text_digest": "86f31bc40b",
-      "id_at_review": "REQ-CHECKOUT-REST-TRANSPORT-SECURITY-01",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0242",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1353,7 +1353,7 @@
     {
       "file": "docs/specification/shopping/checkout/rest.md",
       "text_digest": "2b1505e5e0",
-      "id_at_review": "REQ-CHECKOUT-REST-REQUEST-SIGNING-01",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0248",
       "groups": "B",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1363,7 +1363,7 @@
     {
       "file": "docs/specification/shopping/checkout/rest.md",
       "text_digest": "833d001a11",
-      "id_at_review": "REQ-CHECKOUT-REST-RESPONSE-SIGNING-01",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0249",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1373,7 +1373,7 @@
     {
       "file": "docs/specification/shopping/checkout/rest.md",
       "text_digest": "eb1ea646bd",
-      "id_at_review": "REQ-CHECKOUT-REST-RESPONSE-SIGNING-02",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0250",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1383,7 +1383,7 @@
     {
       "file": "docs/specification/shopping/checkout/rest.md",
       "text_digest": "9655f6d29f",
-      "id_at_review": "REQ-CHECKOUT-REST-AUTHENTICATION-01",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0251",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1393,7 +1393,7 @@
     {
       "file": "docs/specification/shopping/extensions/buyer-consent.md",
       "text_digest": "e83d2886ae",
-      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-SCHEMA-COMPOSITION-01",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-0001",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1403,7 +1403,7 @@
     {
       "file": "docs/specification/shopping/extensions/buyer-consent.md",
       "text_digest": "c9f256df93",
-      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-DATA-DEPENDENCIES-01",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-0002",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1413,7 +1413,7 @@
     {
       "file": "docs/specification/shopping/extensions/buyer-consent.md",
       "text_digest": "847433efb5",
-      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-DATA-DEPENDENCIES-02",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-0003",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1423,7 +1423,7 @@
     {
       "file": "docs/specification/shopping/extensions/buyer-consent.md",
       "text_digest": "ad6ce21b41",
-      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-DATA-DEPENDENCIES-03",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-0004",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1433,7 +1433,7 @@
     {
       "file": "docs/specification/shopping/extensions/buyer-consent.md",
       "text_digest": "0a45016c80",
-      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-01",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-0005",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1443,7 +1443,7 @@
     {
       "file": "docs/specification/shopping/extensions/buyer-consent.md",
       "text_digest": "226370a92e",
-      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-02",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-0006",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1453,7 +1453,7 @@
     {
       "file": "docs/specification/shopping/extensions/buyer-consent.md",
       "text_digest": "13c85fda79",
-      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-03",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-0007",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1463,7 +1463,7 @@
     {
       "file": "docs/specification/shopping/extensions/buyer-consent.md",
       "text_digest": "0251ef1234",
-      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-04",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-0008",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1473,7 +1473,7 @@
     {
       "file": "docs/specification/shopping/extensions/buyer-consent.md",
       "text_digest": "4bdc908f46",
-      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-05",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-0009",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1483,7 +1483,7 @@
     {
       "file": "docs/specification/shopping/extensions/buyer-consent.md",
       "text_digest": "7affd65168",
-      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-06",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-0010",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1493,7 +1493,7 @@
     {
       "file": "docs/specification/shopping/extensions/buyer-consent.md",
       "text_digest": "7918cf85e6",
-      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-07",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-0011",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1503,7 +1503,7 @@
     {
       "file": "docs/specification/shopping/extensions/buyer-consent.md",
       "text_digest": "9ea5b9f143",
-      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-08",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-0012",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1513,7 +1513,7 @@
     {
       "file": "docs/specification/shopping/extensions/buyer-consent.md",
       "text_digest": "d0e9b52bdd",
-      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-09",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-0013",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1523,7 +1523,7 @@
     {
       "file": "docs/specification/shopping/extensions/buyer-consent.md",
       "text_digest": "72244fd689",
-      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-10",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-0014",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1533,7 +1533,7 @@
     {
       "file": "docs/specification/shopping/extensions/buyer-consent.md",
       "text_digest": "6b49f63890",
-      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-11",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-0015",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1543,7 +1543,7 @@
     {
       "file": "docs/specification/shopping/extensions/buyer-consent.md",
       "text_digest": "40c2df7171",
-      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-12",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-0016",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1553,7 +1553,7 @@
     {
       "file": "docs/specification/shopping/extensions/buyer-consent.md",
       "text_digest": "047c97c48a",
-      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-13",
+      "id_at_review": "REQ-SHOPPING-BUYER-CONSENT-0017",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1563,7 +1563,7 @@
     {
       "file": "docs/specification/shopping/extensions/discount.md",
       "text_digest": "75a607ee1b",
-      "id_at_review": "REQ-SHOPPING-DISCOUNT-DISCOUNT-DISCOVERY-01",
+      "id_at_review": "REQ-SHOPPING-DISCOUNT-0001",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1573,7 +1573,7 @@
     {
       "file": "docs/specification/shopping/extensions/discount.md",
       "text_digest": "15ac700129",
-      "id_at_review": "REQ-SHOPPING-DISCOUNT-DISCOUNT-DISCOVERY-02",
+      "id_at_review": "REQ-SHOPPING-DISCOUNT-0002",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1583,7 +1583,7 @@
     {
       "file": "docs/specification/shopping/extensions/discount.md",
       "text_digest": "cf1b7d46ea",
-      "id_at_review": "REQ-SHOPPING-DISCOUNT-DISCOUNT-OPERATIONS-01",
+      "id_at_review": "REQ-SHOPPING-DISCOUNT-0003",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1593,7 +1593,7 @@
     {
       "file": "docs/specification/shopping/extensions/discount.md",
       "text_digest": "99931074ea",
-      "id_at_review": "REQ-SHOPPING-DISCOUNT-DISCOUNT-OPERATIONS-02",
+      "id_at_review": "REQ-SHOPPING-DISCOUNT-0004",
       "groups": "AE",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1603,7 +1603,7 @@
     {
       "file": "docs/specification/shopping/extensions/discount.md",
       "text_digest": "05ed0d297c",
-      "id_at_review": "REQ-SHOPPING-DISCOUNT-DISCOUNT-REJECTED-CODES-01",
+      "id_at_review": "REQ-SHOPPING-DISCOUNT-0005",
       "groups": "E",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1613,18 +1613,18 @@
     {
       "file": "docs/specification/shopping/extensions/discount.md",
       "text_digest": "b7f23c4704",
-      "id_at_review": "REQ-SHOPPING-DISCOUNT-DISCOUNT-VERIFICATION-AT-CHECKOUT-01",
+      "id_at_review": "REQ-SHOPPING-DISCOUNT-0009",
       "groups": "E",
       "verdict": "rule",
       "actor": "BUSINESS",
       "testable": true,
       "reason": "completion behaviour",
-      "note": "restates REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-02"
+      "note": "restates REQ-SHOPPING-CHECKOUT-0047"
     },
     {
       "file": "docs/specification/shopping/extensions/fulfillment.md",
       "text_digest": "eb39670f05",
-      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-DESTINATIONS-01",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-0004",
       "groups": "A",
       "verdict": "rule",
       "actor": "SPEC_AUTHORS",
@@ -1634,7 +1634,7 @@
     {
       "file": "docs/specification/shopping/extensions/fulfillment.md",
       "text_digest": "3049f1a8c3",
-      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-DESTINATIONS-03",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-0006",
       "groups": "E",
       "verdict": "rule",
       "actor": "SPEC_AUTHORS",
@@ -1644,7 +1644,7 @@
     {
       "file": "docs/specification/shopping/extensions/fulfillment.md",
       "text_digest": "09193f5629",
-      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-DESTINATIONS-04",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-0007",
       "groups": "AE",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1654,7 +1654,7 @@
     {
       "file": "docs/specification/shopping/extensions/fulfillment.md",
       "text_digest": "62c051ee37",
-      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-SELECTION-AND-LOCATION-01",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-0011",
       "groups": "E",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1664,7 +1664,7 @@
     {
       "file": "docs/specification/shopping/extensions/fulfillment.md",
       "text_digest": "bdf46e29a3",
-      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-SELECTION-AND-LOCATION-02",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-0012",
       "groups": "E",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1674,7 +1674,7 @@
     {
       "file": "docs/specification/shopping/extensions/fulfillment.md",
       "text_digest": "ac1221953c",
-      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-SELECTION-AND-LOCATION-03",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-0013",
       "groups": "E",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1684,7 +1684,7 @@
     {
       "file": "docs/specification/shopping/extensions/fulfillment.md",
       "text_digest": "2cf57b7024",
-      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-METHODS-02",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-0036",
       "groups": "AE",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1694,7 +1694,7 @@
     {
       "file": "docs/specification/shopping/extensions/fulfillment.md",
       "text_digest": "443d2106bc",
-      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-METHODS-03",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-0037",
       "groups": "AE",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1704,7 +1704,7 @@
     {
       "file": "docs/specification/shopping/extensions/fulfillment.md",
       "text_digest": "2212f639d3",
-      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-OPTIONS-01",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-0038",
       "groups": "AE",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1714,7 +1714,7 @@
     {
       "file": "docs/specification/shopping/extensions/fulfillment.md",
       "text_digest": "a1a4de15f2",
-      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-OPTIONS-03",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-0040",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1724,7 +1724,7 @@
     {
       "file": "docs/specification/shopping/extensions/fulfillment.md",
       "text_digest": "185fc4c8c0",
-      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-OPTIONS-04",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-0041",
       "groups": "AE",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1734,7 +1734,7 @@
     {
       "file": "docs/specification/shopping/extensions/fulfillment.md",
       "text_digest": "ae3b66a72c",
-      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-PLATFORM-PROFILE-01",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-0046",
       "groups": "A",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1744,7 +1744,7 @@
     {
       "file": "docs/specification/shopping/extensions/fulfillment.md",
       "text_digest": "37e1ff580a",
-      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-PLATFORM-PROFILE-02",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-0047",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1754,7 +1754,7 @@
     {
       "file": "docs/specification/shopping/extensions/fulfillment.md",
       "text_digest": "378c4f8068",
-      "id_at_review": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-METHOD-TYPES-05",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-0055",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1764,7 +1764,7 @@
     {
       "file": "docs/specification/shopping/order/index.md",
       "text_digest": "db110c82c0",
-      "id_at_review": "REQ-SHOPPING-ORDER-KEY-CONCEPTS-01",
+      "id_at_review": "REQ-SHOPPING-ORDER-0001",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1774,7 +1774,7 @@
     {
       "file": "docs/specification/shopping/order/index.md",
       "text_digest": "5e0b5a836c",
-      "id_at_review": "REQ-SHOPPING-ORDER-ATTRIBUTION-01",
+      "id_at_review": "REQ-SHOPPING-ORDER-0004",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1784,7 +1784,7 @@
     {
       "file": "docs/specification/shopping/order/index.md",
       "text_digest": "f650fb481d",
-      "id_at_review": "REQ-SHOPPING-ORDER-POLICIES-01",
+      "id_at_review": "REQ-SHOPPING-ORDER-0005",
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1794,7 +1794,7 @@
     {
       "file": "docs/specification/shopping/order/index.md",
       "text_digest": "b3887dba91",
-      "id_at_review": "REQ-SHOPPING-ORDER-EXAMPLE-COUNT-SOLD-01",
+      "id_at_review": "REQ-SHOPPING-ORDER-0006",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1804,7 +1804,7 @@
     {
       "file": "docs/specification/shopping/order/index.md",
       "text_digest": "7e7fe0b12a",
-      "id_at_review": "REQ-SHOPPING-ORDER-EXAMPLE-COUNT-SOLD-02",
+      "id_at_review": "REQ-SHOPPING-ORDER-0007",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1814,7 +1814,7 @@
     {
       "file": "docs/specification/shopping/order/index.md",
       "text_digest": "d79ebec396",
-      "id_at_review": "REQ-SHOPPING-ORDER-OPERATIONS-GUIDELINES-01",
+      "id_at_review": "REQ-SHOPPING-ORDER-0012",
       "groups": "B",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1824,7 +1824,7 @@
     {
       "file": "docs/specification/shopping/order/index.md",
       "text_digest": "8fb9d0d3c3",
-      "id_at_review": "REQ-SHOPPING-ORDER-OPERATIONS-GUIDELINES-02",
+      "id_at_review": "REQ-SHOPPING-ORDER-0013",
       "groups": "B",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1834,7 +1834,7 @@
     {
       "file": "docs/specification/shopping/order/index.md",
       "text_digest": "e3b0e4d162",
-      "id_at_review": "REQ-SHOPPING-ORDER-OPERATIONS-GUIDELINES-03",
+      "id_at_review": "REQ-SHOPPING-ORDER-0014",
       "groups": "B",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1844,7 +1844,7 @@
     {
       "file": "docs/specification/shopping/order/index.md",
       "text_digest": "af7faa7edc",
-      "id_at_review": "REQ-SHOPPING-ORDER-OPERATIONS-GUIDELINES-04",
+      "id_at_review": "REQ-SHOPPING-ORDER-0015",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1854,7 +1854,7 @@
     {
       "file": "docs/specification/shopping/order/index.md",
       "text_digest": "6b50b563f9",
-      "id_at_review": "REQ-SHOPPING-ORDER-WEBHOOK-SIGNATURE-01",
+      "id_at_review": "REQ-SHOPPING-ORDER-0016",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1864,7 +1864,7 @@
     {
       "file": "docs/specification/shopping/order/index.md",
       "text_digest": "f7fb88a8ea",
-      "id_at_review": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-01",
+      "id_at_review": "REQ-SHOPPING-ORDER-0020",
       "groups": "B",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1874,7 +1874,7 @@
     {
       "file": "docs/specification/shopping/order/index.md",
       "text_digest": "cd10b52eeb",
-      "id_at_review": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-02",
+      "id_at_review": "REQ-SHOPPING-ORDER-0021",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1884,7 +1884,7 @@
     {
       "file": "docs/specification/shopping/order/index.md",
       "text_digest": "a5e8107f1f",
-      "id_at_review": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-03",
+      "id_at_review": "REQ-SHOPPING-ORDER-0022",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1894,7 +1894,7 @@
     {
       "file": "docs/specification/shopping/order/index.md",
       "text_digest": "103d1048ca",
-      "id_at_review": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-04",
+      "id_at_review": "REQ-SHOPPING-ORDER-0023",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1904,7 +1904,7 @@
     {
       "file": "docs/specification/shopping/order/index.md",
       "text_digest": "4b626e6827",
-      "id_at_review": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-05",
+      "id_at_review": "REQ-SHOPPING-ORDER-0024",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1914,7 +1914,7 @@
     {
       "file": "docs/specification/shopping/order/index.md",
       "text_digest": "1f2d85ce9c",
-      "id_at_review": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-06",
+      "id_at_review": "REQ-SHOPPING-ORDER-0025",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1924,7 +1924,7 @@
     {
       "file": "docs/specification/shopping/order/index.md",
       "text_digest": "fbd2ccba30",
-      "id_at_review": "REQ-SHOPPING-ORDER-EVENTS-GUIDELINES-07",
+      "id_at_review": "REQ-SHOPPING-ORDER-0026",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1934,7 +1934,7 @@
     {
       "file": "docs/specification/shopping/order/rest.md",
       "text_digest": "de72b2d0de",
-      "id_at_review": "REQ-SHOPPING-ORDER-REST-CONTENT-TYPES-01",
+      "id_at_review": "REQ-SHOPPING-ORDER-0034",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1944,7 +1944,7 @@
     {
       "file": "docs/specification/shopping/order/rest.md",
       "text_digest": "86f31bc40b",
-      "id_at_review": "REQ-SHOPPING-ORDER-REST-TRANSPORT-SECURITY-01",
+      "id_at_review": "REQ-SHOPPING-ORDER-0035",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
@@ -1955,7 +1955,7 @@
     {
       "file": "docs/specification/shopping/order/rest.md",
       "text_digest": "15463fa061",
-      "id_at_review": "REQ-SHOPPING-ORDER-REST-CONFORMANCE-01",
+      "id_at_review": "REQ-SHOPPING-ORDER-0036",
       "groups": "B",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1965,7 +1965,7 @@
     {
       "file": "docs/specification/shopping/order/rest.md",
       "text_digest": "c299106814",
-      "id_at_review": "REQ-SHOPPING-ORDER-REST-CONFORMANCE-02",
+      "id_at_review": "REQ-SHOPPING-ORDER-0037",
       "groups": "B",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1975,7 +1975,7 @@
     {
       "file": "docs/specification/shopping/order/rest.md",
       "text_digest": "a6262d6e2e",
-      "id_at_review": "REQ-SHOPPING-ORDER-REST-CONFORMANCE-03",
+      "id_at_review": "REQ-SHOPPING-ORDER-0038",
       "groups": "B",
       "verdict": "rule",
       "actor": "PLATFORM",
@@ -1985,18 +1985,18 @@
     {
       "file": "docs/specification/shopping/order/rest.md",
       "text_digest": "10eaedb9f9",
-      "id_at_review": "REQ-SHOPPING-ORDER-REST-CONFORMANCE-04",
+      "id_at_review": "REQ-SHOPPING-ORDER-0039",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",
       "testable": true,
       "reason": "visible: the endpoint's TLS version",
-      "note": "same rule as REQ-SHOPPING-ORDER-REST-TRANSPORT-SECURITY-01"
+      "note": "same rule as REQ-SHOPPING-ORDER-0035"
     },
     {
       "file": "docs/specification/shopping/order/rest.md",
       "text_digest": "f797370582",
-      "id_at_review": "REQ-SHOPPING-ORDER-REST-CONFORMANCE-05",
+      "id_at_review": "REQ-SHOPPING-ORDER-0040",
       "groups": "B",
       "verdict": "rule",
       "actor": "BUSINESS",

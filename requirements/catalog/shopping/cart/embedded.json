@@ -51,11 +51,11 @@
       "capability-from-bullet-or-path",
       "count-capitals"
     ],
-    "ids": "provisional"
+    "ids": "stable, from requirements.lock.json"
   },
   "requirements": [
     {
-      "id": "REQ-SHOPPING-CART-EP-PER-CART-CONFIGURATION-01",
+      "id": "REQ-SHOPPING-CART-0030",
       "text_digest": "6d177cbebb",
       "scope": "capability",
       "capabilities": [
@@ -82,6 +82,7 @@
         "anchor": "per-cart-configuration"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-PER-CART-CONFIGURATION-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -96,7 +97,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CART-EP-LOADING-AN-EMBEDDED-CART-01",
+      "id": "REQ-SHOPPING-CART-0031",
       "text_digest": "3bfce93152",
       "scope": "capability",
       "capabilities": [
@@ -123,6 +124,7 @@
         "anchor": "loading-an-embedded-cart-url"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-LOADING-AN-EMBEDDED-CART-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -137,7 +139,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CART-EP-LOADING-AN-EMBEDDED-CART-02",
+      "id": "REQ-SHOPPING-CART-0032",
       "text_digest": "40901b2bee",
       "scope": "capability",
       "capabilities": [
@@ -162,6 +164,7 @@
         "anchor": "loading-an-embedded-cart-url"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-LOADING-AN-EMBEDDED-CART-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -170,7 +173,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CART-EP-LOADING-AN-EMBEDDED-CART-03",
+      "id": "REQ-SHOPPING-CART-0033",
       "text_digest": "1eb6a4ff57",
       "scope": "capability",
       "capabilities": [
@@ -197,6 +200,7 @@
         "anchor": "loading-an-embedded-cart-url"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-LOADING-AN-EMBEDDED-CART-03",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -205,7 +209,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CART-EP-LOADING-AN-EMBEDDED-CART-04",
+      "id": "REQ-SHOPPING-CART-0034",
       "text_digest": "99fb03a018",
       "scope": "capability",
       "capabilities": [
@@ -233,6 +237,7 @@
         "anchor": "loading-an-embedded-cart-url"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-LOADING-AN-EMBEDDED-CART-04",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -241,7 +246,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CART-EP-LOADING-AN-EMBEDDED-CART-05",
+      "id": "REQ-SHOPPING-CART-0035",
       "text_digest": "3ef6139abf",
       "scope": "capability",
       "capabilities": [
@@ -266,6 +271,7 @@
         "anchor": "loading-an-embedded-cart-url"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-LOADING-AN-EMBEDDED-CART-05",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -274,7 +280,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CART-EP-LOADING-AN-EMBEDDED-CART-06",
+      "id": "REQ-SHOPPING-CART-0036",
       "text_digest": "dde250e17d",
       "scope": "capability",
       "capabilities": [
@@ -301,6 +307,7 @@
         "anchor": "loading-an-embedded-cart-url"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-LOADING-AN-EMBEDDED-CART-06",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -309,7 +316,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CART-EP-TRANSPORT-MESSAGING-01",
+      "id": "REQ-SHOPPING-CART-0037",
       "text_digest": "9854f1f8d0",
       "scope": "capability",
       "capabilities": [
@@ -338,6 +345,7 @@
         "anchor": "transport-messaging"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-TRANSPORT-MESSAGING-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -346,7 +354,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CART-EP-TRANSPORT-MESSAGING-02",
+      "id": "REQ-SHOPPING-CART-0038",
       "text_digest": "22d5406f7a",
       "scope": "capability",
       "capabilities": [
@@ -371,6 +379,7 @@
         "anchor": "transport-messaging"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-TRANSPORT-MESSAGING-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -379,7 +388,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CART-EP-CORE-MESSAGES-01",
+      "id": "REQ-SHOPPING-CART-0039",
       "text_digest": "236108e3a6",
       "scope": "capability",
       "capabilities": [
@@ -404,6 +413,7 @@
         "anchor": "core-messages"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-CORE-MESSAGES-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -412,7 +422,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CART-EP-EP-CART-READY-01",
+      "id": "REQ-SHOPPING-CART-0040",
       "text_digest": "12e38410dc",
       "scope": "capability",
       "capabilities": [
@@ -439,6 +449,7 @@
         "anchor": "epcartready"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-EP-CART-READY-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -447,7 +458,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CART-EP-EP-CART-READY-02",
+      "id": "REQ-SHOPPING-CART-0041",
       "text_digest": "d081ee92cc",
       "scope": "capability",
       "capabilities": [
@@ -475,6 +486,7 @@
         "anchor": "epcartready"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-EP-CART-READY-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -483,7 +495,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CART-EP-EP-CART-READY-03",
+      "id": "REQ-SHOPPING-CART-0042",
       "text_digest": "9f75f5e48f",
       "scope": "capability",
       "capabilities": [
@@ -510,6 +522,7 @@
         "anchor": "epcartready"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-EP-CART-READY-03",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -518,7 +531,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CART-EP-EP-CART-READY-04",
+      "id": "REQ-SHOPPING-CART-0043",
       "text_digest": "2732dd948e",
       "scope": "capability",
       "capabilities": [
@@ -547,6 +560,7 @@
         "anchor": "epcartready"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-EP-CART-READY-04",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -555,7 +569,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CART-EP-EP-CART-READY-05",
+      "id": "REQ-SHOPPING-CART-0044",
       "text_digest": "5e3413cd0d",
       "scope": "capability",
       "capabilities": [
@@ -582,6 +596,7 @@
         "anchor": "epcartready"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-EP-CART-READY-05",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -590,7 +605,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CART-EP-EP-CART-READY-06",
+      "id": "REQ-SHOPPING-CART-0045",
       "text_digest": "abdc68d4ce",
       "scope": "capability",
       "capabilities": [
@@ -617,6 +632,7 @@
         "anchor": "epcartready"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-EP-CART-READY-06",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -625,7 +641,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CART-EP-EP-CART-READY-07",
+      "id": "REQ-SHOPPING-CART-0046",
       "text_digest": "8c8a34c733",
       "scope": "capability",
       "capabilities": [
@@ -652,6 +668,7 @@
         "anchor": "epcartready"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-EP-CART-READY-07",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -660,7 +677,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CART-EP-EP-CART-READY-08",
+      "id": "REQ-SHOPPING-CART-0047",
       "text_digest": "93c5cfff95",
       "scope": "capability",
       "capabilities": [
@@ -687,6 +704,7 @@
         "anchor": "epcartready"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-EP-CART-READY-08",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -695,7 +713,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CART-EP-EP-CART-READY-09",
+      "id": "REQ-SHOPPING-CART-0048",
       "text_digest": "eb3704265c",
       "scope": "capability",
       "capabilities": [
@@ -722,6 +740,7 @@
         "anchor": "epcartready"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-EP-CART-READY-09",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -730,7 +749,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CART-EP-EP-CART-READY-10",
+      "id": "REQ-SHOPPING-CART-0049",
       "text_digest": "ad6f991ef5",
       "scope": "capability",
       "capabilities": [
@@ -757,6 +776,7 @@
         "anchor": "epcartready"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-EP-CART-READY-10",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -765,7 +785,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CART-EP-EP-CART-READY-11",
+      "id": "REQ-SHOPPING-CART-0050",
       "text_digest": "8c0d70a15b",
       "scope": "capability",
       "capabilities": [
@@ -793,6 +813,7 @@
         "anchor": "epcartready"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-EP-CART-READY-11",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -801,7 +822,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CART-EP-EP-CART-READY-12",
+      "id": "REQ-SHOPPING-CART-0051",
       "text_digest": "a809664137",
       "scope": "capability",
       "capabilities": [
@@ -826,6 +847,7 @@
         "anchor": "epcartready"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-EP-CART-READY-12",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -834,7 +856,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CART-EP-EP-CART-READY-13",
+      "id": "REQ-SHOPPING-CART-0052",
       "text_digest": "b4ddfaed6e",
       "scope": "capability",
       "capabilities": [
@@ -861,6 +883,7 @@
         "anchor": "epcartready"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-EP-CART-READY-13",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -869,7 +892,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CART-EP-EP-CART-READY-14",
+      "id": "REQ-SHOPPING-CART-0053",
       "text_digest": "dfcef5c6f2",
       "scope": "capability",
       "capabilities": [
@@ -894,6 +917,7 @@
         "anchor": "epcartready"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-EP-CART-READY-14",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -902,7 +926,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CART-EP-EP-CART-READY-15",
+      "id": "REQ-SHOPPING-CART-0054",
       "text_digest": "c45fb9f3f1",
       "scope": "capability",
       "capabilities": [
@@ -929,6 +953,7 @@
         "anchor": "epcartready"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-EP-CART-READY-15",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -937,7 +962,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CART-EP-EP-CART-READY-16",
+      "id": "REQ-SHOPPING-CART-0055",
       "text_digest": "55ae656dbf",
       "scope": "capability",
       "capabilities": [
@@ -962,6 +987,7 @@
         "anchor": "epcartready"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-EP-CART-READY-16",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -970,7 +996,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CART-EP-EP-CART-AUTH-01",
+      "id": "REQ-SHOPPING-CART-0056",
       "text_digest": "2f6da07657",
       "scope": "capability",
       "capabilities": [
@@ -997,6 +1023,7 @@
         "anchor": "epcartauth"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-EP-CART-AUTH-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1005,7 +1032,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CART-EP-EP-CART-COMPLETE-01",
+      "id": "REQ-SHOPPING-CART-0057",
       "text_digest": "431af45a47",
       "scope": "capability",
       "capabilities": [
@@ -1032,6 +1059,7 @@
         "anchor": "epcartcomplete"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CART-EP-EP-CART-COMPLETE-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",

@@ -51,11 +51,11 @@
       "capability-from-bullet-or-path",
       "count-capitals"
     ],
-    "ids": "provisional"
+    "ids": "stable, from requirements.lock.json"
   },
   "requirements": [
     {
-      "id": "REQ-CHECKOUT-REST-CONTENT-TYPES-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0241",
       "text_digest": "017f445b50",
       "scope": "capability",
       "capabilities": [
@@ -80,6 +80,7 @@
         "anchor": "content-types"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-REST-CONTENT-TYPES-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "rest",
@@ -94,7 +95,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-REST-TRANSPORT-SECURITY-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0242",
       "text_digest": "86f31bc40b",
       "scope": "capability",
       "capabilities": [
@@ -119,6 +120,7 @@
         "anchor": "transport-security"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-REST-TRANSPORT-SECURITY-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "rest",
@@ -134,7 +136,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-REST-UPDATE-CHECKOUT-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0243",
       "text_digest": "4bb048462f",
       "scope": "capability",
       "capabilities": [
@@ -159,6 +161,7 @@
         "anchor": "update-checkout"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-REST-UPDATE-CHECKOUT-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "rest",
@@ -167,7 +170,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-REST-UPDATE-CHECKOUT-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0244",
       "text_digest": "abb33abf65",
       "scope": "capability",
       "capabilities": [
@@ -194,6 +197,7 @@
         "anchor": "update-checkout"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-REST-UPDATE-CHECKOUT-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "rest",
@@ -202,7 +206,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-REST-UPDATE-CHECKOUT-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0245",
       "text_digest": "171c8ac33e",
       "scope": "capability",
       "capabilities": [
@@ -227,6 +231,7 @@
         "anchor": "update-checkout"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-REST-UPDATE-CHECKOUT-03",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "rest",
@@ -235,7 +240,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-REST-UPDATE-BUYER-INFO-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0246",
       "text_digest": "036655993f",
       "scope": "capability",
       "capabilities": [
@@ -262,6 +267,7 @@
         "anchor": "update-buyer-info"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-REST-UPDATE-BUYER-INFO-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "rest",
@@ -270,7 +276,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-REST-MESSAGE-SIGNING-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0247",
       "text_digest": "d1ab83442a",
       "scope": "capability",
       "capabilities": [
@@ -295,6 +301,7 @@
         "anchor": "message-signing"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-REST-MESSAGE-SIGNING-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "rest",
@@ -303,7 +310,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-REST-REQUEST-SIGNING-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0248",
       "text_digest": "2b1505e5e0",
       "scope": "capability",
       "capabilities": [
@@ -328,6 +335,7 @@
         "anchor": "request-signing"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-REST-REQUEST-SIGNING-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "rest",
@@ -342,7 +350,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-REST-RESPONSE-SIGNING-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0249",
       "text_digest": "833d001a11",
       "scope": "capability",
       "capabilities": [
@@ -367,6 +375,7 @@
         "anchor": "response-signing"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-REST-RESPONSE-SIGNING-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "rest",
@@ -381,7 +390,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-REST-RESPONSE-SIGNING-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0250",
       "text_digest": "eb1ea646bd",
       "scope": "capability",
       "capabilities": [
@@ -406,6 +415,7 @@
         "anchor": "response-signing"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-REST-RESPONSE-SIGNING-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "rest",
@@ -420,7 +430,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-REST-AUTHENTICATION-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0251",
       "text_digest": "9655f6d29f",
       "scope": "capability",
       "capabilities": [
@@ -445,6 +455,7 @@
         "anchor": "authentication"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-REST-AUTHENTICATION-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "rest",
@@ -459,7 +470,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-REST-AUTHENTICATION-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0252",
       "text_digest": "629a6e09eb",
       "scope": "capability",
       "capabilities": [
@@ -484,6 +495,7 @@
         "anchor": "authentication"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-REST-AUTHENTICATION-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "rest",

@@ -53,11 +53,11 @@
       "capability-from-bullet-or-path",
       "count-capitals"
     ],
-    "ids": "provisional"
+    "ids": "stable, from requirements.lock.json"
   },
   "requirements": [
     {
-      "id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0001",
       "text_digest": "cd05227e99",
       "scope": "capability",
       "capabilities": [
@@ -86,6 +86,7 @@
         "anchor": "quantity-and-sale-basis"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -94,7 +95,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0002",
       "text_digest": "fb0415a3cb",
       "scope": "capability",
       "capabilities": [
@@ -121,6 +122,7 @@
         "anchor": "quantity-and-sale-basis"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-02",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -129,7 +131,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0003",
       "text_digest": "62ebd6174e",
       "scope": "capability",
       "capabilities": [
@@ -154,6 +156,7 @@
         "anchor": "quantity-and-sale-basis"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-03",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -162,7 +165,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-04",
+      "id": "REQ-SHOPPING-CHECKOUT-0004",
       "text_digest": "6ef3b4aed5",
       "scope": "capability",
       "capabilities": [
@@ -190,6 +193,7 @@
         "anchor": "quantity-and-sale-basis"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-04",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -198,7 +202,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-05",
+      "id": "REQ-SHOPPING-CHECKOUT-0005",
       "text_digest": "95f6f6314f",
       "scope": "capability",
       "capabilities": [
@@ -223,6 +227,7 @@
         "anchor": "quantity-and-sale-basis"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-05",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -231,7 +236,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-06",
+      "id": "REQ-SHOPPING-CHECKOUT-0006",
       "text_digest": "9f67312357",
       "scope": "capability",
       "capabilities": [
@@ -258,6 +263,7 @@
         "anchor": "quantity-and-sale-basis"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-06",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -266,7 +272,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-07",
+      "id": "REQ-SHOPPING-CHECKOUT-0007",
       "text_digest": "369ccf093d",
       "scope": "capability",
       "capabilities": [
@@ -293,6 +299,7 @@
         "anchor": "quantity-and-sale-basis"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-07",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -307,7 +314,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-08",
+      "id": "REQ-SHOPPING-CHECKOUT-0008",
       "text_digest": "be19f9b8ba",
       "scope": "capability",
       "capabilities": [
@@ -332,6 +339,7 @@
         "anchor": "quantity-and-sale-basis"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-08",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -340,7 +348,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-09",
+      "id": "REQ-SHOPPING-CHECKOUT-0009",
       "text_digest": "471fb3330b",
       "scope": "capability",
       "capabilities": [
@@ -365,6 +373,7 @@
         "anchor": "quantity-and-sale-basis"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-09",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -373,7 +382,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-10",
+      "id": "REQ-SHOPPING-CHECKOUT-0010",
       "text_digest": "dec45589b9",
       "scope": "capability",
       "capabilities": [
@@ -401,6 +410,7 @@
         "anchor": "quantity-and-sale-basis"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-10",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -415,7 +425,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-11",
+      "id": "REQ-SHOPPING-CHECKOUT-0011",
       "text_digest": "4c7e4ba353",
       "scope": "capability",
       "capabilities": [
@@ -440,6 +450,7 @@
         "anchor": "quantity-and-sale-basis"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-11",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -448,7 +459,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-12",
+      "id": "REQ-SHOPPING-CHECKOUT-0012",
       "text_digest": "dd9079f287",
       "scope": "capability",
       "capabilities": [
@@ -473,6 +484,7 @@
         "anchor": "quantity-and-sale-basis"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-12",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -481,7 +493,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-13",
+      "id": "REQ-SHOPPING-CHECKOUT-0013",
       "text_digest": "8becb2a472",
       "scope": "capability",
       "capabilities": [
@@ -506,6 +518,7 @@
         "anchor": "quantity-and-sale-basis"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-13",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -520,7 +533,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-14",
+      "id": "REQ-SHOPPING-CHECKOUT-0014",
       "text_digest": "f8e51f41e6",
       "scope": "capability",
       "capabilities": [
@@ -547,6 +560,7 @@
         "anchor": "quantity-and-sale-basis"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-14",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -555,7 +569,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-15",
+      "id": "REQ-SHOPPING-CHECKOUT-0015",
       "text_digest": "3bb377c529",
       "scope": "capability",
       "capabilities": [
@@ -582,6 +596,7 @@
         "anchor": "quantity-and-sale-basis"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-15",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -590,7 +605,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-16",
+      "id": "REQ-SHOPPING-CHECKOUT-0016",
       "text_digest": "a3b9edd660",
       "scope": "capability",
       "capabilities": [
@@ -615,6 +630,7 @@
         "anchor": "quantity-and-sale-basis"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-16",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -623,7 +639,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-17",
+      "id": "REQ-SHOPPING-CHECKOUT-0017",
       "text_digest": "3ebe3248f4",
       "scope": "capability",
       "capabilities": [
@@ -648,6 +664,7 @@
         "anchor": "quantity-and-sale-basis"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-17",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -656,7 +673,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-18",
+      "id": "REQ-SHOPPING-CHECKOUT-0018",
       "text_digest": "da38167665",
       "scope": "capability",
       "capabilities": [
@@ -684,6 +701,7 @@
         "anchor": "quantity-and-sale-basis"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-18",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -698,7 +716,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-19",
+      "id": "REQ-SHOPPING-CHECKOUT-0019",
       "text_digest": "bd31c0f360",
       "scope": "capability",
       "capabilities": [
@@ -725,6 +743,7 @@
         "anchor": "quantity-and-sale-basis"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-19",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -733,7 +752,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-20",
+      "id": "REQ-SHOPPING-CHECKOUT-0020",
       "text_digest": "bbea25f035",
       "scope": "capability",
       "capabilities": [
@@ -760,6 +779,7 @@
         "anchor": "quantity-and-sale-basis"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-QUANTITY-AND-SALE-BASIS-20",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -774,7 +794,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-STATUS-VALUES-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0021",
       "text_digest": "af51ddc764",
       "scope": "capability",
       "capabilities": [
@@ -801,6 +821,7 @@
         "anchor": "status-values"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-STATUS-VALUES-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -815,7 +836,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ACTIONS-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0022",
       "text_digest": "d424fedfda",
       "scope": "capability",
       "capabilities": [
@@ -842,6 +863,7 @@
         "anchor": "actions"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ACTIONS-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -850,7 +872,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ACTIONS-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0023",
       "text_digest": "1c657a54ec",
       "scope": "capability",
       "capabilities": [
@@ -879,6 +901,7 @@
         "anchor": "actions"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ACTIONS-02",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -887,7 +910,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0024",
       "text_digest": "525a30062e",
       "scope": "capability",
       "capabilities": [
@@ -912,6 +935,7 @@
         "anchor": "accepted-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -920,7 +944,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0025",
       "text_digest": "3bd78d0877",
       "scope": "capability",
       "capabilities": [
@@ -945,6 +969,7 @@
         "anchor": "accepted-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-02",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -953,7 +978,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0026",
       "text_digest": "e94f7b7609",
       "scope": "capability",
       "capabilities": [
@@ -980,6 +1005,7 @@
         "anchor": "accepted-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-03",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -988,7 +1014,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-04",
+      "id": "REQ-SHOPPING-CHECKOUT-0027",
       "text_digest": "ccf0b15003",
       "scope": "capability",
       "capabilities": [
@@ -1013,6 +1039,7 @@
         "anchor": "accepted-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-04",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -1021,7 +1048,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-05",
+      "id": "REQ-SHOPPING-CHECKOUT-0028",
       "text_digest": "58f10a1130",
       "scope": "capability",
       "capabilities": [
@@ -1046,6 +1073,7 @@
         "anchor": "accepted-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-05",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -1054,7 +1082,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-06",
+      "id": "REQ-SHOPPING-CHECKOUT-0029",
       "text_digest": "7e560a0d63",
       "scope": "capability",
       "capabilities": [
@@ -1081,6 +1109,7 @@
         "anchor": "accepted-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-06",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -1089,7 +1118,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-07",
+      "id": "REQ-SHOPPING-CHECKOUT-0030",
       "text_digest": "4441824ed1",
       "scope": "capability",
       "capabilities": [
@@ -1114,6 +1143,7 @@
         "anchor": "accepted-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-07",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -1122,7 +1152,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-08",
+      "id": "REQ-SHOPPING-CHECKOUT-0031",
       "text_digest": "b392324c48",
       "scope": "capability",
       "capabilities": [
@@ -1147,6 +1177,7 @@
         "anchor": "accepted-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-08",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -1155,7 +1186,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-09",
+      "id": "REQ-SHOPPING-CHECKOUT-0032",
       "text_digest": "12329820ba",
       "scope": "capability",
       "capabilities": [
@@ -1180,6 +1211,7 @@
         "anchor": "accepted-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-09",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -1188,7 +1220,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-10",
+      "id": "REQ-SHOPPING-CHECKOUT-0033",
       "text_digest": "e92495e10d",
       "scope": "capability",
       "capabilities": [
@@ -1213,6 +1245,7 @@
         "anchor": "accepted-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-10",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -1221,7 +1254,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-11",
+      "id": "REQ-SHOPPING-CHECKOUT-0034",
       "text_digest": "e937ec9401",
       "scope": "capability",
       "capabilities": [
@@ -1248,6 +1281,7 @@
         "anchor": "accepted-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-11",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -1256,7 +1290,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-12",
+      "id": "REQ-SHOPPING-CHECKOUT-0035",
       "text_digest": "0f80aad830",
       "scope": "capability",
       "capabilities": [
@@ -1283,6 +1317,7 @@
         "anchor": "accepted-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-12",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -1291,7 +1326,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-13",
+      "id": "REQ-SHOPPING-CHECKOUT-0036",
       "text_digest": "afaf5a02f1",
       "scope": "capability",
       "capabilities": [
@@ -1318,6 +1353,7 @@
         "anchor": "accepted-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-13",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -1326,7 +1362,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-14",
+      "id": "REQ-SHOPPING-CHECKOUT-0037",
       "text_digest": "f4423ba09c",
       "scope": "capability",
       "capabilities": [
@@ -1351,6 +1387,7 @@
         "anchor": "accepted-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-14",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -1359,7 +1396,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-15",
+      "id": "REQ-SHOPPING-CHECKOUT-0038",
       "text_digest": "de9b426014",
       "scope": "capability",
       "capabilities": [
@@ -1386,6 +1423,7 @@
         "anchor": "accepted-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-15",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -1394,7 +1432,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-16",
+      "id": "REQ-SHOPPING-CHECKOUT-0039",
       "text_digest": "37585e2cc9",
       "scope": "capability",
       "capabilities": [
@@ -1421,6 +1459,7 @@
         "anchor": "accepted-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ACCEPTED-COMPLETION-16",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -1429,7 +1468,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ERROR-HANDLING-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0040",
       "text_digest": "68730700a3",
       "scope": "capability",
       "capabilities": [
@@ -1456,6 +1495,7 @@
         "anchor": "error-handling"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ERROR-HANDLING-01",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -1470,7 +1510,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ERROR-PROCESSING-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0041",
       "text_digest": "a66058228d",
       "scope": "capability",
       "capabilities": [
@@ -1495,6 +1535,7 @@
         "anchor": "error-processing-algorithm"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ERROR-PROCESSING-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -1503,7 +1544,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ERROR-PROCESSING-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0042",
       "text_digest": "1a84344de6",
       "scope": "capability",
       "capabilities": [
@@ -1528,6 +1569,7 @@
         "anchor": "error-processing-algorithm"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ERROR-PROCESSING-02",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -1536,7 +1578,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-STANDARD-ERRORS-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0043",
       "text_digest": "34664bbf7f",
       "scope": "capability",
       "capabilities": [
@@ -1563,6 +1605,7 @@
         "anchor": "standard-errors"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-STANDARD-ERRORS-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -1571,7 +1614,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-THE-PATH-FIELD-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0044",
       "text_digest": "f88ead9106",
       "scope": "capability",
       "capabilities": [
@@ -1598,6 +1641,7 @@
         "anchor": "the-path-field"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-THE-PATH-FIELD-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -1612,7 +1656,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-THE-PATH-FIELD-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0045",
       "text_digest": "a3efff7283",
       "scope": "capability",
       "capabilities": [
@@ -1637,6 +1681,7 @@
         "anchor": "the-path-field"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-THE-PATH-FIELD-02",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -1651,7 +1696,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0046",
       "text_digest": "8da7db45a5",
       "scope": "capability",
       "capabilities": [
@@ -1676,6 +1721,7 @@
         "anchor": "eligibility-verification-at-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -1684,7 +1730,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0047",
       "text_digest": "90b3974648",
       "scope": "capability",
       "capabilities": [
@@ -1709,6 +1755,7 @@
         "anchor": "eligibility-verification-at-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-02",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -1723,7 +1770,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0048",
       "text_digest": "ab6a714be7",
       "scope": "capability",
       "capabilities": [
@@ -1748,6 +1795,7 @@
         "anchor": "eligibility-verification-at-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-03",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -1762,7 +1810,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-04",
+      "id": "REQ-SHOPPING-CHECKOUT-0049",
       "text_digest": "80e3a8d49f",
       "scope": "capability",
       "capabilities": [
@@ -1790,6 +1838,7 @@
         "anchor": "eligibility-verification-at-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-04",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -1798,7 +1847,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-05",
+      "id": "REQ-SHOPPING-CHECKOUT-0050",
       "text_digest": "39c0060e67",
       "scope": "capability",
       "capabilities": [
@@ -1825,6 +1874,7 @@
         "anchor": "eligibility-verification-at-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-05",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -1833,7 +1883,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-06",
+      "id": "REQ-SHOPPING-CHECKOUT-0051",
       "text_digest": "7ace1fe265",
       "scope": "capability",
       "capabilities": [
@@ -1861,6 +1911,7 @@
         "anchor": "eligibility-verification-at-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-06",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -1875,7 +1926,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-07",
+      "id": "REQ-SHOPPING-CHECKOUT-0052",
       "text_digest": "4e67dc5855",
       "scope": "capability",
       "capabilities": [
@@ -1900,6 +1951,7 @@
         "anchor": "eligibility-verification-at-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-07",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -1908,7 +1960,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-08",
+      "id": "REQ-SHOPPING-CHECKOUT-0053",
       "text_digest": "79e6b4f5b0",
       "scope": "capability",
       "capabilities": [
@@ -1937,6 +1989,7 @@
         "anchor": "eligibility-verification-at-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-08",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -1945,7 +1998,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-09",
+      "id": "REQ-SHOPPING-CHECKOUT-0054",
       "text_digest": "11372efe76",
       "scope": "capability",
       "capabilities": [
@@ -1972,6 +2025,7 @@
         "anchor": "eligibility-verification-at-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-09",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -1980,7 +2034,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-10",
+      "id": "REQ-SHOPPING-CHECKOUT-0055",
       "text_digest": "bb1452383a",
       "scope": "capability",
       "capabilities": [
@@ -2007,6 +2061,7 @@
         "anchor": "eligibility-verification-at-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-10",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -2015,7 +2070,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-11",
+      "id": "REQ-SHOPPING-CHECKOUT-0056",
       "text_digest": "daf94805c3",
       "scope": "capability",
       "capabilities": [
@@ -2040,6 +2095,7 @@
         "anchor": "eligibility-verification-at-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-11",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -2054,7 +2110,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-12",
+      "id": "REQ-SHOPPING-CHECKOUT-0057",
       "text_digest": "57ed2f5e33",
       "scope": "capability",
       "capabilities": [
@@ -2079,6 +2135,7 @@
         "anchor": "eligibility-verification-at-completion"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-12",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -2087,7 +2144,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EXAMPLE-RESOLVING-A-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0058",
       "text_digest": "c00cb541a5",
       "scope": "capability",
       "capabilities": [
@@ -2114,6 +2171,7 @@
         "anchor": "example-resolving-a-claim-with-a-verification-action"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EXAMPLE-RESOLVING-A-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -2129,7 +2187,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EXAMPLE-RESOLVING-A-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0059",
       "text_digest": "c9eeb1baa3",
       "scope": "capability",
       "capabilities": [
@@ -2154,6 +2212,7 @@
         "anchor": "example-resolving-a-claim-with-a-verification-action"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EXAMPLE-RESOLVING-A-02",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -2162,7 +2221,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-WARNING-PRESENTATION-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0060",
       "text_digest": "acfcf54c52",
       "scope": "capability",
       "capabilities": [
@@ -2189,6 +2248,7 @@
         "anchor": "warning-presentation"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-WARNING-PRESENTATION-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -2197,7 +2257,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-WARNING-PRESENTATION-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0061",
       "text_digest": "f1104000fd",
       "scope": "capability",
       "capabilities": [
@@ -2222,6 +2282,7 @@
         "anchor": "warning-presentation"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-WARNING-PRESENTATION-02",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -2236,7 +2297,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-WARNING-PRESENTATION-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0062",
       "text_digest": "2c5d9d6629",
       "scope": "capability",
       "capabilities": [
@@ -2261,6 +2322,7 @@
         "anchor": "warning-presentation"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-WARNING-PRESENTATION-03",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -2275,7 +2337,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-WARNING-PRESENTATION-04",
+      "id": "REQ-SHOPPING-CHECKOUT-0063",
       "text_digest": "16da19e571",
       "scope": "capability",
       "capabilities": [
@@ -2300,6 +2362,7 @@
         "anchor": "warning-presentation"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-WARNING-PRESENTATION-04",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -2314,7 +2377,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-WARNING-PRESENTATION-05",
+      "id": "REQ-SHOPPING-CHECKOUT-0064",
       "text_digest": "3214a8b4f3",
       "scope": "capability",
       "capabilities": [
@@ -2339,6 +2402,7 @@
         "anchor": "warning-presentation"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-WARNING-PRESENTATION-05",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -2353,7 +2417,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-WARNING-PRESENTATION-06",
+      "id": "REQ-SHOPPING-CHECKOUT-0065",
       "text_digest": "f2580192f4",
       "scope": "capability",
       "capabilities": [
@@ -2378,6 +2442,7 @@
         "anchor": "warning-presentation"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-WARNING-PRESENTATION-06",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -2392,7 +2457,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-WARNING-PRESENTATION-07",
+      "id": "REQ-SHOPPING-CHECKOUT-0066",
       "text_digest": "454e178f36",
       "scope": "capability",
       "capabilities": [
@@ -2417,6 +2482,7 @@
         "anchor": "warning-presentation"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-WARNING-PRESENTATION-07",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -2431,7 +2497,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-WARNING-PRESENTATION-08",
+      "id": "REQ-SHOPPING-CHECKOUT-0067",
       "text_digest": "164a7d0bf1",
       "scope": "capability",
       "capabilities": [
@@ -2456,6 +2522,7 @@
         "anchor": "warning-presentation"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-WARNING-PRESENTATION-08",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -2470,7 +2537,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-WARNING-PRESENTATION-09",
+      "id": "REQ-SHOPPING-CHECKOUT-0068",
       "text_digest": "22696563a2",
       "scope": "capability",
       "capabilities": [
@@ -2495,6 +2562,7 @@
         "anchor": "warning-presentation"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-WARNING-PRESENTATION-09",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -2509,7 +2577,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-WARNING-PRESENTATION-10",
+      "id": "REQ-SHOPPING-CHECKOUT-0069",
       "text_digest": "1d6897ff8a",
       "scope": "capability",
       "capabilities": [
@@ -2534,6 +2602,7 @@
         "anchor": "warning-presentation"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-WARNING-PRESENTATION-10",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -2548,7 +2617,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-WARNING-PRESENTATION-11",
+      "id": "REQ-SHOPPING-CHECKOUT-0070",
       "text_digest": "93029fc74c",
       "scope": "capability",
       "capabilities": [
@@ -2573,6 +2642,7 @@
         "anchor": "warning-presentation"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-WARNING-PRESENTATION-11",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -2587,7 +2657,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-WARNING-PRESENTATION-12",
+      "id": "REQ-SHOPPING-CHECKOUT-0071",
       "text_digest": "d8320eb452",
       "scope": "capability",
       "capabilities": [
@@ -2614,6 +2684,7 @@
         "anchor": "warning-presentation"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-WARNING-PRESENTATION-12",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -2628,7 +2699,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-NOTICE-DEFAULT-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0072",
       "text_digest": "63eb9ce1e6",
       "scope": "capability",
       "capabilities": [
@@ -2653,6 +2724,7 @@
         "anchor": "notice-default"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-NOTICE-DEFAULT-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -2661,7 +2733,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-NOTICE-DEFAULT-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0073",
       "text_digest": "332fc3eb7b",
       "scope": "capability",
       "capabilities": [
@@ -2686,6 +2758,7 @@
         "anchor": "notice-default"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-NOTICE-DEFAULT-02",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -2694,7 +2767,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-NOTICE-DEFAULT-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0074",
       "text_digest": "bfb5252497",
       "scope": "capability",
       "capabilities": [
@@ -2719,6 +2792,7 @@
         "anchor": "notice-default"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-NOTICE-DEFAULT-03",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -2727,7 +2801,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-DISCLOSURE-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0075",
       "text_digest": "6f25efb860",
       "scope": "capability",
       "capabilities": [
@@ -2754,6 +2828,7 @@
         "anchor": "disclosure"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-DISCLOSURE-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -2768,7 +2843,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-DISCLOSURE-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0076",
       "text_digest": "06cceec768",
       "scope": "capability",
       "capabilities": [
@@ -2795,6 +2870,7 @@
         "anchor": "disclosure"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-DISCLOSURE-02",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -2803,7 +2879,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-DISCLOSURE-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0077",
       "text_digest": "ae0c97bc1a",
       "scope": "capability",
       "capabilities": [
@@ -2830,6 +2906,7 @@
         "anchor": "disclosure"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-DISCLOSURE-03",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -2838,7 +2915,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-DISCLOSURE-04",
+      "id": "REQ-SHOPPING-CHECKOUT-0078",
       "text_digest": "a1863922cf",
       "scope": "capability",
       "capabilities": [
@@ -2863,6 +2940,7 @@
         "anchor": "disclosure"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-DISCLOSURE-04",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -2871,7 +2949,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-DISCLOSURE-05",
+      "id": "REQ-SHOPPING-CHECKOUT-0079",
       "text_digest": "fd7771f63a",
       "scope": "capability",
       "capabilities": [
@@ -2898,6 +2976,7 @@
         "anchor": "disclosure"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-DISCLOSURE-05",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -2906,7 +2985,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-DISCLOSURE-06",
+      "id": "REQ-SHOPPING-CHECKOUT-0080",
       "text_digest": "820a2f9efe",
       "scope": "capability",
       "capabilities": [
@@ -2933,6 +3012,7 @@
         "anchor": "disclosure"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-DISCLOSURE-06",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -2941,7 +3021,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-DISCLOSURE-07",
+      "id": "REQ-SHOPPING-CHECKOUT-0081",
       "text_digest": "0263f18adb",
       "scope": "capability",
       "capabilities": [
@@ -2968,6 +3048,7 @@
         "anchor": "disclosure"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-DISCLOSURE-07",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -2982,7 +3063,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-DISCLOSURE-08",
+      "id": "REQ-SHOPPING-CHECKOUT-0082",
       "text_digest": "489e05ddc3",
       "scope": "capability",
       "capabilities": [
@@ -3009,6 +3090,7 @@
         "anchor": "disclosure"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-DISCLOSURE-08",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3017,7 +3099,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-DISCLOSURE-09",
+      "id": "REQ-SHOPPING-CHECKOUT-0083",
       "text_digest": "beafa21ced",
       "scope": "capability",
       "capabilities": [
@@ -3044,6 +3126,7 @@
         "anchor": "disclosure"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-DISCLOSURE-09",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3052,7 +3135,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-DISCLOSURE-10",
+      "id": "REQ-SHOPPING-CHECKOUT-0084",
       "text_digest": "0d63274715",
       "scope": "capability",
       "capabilities": [
@@ -3079,6 +3162,7 @@
         "anchor": "disclosure"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-DISCLOSURE-10",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3087,7 +3171,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-DISCLOSURE-11",
+      "id": "REQ-SHOPPING-CHECKOUT-0085",
       "text_digest": "53c2decc92",
       "scope": "capability",
       "capabilities": [
@@ -3117,6 +3201,7 @@
         "anchor": "disclosure"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-DISCLOSURE-11",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3125,7 +3210,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-DISCLOSURE-12",
+      "id": "REQ-SHOPPING-CHECKOUT-0086",
       "text_digest": "2c7e59d4d5",
       "scope": "capability",
       "capabilities": [
@@ -3154,6 +3239,7 @@
         "anchor": "disclosure"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-DISCLOSURE-12",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3162,7 +3248,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-DISCLOSURE-13",
+      "id": "REQ-SHOPPING-CHECKOUT-0087",
       "text_digest": "05d6c52b57",
       "scope": "capability",
       "capabilities": [
@@ -3189,6 +3275,7 @@
         "anchor": "disclosure"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-DISCLOSURE-13",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3197,7 +3284,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-DISCLOSURE-14",
+      "id": "REQ-SHOPPING-CHECKOUT-0088",
       "text_digest": "1017c13bf3",
       "scope": "capability",
       "capabilities": [
@@ -3224,6 +3311,7 @@
         "anchor": "disclosure"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-DISCLOSURE-14",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3232,7 +3320,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-DISCLOSURE-AND-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0089",
       "text_digest": "a0fa76b0d2",
       "scope": "capability",
       "capabilities": [
@@ -3257,6 +3345,7 @@
         "anchor": "disclosure-and-acknowledgment"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-DISCLOSURE-AND-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3265,7 +3354,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-JURISDICTION-AND-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0090",
       "text_digest": "db543e2f62",
       "scope": "capability",
       "capabilities": [
@@ -3292,6 +3381,7 @@
         "anchor": "jurisdiction-and-applicability"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-JURISDICTION-AND-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3300,7 +3390,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-AVAILABILITY-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0091",
       "text_digest": "e583c00f08",
       "scope": "capability",
       "capabilities": [
@@ -3329,6 +3419,7 @@
         "anchor": "availability"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-AVAILABILITY-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3337,7 +3428,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-AVAILABILITY-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0092",
       "text_digest": "a625c88b45",
       "scope": "capability",
       "capabilities": [
@@ -3367,6 +3458,7 @@
         "anchor": "availability"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-AVAILABILITY-02",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3375,7 +3467,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-AVAILABILITY-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0093",
       "text_digest": "ec3bac66a2",
       "scope": "capability",
       "capabilities": [
@@ -3404,6 +3496,7 @@
         "anchor": "availability"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-AVAILABILITY-03",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3418,7 +3511,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-FORMAT-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0094",
       "text_digest": "e6f81fd0dd",
       "scope": "capability",
       "capabilities": [
@@ -3445,6 +3538,7 @@
         "anchor": "format"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-FORMAT-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3459,7 +3553,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-FORMAT-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0095",
       "text_digest": "a1b795b70e",
       "scope": "capability",
       "capabilities": [
@@ -3486,6 +3580,7 @@
         "anchor": "format"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-FORMAT-02",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3500,7 +3595,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-FORMAT-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0096",
       "text_digest": "5c90286075",
       "scope": "capability",
       "capabilities": [
@@ -3525,6 +3620,7 @@
         "anchor": "format"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-FORMAT-03",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3533,7 +3629,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-CHECKOUT-PERMALINK-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0097",
       "text_digest": "1717dcf0e4",
       "scope": "capability",
       "capabilities": [
@@ -3558,6 +3654,7 @@
         "anchor": "checkout-permalink"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-CHECKOUT-PERMALINK-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3566,7 +3663,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-PLATFORM-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0098",
       "text_digest": "404be9b6a9",
       "scope": "capability",
       "capabilities": [
@@ -3591,6 +3688,7 @@
         "anchor": "platform"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-PLATFORM-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3599,7 +3697,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-PLATFORM-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0099",
       "text_digest": "5bfe027f42",
       "scope": "capability",
       "capabilities": [
@@ -3624,6 +3722,7 @@
         "anchor": "platform"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-PLATFORM-02",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3632,7 +3731,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-PLATFORM-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0100",
       "text_digest": "6bb1d43d30",
       "scope": "capability",
       "capabilities": [
@@ -3657,6 +3756,7 @@
         "anchor": "platform"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-PLATFORM-03",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3665,7 +3765,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-PLATFORM-04",
+      "id": "REQ-SHOPPING-CHECKOUT-0101",
       "text_digest": "d0db3bab09",
       "scope": "capability",
       "capabilities": [
@@ -3693,6 +3793,7 @@
         "anchor": "platform"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-PLATFORM-04",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3701,7 +3802,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-PLATFORM-05",
+      "id": "REQ-SHOPPING-CHECKOUT-0102",
       "text_digest": "50c0cd861a",
       "scope": "capability",
       "capabilities": [
@@ -3728,6 +3829,7 @@
         "anchor": "platform"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-PLATFORM-05",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3736,7 +3838,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-PLATFORM-06",
+      "id": "REQ-SHOPPING-CHECKOUT-0103",
       "text_digest": "195cd330b6",
       "scope": "capability",
       "capabilities": [
@@ -3763,6 +3865,7 @@
         "anchor": "platform"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-PLATFORM-06",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3771,7 +3874,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-BUSINESS-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0104",
       "text_digest": "30d3516026",
       "scope": "capability",
       "capabilities": [
@@ -3796,6 +3899,7 @@
         "anchor": "business"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-BUSINESS-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3804,7 +3908,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-BUSINESS-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0105",
       "text_digest": "ab9070f00a",
       "scope": "capability",
       "capabilities": [
@@ -3829,6 +3933,7 @@
         "anchor": "business"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-BUSINESS-02",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3837,7 +3942,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-BUSINESS-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0106",
       "text_digest": "adbf81349f",
       "scope": "capability",
       "capabilities": [
@@ -3862,6 +3967,7 @@
         "anchor": "business"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-BUSINESS-03",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3870,7 +3976,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-BUSINESS-04",
+      "id": "REQ-SHOPPING-CHECKOUT-0107",
       "text_digest": "59ce9514a8",
       "scope": "capability",
       "capabilities": [
@@ -3899,6 +4005,7 @@
         "anchor": "business"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-BUSINESS-04",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3907,7 +4014,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-BUSINESS-05",
+      "id": "REQ-SHOPPING-CHECKOUT-0108",
       "text_digest": "43a4121d2d",
       "scope": "capability",
       "capabilities": [
@@ -3938,6 +4045,7 @@
         "anchor": "business"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-BUSINESS-05",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3946,7 +4054,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-BUSINESS-06",
+      "id": "REQ-SHOPPING-CHECKOUT-0109",
       "text_digest": "456e8a756f",
       "scope": "capability",
       "capabilities": [
@@ -3973,6 +4081,7 @@
         "anchor": "business"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-BUSINESS-06",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -3981,7 +4090,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-CREATE-CHECKOUT-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0110",
       "text_digest": "04933d86f1",
       "scope": "capability",
       "capabilities": [
@@ -4006,6 +4115,7 @@
         "anchor": "create-checkout"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-CREATE-CHECKOUT-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -4014,7 +4124,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-UPDATE-CHECKOUT-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0111",
       "text_digest": "bac6d12327",
       "scope": "capability",
       "capabilities": [
@@ -4039,6 +4149,7 @@
         "anchor": "update-checkout"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-UPDATE-CHECKOUT-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -4047,7 +4158,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-COMPLETE-CHECKOUT-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0112",
       "text_digest": "2d86535f99",
       "scope": "capability",
       "capabilities": [
@@ -4072,6 +4183,7 @@
         "anchor": "complete-checkout"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-COMPLETE-CHECKOUT-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -4080,7 +4192,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-COMPLETE-CHECKOUT-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0113",
       "text_digest": "9727e007fa",
       "scope": "capability",
       "capabilities": [
@@ -4105,6 +4217,7 @@
         "anchor": "complete-checkout"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-COMPLETE-CHECKOUT-02",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -4113,7 +4226,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-COMPLETE-CHECKOUT-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0114",
       "text_digest": "1c7ec12253",
       "scope": "capability",
       "capabilities": [
@@ -4140,6 +4253,7 @@
         "anchor": "complete-checkout"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-COMPLETE-CHECKOUT-03",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -4148,7 +4262,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-COMPLETE-CHECKOUT-04",
+      "id": "REQ-SHOPPING-CHECKOUT-0115",
       "text_digest": "5ba0cdb896",
       "scope": "capability",
       "capabilities": [
@@ -4173,6 +4287,7 @@
         "anchor": "complete-checkout"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-COMPLETE-CHECKOUT-04",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -4181,7 +4296,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-COMPLETE-CHECKOUT-05",
+      "id": "REQ-SHOPPING-CHECKOUT-0116",
       "text_digest": "47be3f62c8",
       "scope": "capability",
       "capabilities": [
@@ -4206,6 +4321,7 @@
         "anchor": "complete-checkout"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-COMPLETE-CHECKOUT-05",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -4214,7 +4330,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-COMPLETE-CHECKOUT-06",
+      "id": "REQ-SHOPPING-CHECKOUT-0117",
       "text_digest": "0c5c2c4998",
       "scope": "capability",
       "capabilities": [
@@ -4241,6 +4357,7 @@
         "anchor": "complete-checkout"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-COMPLETE-CHECKOUT-06",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -4255,7 +4372,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-COMPLETE-CHECKOUT-07",
+      "id": "REQ-SHOPPING-CHECKOUT-0118",
       "text_digest": "56dd9d5db0",
       "scope": "capability",
       "capabilities": [
@@ -4283,6 +4400,7 @@
         "anchor": "complete-checkout"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-COMPLETE-CHECKOUT-07",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -4297,7 +4415,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-CANCEL-CHECKOUT-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0119",
       "text_digest": "6f0756c2eb",
       "scope": "capability",
       "capabilities": [
@@ -4322,6 +4440,7 @@
         "anchor": "cancel-checkout"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-CANCEL-CHECKOUT-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -4330,7 +4449,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-CANCEL-CHECKOUT-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0120",
       "text_digest": "1929627a42",
       "scope": "capability",
       "capabilities": [
@@ -4358,6 +4477,7 @@
         "anchor": "cancel-checkout"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-CANCEL-CHECKOUT-02",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -4372,7 +4492,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-CONTEXT-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0121",
       "text_digest": "35b444ee45",
       "scope": "capability",
       "capabilities": [
@@ -4397,6 +4517,7 @@
         "anchor": "context"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-CONTEXT-01",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -4411,7 +4532,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-CONTEXT-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0122",
       "text_digest": "e137bb0b98",
       "scope": "capability",
       "capabilities": [
@@ -4436,6 +4557,7 @@
         "anchor": "context"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-CONTEXT-02",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -4450,7 +4572,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-CONTEXT-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0123",
       "text_digest": "d647a85835",
       "scope": "capability",
       "capabilities": [
@@ -4475,6 +4597,7 @@
         "anchor": "context"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-CONTEXT-03",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -4489,7 +4612,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-SIGNALS-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0124",
       "text_digest": "916a488164",
       "scope": "capability",
       "capabilities": [
@@ -4517,6 +4640,7 @@
         "anchor": "signals"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-SIGNALS-01",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -4531,7 +4655,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-WELL-KNOWN-LINK-TYPES-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0125",
       "text_digest": "711f3836a0",
       "scope": "capability",
       "capabilities": [
@@ -4556,6 +4680,7 @@
         "anchor": "well-known-link-types"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-WELL-KNOWN-LINK-TYPES-01",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -4564,7 +4689,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-WELL-KNOWN-LINK-TYPES-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0126",
       "text_digest": "9616b961a3",
       "scope": "capability",
       "capabilities": [
@@ -4589,6 +4714,7 @@
         "anchor": "well-known-link-types"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-WELL-KNOWN-LINK-TYPES-02",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -4597,7 +4723,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-WELL-KNOWN-LINK-TYPES-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0127",
       "text_digest": "85bc46fdb7",
       "scope": "capability",
       "capabilities": [
@@ -4624,6 +4750,7 @@
         "anchor": "well-known-link-types"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-WELL-KNOWN-LINK-TYPES-03",
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
@@ -4632,7 +4759,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-RENDERING-CONTRACT-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0128",
       "text_digest": "633738379e",
       "scope": "capability",
       "capabilities": [
@@ -4657,6 +4784,7 @@
         "anchor": "rendering-contract"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-RENDERING-CONTRACT-01",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -4671,7 +4799,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-RENDERING-CONTRACT-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0129",
       "text_digest": "9686f34d66",
       "scope": "capability",
       "capabilities": [
@@ -4696,6 +4824,7 @@
         "anchor": "rendering-contract"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-RENDERING-CONTRACT-02",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -4710,7 +4839,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-RENDERING-CONTRACT-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0130",
       "text_digest": "ed6e5e1a5e",
       "scope": "capability",
       "capabilities": [
@@ -4735,6 +4864,7 @@
         "anchor": "rendering-contract"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-RENDERING-CONTRACT-03",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -4749,7 +4879,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-RENDERING-CONTRACT-04",
+      "id": "REQ-SHOPPING-CHECKOUT-0131",
       "text_digest": "78eb4e97bf",
       "scope": "capability",
       "capabilities": [
@@ -4776,6 +4906,7 @@
         "anchor": "rendering-contract"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-RENDERING-CONTRACT-04",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -4790,7 +4921,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-RENDERING-CONTRACT-05",
+      "id": "REQ-SHOPPING-CHECKOUT-0132",
       "text_digest": "debd639454",
       "scope": "capability",
       "capabilities": [
@@ -4817,6 +4948,7 @@
         "anchor": "rendering-contract"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-RENDERING-CONTRACT-05",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -4831,7 +4963,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-RENDERING-CONTRACT-06",
+      "id": "REQ-SHOPPING-CHECKOUT-0133",
       "text_digest": "d725369b04",
       "scope": "capability",
       "capabilities": [
@@ -4858,6 +4990,7 @@
         "anchor": "rendering-contract"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-RENDERING-CONTRACT-06",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -4872,7 +5005,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-RENDERING-CONTRACT-07",
+      "id": "REQ-SHOPPING-CHECKOUT-0134",
       "text_digest": "749321cc43",
       "scope": "capability",
       "capabilities": [
@@ -4899,6 +5032,7 @@
         "anchor": "rendering-contract"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-RENDERING-CONTRACT-07",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -4913,7 +5047,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-VERIFICATION-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0135",
       "text_digest": "bcc53c3234",
       "scope": "capability",
       "capabilities": [
@@ -4938,6 +5072,7 @@
         "anchor": "verification"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-VERIFICATION-01",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -4952,7 +5087,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-VERIFICATION-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0136",
       "text_digest": "8771b7a275",
       "scope": "capability",
       "capabilities": [
@@ -4977,6 +5112,7 @@
         "anchor": "verification"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-VERIFICATION-02",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -4991,7 +5127,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-VERIFICATION-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0137",
       "text_digest": "287b81954f",
       "scope": "capability",
       "capabilities": [
@@ -5018,6 +5154,7 @@
         "anchor": "verification"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-VERIFICATION-03",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -5032,7 +5169,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-VERIFICATION-04",
+      "id": "REQ-SHOPPING-CHECKOUT-0138",
       "text_digest": "594b999c87",
       "scope": "capability",
       "capabilities": [
@@ -5057,6 +5194,7 @@
         "anchor": "verification"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-VERIFICATION-04",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -5071,7 +5209,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-VERIFICATION-05",
+      "id": "REQ-SHOPPING-CHECKOUT-0139",
       "text_digest": "b43edb9f37",
       "scope": "capability",
       "capabilities": [
@@ -5098,6 +5236,7 @@
         "anchor": "verification"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-VERIFICATION-05",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -5112,7 +5251,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-WELL-KNOWN-TYPES-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0140",
       "text_digest": "67b450f295",
       "scope": "capability",
       "capabilities": [
@@ -5139,6 +5278,7 @@
         "anchor": "well-known-types"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-WELL-KNOWN-TYPES-01",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -5153,7 +5293,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-WELL-KNOWN-TYPES-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0141",
       "text_digest": "6e36252844",
       "scope": "capability",
       "capabilities": [
@@ -5178,6 +5318,7 @@
         "anchor": "well-known-types"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-WELL-KNOWN-TYPES-02",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -5192,7 +5333,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-WELL-KNOWN-TYPES-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0142",
       "text_digest": "df0becb156",
       "scope": "capability",
       "capabilities": [
@@ -5217,6 +5358,7 @@
         "anchor": "well-known-types"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-WELL-KNOWN-TYPES-03",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -5231,7 +5373,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-WELL-KNOWN-TYPES-04",
+      "id": "REQ-SHOPPING-CHECKOUT-0143",
       "text_digest": "cf4dce95bc",
       "scope": "capability",
       "capabilities": [
@@ -5256,6 +5398,7 @@
         "anchor": "well-known-types"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-WELL-KNOWN-TYPES-04",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -5270,7 +5413,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-WELL-KNOWN-TYPES-05",
+      "id": "REQ-SHOPPING-CHECKOUT-0144",
       "text_digest": "26a6f1432c",
       "scope": "capability",
       "capabilities": [
@@ -5297,6 +5440,7 @@
         "anchor": "well-known-types"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-WELL-KNOWN-TYPES-05",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -5311,7 +5455,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-WELL-KNOWN-TYPES-06",
+      "id": "REQ-SHOPPING-CHECKOUT-0145",
       "text_digest": "3ff1a76ae8",
       "scope": "capability",
       "capabilities": [
@@ -5338,6 +5482,7 @@
         "anchor": "well-known-types"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-WELL-KNOWN-TYPES-06",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -5348,12 +5493,12 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "totals content",
-          "note": "same rule as REQ-CHECKOUT-RENDERING-CONTRACT-05"
+          "note": "same rule as REQ-SHOPPING-CHECKOUT-0132"
         }
       }
     },
     {
-      "id": "REQ-CHECKOUT-REPEATING-TYPES-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0146",
       "text_digest": "2440b50ae1",
       "scope": "capability",
       "capabilities": [
@@ -5381,6 +5526,7 @@
         "anchor": "repeating-types"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-REPEATING-TYPES-01",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -5395,7 +5541,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-SUB-LINES-LINES-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0147",
       "text_digest": "c933a8a798",
       "scope": "capability",
       "capabilities": [
@@ -5422,6 +5568,7 @@
         "anchor": "sub-lines-lines"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-SUB-LINES-LINES-01",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -5436,7 +5583,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-SUB-LINES-LINES-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0148",
       "text_digest": "c49ea1cbba",
       "scope": "capability",
       "capabilities": [
@@ -5463,6 +5610,7 @@
         "anchor": "sub-lines-lines"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-SUB-LINES-LINES-02",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -5477,7 +5625,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-SUB-LINES-LINES-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0149",
       "text_digest": "880a06d004",
       "scope": "capability",
       "capabilities": [
@@ -5502,6 +5650,7 @@
         "anchor": "sub-lines-lines"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-SUB-LINES-LINES-03",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -5517,7 +5666,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-SUB-LINES-LINES-04",
+      "id": "REQ-SHOPPING-CHECKOUT-0150",
       "text_digest": "57a1e5693e",
       "scope": "capability",
       "capabilities": [
@@ -5542,6 +5691,7 @@
         "anchor": "sub-lines-lines"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-SUB-LINES-LINES-04",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",

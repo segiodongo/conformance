@@ -52,11 +52,11 @@
       "capability-from-bullet-or-path",
       "count-capitals"
     ],
-    "ids": "provisional"
+    "ids": "stable, from requirements.lock.json"
   },
   "requirements": [
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-LOCATION-CONTEXT-01",
+      "id": "REQ-SHOPPING-FULFILLMENT-0001",
       "text_digest": "cdbd5fec10",
       "scope": "capability",
       "capabilities": [
@@ -85,6 +85,7 @@
         "anchor": "location-context"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-LOCATION-CONTEXT-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -93,7 +94,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-LOCATION-CONTEXT-02",
+      "id": "REQ-SHOPPING-FULFILLMENT-0002",
       "text_digest": "fe8277d08b",
       "scope": "capability",
       "capabilities": [
@@ -121,6 +122,7 @@
         "anchor": "location-context"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-LOCATION-CONTEXT-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -129,7 +131,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-LOCATION-CONTEXT-03",
+      "id": "REQ-SHOPPING-FULFILLMENT-0003",
       "text_digest": "40ffef1f4a",
       "scope": "capability",
       "capabilities": [
@@ -157,6 +159,7 @@
         "anchor": "location-context"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-LOCATION-CONTEXT-03",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -165,7 +168,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-DESTINATIONS-01",
+      "id": "REQ-SHOPPING-FULFILLMENT-0004",
       "text_digest": "eb39670f05",
       "scope": "capability",
       "capabilities": [
@@ -193,6 +196,7 @@
         "anchor": "destinations"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-DESTINATIONS-01",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -207,7 +211,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-DESTINATIONS-02",
+      "id": "REQ-SHOPPING-FULFILLMENT-0005",
       "text_digest": "2526f4c07e",
       "scope": "capability",
       "capabilities": [
@@ -235,6 +239,7 @@
         "anchor": "destinations"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-DESTINATIONS-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -243,7 +248,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-DESTINATIONS-03",
+      "id": "REQ-SHOPPING-FULFILLMENT-0006",
       "text_digest": "3049f1a8c3",
       "scope": "capability",
       "capabilities": [
@@ -268,6 +273,7 @@
         "anchor": "destinations"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-DESTINATIONS-03",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -282,7 +288,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-DESTINATIONS-04",
+      "id": "REQ-SHOPPING-FULFILLMENT-0007",
       "text_digest": "09193f5629",
       "scope": "capability",
       "capabilities": [
@@ -310,6 +316,7 @@
         "anchor": "destinations"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-DESTINATIONS-04",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -324,7 +331,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-LOCATION-01",
+      "id": "REQ-SHOPPING-FULFILLMENT-0008",
       "text_digest": "b44067a978",
       "scope": "capability",
       "capabilities": [
@@ -352,6 +359,7 @@
         "anchor": "business-location-destination"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-LOCATION-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -360,7 +368,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-LOCATION-02",
+      "id": "REQ-SHOPPING-FULFILLMENT-0009",
       "text_digest": "ebf819f726",
       "scope": "capability",
       "capabilities": [
@@ -389,6 +397,7 @@
         "anchor": "business-location-destination"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-LOCATION-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -397,7 +406,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-LOCATION-03",
+      "id": "REQ-SHOPPING-FULFILLMENT-0010",
       "text_digest": "0656640d46",
       "scope": "capability",
       "capabilities": [
@@ -424,6 +433,7 @@
         "anchor": "business-location-destination"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-LOCATION-03",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -432,7 +442,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-SELECTION-AND-LOCATION-01",
+      "id": "REQ-SHOPPING-FULFILLMENT-0011",
       "text_digest": "62c051ee37",
       "scope": "capability",
       "capabilities": [
@@ -459,6 +469,7 @@
         "anchor": "selection-and-location-identity"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-SELECTION-AND-LOCATION-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -473,7 +484,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-SELECTION-AND-LOCATION-02",
+      "id": "REQ-SHOPPING-FULFILLMENT-0012",
       "text_digest": "bdf46e29a3",
       "scope": "capability",
       "capabilities": [
@@ -500,6 +511,7 @@
         "anchor": "selection-and-location-identity"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-SELECTION-AND-LOCATION-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -514,7 +526,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-SELECTION-AND-LOCATION-03",
+      "id": "REQ-SHOPPING-FULFILLMENT-0013",
       "text_digest": "ac1221953c",
       "scope": "capability",
       "capabilities": [
@@ -542,6 +554,7 @@
         "anchor": "selection-and-location-identity"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-SELECTION-AND-LOCATION-03",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -556,7 +569,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-SELECTION-AND-LOCATION-04",
+      "id": "REQ-SHOPPING-FULFILLMENT-0014",
       "text_digest": "cb549868ae",
       "scope": "capability",
       "capabilities": [
@@ -581,6 +594,7 @@
         "anchor": "selection-and-location-identity"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-SELECTION-AND-LOCATION-04",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -589,7 +603,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-SELECTION-AND-LOCATION-05",
+      "id": "REQ-SHOPPING-FULFILLMENT-0015",
       "text_digest": "3405a629ce",
       "scope": "capability",
       "capabilities": [
@@ -616,6 +630,7 @@
         "anchor": "selection-and-location-identity"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-SELECTION-AND-LOCATION-05",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -624,7 +639,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-SELECTION-AND-LOCATION-06",
+      "id": "REQ-SHOPPING-FULFILLMENT-0016",
       "text_digest": "de41b39472",
       "scope": "capability",
       "capabilities": [
@@ -651,6 +666,7 @@
         "anchor": "selection-and-location-identity"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-SELECTION-AND-LOCATION-06",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -659,7 +675,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-SELECTION-AND-LOCATION-07",
+      "id": "REQ-SHOPPING-FULFILLMENT-0017",
       "text_digest": "4b4188b3b6",
       "scope": "capability",
       "capabilities": [
@@ -688,6 +704,7 @@
         "anchor": "selection-and-location-identity"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-SELECTION-AND-LOCATION-07",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -696,7 +713,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-01",
+      "id": "REQ-SHOPPING-FULFILLMENT-0018",
       "text_digest": "c7748bb9e7",
       "scope": "capability",
       "capabilities": [
@@ -721,6 +738,7 @@
         "anchor": "business-responsibilities"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -729,7 +747,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-02",
+      "id": "REQ-SHOPPING-FULFILLMENT-0019",
       "text_digest": "7dcad6bd86",
       "scope": "capability",
       "capabilities": [
@@ -754,6 +772,7 @@
         "anchor": "business-responsibilities"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -762,7 +781,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-03",
+      "id": "REQ-SHOPPING-FULFILLMENT-0020",
       "text_digest": "3c15b23155",
       "scope": "capability",
       "capabilities": [
@@ -789,6 +808,7 @@
         "anchor": "business-responsibilities"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-03",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -797,7 +817,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-04",
+      "id": "REQ-SHOPPING-FULFILLMENT-0021",
       "text_digest": "57af5875a4",
       "scope": "capability",
       "capabilities": [
@@ -825,6 +845,7 @@
         "anchor": "business-responsibilities"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-04",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -833,7 +854,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-05",
+      "id": "REQ-SHOPPING-FULFILLMENT-0022",
       "text_digest": "7e4d50e16f",
       "scope": "capability",
       "capabilities": [
@@ -858,6 +879,7 @@
         "anchor": "business-responsibilities"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-05",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -866,7 +888,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-06",
+      "id": "REQ-SHOPPING-FULFILLMENT-0023",
       "text_digest": "b82083a42f",
       "scope": "capability",
       "capabilities": [
@@ -891,6 +913,7 @@
         "anchor": "business-responsibilities"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-06",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -899,7 +922,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-07",
+      "id": "REQ-SHOPPING-FULFILLMENT-0024",
       "text_digest": "210c8c5962",
       "scope": "capability",
       "capabilities": [
@@ -924,6 +947,7 @@
         "anchor": "business-responsibilities"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-07",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -932,7 +956,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-08",
+      "id": "REQ-SHOPPING-FULFILLMENT-0025",
       "text_digest": "d8d326773b",
       "scope": "capability",
       "capabilities": [
@@ -957,6 +981,7 @@
         "anchor": "business-responsibilities"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-08",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -965,7 +990,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-09",
+      "id": "REQ-SHOPPING-FULFILLMENT-0026",
       "text_digest": "b8449b14d9",
       "scope": "capability",
       "capabilities": [
@@ -990,6 +1015,7 @@
         "anchor": "business-responsibilities"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-09",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -998,7 +1024,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-10",
+      "id": "REQ-SHOPPING-FULFILLMENT-0027",
       "text_digest": "a953e97c48",
       "scope": "capability",
       "capabilities": [
@@ -1025,6 +1051,7 @@
         "anchor": "business-responsibilities"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-10",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -1033,7 +1060,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-11",
+      "id": "REQ-SHOPPING-FULFILLMENT-0028",
       "text_digest": "765f49eb7f",
       "scope": "capability",
       "capabilities": [
@@ -1058,6 +1085,7 @@
         "anchor": "business-responsibilities"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-11",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -1066,7 +1094,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-12",
+      "id": "REQ-SHOPPING-FULFILLMENT-0029",
       "text_digest": "b4c3462586",
       "scope": "capability",
       "capabilities": [
@@ -1091,6 +1119,7 @@
         "anchor": "business-responsibilities"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-12",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -1099,7 +1128,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-13",
+      "id": "REQ-SHOPPING-FULFILLMENT-0030",
       "text_digest": "676047abce",
       "scope": "capability",
       "capabilities": [
@@ -1124,6 +1153,7 @@
         "anchor": "business-responsibilities"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-13",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -1132,7 +1162,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-PLATFORM-01",
+      "id": "REQ-SHOPPING-FULFILLMENT-0031",
       "text_digest": "0a0dc9bdef",
       "scope": "capability",
       "capabilities": [
@@ -1157,6 +1187,7 @@
         "anchor": "platform-responsibilities"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-PLATFORM-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -1165,7 +1196,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-PLATFORM-02",
+      "id": "REQ-SHOPPING-FULFILLMENT-0032",
       "text_digest": "ae5940e52e",
       "scope": "capability",
       "capabilities": [
@@ -1190,6 +1221,7 @@
         "anchor": "platform-responsibilities"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-PLATFORM-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -1198,7 +1230,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-PLATFORM-03",
+      "id": "REQ-SHOPPING-FULFILLMENT-0033",
       "text_digest": "10dcc01036",
       "scope": "capability",
       "capabilities": [
@@ -1225,6 +1257,7 @@
         "anchor": "platform-responsibilities"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-PLATFORM-03",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -1233,7 +1266,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-AVAILABLE-METHODS-01",
+      "id": "REQ-SHOPPING-FULFILLMENT-0034",
       "text_digest": "c3d38466fe",
       "scope": "capability",
       "capabilities": [
@@ -1260,6 +1293,7 @@
         "anchor": "available-methods"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-AVAILABLE-METHODS-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -1268,7 +1302,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-METHODS-01",
+      "id": "REQ-SHOPPING-FULFILLMENT-0035",
       "text_digest": "c663a9746e",
       "scope": "capability",
       "capabilities": [
@@ -1296,6 +1330,7 @@
         "anchor": "methods"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-METHODS-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -1304,7 +1339,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-METHODS-02",
+      "id": "REQ-SHOPPING-FULFILLMENT-0036",
       "text_digest": "2cf57b7024",
       "scope": "capability",
       "capabilities": [
@@ -1331,6 +1366,7 @@
         "anchor": "methods"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-METHODS-02",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -1345,7 +1381,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-METHODS-03",
+      "id": "REQ-SHOPPING-FULFILLMENT-0037",
       "text_digest": "443d2106bc",
       "scope": "capability",
       "capabilities": [
@@ -1372,6 +1408,7 @@
         "anchor": "methods"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-METHODS-03",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -1386,7 +1423,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-OPTIONS-01",
+      "id": "REQ-SHOPPING-FULFILLMENT-0038",
       "text_digest": "2212f639d3",
       "scope": "capability",
       "capabilities": [
@@ -1413,6 +1450,7 @@
         "anchor": "options"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-OPTIONS-01",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -1427,7 +1465,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-OPTIONS-02",
+      "id": "REQ-SHOPPING-FULFILLMENT-0039",
       "text_digest": "62d55044f9",
       "scope": "capability",
       "capabilities": [
@@ -1452,6 +1490,7 @@
         "anchor": "options"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-OPTIONS-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -1460,7 +1499,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-OPTIONS-03",
+      "id": "REQ-SHOPPING-FULFILLMENT-0040",
       "text_digest": "a1a4de15f2",
       "scope": "capability",
       "capabilities": [
@@ -1485,6 +1524,7 @@
         "anchor": "options"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-OPTIONS-03",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -1499,7 +1539,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-OPTIONS-04",
+      "id": "REQ-SHOPPING-FULFILLMENT-0041",
       "text_digest": "185fc4c8c0",
       "scope": "capability",
       "capabilities": [
@@ -1528,6 +1568,7 @@
         "anchor": "options"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-OPTIONS-04",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -1542,7 +1583,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-OPTIONS-05",
+      "id": "REQ-SHOPPING-FULFILLMENT-0042",
       "text_digest": "417161b1bb",
       "scope": "capability",
       "capabilities": [
@@ -1569,6 +1610,7 @@
         "anchor": "options"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-OPTIONS-05",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -1577,7 +1619,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-LOCATION-AND-METHOD-01",
+      "id": "REQ-SHOPPING-FULFILLMENT-0043",
       "text_digest": "f9ed828394",
       "scope": "capability",
       "capabilities": [
@@ -1602,6 +1644,7 @@
         "anchor": "location-and-method-context-and-filters"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-LOCATION-AND-METHOD-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -1610,7 +1653,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-LOCATION-AND-METHOD-02",
+      "id": "REQ-SHOPPING-FULFILLMENT-0044",
       "text_digest": "3a8712da69",
       "scope": "capability",
       "capabilities": [
@@ -1635,6 +1678,7 @@
         "anchor": "location-and-method-context-and-filters"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-LOCATION-AND-METHOD-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -1643,7 +1687,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-LOCATION-AND-METHOD-03",
+      "id": "REQ-SHOPPING-FULFILLMENT-0045",
       "text_digest": "100391f5f5",
       "scope": "capability",
       "capabilities": [
@@ -1670,6 +1714,7 @@
         "anchor": "location-and-method-context-and-filters"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-LOCATION-AND-METHOD-03",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -1678,7 +1723,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-PLATFORM-PROFILE-01",
+      "id": "REQ-SHOPPING-FULFILLMENT-0046",
       "text_digest": "ae3b66a72c",
       "scope": "capability",
       "capabilities": [
@@ -1705,6 +1750,7 @@
         "anchor": "platform-profile"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-PLATFORM-PROFILE-01",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -1719,7 +1765,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-PLATFORM-PROFILE-02",
+      "id": "REQ-SHOPPING-FULFILLMENT-0047",
       "text_digest": "37e1ff580a",
       "scope": "capability",
       "capabilities": [
@@ -1744,6 +1790,7 @@
         "anchor": "platform-profile"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-PLATFORM-PROFILE-02",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -1758,7 +1805,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-RESPONSE-01",
+      "id": "REQ-SHOPPING-FULFILLMENT-0048",
       "text_digest": "5a0da8cb6d",
       "scope": "capability",
       "capabilities": [
@@ -1783,6 +1830,7 @@
         "anchor": "business-response-behavior"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-RESPONSE-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -1791,7 +1839,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-RESPONSE-02",
+      "id": "REQ-SHOPPING-FULFILLMENT-0049",
       "text_digest": "f390899b31",
       "scope": "capability",
       "capabilities": [
@@ -1816,6 +1864,7 @@
         "anchor": "business-response-behavior"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-RESPONSE-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -1824,7 +1873,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-RESPONSE-03",
+      "id": "REQ-SHOPPING-FULFILLMENT-0050",
       "text_digest": "ea0855e957",
       "scope": "capability",
       "capabilities": [
@@ -1849,6 +1898,7 @@
         "anchor": "business-response-behavior"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-BUSINESS-RESPONSE-03",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -1857,7 +1907,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-METHOD-TYPES-01",
+      "id": "REQ-SHOPPING-FULFILLMENT-0051",
       "text_digest": "746f0c1c71",
       "scope": "capability",
       "capabilities": [
@@ -1886,6 +1936,7 @@
         "anchor": "method-types"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-METHOD-TYPES-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -1894,7 +1945,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-METHOD-TYPES-02",
+      "id": "REQ-SHOPPING-FULFILLMENT-0052",
       "text_digest": "f3e16becc1",
       "scope": "capability",
       "capabilities": [
@@ -1921,6 +1972,7 @@
         "anchor": "method-types"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-METHOD-TYPES-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -1929,7 +1981,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-METHOD-TYPES-03",
+      "id": "REQ-SHOPPING-FULFILLMENT-0053",
       "text_digest": "79e7a637e6",
       "scope": "capability",
       "capabilities": [
@@ -1956,6 +2008,7 @@
         "anchor": "method-types"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-METHOD-TYPES-03",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -1964,7 +2017,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-METHOD-TYPES-04",
+      "id": "REQ-SHOPPING-FULFILLMENT-0054",
       "text_digest": "15788b383d",
       "scope": "capability",
       "capabilities": [
@@ -1989,6 +2042,7 @@
         "anchor": "method-types"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-METHOD-TYPES-04",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -1997,7 +2051,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-METHOD-TYPES-05",
+      "id": "REQ-SHOPPING-FULFILLMENT-0055",
       "text_digest": "378c4f8068",
       "scope": "capability",
       "capabilities": [
@@ -2025,6 +2079,7 @@
         "anchor": "method-types"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-FULFILLMENT-FULFILLMENT-METHOD-TYPES-05",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",

@@ -55,11 +55,11 @@
       "capability-from-bullet-or-path",
       "count-capitals"
     ],
-    "ids": "provisional"
+    "ids": "stable, from requirements.lock.json"
   },
   "requirements": [
     {
-      "id": "REQ-CHECKOUT-EP-PER-CHECKOUT-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0152",
       "text_digest": "d3a16bd983",
       "scope": "capability",
       "capabilities": [
@@ -86,6 +86,7 @@
         "anchor": "per-checkout-configuration"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-PER-CHECKOUT-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -100,7 +101,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-LOADING-AN-EMBEDDED-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0153",
       "text_digest": "b9d5e402e6",
       "scope": "capability",
       "capabilities": [
@@ -127,6 +128,7 @@
         "anchor": "loading-an-embedded-checkout-url"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-LOADING-AN-EMBEDDED-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -135,7 +137,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-LOADING-AN-EMBEDDED-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0154",
       "text_digest": "40901b2bee",
       "scope": "capability",
       "capabilities": [
@@ -160,6 +162,7 @@
         "anchor": "loading-an-embedded-checkout-url"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-LOADING-AN-EMBEDDED-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -168,7 +171,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-LOADING-AN-EMBEDDED-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0155",
       "text_digest": "3230757599",
       "scope": "capability",
       "capabilities": [
@@ -196,6 +199,7 @@
         "anchor": "loading-an-embedded-checkout-url"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-LOADING-AN-EMBEDDED-03",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -204,7 +208,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-LOADING-AN-EMBEDDED-04",
+      "id": "REQ-SHOPPING-CHECKOUT-0156",
       "text_digest": "db1f71589a",
       "scope": "capability",
       "capabilities": [
@@ -229,6 +233,7 @@
         "anchor": "loading-an-embedded-checkout-url"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-LOADING-AN-EMBEDDED-04",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -237,7 +242,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-LOADING-AN-EMBEDDED-05",
+      "id": "REQ-SHOPPING-CHECKOUT-0157",
       "text_digest": "036cb43223",
       "scope": "capability",
       "capabilities": [
@@ -264,6 +269,7 @@
         "anchor": "loading-an-embedded-checkout-url"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-LOADING-AN-EMBEDDED-05",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -272,7 +278,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-AUTHENTICATION-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0158",
       "text_digest": "81afb6fb27",
       "scope": "capability",
       "capabilities": [
@@ -297,6 +303,7 @@
         "anchor": "authentication"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-AUTHENTICATION-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -311,7 +318,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-AUTHENTICATION-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0159",
       "text_digest": "e5b5268361",
       "scope": "capability",
       "capabilities": [
@@ -336,6 +343,7 @@
         "anchor": "authentication"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-AUTHENTICATION-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -350,7 +358,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-COLOR-SCHEME-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0160",
       "text_digest": "33e3f0b0e5",
       "scope": "capability",
       "capabilities": [
@@ -377,6 +385,7 @@
         "anchor": "color-scheme"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-COLOR-SCHEME-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -385,7 +394,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-COLOR-SCHEME-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0161",
       "text_digest": "cbd466887a",
       "scope": "capability",
       "capabilities": [
@@ -410,6 +419,7 @@
         "anchor": "color-scheme"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-COLOR-SCHEME-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -418,7 +428,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-COLOR-SCHEME-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0162",
       "text_digest": "830bc43945",
       "scope": "capability",
       "capabilities": [
@@ -445,6 +455,7 @@
         "anchor": "color-scheme"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-COLOR-SCHEME-03",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -453,7 +464,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-COLOR-SCHEME-04",
+      "id": "REQ-SHOPPING-CHECKOUT-0163",
       "text_digest": "1e3b81573d",
       "scope": "capability",
       "capabilities": [
@@ -478,6 +489,7 @@
         "anchor": "color-scheme"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-COLOR-SCHEME-04",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -492,7 +504,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-DELEGATION-NEGOTIATION-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0164",
       "text_digest": "cf58d72baa",
       "scope": "capability",
       "capabilities": [
@@ -519,6 +531,7 @@
         "anchor": "delegation-negotiation"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-DELEGATION-NEGOTIATION-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -527,7 +540,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-DELEGATION-NEGOTIATION-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0165",
       "text_digest": "2c534b146e",
       "scope": "capability",
       "capabilities": [
@@ -554,6 +567,7 @@
         "anchor": "delegation-negotiation"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-DELEGATION-NEGOTIATION-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -568,7 +582,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-DELEGATION-NEGOTIATION-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0166",
       "text_digest": "bf3f2784f2",
       "scope": "capability",
       "capabilities": [
@@ -595,6 +609,7 @@
         "anchor": "delegation-negotiation"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-DELEGATION-NEGOTIATION-03",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -609,7 +624,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-DELEGATION-CONTRACT-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0167",
       "text_digest": "7c0f80c2dd",
       "scope": "capability",
       "capabilities": [
@@ -634,6 +649,7 @@
         "anchor": "delegation-contract"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-DELEGATION-CONTRACT-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -642,7 +658,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-DELEGATION-ACCEPTANCE-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0168",
       "text_digest": "a7063be24b",
       "scope": "capability",
       "capabilities": [
@@ -670,6 +686,7 @@
         "anchor": "delegation-acceptance"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-DELEGATION-ACCEPTANCE-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -678,7 +695,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-DELEGATION-ACCEPTANCE-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0169",
       "text_digest": "71b19fcb62",
       "scope": "capability",
       "capabilities": [
@@ -703,6 +720,7 @@
         "anchor": "delegation-acceptance"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-DELEGATION-ACCEPTANCE-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -711,7 +729,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-BINDING-REQUIREMENTS-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0170",
       "text_digest": "b24866bb8b",
       "scope": "capability",
       "capabilities": [
@@ -736,6 +754,7 @@
         "anchor": "binding-requirements"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-BINDING-REQUIREMENTS-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -744,7 +763,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-BINDING-REQUIREMENTS-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0171",
       "text_digest": "b33f69b0a1",
       "scope": "capability",
       "capabilities": [
@@ -769,6 +788,7 @@
         "anchor": "binding-requirements"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-BINDING-REQUIREMENTS-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -777,7 +797,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-BINDING-REQUIREMENTS-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0172",
       "text_digest": "12912430f0",
       "scope": "capability",
       "capabilities": [
@@ -802,6 +822,7 @@
         "anchor": "binding-requirements"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-BINDING-REQUIREMENTS-03",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -810,7 +831,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-BINDING-REQUIREMENTS-04",
+      "id": "REQ-SHOPPING-CHECKOUT-0173",
       "text_digest": "623e486ff4",
       "scope": "capability",
       "capabilities": [
@@ -835,6 +856,7 @@
         "anchor": "binding-requirements"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-BINDING-REQUIREMENTS-04",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -843,7 +865,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-BINDING-REQUIREMENTS-05",
+      "id": "REQ-SHOPPING-CHECKOUT-0174",
       "text_digest": "ef9672232b",
       "scope": "capability",
       "capabilities": [
@@ -868,6 +890,7 @@
         "anchor": "binding-requirements"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-BINDING-REQUIREMENTS-05",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -876,7 +899,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-BINDING-REQUIREMENTS-06",
+      "id": "REQ-SHOPPING-CHECKOUT-0175",
       "text_digest": "d709c5a4ac",
       "scope": "capability",
       "capabilities": [
@@ -901,6 +924,7 @@
         "anchor": "binding-requirements"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-BINDING-REQUIREMENTS-06",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -909,7 +933,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-NAVIGATION-CONSTRAINTS-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0176",
       "text_digest": "9af2ffa86a",
       "scope": "capability",
       "capabilities": [
@@ -934,6 +958,7 @@
         "anchor": "navigation-constraints"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-NAVIGATION-CONSTRAINTS-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -942,7 +967,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-NAVIGATION-CONSTRAINTS-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0177",
       "text_digest": "064ee17546",
       "scope": "capability",
       "capabilities": [
@@ -967,6 +992,7 @@
         "anchor": "navigation-constraints"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-NAVIGATION-CONSTRAINTS-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -975,7 +1001,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-NAVIGATION-CONSTRAINTS-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0178",
       "text_digest": "eea24f25f2",
       "scope": "capability",
       "capabilities": [
@@ -1000,6 +1026,7 @@
         "anchor": "navigation-constraints"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-NAVIGATION-CONSTRAINTS-03",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1008,7 +1035,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-NAVIGATION-CONSTRAINTS-04",
+      "id": "REQ-SHOPPING-CHECKOUT-0179",
       "text_digest": "258443814e",
       "scope": "capability",
       "capabilities": [
@@ -1033,6 +1060,7 @@
         "anchor": "navigation-constraints"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-NAVIGATION-CONSTRAINTS-04",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1041,7 +1069,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-NAVIGATION-CONSTRAINTS-05",
+      "id": "REQ-SHOPPING-CHECKOUT-0180",
       "text_digest": "35d3489e9b",
       "scope": "capability",
       "capabilities": [
@@ -1066,6 +1094,7 @@
         "anchor": "navigation-constraints"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-NAVIGATION-CONSTRAINTS-05",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1074,7 +1103,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-NAVIGATION-CONSTRAINTS-06",
+      "id": "REQ-SHOPPING-CHECKOUT-0181",
       "text_digest": "1df2a4b4f1",
       "scope": "capability",
       "capabilities": [
@@ -1099,6 +1128,7 @@
         "anchor": "navigation-constraints"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-NAVIGATION-CONSTRAINTS-06",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1107,7 +1137,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-TRANSPORT-MESSAGING-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0182",
       "text_digest": "d27d8e1378",
       "scope": "capability",
       "capabilities": [
@@ -1136,6 +1166,7 @@
         "anchor": "transport-messaging"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-TRANSPORT-MESSAGING-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1144,7 +1175,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-TRANSPORT-MESSAGING-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0183",
       "text_digest": "e31c7d39c1",
       "scope": "capability",
       "capabilities": [
@@ -1169,6 +1200,7 @@
         "anchor": "transport-messaging"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-TRANSPORT-MESSAGING-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1177,7 +1209,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-CORE-MESSAGES-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0184",
       "text_digest": "629595ef1a",
       "scope": "capability",
       "capabilities": [
@@ -1202,6 +1234,7 @@
         "anchor": "core-messages"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-CORE-MESSAGES-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1210,7 +1243,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EXTENSION-MESSAGES-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0185",
       "text_digest": "49e984cded",
       "scope": "capability",
       "capabilities": [
@@ -1235,6 +1268,7 @@
         "anchor": "extension-messages"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EXTENSION-MESSAGES-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1243,7 +1277,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EXTENSION-MESSAGES-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0186",
       "text_digest": "6610687fbf",
       "scope": "capability",
       "capabilities": [
@@ -1268,6 +1302,7 @@
         "anchor": "extension-messages"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EXTENSION-MESSAGES-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1276,7 +1311,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-READY-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0187",
       "text_digest": "a3d2f4d56f",
       "scope": "capability",
       "capabilities": [
@@ -1303,6 +1338,7 @@
         "anchor": "ecready"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-READY-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1311,7 +1347,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-READY-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0188",
       "text_digest": "5983dfa675",
       "scope": "capability",
       "capabilities": [
@@ -1339,6 +1375,7 @@
         "anchor": "ecready"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-READY-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1347,7 +1384,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-READY-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0189",
       "text_digest": "66c2becef2",
       "scope": "capability",
       "capabilities": [
@@ -1374,6 +1411,7 @@
         "anchor": "ecready"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-READY-03",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1382,7 +1420,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-READY-04",
+      "id": "REQ-SHOPPING-CHECKOUT-0190",
       "text_digest": "2e7656caf9",
       "scope": "capability",
       "capabilities": [
@@ -1411,6 +1449,7 @@
         "anchor": "ecready"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-READY-04",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1419,7 +1458,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-READY-05",
+      "id": "REQ-SHOPPING-CHECKOUT-0191",
       "text_digest": "d4a5ed6089",
       "scope": "capability",
       "capabilities": [
@@ -1444,6 +1483,7 @@
         "anchor": "ecready"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-READY-05",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1452,7 +1492,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-READY-06",
+      "id": "REQ-SHOPPING-CHECKOUT-0192",
       "text_digest": "5e3413cd0d",
       "scope": "capability",
       "capabilities": [
@@ -1479,6 +1519,7 @@
         "anchor": "ecready"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-READY-06",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1487,7 +1528,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-READY-07",
+      "id": "REQ-SHOPPING-CHECKOUT-0193",
       "text_digest": "abdc68d4ce",
       "scope": "capability",
       "capabilities": [
@@ -1514,6 +1555,7 @@
         "anchor": "ecready"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-READY-07",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1522,7 +1564,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-READY-08",
+      "id": "REQ-SHOPPING-CHECKOUT-0194",
       "text_digest": "8c8a34c733",
       "scope": "capability",
       "capabilities": [
@@ -1549,6 +1591,7 @@
         "anchor": "ecready"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-READY-08",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1557,7 +1600,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-READY-09",
+      "id": "REQ-SHOPPING-CHECKOUT-0195",
       "text_digest": "d761ce51d7",
       "scope": "capability",
       "capabilities": [
@@ -1584,6 +1627,7 @@
         "anchor": "ecready"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-READY-09",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1592,7 +1636,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-READY-10",
+      "id": "REQ-SHOPPING-CHECKOUT-0196",
       "text_digest": "eb3704265c",
       "scope": "capability",
       "capabilities": [
@@ -1619,6 +1663,7 @@
         "anchor": "ecready"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-READY-10",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1627,7 +1672,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-READY-11",
+      "id": "REQ-SHOPPING-CHECKOUT-0197",
       "text_digest": "9dbc2de6b2",
       "scope": "capability",
       "capabilities": [
@@ -1654,6 +1699,7 @@
         "anchor": "ecready"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-READY-11",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1662,7 +1708,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-READY-12",
+      "id": "REQ-SHOPPING-CHECKOUT-0198",
       "text_digest": "7604d830f0",
       "scope": "capability",
       "capabilities": [
@@ -1690,6 +1736,7 @@
         "anchor": "ecready"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-READY-12",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1698,7 +1745,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-READY-13",
+      "id": "REQ-SHOPPING-CHECKOUT-0199",
       "text_digest": "a809664137",
       "scope": "capability",
       "capabilities": [
@@ -1723,6 +1770,7 @@
         "anchor": "ecready"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-READY-13",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1731,7 +1779,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-READY-14",
+      "id": "REQ-SHOPPING-CHECKOUT-0200",
       "text_digest": "273736b04d",
       "scope": "capability",
       "capabilities": [
@@ -1758,6 +1806,7 @@
         "anchor": "ecready"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-READY-14",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1766,7 +1815,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-READY-15",
+      "id": "REQ-SHOPPING-CHECKOUT-0201",
       "text_digest": "b4ddfaed6e",
       "scope": "capability",
       "capabilities": [
@@ -1793,6 +1842,7 @@
         "anchor": "ecready"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-READY-15",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1801,7 +1851,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-READY-16",
+      "id": "REQ-SHOPPING-CHECKOUT-0202",
       "text_digest": "dfcef5c6f2",
       "scope": "capability",
       "capabilities": [
@@ -1826,6 +1876,7 @@
         "anchor": "ecready"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-READY-16",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1834,7 +1885,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-READY-17",
+      "id": "REQ-SHOPPING-CHECKOUT-0203",
       "text_digest": "c45fb9f3f1",
       "scope": "capability",
       "capabilities": [
@@ -1861,6 +1912,7 @@
         "anchor": "ecready"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-READY-17",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1869,7 +1921,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-READY-18",
+      "id": "REQ-SHOPPING-CHECKOUT-0204",
       "text_digest": "0c350741c8",
       "scope": "capability",
       "capabilities": [
@@ -1894,6 +1946,7 @@
         "anchor": "ecready"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-READY-18",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1902,7 +1955,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-AUTH-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0205",
       "text_digest": "a49ddfe7c1",
       "scope": "capability",
       "capabilities": [
@@ -1929,6 +1982,7 @@
         "anchor": "ecauth"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-AUTH-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1937,7 +1991,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-TOTALS-CHANGE-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0206",
       "text_digest": "99e001b8a5",
       "scope": "capability",
       "capabilities": [
@@ -1964,6 +2018,7 @@
         "anchor": "ectotalschange"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-TOTALS-CHANGE-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -1978,7 +2033,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-TOTALS-CHANGE-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0207",
       "text_digest": "5023f77e0f",
       "scope": "capability",
       "capabilities": [
@@ -2008,6 +2063,7 @@
         "anchor": "ectotalschange"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-TOTALS-CHANGE-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -2022,7 +2078,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-PAYMENT-INSTRUMENTS-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0208",
       "text_digest": "2f8c3a174a",
       "scope": "capability",
       "capabilities": [
@@ -2047,6 +2103,7 @@
         "anchor": "ecpaymentinstruments_change_request"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-PAYMENT-INSTRUMENTS-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -2055,7 +2112,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-PAYMENT-INSTRUMENTS-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0209",
       "text_digest": "f8653b81c3",
       "scope": "capability",
       "capabilities": [
@@ -2083,6 +2140,7 @@
         "anchor": "ecpaymentinstruments_change_request"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-PAYMENT-INSTRUMENTS-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -2091,7 +2149,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-PAYMENT-INSTRUMENTS-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0210",
       "text_digest": "e0c6543fed",
       "scope": "capability",
       "capabilities": [
@@ -2116,6 +2174,7 @@
         "anchor": "ecpaymentinstruments_change_request"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-PAYMENT-INSTRUMENTS-03",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -2124,7 +2183,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-PAYMENT-CREDENTIAL-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0211",
       "text_digest": "0d386b4856",
       "scope": "capability",
       "capabilities": [
@@ -2149,6 +2208,7 @@
         "anchor": "ecpaymentcredential_request"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-PAYMENT-CREDENTIAL-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -2157,7 +2217,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-PAYMENT-CREDENTIAL-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0212",
       "text_digest": "22353ff600",
       "scope": "capability",
       "capabilities": [
@@ -2186,6 +2246,7 @@
         "anchor": "ecpaymentcredential_request"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-PAYMENT-CREDENTIAL-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -2194,7 +2255,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-PAYMENT-CREDENTIAL-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0213",
       "text_digest": "03e22bb1c3",
       "scope": "capability",
       "capabilities": [
@@ -2221,6 +2282,7 @@
         "anchor": "ecpaymentcredential_request"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-PAYMENT-CREDENTIAL-03",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -2229,7 +2291,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-PAYMENT-CREDENTIAL-04",
+      "id": "REQ-SHOPPING-CHECKOUT-0214",
       "text_digest": "a207de5e37",
       "scope": "capability",
       "capabilities": [
@@ -2254,6 +2316,7 @@
         "anchor": "ecpaymentcredential_request"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-PAYMENT-CREDENTIAL-04",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -2262,7 +2325,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-FULFILLMENT-ADDRESS-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0215",
       "text_digest": "3060692cd2",
       "scope": "capability",
       "capabilities": [
@@ -2287,6 +2350,7 @@
         "anchor": "ecfulfillmentaddress_change_request"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-FULFILLMENT-ADDRESS-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -2295,7 +2359,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-FULFILLMENT-ADDRESS-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0216",
       "text_digest": "2f14a5d57a",
       "scope": "capability",
       "capabilities": [
@@ -2324,6 +2388,7 @@
         "anchor": "ecfulfillmentaddress_change_request"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-FULFILLMENT-ADDRESS-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -2332,7 +2397,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-EC-FULFILLMENT-ADDRESS-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0217",
       "text_digest": "fd862f1fd7",
       "scope": "capability",
       "capabilities": [
@@ -2359,6 +2424,7 @@
         "anchor": "ecfulfillmentaddress_change_request"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-EC-FULFILLMENT-ADDRESS-03",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -2367,7 +2433,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-WINDOW-EXTENSION-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0218",
       "text_digest": "f863ba3cef",
       "scope": "capability",
       "capabilities": [
@@ -2394,6 +2460,7 @@
         "anchor": "window-extension"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-WINDOW-EXTENSION-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -2402,7 +2469,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-WINDOW-OVERVIEW-HOST-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0219",
       "text_digest": "be256dd9cb",
       "scope": "capability",
       "capabilities": [
@@ -2429,6 +2496,7 @@
         "anchor": "window-overview-host-choice"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-WINDOW-OVERVIEW-HOST-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -2437,7 +2505,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-WINDOW-OVERVIEW-HOST-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0220",
       "text_digest": "f74c8b5260",
       "scope": "capability",
       "capabilities": [
@@ -2464,6 +2532,7 @@
         "anchor": "window-overview-host-choice"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-WINDOW-OVERVIEW-HOST-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -2472,7 +2541,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-WINDOW-OVERVIEW-HOST-03",
+      "id": "REQ-SHOPPING-CHECKOUT-0221",
       "text_digest": "ac546d4675",
       "scope": "capability",
       "capabilities": [
@@ -2497,6 +2566,7 @@
         "anchor": "window-overview-host-choice"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-WINDOW-OVERVIEW-HOST-03",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -2505,7 +2575,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-WINDOW-OVERVIEW-HOST-04",
+      "id": "REQ-SHOPPING-CHECKOUT-0222",
       "text_digest": "1e520ee6a8",
       "scope": "capability",
       "capabilities": [
@@ -2530,6 +2600,7 @@
         "anchor": "window-overview-host-choice"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-WINDOW-OVERVIEW-HOST-04",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -2538,7 +2609,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-WINDOW-OVERVIEW-HOST-05",
+      "id": "REQ-SHOPPING-CHECKOUT-0223",
       "text_digest": "df7a51899a",
       "scope": "capability",
       "capabilities": [
@@ -2565,6 +2636,7 @@
         "anchor": "window-overview-host-choice"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-WINDOW-OVERVIEW-HOST-05",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -2573,7 +2645,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-WINDOW-OVERVIEW-HOST-06",
+      "id": "REQ-SHOPPING-CHECKOUT-0224",
       "text_digest": "55e3e568a0",
       "scope": "capability",
       "capabilities": [
@@ -2598,6 +2670,7 @@
         "anchor": "window-overview-host-choice"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-WINDOW-OVERVIEW-HOST-06",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -2606,7 +2679,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-WINDOW-OVERVIEW-HOST-07",
+      "id": "REQ-SHOPPING-CHECKOUT-0225",
       "text_digest": "cf9241666a",
       "scope": "capability",
       "capabilities": [
@@ -2631,6 +2704,7 @@
         "anchor": "window-overview-host-choice"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-WINDOW-OVERVIEW-HOST-07",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -2639,7 +2713,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-WINDOW-OVERVIEW-HOST-08",
+      "id": "REQ-SHOPPING-CHECKOUT-0226",
       "text_digest": "1e42c2ea27",
       "scope": "capability",
       "capabilities": [
@@ -2666,6 +2740,7 @@
         "anchor": "window-overview-host-choice"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-WINDOW-OVERVIEW-HOST-08",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -2674,7 +2749,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-ERROR-CODES-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0227",
       "text_digest": "95b351b8f1",
       "scope": "capability",
       "capabilities": [
@@ -2699,6 +2774,7 @@
         "anchor": "error-codes"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-ERROR-CODES-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "embedded",
@@ -2707,7 +2783,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-EP-PREVENTION-OF-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0228",
       "text_digest": "8f97f24d67",
       "scope": "capability",
       "capabilities": [
@@ -2732,6 +2808,7 @@
         "anchor": "prevention-of-unsolicited-payment-requests"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-EP-PREVENTION-OF-01",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "embedded",

@@ -33,8 +33,12 @@ extractor does not have yet:
   counting capitals).
 
 Every record gains a `demo` object saying how its capability was found,
-whether its keyword was bold, and whether this suite can test it. IDs are the
-extractor's positional IDs, so they are provisional.
+whether its keyword was bold, and whether this suite can test it.
+
+IDs are stable. Each rule's ID comes from `requirements.lock.json`, beside
+the catalog, so it no longer changes when a rule is added above it; a
+reworded rule keeps its ID, and a removed rule's ID is retired, never
+reused. The extractor's positional ID is kept as `demo.positional_id`.
 
 It also writes `capabilities.json`, an index of the capabilities in the
 catalog: whether each is an extension, which capabilities it extends, its
@@ -50,13 +54,19 @@ Usage, from the repository root:
   uv run --no-project requirements/tools/build_catalog.py \
     --spec-root=<ucp checkout> --spec-commit=<commit> \
     --extractor-dir=<.github checkout>/org-tools/requirements-extractor/scripts
+
+With `--check`, nothing is written, and the run fails if any output, the
+lock included, would change.
 """
 
 import argparse
 import collections
 from collections.abc import Callable, Iterator
 import contextlib
+import copy
 import dataclasses
+import difflib
+import hashlib
 import importlib
 import json
 from pathlib import Path, PurePosixPath
@@ -74,7 +84,36 @@ DEFAULT_OUT_DIR = REPO_ROOT / "requirements" / "catalog"
 DEFAULT_REVIEW_FILE = REPO_ROOT / "requirements" / "review.json"
 REPORT_FILE = "extraction_report.json"
 INDEX_FILE = "capabilities.json"
+LOCK_FILE = "requirements.lock.json"
 OPTIONS = ("capability-from-bullet-or-path", "count-capitals")
+
+# Stable IDs: one lock entry per ID ever issued, in ID order.
+LOCK_VERSION = 1
+LOCK_ABOUT = (
+  "Stable IDs for the demo catalog: one entry for every ID ever issued. An "
+  "ID never changes, and a retired ID's number is never issued again. See "
+  "requirements/README.md."
+)
+LOCK_FIELDS = (
+  "id",
+  "file",
+  "text_digest",
+  "context",
+  "text",
+  "previous_digests",
+  "status",
+  "minted_at",
+  "retired_at",
+)
+LOCK_STATUSES = ("active", "retired")
+ID_NUMBER_WIDTH = 4
+# The catalog schema's pattern for a requirement ID.
+ID_RE = re.compile(r"^REQ-[A-Z0-9-]+-[0-9]{2,}$")
+# How alike a rule's wording must be to that of a rule missing from the same
+# page for the two to count as one rule, reworded.
+REWORD_SIMILARITY = 0.85
+# The summary lists changed IDs one by one when there are at most this many.
+LIST_LIMIT = 20
 
 BOLD_KEYWORD_RE = re.compile(
   r"\*\*\s*(?:MUST\s+NOT|MUST|SHALL\s+NOT|SHALL|SHOULD\s+NOT|SHOULD|"
@@ -386,7 +425,7 @@ def load_extractor(extractor_dir: Path) -> dict[str, ModuleType]:
   sys.path.insert(0, str(extractor_dir))
   return {
     name: importlib.import_module(f"requirements_extractor.{name}")
-    for name in ("catalog", "classifier", "config")
+    for name in ("catalog", "classifier", "config", "identity")
   }
 
 
@@ -449,6 +488,307 @@ def apply_review(record: dict[str, Any], decision: dict[str, Any]) -> None:
     demo["testable_reason"] = "reviewed: " + decision["reason"]
 
 
+@dataclasses.dataclass(frozen=True)
+class LockRule:
+  """What the lock needs to know about one rule.
+
+  Attributes:
+    prefix: The ID prefix for the rule's page, such as `REQ-SHOPPING-CART`.
+    file: The rule's page.
+    text_digest: The rule's text digest.
+    context: The rule's normalized compound parent, if it has one.
+    text: The rule's normalized wording.
+    position: Where the rule sits on its page: its first line, then the
+      extractor's document order.
+
+  """
+
+  prefix: str
+  file: str
+  text_digest: str
+  context: str | None
+  text: str
+  position: tuple[int, int]
+
+
+@dataclasses.dataclass
+class LockResult:
+  """The outcome of giving every rule a stable ID.
+
+  Attributes:
+    ids: Each rule's stable ID, in the order the rules were given.
+    entries: Every lock entry after the run, in ID order.
+    kept: IDs whose rule was found word for word.
+    carried: IDs whose rule was found reworded, each with the similarity and
+      the wording before.
+    minted: New IDs.
+    retired: IDs whose rule is gone.
+    restored: Retired IDs whose rule is back, word for word.
+
+  """
+
+  ids: list[str] = dataclasses.field(default_factory=list)
+  entries: list[dict[str, Any]] = dataclasses.field(default_factory=list)
+  kept: list[str] = dataclasses.field(default_factory=list)
+  carried: list[tuple[str, float, str]] = dataclasses.field(
+    default_factory=list
+  )
+  minted: list[str] = dataclasses.field(default_factory=list)
+  retired: list[str] = dataclasses.field(default_factory=list)
+  restored: list[str] = dataclasses.field(default_factory=list)
+
+
+def split_id(rule_id: str) -> tuple[str, int]:
+  """Split a stable ID into its prefix and its number."""
+  prefix, _, number = rule_id.rpartition("-")
+  return prefix, int(number)
+
+
+def match_text(context: str | None, text: str) -> str:
+  """Return the wording compared when looking for a reworded rule.
+
+  The context is included because the wording alone can be a single word:
+  the cells of the checkout obligation matrix read "must" or "may".
+  """
+  return f"{context}\n{text}" if context else text
+
+
+def mint_order(rule: LockRule) -> tuple[Any, ...]:
+  """Return the order new IDs go out in: core page first, then page order."""
+  return (
+    rule.prefix,
+    PurePosixPath(rule.file).name != "index.md",
+    rule.file,
+    rule.position,
+  )
+
+
+def assign_stable_ids(
+  rules: list[LockRule], lock: list[dict[str, Any]], spec_commit: str
+) -> LockResult:
+  """Give every rule a stable ID from the lock, issuing new IDs as needed.
+
+  Four passes:
+
+  1. Exact: a rule takes the ID of an entry on the same page with the same
+     text digest. Copies of one sentence on a page take that wording's IDs
+     oldest first, in page order. A retired entry can match, which restores
+     its ID.
+  2. Reworded: a rule still without an ID takes the ID of an unclaimed
+     active entry on the same page whose wording is at least
+     `REWORD_SIMILARITY` alike, the most alike pairs first. The entry keeps
+     its old digest in `previous_digests`.
+  3. New: every rule still without an ID gets the next number for its
+     prefix, in `mint_order`.
+  4. Retired: an active entry no rule claimed is retired. Its number is
+     never issued again.
+
+  Args:
+    rules: The catalog's rules.
+    lock: The lock's entries. They are not modified.
+    spec_commit: The specification commit, recorded on new and retired
+      entries.
+
+  Returns:
+    The IDs, the updated entries and what changed.
+
+  """
+  entries = {entry["id"]: copy.deepcopy(entry) for entry in lock}
+  ids: list[str | None] = [None] * len(rules)
+  claimed: set[str] = set()
+  result = LockResult()
+  page_order = sorted(
+    range(len(rules)), key=lambda i: (rules[i].file, rules[i].position)
+  )
+
+  # 1. Exact.
+  by_wording = collections.defaultdict(list)
+  for rule_id in sorted(entries, key=split_id):
+    entry = entries[rule_id]
+    by_wording[entry["file"], entry["text_digest"]].append(rule_id)
+  for i in page_order:
+    for rule_id in by_wording[rules[i].file, rules[i].text_digest]:
+      if rule_id in claimed:
+        continue
+      claimed.add(rule_id)
+      ids[i] = rule_id
+      entry = entries[rule_id]
+      if entry["status"] == "retired":
+        entry["status"], entry["retired_at"] = "active", None
+        result.restored.append(rule_id)
+      else:
+        result.kept.append(rule_id)
+      break
+
+  # 2. Reworded.
+  open_entries = collections.defaultdict(list)
+  for rule_id in sorted(entries, key=split_id):
+    entry = entries[rule_id]
+    if rule_id not in claimed and entry["status"] == "active":
+      open_entries[entry["file"]].append(rule_id)
+  pairs = []
+  for rank, i in enumerate(page_order):
+    if ids[i] is not None:
+      continue
+    wording = match_text(rules[i].context, rules[i].text)
+    for rule_id in open_entries[rules[i].file]:
+      entry = entries[rule_id]
+      matcher = difflib.SequenceMatcher(
+        None,
+        match_text(entry["context"], entry["text"]),
+        wording,
+        autojunk=False,
+      )
+      if (
+        matcher.real_quick_ratio() >= REWORD_SIMILARITY
+        and matcher.quick_ratio() >= REWORD_SIMILARITY
+        and (similarity := matcher.ratio()) >= REWORD_SIMILARITY
+      ):
+        pairs.append((-similarity, split_id(rule_id), rank, i, rule_id))
+  for negative_similarity, _, _, i, rule_id in sorted(pairs):
+    if ids[i] is not None or rule_id in claimed:
+      continue
+    claimed.add(rule_id)
+    ids[i] = rule_id
+    entry = entries[rule_id]
+    result.carried.append((rule_id, -negative_similarity, entry["text"]))
+    entry["previous_digests"].append(entry["text_digest"])
+    entry["text_digest"] = rules[i].text_digest
+    entry["context"] = rules[i].context
+    entry["text"] = rules[i].text
+
+  # 3. New.
+  highest: collections.Counter[str] = collections.Counter()
+  for rule_id in entries:
+    prefix, number = split_id(rule_id)
+    highest[prefix] = max(highest[prefix], number)
+  unmatched = [i for i in range(len(rules)) if ids[i] is None]
+  for i in sorted(unmatched, key=lambda i: mint_order(rules[i])):
+    rule = rules[i]
+    highest[rule.prefix] += 1
+    rule_id = f"{rule.prefix}-{highest[rule.prefix]:0{ID_NUMBER_WIDTH}d}"
+    entries[rule_id] = {
+      "id": rule_id,
+      "file": rule.file,
+      "text_digest": rule.text_digest,
+      "context": rule.context,
+      "text": rule.text,
+      "previous_digests": [],
+      "status": "active",
+      "minted_at": spec_commit,
+      "retired_at": None,
+    }
+    claimed.add(rule_id)
+    ids[i] = rule_id
+    result.minted.append(rule_id)
+
+  # 4. Retired.
+  for rule_id in sorted(entries, key=split_id):
+    entry = entries[rule_id]
+    if rule_id not in claimed and entry["status"] == "active":
+      entry["status"], entry["retired_at"] = "retired", spec_commit
+      result.retired.append(rule_id)
+
+  result.ids = [rule_id or "" for rule_id in ids]
+  result.entries = [entries[k] for k in sorted(entries, key=split_id)]
+  return result
+
+
+def load_lock(
+  path: Path,
+  digest_of: Callable[[str | None, str], str],
+  problems: list[str],
+) -> list[dict[str, Any]]:
+  """Load the lock's entries and check that they are well formed.
+
+  Args:
+    path: The lock file. A missing file means no ID has been issued yet.
+    digest_of: Computes a text digest from a context and a wording.
+    problems: Collects anything malformed.
+
+  Returns:
+    The entries, as stored.
+
+  """
+  if not path.exists():
+    return []
+  document = json.loads(path.read_text(encoding="utf-8"))
+  if document.get("lock_version") != LOCK_VERSION:
+    problems.append(
+      f"lock: unsupported lock_version {document.get('lock_version')!r}"
+    )
+    return []
+  entries = document.get("entries", [])
+  seen = set()
+  for entry in entries:
+    rule_id = str(entry.get("id"))
+    if sorted(entry) != sorted(LOCK_FIELDS):
+      problems.append(f"lock: {rule_id} does not have the expected fields")
+      continue
+    if not ID_RE.match(rule_id) or rule_id in seen:
+      problems.append(f"lock: {rule_id} is malformed or repeated")
+    seen.add(rule_id)
+    retired = entry["status"] == "retired"
+    if entry["status"] not in LOCK_STATUSES or retired != bool(
+      entry["retired_at"]
+    ):
+      problems.append(f"lock: {rule_id} has an inconsistent status")
+    if digest_of(entry["context"], entry["text"]) != entry["text_digest"]:
+      problems.append(f"lock: {rule_id}'s wording does not match its digest")
+  return entries
+
+
+def lock_problems(lock: list[dict[str, Any]], result: LockResult) -> list[str]:
+  """Check what giving out stable IDs must never do.
+
+  Every ID ever issued stays in the lock; a new ID's number is above every
+  number its prefix has used, retired ones included; and every rule has an
+  ID that fits the catalog schema's pattern and an active entry of its own.
+  """
+  problems = []
+  dropped = sorted({e["id"] for e in lock} - {e["id"] for e in result.entries})
+  if dropped:
+    problems.append(f"lock: IDs dropped: {dropped[:5]}")
+  highest: collections.Counter[str] = collections.Counter()
+  for entry in lock:
+    prefix, number = split_id(entry["id"])
+    highest[prefix] = max(highest[prefix], number)
+  reused = [
+    rule_id
+    for rule_id in result.minted
+    if split_id(rule_id)[1] <= highest[split_id(rule_id)[0]]
+  ]
+  if reused:
+    problems.append(f"lock: numbers issued again: {reused[:5]}")
+  malformed = [rule_id for rule_id in result.ids if not ID_RE.match(rule_id)]
+  if malformed:
+    problems.append(f"IDs that do not fit the schema: {malformed[:5]}")
+  active = sum(entry["status"] == "active" for entry in result.entries)
+  if active != len(result.ids):
+    problems.append(f"lock: {active} active IDs for {len(result.ids)} rules")
+  return problems
+
+
+def lock_document(entries: list[dict[str, Any]]) -> dict[str, Any]:
+  """Return the lock file's contents, each entry's fields in a fixed order."""
+  return {
+    "about": LOCK_ABOUT,
+    "lock_version": LOCK_VERSION,
+    "entries": [{field: e[field] for field in LOCK_FIELDS} for e in entries],
+  }
+
+
+def without_demo(document: dict[str, Any]) -> dict[str, Any]:
+  """Return a catalog document without the demo's additions."""
+  return {
+    **{k: v for k, v in document.items() if k != "demo"},
+    "requirements": [
+      {k: v for k, v in record.items() if k != "demo"}
+      for record in document["requirements"]
+    ],
+  }
+
+
 def main(argv: list[str] | None = None) -> int:
   """Build the catalog, write it, and print a summary."""
   parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -457,15 +797,22 @@ def main(argv: list[str] | None = None) -> int:
   parser.add_argument("--extractor-dir", type=Path, required=True)
   parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
   parser.add_argument("--review", type=Path, default=DEFAULT_REVIEW_FILE)
+  parser.add_argument(
+    "--check",
+    action="store_true",
+    help="write nothing; fail if any output, the lock included, would change",
+  )
   args = parser.parse_args(argv)
   spec_root = args.spec_root.resolve()
+  out_dir = args.out_dir.resolve()
   out = sys.stdout.write
 
   modules = load_extractor(args.extractor_dir.resolve())
-  catalog, classifier, config = (
+  catalog, classifier, config, identity = (
     modules["catalog"],
     modules["classifier"],
     modules["config"],
+    modules["identity"],
   )
   extractor_commit, extractor_dirty = git_commit(args.extractor_dir)
   schemas = schema_capabilities(spec_root)
@@ -492,7 +839,7 @@ def main(argv: list[str] | None = None) -> int:
     "spec_commit": args.spec_commit,
     "extractor_commit": extractor_commit,
     "options": list(OPTIONS),
-    "ids": "provisional",
+    "ids": f"stable, from {LOCK_FILE}",
   }
   review_problems: list[str] = []
   reviews = load_review(args.review.resolve(), review_problems)
@@ -506,6 +853,7 @@ def main(argv: list[str] | None = None) -> int:
         record["capabilities"] = list(label.capabilities)
       transport, testable, reason = testability(record)
       record["demo"] = {
+        "positional_id": record["id"],
         "capability_source": label.source,
         "keyword_style": keyword_style(record["clause"]),
         "transport": transport,
@@ -525,6 +873,39 @@ def main(argv: list[str] | None = None) -> int:
         ("requirements", document["requirements"]),
       ]
     )
+
+  # Stable IDs. A malformed lock stops the run before anything is written.
+  def digest_of(context: str | None, text: str) -> str:
+    joined = identity.DIGEST_SEPARATOR.join((context or "", text))
+    digest = hashlib.sha256(joined.encode("utf-8")).hexdigest()
+    return digest[: config.ID_DIGEST_LENGTH]
+
+  lock_path = out_dir / LOCK_FILE
+  lock_load_problems: list[str] = []
+  lock = load_lock(lock_path, digest_of, lock_load_problems)
+  if lock_load_problems:
+    out("PROBLEMS:\n" + "".join(f"  - {p}\n" for p in lock_load_problems))
+    return 1
+  rules = [
+    LockRule(
+      prefix=f"{config.READABLE_ID_PREFIX}-"
+      + config.capability_slug(resolver.labels[r["source"]["file"]].id_name),
+      file=r["source"]["file"],
+      text_digest=r["text_digest"],
+      context=identity.normalize(r["compound_parent"])
+      if r["compound_parent"]
+      else None,
+      text=r["normalized"],
+      position=(r["source"]["start_line"], r["document_order"]),
+    )
+    for r in records
+  ]
+  assigned = assign_stable_ids(rules, lock, args.spec_commit)
+  for record, stable_id in zip(records, assigned.ids, strict=True):
+    record["id"] = stable_id
+  stable_ids = {r["demo"]["positional_id"]: r["id"] for r in records}
+  for entry in report_document["diagnostics"].get("duplicate_requirements", []):
+    entry["ids"] = [stable_ids.get(i, i) for i in entry["ids"]]
 
   # Checks. Anything here is unexpected and fails the run.
   problems = list(resolver.problems) + review_problems
@@ -559,6 +940,11 @@ def main(argv: list[str] | None = None) -> int:
   ]
   if duplicate_ids:
     problems.append(f"duplicate IDs: {duplicate_ids[:5]}")
+  problems.extend(lock_problems(lock, assigned))
+  for path, document in documents.items():
+    problems.extend(
+      f"{path}: {error}" for error in catalog.validate(without_demo(document))
+    )
   index = capability_index(schemas, resolver.labels, records)
   kinds = {entry["name"]: entry["kind"] for entry in index}
   for rel_path, label in sorted(resolver.labels.items()):
@@ -571,27 +957,37 @@ def main(argv: list[str] | None = None) -> int:
       if not in_extensions and kinds.get(name) == "extension":
         problems.append(f"{rel_path} is labelled with the extension {name}")
 
-  # Write.
-  out_dir = args.out_dir.resolve()
-  if (out_dir / "shopping").exists():
-    shutil.rmtree(out_dir / "shopping")
-  for path, document in documents.items():
-    target = out_dir / path
-    target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(catalog.serialize(document), encoding="utf-8")
+  # Write, or with --check only compare.
   report_document = {**report_document, "demo": demo_header}
-  (out_dir / REPORT_FILE).write_text(
-    catalog.serialize(report_document), encoding="utf-8"
-  )
   index_document = {
     "demo": demo_header,
     "extends_from": "each extension schema's $defs keys that name another "
     "capability",
     "capabilities": index,
   }
-  (out_dir / INDEX_FILE).write_text(
-    catalog.serialize(index_document), encoding="utf-8"
+  outputs = {
+    out_dir / path: catalog.serialize(document)
+    for path, document in documents.items()
+  }
+  outputs[out_dir / REPORT_FILE] = catalog.serialize(report_document)
+  outputs[out_dir / INDEX_FILE] = catalog.serialize(index_document)
+  outputs[lock_path] = catalog.serialize(lock_document(assigned.entries))
+  pages_dir = out_dir / "shopping"
+  old_pages = set(pages_dir.rglob("*.json")) if pages_dir.exists() else set()
+  out_of_date = sorted(
+    (old_pages - set(outputs))
+    | {
+      path
+      for path, text in outputs.items()
+      if not path.exists() or path.read_text(encoding="utf-8") != text
+    }
   )
+  if not args.check:
+    if pages_dir.exists():
+      shutil.rmtree(pages_dir)
+    for path, text in outputs.items():
+      path.parent.mkdir(parents=True, exist_ok=True)
+      path.write_text(text, encoding="utf-8")
 
   # Summary.
   styles = collections.Counter(r["demo"]["keyword_style"] for r in records)
@@ -708,7 +1104,7 @@ def main(argv: list[str] | None = None) -> int:
       bool(t) and level in MUST_LEVELS for t, level in pre_review.values()
     )
     flips = collections.Counter(
-      (bool(pre_review[r["id"]][0]), r["demo"]["testable"])
+      (bool(pre_review[r["demo"]["positional_id"]][0]), r["demo"]["testable"])
       for r in reviewed
       if is_active(r)
     )
@@ -735,16 +1131,65 @@ def main(argv: list[str] | None = None) -> int:
       f"actor set or corrected: {actor_fixes}\n"
     )
 
+  statuses = collections.Counter(e["status"] for e in assigned.entries)
   out(
-    f"\nwrote {len(documents)} page files, {REPORT_FILE} and {INDEX_FILE} "
-    f"to {out_dir}\n"
+    f"\nstable IDs ({LOCK_FILE}): kept {len(assigned.kept)}, carried over "
+    f"{len(assigned.carried)}, new {len(assigned.minted)}, retired "
+    f"{len(assigned.retired)}, restored {len(assigned.restored)}\n"
+    f"  the lock holds {len(assigned.entries)} IDs: {statuses['active']} "
+    f"active, {statuses['retired']} retired\n"
   )
+  if assigned.minted:
+    by_prefix = collections.Counter(split_id(i)[0] for i in assigned.minted)
+    out(
+      "  new, by prefix: "
+      + ", ".join(f"{p} {n}" for p, n in sorted(by_prefix.items()))
+      + "\n"
+    )
+  where = {
+    e["id"]: e["file"].removeprefix(f"{SHOPPING_DIR}/")
+    for e in assigned.entries
+  }
+  for record in records:
+    where[record["id"]] += f":{record['source']['start_line']}"
+  for title, listed in (
+    ("new", assigned.minted),
+    ("retired", assigned.retired),
+    ("restored", assigned.restored),
+  ):
+    if len(listed) <= LIST_LIMIT:
+      for rule_id in listed:
+        out(f"  {title}: {rule_id} at {where[rule_id]}\n")
+  wording = {e["id"]: e["text"] for e in assigned.entries}
+  for rule_id, similarity, before in assigned.carried:
+    out(
+      f"  carried over: {rule_id} at {where[rule_id]}, {similarity:.0%} "
+      "alike; check it is the same rule\n"
+      f"    was: {before[:100]}\n    now: {wording[rule_id][:100]}\n"
+    )
+
+  out(
+    f"\n{'would write' if args.check else 'wrote'} {len(documents)} page "
+    f"files, {REPORT_FILE}, {INDEX_FILE} and {LOCK_FILE} to {out_dir}; "
+    f"{len(out_of_date)} files {'differ' if args.check else 'changed'}\n"
+  )
+  if args.check and out_of_date:
+    out("check: nothing was written; out of date:\n")
+    for path in out_of_date[:LIST_LIMIT]:
+      out(f"  - {path.relative_to(out_dir)}\n")
+    if len(out_of_date) > LIST_LIMIT:
+      out(f"  - and {len(out_of_date) - LIST_LIMIT} more\n")
+  elif args.check:
+    out("check: every output is up to date\n")
   if problems:
     out("\nPROBLEMS:\n" + "".join(f"  - {p}\n" for p in problems))
     return 1
+  if args.check and out_of_date:
+    return 1
   out(
-    "checks: every rule has a capability, all names are declared, "
-    "no conflicts, every extension page belongs to an extension\n"
+    "checks: every rule has a capability and its own stable ID, all names "
+    "are declared, no conflicts, every extension page belongs to an "
+    "extension, every page fits the catalog schema\n"
   )
   return 0
 

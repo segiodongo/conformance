@@ -52,11 +52,11 @@
       "capability-from-bullet-or-path",
       "count-capitals"
     ],
-    "ids": "provisional"
+    "ids": "stable, from requirements.lock.json"
   },
   "requirements": [
     {
-      "id": "REQ-CHECKOUT-MCP-REQUEST-METADATA-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0229",
       "text_digest": "7d9d798bfd",
       "scope": "capability",
       "capabilities": [
@@ -83,6 +83,7 @@
         "anchor": "request-metadata"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-MCP-REQUEST-METADATA-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "mcp",
@@ -91,7 +92,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-MCP-REQUEST-METADATA-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0230",
       "text_digest": "160daf898a",
       "scope": "capability",
       "capabilities": [
@@ -116,6 +117,7 @@
         "anchor": "request-metadata"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-MCP-REQUEST-METADATA-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "mcp",
@@ -124,7 +126,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-MCP-IDENTIFIER-PATTERN-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0231",
       "text_digest": "bd19e02460",
       "scope": "capability",
       "capabilities": [
@@ -152,6 +154,7 @@
         "anchor": "identifier-pattern"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-MCP-IDENTIFIER-PATTERN-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "mcp",
@@ -160,7 +163,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-MCP-UPDATE-CHECKOUT-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0232",
       "text_digest": "b640f75fbf",
       "scope": "capability",
       "capabilities": [
@@ -188,6 +191,7 @@
         "anchor": "update_checkout"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-MCP-UPDATE-CHECKOUT-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "mcp",
@@ -196,7 +200,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-MCP-UPDATE-CHECKOUT-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0233",
       "text_digest": "35bccf4f4a",
       "scope": "capability",
       "capabilities": [
@@ -223,6 +227,7 @@
         "anchor": "update_checkout"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-MCP-UPDATE-CHECKOUT-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "mcp",
@@ -237,7 +242,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-MCP-MESSAGE-SIGNING-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0234",
       "text_digest": "9f730a1543",
       "scope": "capability",
       "capabilities": [
@@ -262,6 +267,7 @@
         "anchor": "message-signing"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-MCP-MESSAGE-SIGNING-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "mcp",
@@ -270,7 +276,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-MCP-RESPONSE-SIGNING-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0235",
       "text_digest": "833d001a11",
       "scope": "capability",
       "capabilities": [
@@ -295,6 +301,7 @@
         "anchor": "response-signing"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-MCP-RESPONSE-SIGNING-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "mcp",
@@ -303,7 +310,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-MCP-RESPONSE-SIGNING-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0236",
       "text_digest": "eb1ea646bd",
       "scope": "capability",
       "capabilities": [
@@ -328,6 +335,7 @@
         "anchor": "response-signing"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-MCP-RESPONSE-SIGNING-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "mcp",
@@ -336,7 +344,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-MCP-CONFORMANCE-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0237",
       "text_digest": "748fc7ead3",
       "scope": "capability",
       "capabilities": [
@@ -361,6 +369,7 @@
         "anchor": "conformance"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-MCP-CONFORMANCE-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "mcp",
@@ -369,7 +378,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-MCP-CONFORMANCE-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0238",
       "text_digest": "89481e6bfe",
       "scope": "capability",
       "capabilities": [
@@ -394,6 +403,7 @@
         "anchor": "conformance"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-MCP-CONFORMANCE-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "mcp",
@@ -402,7 +412,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-MCP-IMPLEMENTATION-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0239",
       "text_digest": "66b14d426c",
       "scope": "capability",
       "capabilities": [
@@ -427,6 +437,7 @@
         "anchor": "implementation"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-MCP-IMPLEMENTATION-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "mcp",
@@ -435,7 +446,7 @@
       }
     },
     {
-      "id": "REQ-CHECKOUT-MCP-IMPLEMENTATION-02",
+      "id": "REQ-SHOPPING-CHECKOUT-0240",
       "text_digest": "dc67c9c070",
       "scope": "capability",
       "capabilities": [
@@ -460,6 +471,7 @@
         "anchor": "implementation"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-MCP-IMPLEMENTATION-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "mcp",

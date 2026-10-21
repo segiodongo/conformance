@@ -6,7 +6,7 @@
       "capability-from-bullet-or-path",
       "count-capitals"
     ],
-    "ids": "provisional"
+    "ids": "stable, from requirements.lock.json"
   },
   "extends_from": "each extension schema's $defs keys that name another capability",
   "capabilities": [

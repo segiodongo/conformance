@@ -1770,8 +1770,8 @@
         "text_digest": "40901b2bee",
         "copies": 2,
         "ids": [
-          "REQ-SHOPPING-CART-EP-LOADING-AN-EMBEDDED-CART-02",
-          "REQ-CHECKOUT-EP-LOADING-AN-EMBEDDED-02"
+          "REQ-SHOPPING-CART-0032",
+          "REQ-SHOPPING-CHECKOUT-0154"
         ],
         "locations": [
           "docs/specification/shopping/cart/embedded.md:131",
@@ -1786,8 +1786,8 @@
         "text_digest": "5e3413cd0d",
         "copies": 2,
         "ids": [
-          "REQ-SHOPPING-CART-EP-EP-CART-READY-05",
-          "REQ-CHECKOUT-EP-EC-READY-06"
+          "REQ-SHOPPING-CART-0044",
+          "REQ-SHOPPING-CHECKOUT-0192"
         ],
         "locations": [
           "docs/specification/shopping/cart/embedded.md:246",
@@ -1802,8 +1802,8 @@
         "text_digest": "abdc68d4ce",
         "copies": 2,
         "ids": [
-          "REQ-SHOPPING-CART-EP-EP-CART-READY-06",
-          "REQ-CHECKOUT-EP-EC-READY-07"
+          "REQ-SHOPPING-CART-0045",
+          "REQ-SHOPPING-CHECKOUT-0193"
         ],
         "locations": [
           "docs/specification/shopping/cart/embedded.md:251",
@@ -1818,8 +1818,8 @@
         "text_digest": "8c8a34c733",
         "copies": 2,
         "ids": [
-          "REQ-SHOPPING-CART-EP-EP-CART-READY-07",
-          "REQ-CHECKOUT-EP-EC-READY-08"
+          "REQ-SHOPPING-CART-0046",
+          "REQ-SHOPPING-CHECKOUT-0194"
         ],
         "locations": [
           "docs/specification/shopping/cart/embedded.md:251",
@@ -1834,8 +1834,8 @@
         "text_digest": "eb3704265c",
         "copies": 2,
         "ids": [
-          "REQ-SHOPPING-CART-EP-EP-CART-READY-09",
-          "REQ-CHECKOUT-EP-EC-READY-10"
+          "REQ-SHOPPING-CART-0048",
+          "REQ-SHOPPING-CHECKOUT-0196"
         ],
         "locations": [
           "docs/specification/shopping/cart/embedded.md:270",
@@ -1850,8 +1850,8 @@
         "text_digest": "a809664137",
         "copies": 2,
         "ids": [
-          "REQ-SHOPPING-CART-EP-EP-CART-READY-12",
-          "REQ-CHECKOUT-EP-EC-READY-13"
+          "REQ-SHOPPING-CART-0051",
+          "REQ-SHOPPING-CHECKOUT-0199"
         ],
         "locations": [
           "docs/specification/shopping/cart/embedded.md:292",
@@ -1866,8 +1866,8 @@
         "text_digest": "b4ddfaed6e",
         "copies": 2,
         "ids": [
-          "REQ-SHOPPING-CART-EP-EP-CART-READY-13",
-          "REQ-CHECKOUT-EP-EC-READY-15"
+          "REQ-SHOPPING-CART-0052",
+          "REQ-SHOPPING-CHECKOUT-0201"
         ],
         "locations": [
           "docs/specification/shopping/cart/embedded.md:298",
@@ -1882,8 +1882,8 @@
         "text_digest": "dfcef5c6f2",
         "copies": 2,
         "ids": [
-          "REQ-SHOPPING-CART-EP-EP-CART-READY-14",
-          "REQ-CHECKOUT-EP-EC-READY-16"
+          "REQ-SHOPPING-CART-0053",
+          "REQ-SHOPPING-CHECKOUT-0202"
         ],
         "locations": [
           "docs/specification/shopping/cart/embedded.md:298",
@@ -1898,8 +1898,8 @@
         "text_digest": "c45fb9f3f1",
         "copies": 2,
         "ids": [
-          "REQ-SHOPPING-CART-EP-EP-CART-READY-15",
-          "REQ-CHECKOUT-EP-EC-READY-17"
+          "REQ-SHOPPING-CART-0054",
+          "REQ-SHOPPING-CHECKOUT-0203"
         ],
         "locations": [
           "docs/specification/shopping/cart/embedded.md:298",
@@ -1914,8 +1914,8 @@
         "text_digest": "d17ebc6153",
         "copies": 2,
         "ids": [
-          "REQ-SHOPPING-CART-SIGNALS-01",
-          "REQ-SHOPPING-CATALOG-SIGNALS-01"
+          "REQ-SHOPPING-CART-0027",
+          "REQ-SHOPPING-CATALOG-0019"
         ],
         "locations": [
           "docs/specification/shopping/cart/index.md:267",
@@ -1930,10 +1930,10 @@
         "text_digest": "7d9d798bfd",
         "copies": 4,
         "ids": [
-          "REQ-SHOPPING-CART-MCP-REQUEST-METADATA-01",
-          "REQ-SHOPPING-CATALOG-MCP-REQUEST-METADATA-01",
-          "REQ-CHECKOUT-MCP-REQUEST-METADATA-01",
-          "REQ-SHOPPING-ORDER-MCP-REQUEST-METADATA-01"
+          "REQ-SHOPPING-CART-0058",
+          "REQ-SHOPPING-CATALOG-0036",
+          "REQ-SHOPPING-CHECKOUT-0229",
+          "REQ-SHOPPING-ORDER-0027"
         ],
         "locations": [
           "docs/specification/shopping/cart/mcp.md:68",
@@ -1950,9 +1950,9 @@
         "text_digest": "160daf898a",
         "copies": 3,
         "ids": [
-          "REQ-SHOPPING-CART-MCP-REQUEST-METADATA-02",
-          "REQ-CHECKOUT-MCP-REQUEST-METADATA-02",
-          "REQ-SHOPPING-ORDER-MCP-REQUEST-METADATA-02"
+          "REQ-SHOPPING-CART-0059",
+          "REQ-SHOPPING-CHECKOUT-0230",
+          "REQ-SHOPPING-ORDER-0028"
         ],
         "locations": [
           "docs/specification/shopping/cart/mcp.md:91",
@@ -1968,9 +1968,9 @@
         "text_digest": "748fc7ead3",
         "copies": 3,
         "ids": [
-          "REQ-SHOPPING-CART-MCP-CONFORMANCE-01",
-          "REQ-SHOPPING-CATALOG-MCP-CONFORMANCE-01",
-          "REQ-CHECKOUT-MCP-CONFORMANCE-01"
+          "REQ-SHOPPING-CART-0061",
+          "REQ-SHOPPING-CATALOG-0039",
+          "REQ-SHOPPING-CHECKOUT-0237"
         ],
         "locations": [
           "docs/specification/shopping/cart/mcp.md:651",
@@ -1986,8 +1986,8 @@
         "text_digest": "017f445b50",
         "copies": 2,
         "ids": [
-          "REQ-SHOPPING-CART-REST-CONTENT-TYPES-01",
-          "REQ-CHECKOUT-REST-CONTENT-TYPES-01"
+          "REQ-SHOPPING-CART-0062",
+          "REQ-SHOPPING-CHECKOUT-0241"
         ],
         "locations": [
           "docs/specification/shopping/cart/rest.md:76",
@@ -2002,9 +2002,9 @@
         "text_digest": "86f31bc40b",
         "copies": 3,
         "ids": [
-          "REQ-SHOPPING-CART-REST-TRANSPORT-SECURITY-01",
-          "REQ-CHECKOUT-REST-TRANSPORT-SECURITY-01",
-          "REQ-SHOPPING-ORDER-REST-TRANSPORT-SECURITY-01"
+          "REQ-SHOPPING-CART-0063",
+          "REQ-SHOPPING-CHECKOUT-0242",
+          "REQ-SHOPPING-ORDER-0035"
         ],
         "locations": [
           "docs/specification/shopping/cart/rest.md:81",
@@ -2020,8 +2020,8 @@
         "text_digest": "9655f6d29f",
         "copies": 2,
         "ids": [
-          "REQ-SHOPPING-CART-REST-AUTHENTICATION-01",
-          "REQ-CHECKOUT-REST-AUTHENTICATION-01"
+          "REQ-SHOPPING-CART-0064",
+          "REQ-SHOPPING-CHECKOUT-0251"
         ],
         "locations": [
           "docs/specification/shopping/cart/rest.md:538",
@@ -2036,8 +2036,8 @@
         "text_digest": "35b444ee45",
         "copies": 2,
         "ids": [
-          "REQ-SHOPPING-CATALOG-CONTEXT-02",
-          "REQ-CHECKOUT-CONTEXT-01"
+          "REQ-SHOPPING-CATALOG-0013",
+          "REQ-SHOPPING-CHECKOUT-0121"
         ],
         "locations": [
           "docs/specification/shopping/catalog/index.md:181",
@@ -2052,8 +2052,8 @@
         "text_digest": "e137bb0b98",
         "copies": 2,
         "ids": [
-          "REQ-SHOPPING-CATALOG-CONTEXT-03",
-          "REQ-CHECKOUT-CONTEXT-02"
+          "REQ-SHOPPING-CATALOG-0014",
+          "REQ-SHOPPING-CHECKOUT-0122"
         ],
         "locations": [
           "docs/specification/shopping/catalog/index.md:181",
@@ -2068,8 +2068,8 @@
         "text_digest": "d647a85835",
         "copies": 2,
         "ids": [
-          "REQ-SHOPPING-CATALOG-CONTEXT-04",
-          "REQ-CHECKOUT-CONTEXT-03"
+          "REQ-SHOPPING-CATALOG-0015",
+          "REQ-SHOPPING-CHECKOUT-0123"
         ],
         "locations": [
           "docs/specification/shopping/catalog/index.md:181",
@@ -2084,8 +2084,8 @@
         "text_digest": "def47e598c",
         "copies": 2,
         "ids": [
-          "REQ-SHOPPING-CATALOG-PRODUCT-02",
-          "REQ-SHOPPING-CATALOG-VARIANT-02"
+          "REQ-SHOPPING-CATALOG-0021",
+          "REQ-SHOPPING-CATALOG-0023"
         ],
         "locations": [
           "docs/specification/shopping/catalog/index.md:222",
@@ -2100,11 +2100,11 @@
         "text_digest": "440c8529d2",
         "copies": 5,
         "ids": [
-          "REQ-SHOPPING-CATALOG-IDENTIFIERS-NOT-FOUND-01",
-          "REQ-SHOPPING-CATALOG-MCP-PARTIAL-SUCCESS-01",
-          "REQ-SHOPPING-CATALOG-MCP-EXAMPLE-ALL-PRODUCTS-NOT-01",
-          "REQ-SHOPPING-CATALOG-REST-EXAMPLE-PARTIAL-SUCCESS-01",
-          "REQ-SHOPPING-CATALOG-REST-EXAMPLE-ALL-PRODUCTS-NOT-01"
+          "REQ-SHOPPING-CATALOG-0035",
+          "REQ-SHOPPING-CATALOG-0037",
+          "REQ-SHOPPING-CATALOG-0038",
+          "REQ-SHOPPING-CATALOG-0042",
+          "REQ-SHOPPING-CATALOG-0043"
         ],
         "locations": [
           "docs/specification/shopping/catalog/index.md:504",
@@ -2122,8 +2122,8 @@
         "text_digest": "833d001a11",
         "copies": 2,
         "ids": [
-          "REQ-CHECKOUT-MCP-RESPONSE-SIGNING-01",
-          "REQ-CHECKOUT-REST-RESPONSE-SIGNING-01"
+          "REQ-SHOPPING-CHECKOUT-0235",
+          "REQ-SHOPPING-CHECKOUT-0249"
         ],
         "locations": [
           "docs/specification/shopping/checkout/mcp.md:782",
@@ -2138,8 +2138,8 @@
         "text_digest": "eb1ea646bd",
         "copies": 2,
         "ids": [
-          "REQ-CHECKOUT-MCP-RESPONSE-SIGNING-02",
-          "REQ-CHECKOUT-REST-RESPONSE-SIGNING-02"
+          "REQ-SHOPPING-CHECKOUT-0236",
+          "REQ-SHOPPING-CHECKOUT-0250"
         ],
         "locations": [
           "docs/specification/shopping/checkout/mcp.md:786",
@@ -2501,6 +2501,6 @@
       "capability-from-bullet-or-path",
       "count-capitals"
     ],
-    "ids": "provisional"
+    "ids": "stable, from requirements.lock.json"
   }
 }

@@ -50,11 +50,11 @@
       "capability-from-bullet-or-path",
       "count-capitals"
     ],
-    "ids": "provisional"
+    "ids": "stable, from requirements.lock.json"
   },
   "requirements": [
     {
-      "id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-OPERATIONS-01",
+      "id": "REQ-SHOPPING-CATALOG-LOOKUP-0001",
       "text_digest": "05e08eb33c",
       "scope": "capability",
       "capabilities": [
@@ -79,6 +79,7 @@
         "anchor": "operations"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-OPERATIONS-01",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -93,7 +94,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-SUPPORTED-IDENTIFIERS-01",
+      "id": "REQ-SHOPPING-CATALOG-LOOKUP-0002",
       "text_digest": "4d7409c0dd",
       "scope": "capability",
       "capabilities": [
@@ -118,6 +119,7 @@
         "anchor": "supported-identifiers"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-SUPPORTED-IDENTIFIERS-01",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -132,7 +134,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-SUPPORTED-IDENTIFIERS-02",
+      "id": "REQ-SHOPPING-CATALOG-LOOKUP-0003",
       "text_digest": "bb0139a517",
       "scope": "capability",
       "capabilities": [
@@ -157,6 +159,7 @@
         "anchor": "supported-identifiers"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-SUPPORTED-IDENTIFIERS-02",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -171,7 +174,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-SUPPORTED-IDENTIFIERS-03",
+      "id": "REQ-SHOPPING-CATALOG-LOOKUP-0004",
       "text_digest": "fddacf45d0",
       "scope": "capability",
       "capabilities": [
@@ -196,6 +199,7 @@
         "anchor": "supported-identifiers"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-SUPPORTED-IDENTIFIERS-03",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -210,7 +214,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-SUPPORTED-IDENTIFIERS-04",
+      "id": "REQ-SHOPPING-CATALOG-LOOKUP-0005",
       "text_digest": "1976ef2539",
       "scope": "capability",
       "capabilities": [
@@ -235,6 +239,7 @@
         "anchor": "supported-identifiers"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-SUPPORTED-IDENTIFIERS-04",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -249,7 +254,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-SUPPORTED-IDENTIFIERS-05",
+      "id": "REQ-SHOPPING-CATALOG-LOOKUP-0006",
       "text_digest": "25191003c1",
       "scope": "capability",
       "capabilities": [
@@ -274,6 +279,7 @@
         "anchor": "supported-identifiers"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-SUPPORTED-IDENTIFIERS-05",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -288,7 +294,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-CLIENT-CORRELATION-01",
+      "id": "REQ-SHOPPING-CATALOG-LOOKUP-0007",
       "text_digest": "67d7d28db3",
       "scope": "capability",
       "capabilities": [
@@ -315,6 +321,7 @@
         "anchor": "client-correlation"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-CLIENT-CORRELATION-01",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -329,7 +336,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-BATCH-SIZE-01",
+      "id": "REQ-SHOPPING-CATALOG-LOOKUP-0008",
       "text_digest": "0bedb69a17",
       "scope": "capability",
       "capabilities": [
@@ -354,6 +361,7 @@
         "anchor": "batch-size"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-BATCH-SIZE-01",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -368,7 +376,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-BATCH-SIZE-02",
+      "id": "REQ-SHOPPING-CATALOG-LOOKUP-0009",
       "text_digest": "1531d8ed95",
       "scope": "capability",
       "capabilities": [
@@ -393,6 +401,7 @@
         "anchor": "batch-size"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-BATCH-SIZE-02",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -407,7 +416,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-BATCH-SIZE-03",
+      "id": "REQ-SHOPPING-CATALOG-LOOKUP-0010",
       "text_digest": "160c793a93",
       "scope": "capability",
       "capabilities": [
@@ -434,6 +443,7 @@
         "anchor": "batch-size"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-BATCH-SIZE-03",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -448,7 +458,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-RESOLUTION-BEHAVIOR-01",
+      "id": "REQ-SHOPPING-CATALOG-LOOKUP-0011",
       "text_digest": "2d2516174f",
       "scope": "capability",
       "capabilities": [
@@ -476,6 +486,7 @@
         "anchor": "resolution-behavior"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-RESOLUTION-BEHAVIOR-01",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -490,7 +501,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-RESOLUTION-BEHAVIOR-02",
+      "id": "REQ-SHOPPING-CATALOG-LOOKUP-0012",
       "text_digest": "00e5f417b1",
       "scope": "capability",
       "capabilities": [
@@ -515,6 +526,7 @@
         "anchor": "resolution-behavior"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-RESOLUTION-BEHAVIOR-02",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -529,7 +541,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-INPUT-01",
+      "id": "REQ-SHOPPING-CATALOG-LOOKUP-0013",
       "text_digest": "50e0b6763f",
       "scope": "capability",
       "capabilities": [
@@ -554,6 +566,7 @@
         "anchor": "input"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-INPUT-01",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -568,7 +581,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-OUTPUT-EFFECTIVE-01",
+      "id": "REQ-SHOPPING-CATALOG-LOOKUP-0014",
       "text_digest": "f39f08283c",
       "scope": "capability",
       "capabilities": [
@@ -596,6 +609,7 @@
         "anchor": "output-effective-selections"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-OUTPUT-EFFECTIVE-01",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -610,7 +624,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-OUTPUT-EFFECTIVE-02",
+      "id": "REQ-SHOPPING-CATALOG-LOOKUP-0015",
       "text_digest": "cc0f65f541",
       "scope": "capability",
       "capabilities": [
@@ -637,6 +651,7 @@
         "anchor": "output-effective-selections"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-OUTPUT-EFFECTIVE-02",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",
@@ -651,7 +666,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-OUTPUT-AVAILABILITY-01",
+      "id": "REQ-SHOPPING-CATALOG-LOOKUP-0016",
       "text_digest": "515545af2a",
       "scope": "capability",
       "capabilities": [
@@ -678,6 +693,7 @@
         "anchor": "output-availability-signals"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-LOOKUP-LOOKUP-OUTPUT-AVAILABILITY-01",
         "capability_source": "bullet",
         "keyword_style": "capitals",
         "transport": "core",

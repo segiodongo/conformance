@@ -46,11 +46,11 @@
       "capability-from-bullet-or-path",
       "count-capitals"
     ],
-    "ids": "provisional"
+    "ids": "stable, from requirements.lock.json"
   },
   "requirements": [
     {
-      "id": "REQ-CHECKOUT-A2A-CHECKOUT-FUNCTIONALITY-01",
+      "id": "REQ-SHOPPING-CHECKOUT-0151",
       "text_digest": "3fd4c0c210",
       "scope": "capability",
       "capabilities": [
@@ -77,6 +77,7 @@
         "anchor": "checkout-functionality"
       },
       "demo": {
+        "positional_id": "REQ-CHECKOUT-A2A-CHECKOUT-FUNCTIONALITY-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "a2a",

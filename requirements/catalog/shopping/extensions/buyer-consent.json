@@ -51,11 +51,11 @@
       "capability-from-bullet-or-path",
       "count-capitals"
     ],
-    "ids": "provisional"
+    "ids": "stable, from requirements.lock.json"
   },
   "requirements": [
     {
-      "id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-SCHEMA-COMPOSITION-01",
+      "id": "REQ-SHOPPING-BUYER-CONSENT-0001",
       "text_digest": "e83d2886ae",
       "scope": "capability",
       "capabilities": [
@@ -82,6 +82,7 @@
         "anchor": "schema-composition"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-SCHEMA-COMPOSITION-01",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -96,7 +97,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-DATA-DEPENDENCIES-01",
+      "id": "REQ-SHOPPING-BUYER-CONSENT-0002",
       "text_digest": "c9f256df93",
       "scope": "capability",
       "capabilities": [
@@ -127,6 +128,7 @@
         "anchor": "data-dependencies"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-DATA-DEPENDENCIES-01",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -141,7 +143,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-DATA-DEPENDENCIES-02",
+      "id": "REQ-SHOPPING-BUYER-CONSENT-0003",
       "text_digest": "847433efb5",
       "scope": "capability",
       "capabilities": [
@@ -169,6 +171,7 @@
         "anchor": "data-dependencies"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-DATA-DEPENDENCIES-02",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -183,7 +186,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-DATA-DEPENDENCIES-03",
+      "id": "REQ-SHOPPING-BUYER-CONSENT-0004",
       "text_digest": "ad6ce21b41",
       "scope": "capability",
       "capabilities": [
@@ -208,6 +211,7 @@
         "anchor": "data-dependencies"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-DATA-DEPENDENCIES-03",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -222,7 +226,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-01",
+      "id": "REQ-SHOPPING-BUYER-CONSENT-0005",
       "text_digest": "0a45016c80",
       "scope": "capability",
       "capabilities": [
@@ -247,6 +251,7 @@
         "anchor": "normative-requirements"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-01",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -261,7 +266,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-02",
+      "id": "REQ-SHOPPING-BUYER-CONSENT-0006",
       "text_digest": "226370a92e",
       "scope": "capability",
       "capabilities": [
@@ -290,6 +295,7 @@
         "anchor": "normative-requirements"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-02",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -304,7 +310,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-03",
+      "id": "REQ-SHOPPING-BUYER-CONSENT-0007",
       "text_digest": "13c85fda79",
       "scope": "capability",
       "capabilities": [
@@ -329,6 +335,7 @@
         "anchor": "normative-requirements"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-03",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -343,7 +350,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-04",
+      "id": "REQ-SHOPPING-BUYER-CONSENT-0008",
       "text_digest": "0251ef1234",
       "scope": "capability",
       "capabilities": [
@@ -372,6 +379,7 @@
         "anchor": "normative-requirements"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-04",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -386,7 +394,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-05",
+      "id": "REQ-SHOPPING-BUYER-CONSENT-0009",
       "text_digest": "4bdc908f46",
       "scope": "capability",
       "capabilities": [
@@ -413,6 +421,7 @@
         "anchor": "normative-requirements"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-05",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -427,7 +436,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-06",
+      "id": "REQ-SHOPPING-BUYER-CONSENT-0010",
       "text_digest": "7affd65168",
       "scope": "capability",
       "capabilities": [
@@ -452,6 +461,7 @@
         "anchor": "normative-requirements"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-06",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -466,7 +476,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-07",
+      "id": "REQ-SHOPPING-BUYER-CONSENT-0011",
       "text_digest": "7918cf85e6",
       "scope": "capability",
       "capabilities": [
@@ -491,6 +501,7 @@
         "anchor": "normative-requirements"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-07",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -505,7 +516,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-08",
+      "id": "REQ-SHOPPING-BUYER-CONSENT-0012",
       "text_digest": "9ea5b9f143",
       "scope": "capability",
       "capabilities": [
@@ -533,6 +544,7 @@
         "anchor": "normative-requirements"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-08",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -547,7 +559,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-09",
+      "id": "REQ-SHOPPING-BUYER-CONSENT-0013",
       "text_digest": "d0e9b52bdd",
       "scope": "capability",
       "capabilities": [
@@ -574,6 +586,7 @@
         "anchor": "normative-requirements"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-09",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -588,7 +601,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-10",
+      "id": "REQ-SHOPPING-BUYER-CONSENT-0014",
       "text_digest": "72244fd689",
       "scope": "capability",
       "capabilities": [
@@ -615,6 +628,7 @@
         "anchor": "normative-requirements"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-10",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -629,7 +643,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-11",
+      "id": "REQ-SHOPPING-BUYER-CONSENT-0015",
       "text_digest": "6b49f63890",
       "scope": "capability",
       "capabilities": [
@@ -656,6 +670,7 @@
         "anchor": "normative-requirements"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-11",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -670,7 +685,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-12",
+      "id": "REQ-SHOPPING-BUYER-CONSENT-0016",
       "text_digest": "40c2df7171",
       "scope": "capability",
       "capabilities": [
@@ -695,6 +710,7 @@
         "anchor": "normative-requirements"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-12",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -709,7 +725,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-13",
+      "id": "REQ-SHOPPING-BUYER-CONSENT-0017",
       "text_digest": "047c97c48a",
       "scope": "capability",
       "capabilities": [
@@ -734,6 +750,7 @@
         "anchor": "normative-requirements"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-BUYER-CONSENT-BUYERCONSENT-NORMATIVE-REQUIREMENTS-13",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",

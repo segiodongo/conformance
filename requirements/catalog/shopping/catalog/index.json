@@ -53,11 +53,11 @@
       "capability-from-bullet-or-path",
       "count-capitals"
     ],
-    "ids": "provisional"
+    "ids": "stable, from requirements.lock.json"
   },
   "requirements": [
     {
-      "id": "REQ-SHOPPING-CATALOG-RELATIONSHIP-TO-CHECKOUT-01",
+      "id": "REQ-SHOPPING-CATALOG-0001",
       "text_digest": "40b521f2a3",
       "scope": "capability",
       "capabilities": [
@@ -83,6 +83,7 @@
         "anchor": "relationship-to-checkout"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-RELATIONSHIP-TO-CHECKOUT-01",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "core",
@@ -97,7 +98,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-DISTINCTION-FROM-UNIT-01",
+      "id": "REQ-SHOPPING-CATALOG-0002",
       "text_digest": "1db3a3f0bd",
       "scope": "capability",
       "capabilities": [
@@ -126,6 +127,7 @@
         "anchor": "distinction-from-unit-price"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-DISTINCTION-FROM-UNIT-01",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "core",
@@ -134,7 +136,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-DISTINCTION-FROM-UNIT-02",
+      "id": "REQ-SHOPPING-CATALOG-0003",
       "text_digest": "ee324c49fb",
       "scope": "capability",
       "capabilities": [
@@ -163,6 +165,7 @@
         "anchor": "distinction-from-unit-price"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-DISTINCTION-FROM-UNIT-02",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "core",
@@ -171,7 +174,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-DISTINCTION-FROM-UNIT-03",
+      "id": "REQ-SHOPPING-CATALOG-0004",
       "text_digest": "fb6e4f7181",
       "scope": "capability",
       "capabilities": [
@@ -200,6 +203,7 @@
         "anchor": "distinction-from-unit-price"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-DISTINCTION-FROM-UNIT-03",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "core",
@@ -208,7 +212,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-DISTINCTION-FROM-UNIT-04",
+      "id": "REQ-SHOPPING-CATALOG-0005",
       "text_digest": "5593fc2913",
       "scope": "capability",
       "capabilities": [
@@ -238,6 +242,7 @@
         "anchor": "distinction-from-unit-price"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-DISTINCTION-FROM-UNIT-04",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "core",
@@ -246,7 +251,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-DISTINCTION-FROM-UNIT-05",
+      "id": "REQ-SHOPPING-CATALOG-0006",
       "text_digest": "20cb8c2a29",
       "scope": "capability",
       "capabilities": [
@@ -274,6 +279,7 @@
         "anchor": "distinction-from-unit-price"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-DISTINCTION-FROM-UNIT-05",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "core",
@@ -282,7 +288,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-DISTINCTION-FROM-UNIT-06",
+      "id": "REQ-SHOPPING-CATALOG-0007",
       "text_digest": "41a9ebc50c",
       "scope": "capability",
       "capabilities": [
@@ -308,6 +314,7 @@
         "anchor": "distinction-from-unit-price"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-DISTINCTION-FROM-UNIT-06",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "core",
@@ -316,7 +323,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-DISTINCTION-FROM-UNIT-07",
+      "id": "REQ-SHOPPING-CATALOG-0008",
       "text_digest": "e6da3fa860",
       "scope": "capability",
       "capabilities": [
@@ -344,6 +351,7 @@
         "anchor": "distinction-from-unit-price"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-DISTINCTION-FROM-UNIT-07",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "core",
@@ -352,7 +360,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-DISTINCTION-FROM-UNIT-08",
+      "id": "REQ-SHOPPING-CATALOG-0009",
       "text_digest": "685546d140",
       "scope": "capability",
       "capabilities": [
@@ -380,6 +388,7 @@
         "anchor": "distinction-from-unit-price"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-DISTINCTION-FROM-UNIT-08",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "core",
@@ -388,7 +397,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-DISTINCTION-FROM-UNIT-09",
+      "id": "REQ-SHOPPING-CATALOG-0010",
       "text_digest": "979cf19ab7",
       "scope": "capability",
       "capabilities": [
@@ -414,6 +423,7 @@
         "anchor": "distinction-from-unit-price"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-DISTINCTION-FROM-UNIT-09",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "core",
@@ -422,7 +432,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-DISTINCTION-FROM-UNIT-10",
+      "id": "REQ-SHOPPING-CATALOG-0011",
       "text_digest": "b566d9087f",
       "scope": "capability",
       "capabilities": [
@@ -450,6 +460,7 @@
         "anchor": "distinction-from-unit-price"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-DISTINCTION-FROM-UNIT-10",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "core",
@@ -458,7 +469,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-CONTEXT-01",
+      "id": "REQ-SHOPPING-CATALOG-0012",
       "text_digest": "96e978ebd7",
       "scope": "capability",
       "capabilities": [
@@ -484,6 +495,7 @@
         "anchor": "context"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-CONTEXT-01",
         "capability_source": "path (family)",
         "keyword_style": "capitals",
         "transport": "core",
@@ -498,7 +510,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-CONTEXT-02",
+      "id": "REQ-SHOPPING-CATALOG-0013",
       "text_digest": "35b444ee45",
       "scope": "capability",
       "capabilities": [
@@ -524,6 +536,7 @@
         "anchor": "context"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-CONTEXT-02",
         "capability_source": "path (family)",
         "keyword_style": "capitals",
         "transport": "core",
@@ -538,7 +551,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-CONTEXT-03",
+      "id": "REQ-SHOPPING-CATALOG-0014",
       "text_digest": "e137bb0b98",
       "scope": "capability",
       "capabilities": [
@@ -564,6 +577,7 @@
         "anchor": "context"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-CONTEXT-03",
         "capability_source": "path (family)",
         "keyword_style": "capitals",
         "transport": "core",
@@ -578,7 +592,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-CONTEXT-04",
+      "id": "REQ-SHOPPING-CATALOG-0015",
       "text_digest": "d647a85835",
       "scope": "capability",
       "capabilities": [
@@ -604,6 +618,7 @@
         "anchor": "context"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-CONTEXT-04",
         "capability_source": "path (family)",
         "keyword_style": "capitals",
         "transport": "core",
@@ -618,7 +633,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-CONTEXT-05",
+      "id": "REQ-SHOPPING-CATALOG-0016",
       "text_digest": "d33d7257de",
       "scope": "capability",
       "capabilities": [
@@ -646,6 +661,7 @@
         "anchor": "context"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-CONTEXT-05",
         "capability_source": "path (family)",
         "keyword_style": "capitals",
         "transport": "core",
@@ -660,7 +676,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-CONTEXT-06",
+      "id": "REQ-SHOPPING-CATALOG-0017",
       "text_digest": "f49fb6dcf9",
       "scope": "capability",
       "capabilities": [
@@ -690,6 +706,7 @@
         "anchor": "context"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-CONTEXT-06",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "core",
@@ -698,7 +715,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-CONTEXT-07",
+      "id": "REQ-SHOPPING-CATALOG-0018",
       "text_digest": "7e656cdd76",
       "scope": "capability",
       "capabilities": [
@@ -728,6 +745,7 @@
         "anchor": "context"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-CONTEXT-07",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "core",
@@ -736,7 +754,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-SIGNALS-01",
+      "id": "REQ-SHOPPING-CATALOG-0019",
       "text_digest": "d17ebc6153",
       "scope": "capability",
       "capabilities": [
@@ -762,6 +780,7 @@
         "anchor": "signals"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-SIGNALS-01",
         "capability_source": "path (family)",
         "keyword_style": "capitals",
         "transport": "core",
@@ -776,7 +795,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-PRODUCT-01",
+      "id": "REQ-SHOPPING-CATALOG-0020",
       "text_digest": "31e5f5455d",
       "scope": "capability",
       "capabilities": [
@@ -802,6 +821,7 @@
         "anchor": "product"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-PRODUCT-01",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "core",
@@ -810,7 +830,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-PRODUCT-02",
+      "id": "REQ-SHOPPING-CATALOG-0021",
       "text_digest": "def47e598c",
       "scope": "capability",
       "capabilities": [
@@ -836,6 +856,7 @@
         "anchor": "product"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-PRODUCT-02",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "core",
@@ -844,7 +865,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-VARIANT-01",
+      "id": "REQ-SHOPPING-CATALOG-0022",
       "text_digest": "f0f49c3eac",
       "scope": "capability",
       "capabilities": [
@@ -870,6 +891,7 @@
         "anchor": "variant"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-VARIANT-01",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "core",
@@ -878,7 +900,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-VARIANT-02",
+      "id": "REQ-SHOPPING-CATALOG-0023",
       "text_digest": "def47e598c",
       "scope": "capability",
       "capabilities": [
@@ -904,6 +926,7 @@
         "anchor": "variant"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-VARIANT-02",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "core",
@@ -912,7 +935,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-MEDIA-01",
+      "id": "REQ-SHOPPING-CATALOG-0024",
       "text_digest": "47d4d69eb8",
       "scope": "capability",
       "capabilities": [
@@ -940,6 +963,7 @@
         "anchor": "media"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-MEDIA-01",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "core",
@@ -948,7 +972,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-MEDIA-02",
+      "id": "REQ-SHOPPING-CATALOG-0025",
       "text_digest": "50fd9f9ad5",
       "scope": "capability",
       "capabilities": [
@@ -977,6 +1001,7 @@
         "anchor": "media"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-MEDIA-02",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "core",
@@ -991,7 +1016,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-MEDIA-03",
+      "id": "REQ-SHOPPING-CATALOG-0026",
       "text_digest": "e03f1b1b3e",
       "scope": "capability",
       "capabilities": [
@@ -1019,6 +1044,7 @@
         "anchor": "media"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-MEDIA-03",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "core",
@@ -1027,7 +1053,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-MEDIA-04",
+      "id": "REQ-SHOPPING-CATALOG-0027",
       "text_digest": "2272b4257d",
       "scope": "capability",
       "capabilities": [
@@ -1056,6 +1082,7 @@
         "anchor": "media"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-MEDIA-04",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "core",
@@ -1064,7 +1091,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-IMAGE-01",
+      "id": "REQ-SHOPPING-CATALOG-0028",
       "text_digest": "f04858a60f",
       "scope": "capability",
       "capabilities": [
@@ -1093,6 +1120,7 @@
         "anchor": "image"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-IMAGE-01",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "core",
@@ -1101,7 +1129,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-EXTERNAL-VIDEO-01",
+      "id": "REQ-SHOPPING-CATALOG-0029",
       "text_digest": "6610f50a78",
       "scope": "capability",
       "capabilities": [
@@ -1127,6 +1155,7 @@
         "anchor": "external-video"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-EXTERNAL-VIDEO-01",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "core",
@@ -1135,7 +1164,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-EXTERNAL-VIDEO-02",
+      "id": "REQ-SHOPPING-CATALOG-0030",
       "text_digest": "972c1b040c",
       "scope": "capability",
       "capabilities": [
@@ -1164,6 +1193,7 @@
         "anchor": "external-video"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-EXTERNAL-VIDEO-02",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "core",
@@ -1178,7 +1208,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-ACTIONS-01",
+      "id": "REQ-SHOPPING-CATALOG-0031",
       "text_digest": "b272585568",
       "scope": "capability",
       "capabilities": [
@@ -1206,6 +1236,7 @@
         "anchor": "actions"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-ACTIONS-01",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "core",
@@ -1214,7 +1245,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-ACTIONS-02",
+      "id": "REQ-SHOPPING-CATALOG-0032",
       "text_digest": "9525c6155e",
       "scope": "capability",
       "capabilities": [
@@ -1240,6 +1271,7 @@
         "anchor": "actions"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-ACTIONS-02",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "core",
@@ -1254,7 +1286,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-ACTIONS-03",
+      "id": "REQ-SHOPPING-CATALOG-0033",
       "text_digest": "1532082837",
       "scope": "capability",
       "capabilities": [
@@ -1280,6 +1312,7 @@
         "anchor": "actions"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-ACTIONS-03",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "core",
@@ -1294,7 +1327,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-MESSAGE-TYPES-01",
+      "id": "REQ-SHOPPING-CATALOG-0034",
       "text_digest": "950a55324b",
       "scope": "capability",
       "capabilities": [
@@ -1324,6 +1357,7 @@
         "anchor": "message-types"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-MESSAGE-TYPES-01",
         "capability_source": "path (family)",
         "keyword_style": "capitals",
         "transport": "core",
@@ -1338,7 +1372,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-IDENTIFIERS-NOT-FOUND-01",
+      "id": "REQ-SHOPPING-CATALOG-0035",
       "text_digest": "440c8529d2",
       "scope": "capability",
       "capabilities": [
@@ -1364,6 +1398,7 @@
         "anchor": "identifiers-not-found"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-IDENTIFIERS-NOT-FOUND-01",
         "capability_source": "path (family)",
         "keyword_style": "capitals",
         "transport": "core",

@@ -47,11 +47,11 @@
       "capability-from-bullet-or-path",
       "count-capitals"
     ],
-    "ids": "provisional"
+    "ids": "stable, from requirements.lock.json"
   },
   "requirements": [
     {
-      "id": "REQ-SHOPPING-ORDER-REST-CONTENT-TYPES-01",
+      "id": "REQ-SHOPPING-ORDER-0034",
       "text_digest": "de72b2d0de",
       "scope": "capability",
       "capabilities": [
@@ -76,6 +76,7 @@
         "anchor": "content-types"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-REST-CONTENT-TYPES-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "rest",
@@ -90,7 +91,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-REST-TRANSPORT-SECURITY-01",
+      "id": "REQ-SHOPPING-ORDER-0035",
       "text_digest": "86f31bc40b",
       "scope": "capability",
       "capabilities": [
@@ -115,6 +116,7 @@
         "anchor": "transport-security"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-REST-TRANSPORT-SECURITY-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "rest",
@@ -130,7 +132,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-REST-CONFORMANCE-01",
+      "id": "REQ-SHOPPING-ORDER-0036",
       "text_digest": "15463fa061",
       "scope": "capability",
       "capabilities": [
@@ -155,6 +157,7 @@
         "anchor": "conformance"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-REST-CONFORMANCE-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "rest",
@@ -169,7 +172,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-REST-CONFORMANCE-02",
+      "id": "REQ-SHOPPING-ORDER-0037",
       "text_digest": "c299106814",
       "scope": "capability",
       "capabilities": [
@@ -196,6 +199,7 @@
         "anchor": "conformance"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-REST-CONFORMANCE-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "rest",
@@ -210,7 +214,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-REST-CONFORMANCE-03",
+      "id": "REQ-SHOPPING-ORDER-0038",
       "text_digest": "a6262d6e2e",
       "scope": "capability",
       "capabilities": [
@@ -237,6 +241,7 @@
         "anchor": "conformance"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-REST-CONFORMANCE-03",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "rest",
@@ -251,7 +256,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-REST-CONFORMANCE-04",
+      "id": "REQ-SHOPPING-ORDER-0039",
       "text_digest": "10eaedb9f9",
       "scope": "capability",
       "capabilities": [
@@ -276,6 +281,7 @@
         "anchor": "conformance"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-REST-CONFORMANCE-04",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "rest",
@@ -286,12 +292,12 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "visible: the endpoint's TLS version",
-          "note": "same rule as REQ-SHOPPING-ORDER-REST-TRANSPORT-SECURITY-01"
+          "note": "same rule as REQ-SHOPPING-ORDER-0035"
         }
       }
     },
     {
-      "id": "REQ-SHOPPING-ORDER-REST-CONFORMANCE-05",
+      "id": "REQ-SHOPPING-ORDER-0040",
       "text_digest": "f797370582",
       "scope": "capability",
       "capabilities": [
@@ -316,6 +322,7 @@
         "anchor": "conformance"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-ORDER-REST-CONFORMANCE-05",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "rest",

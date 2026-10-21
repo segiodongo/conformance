@@ -51,11 +51,11 @@
       "capability-from-bullet-or-path",
       "count-capitals"
     ],
-    "ids": "provisional"
+    "ids": "stable, from requirements.lock.json"
   },
   "requirements": [
     {
-      "id": "REQ-SHOPPING-DISCOUNT-DISCOUNT-DISCOVERY-01",
+      "id": "REQ-SHOPPING-DISCOUNT-0001",
       "text_digest": "75a607ee1b",
       "scope": "capability",
       "capabilities": [
@@ -80,6 +80,7 @@
         "anchor": "discovery"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-DISCOUNT-DISCOUNT-DISCOVERY-01",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -94,7 +95,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-DISCOUNT-DISCOUNT-DISCOVERY-02",
+      "id": "REQ-SHOPPING-DISCOUNT-0002",
       "text_digest": "15ac700129",
       "scope": "capability",
       "capabilities": [
@@ -119,6 +120,7 @@
         "anchor": "discovery"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-DISCOUNT-DISCOUNT-DISCOVERY-02",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -133,7 +135,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-DISCOUNT-DISCOUNT-OPERATIONS-01",
+      "id": "REQ-SHOPPING-DISCOUNT-0003",
       "text_digest": "cf1b7d46ea",
       "scope": "capability",
       "capabilities": [
@@ -160,6 +162,7 @@
         "anchor": "operations"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-DISCOUNT-DISCOUNT-OPERATIONS-01",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -174,7 +177,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-DISCOUNT-DISCOUNT-OPERATIONS-02",
+      "id": "REQ-SHOPPING-DISCOUNT-0004",
       "text_digest": "99931074ea",
       "scope": "capability",
       "capabilities": [
@@ -201,6 +204,7 @@
         "anchor": "operations"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-DISCOUNT-DISCOUNT-OPERATIONS-02",
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
@@ -215,7 +219,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-DISCOUNT-DISCOUNT-REJECTED-CODES-01",
+      "id": "REQ-SHOPPING-DISCOUNT-0005",
       "text_digest": "05ed0d297c",
       "scope": "capability",
       "capabilities": [
@@ -242,6 +246,7 @@
         "anchor": "rejected-codes"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-DISCOUNT-DISCOUNT-REJECTED-CODES-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -256,7 +261,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-DISCOUNT-DISCOUNT-ELIGIBILITY-CLAIMS-01",
+      "id": "REQ-SHOPPING-DISCOUNT-0006",
       "text_digest": "9e72b57cbb",
       "scope": "capability",
       "capabilities": [
@@ -283,6 +288,7 @@
         "anchor": "eligibility-claims"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-DISCOUNT-DISCOUNT-ELIGIBILITY-CLAIMS-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -291,7 +297,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-DISCOUNT-DISCOUNT-ELIGIBILITY-CLAIMS-02",
+      "id": "REQ-SHOPPING-DISCOUNT-0007",
       "text_digest": "d72ee70a9e",
       "scope": "capability",
       "capabilities": [
@@ -316,6 +322,7 @@
         "anchor": "eligibility-claims"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-DISCOUNT-DISCOUNT-ELIGIBILITY-CLAIMS-02",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -324,7 +331,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-DISCOUNT-DISCOUNT-DISCOUNT-BEHAVIOR-01",
+      "id": "REQ-SHOPPING-DISCOUNT-0008",
       "text_digest": "77b348abb6",
       "scope": "capability",
       "capabilities": [
@@ -351,6 +358,7 @@
         "anchor": "discount-behavior"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-DISCOUNT-DISCOUNT-DISCOUNT-BEHAVIOR-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -359,7 +367,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-DISCOUNT-DISCOUNT-VERIFICATION-AT-CHECKOUT-01",
+      "id": "REQ-SHOPPING-DISCOUNT-0009",
       "text_digest": "b7f23c4704",
       "scope": "capability",
       "capabilities": [
@@ -384,6 +392,7 @@
         "anchor": "verification-at-checkout"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-DISCOUNT-DISCOUNT-VERIFICATION-AT-CHECKOUT-01",
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
@@ -394,7 +403,7 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "completion behaviour",
-          "note": "restates REQ-CHECKOUT-ELIGIBILITY-VERIFICATION-02"
+          "note": "restates REQ-SHOPPING-CHECKOUT-0047"
         }
       }
     }

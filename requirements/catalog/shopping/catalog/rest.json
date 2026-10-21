@@ -49,11 +49,11 @@
       "capability-from-bullet-or-path",
       "count-capitals"
     ],
-    "ids": "provisional"
+    "ids": "stable, from requirements.lock.json"
   },
   "requirements": [
     {
-      "id": "REQ-SHOPPING-CATALOG-REST-EXAMPLE-PARTIAL-SUCCESS-01",
+      "id": "REQ-SHOPPING-CATALOG-0042",
       "text_digest": "440c8529d2",
       "scope": "capability",
       "capabilities": [
@@ -79,6 +79,7 @@
         "anchor": "example-partial-success-some-identifiers-not-found"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-REST-EXAMPLE-PARTIAL-SUCCESS-01",
         "capability_source": "path (family)",
         "keyword_style": "capitals",
         "transport": "rest",
@@ -93,7 +94,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-REST-EXAMPLE-ALL-PRODUCTS-NOT-01",
+      "id": "REQ-SHOPPING-CATALOG-0043",
       "text_digest": "440c8529d2",
       "scope": "capability",
       "capabilities": [
@@ -119,6 +120,7 @@
         "anchor": "example-all-products-not-found"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-REST-EXAMPLE-ALL-PRODUCTS-NOT-01",
         "capability_source": "path (family)",
         "keyword_style": "capitals",
         "transport": "rest",
@@ -133,7 +135,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-REST-CONFORMANCE-01",
+      "id": "REQ-SHOPPING-CATALOG-0044",
       "text_digest": "350f72606a",
       "scope": "capability",
       "capabilities": [
@@ -159,6 +161,7 @@
         "anchor": "conformance"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-REST-CONFORMANCE-01",
         "capability_source": "path (family)",
         "keyword_style": "bold",
         "transport": "rest",
@@ -174,7 +177,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-REST-CONFORMANCE-02",
+      "id": "REQ-SHOPPING-CATALOG-0045",
       "text_digest": "35a3e3f4dd",
       "scope": "capability",
       "capabilities": [
@@ -200,6 +203,7 @@
         "anchor": "conformance"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-REST-CONFORMANCE-02",
         "capability_source": "path (family)",
         "keyword_style": "capitals",
         "transport": "rest",
@@ -214,7 +218,7 @@
       }
     },
     {
-      "id": "REQ-SHOPPING-CATALOG-REST-CONFORMANCE-03",
+      "id": "REQ-SHOPPING-CATALOG-0046",
       "text_digest": "f52390f942",
       "scope": "capability",
       "capabilities": [
@@ -242,6 +246,7 @@
         "anchor": "conformance"
       },
       "demo": {
+        "positional_id": "REQ-SHOPPING-CATALOG-REST-CONFORMANCE-03",
         "capability_source": "path (family)",
         "keyword_style": "capitals",
         "transport": "rest",

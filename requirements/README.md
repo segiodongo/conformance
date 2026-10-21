@@ -2,8 +2,8 @@
 
 > **Demo only, not for merge.** This catalog is generated from a pinned copy of
 > the specification with two options the requirements extractor doesn't have
-> yet, and its IDs are provisional: they change whenever a rule is added above
-> them on the same page.
+> yet. Its IDs are stable within the demo (see [Stable IDs](#stable-ids)), but
+> they aren't official IDs.
 
 ## Contents
 
@@ -11,6 +11,7 @@
 | -------------------------------- | ------------------------------------------------------------------------------------- |
 | `catalog/shopping/**/*.json`     | One file per specification page, with every rule on that page                         |
 | `catalog/capabilities.json`      | Each capability: extension or not, what it extends, its schema, pages and rule counts |
+| `catalog/requirements.lock.json` | Every rule ID ever issued, with the wording it was issued for                         |
 | `catalog/extraction_report.json` | The extractor's diagnostics for the run                                               |
 | `review.json`                    | A person's decisions on 199 rules the automatic pass couldn't settle                  |
 | `tools/build_catalog.py`         | Regenerates the `catalog/` folder from the inputs below                               |
@@ -32,12 +33,45 @@
 - **Testable:** this suite plays the platform and calls a business over REST,
   so a rule is testable when it sits on a transport-neutral or REST page and
   is aimed at the business, as corrected by `review.json`.
-- **Review:** decisions are keyed by page and `text_digest`, so they survive
-  ID renumbering. A decision whose wording no longer matches a rule fails the
-  build.
+- **Review:** decisions are keyed by page and `text_digest`, not by ID, so a
+  reworded rule needs a fresh decision: a decision whose wording no longer
+  matches a rule fails the build.
 
-Each record keeps the extractor's fields; everything the demo adds is in its
-`demo` object.
+Each record keeps the extractor's fields, with `id` holding the stable ID;
+everything the demo adds is in its `demo` object, including the extractor's
+positional ID as `demo.positional_id`.
+
+## Stable IDs
+
+Each rule's ID, such as `REQ-SHOPPING-CART-0007`, comes from
+`catalog/requirements.lock.json`, so it doesn't change when the page around it
+does. The prefix comes from the page's capability (`SHOPPING-CATALOG` for the
+shared catalog pages), followed by a four-digit number. A lock entry records
+the rule's page, its wording and digest, any earlier digests, whether it is
+active or retired, and the specification commits it was issued and retired
+at.
+
+Each run matches the rules it finds against the lock, page by page:
+
+1. **Same wording:** a rule with the same page and `text_digest` as an entry
+   keeps that entry's ID. Copies of one sentence on a page take that
+   wording's IDs oldest first, in page order. A retired ID whose wording comes
+   back is restored.
+2. **Reworded:** a rule left over takes the ID of a still-unmatched active
+   entry on the same page whose wording is at least 85% alike, most alike
+   first. The entry keeps its old digests in `previous_digests`, and the run
+   lists the rule as carried over so a person can confirm it's the same rule.
+3. **New:** a rule still left over gets the next number for its prefix.
+4. **Retired:** an active entry that matched nothing is marked `retired`. Its
+   number is never issued again.
+
+A rule that moves to another page is retired on the old page and gets a new
+ID on the new one. If one of two identical sentences on a page is removed, the
+copy that stays keeps the older ID, whichever copy was removed.
+
+These IDs are stable within this demo only. Official IDs will be issued in
+the `ucp` repository, in a different order. Every lock entry records its
+`text_digest`, so demo IDs can be mapped to official ones.
 
 ## Numbers at `f2626c28`
 
@@ -75,6 +109,13 @@ uv run --no-project requirements/tools/build_catalog.py \
   --extractor-dir=<.github checkout>/org-tools/requirements-extractor/scripts
 ```
 
-The output is deterministic: a second run writes identical bytes. The
-`catalog/` folder is excluded from prettier and codespell in
+The output is deterministic: a second run writes identical bytes. Add
+`--check` to write nothing and fail if any output, the lock included, would
+change.
+
+Keep `catalog/requirements.lock.json` committed with the catalog. It is the
+only record of the IDs issued so far: without it, the next run would issue
+every ID again, from scratch.
+
+The `catalog/` folder is excluded from prettier and codespell in
 `.pre-commit-config.yaml` so that it stays exactly as the tool writes it.
