@@ -84,7 +84,11 @@ Each shopping test says which rules it checks, with one marker from
 - `@no_rule("...")`: the spec describes the behaviour without an RFC 2119
   keyword, so there is no rule to cite;
 - `@scenario("...")`: the test checks a store's own data, such as a
-  free-shipping threshold, rather than a rule.
+  free-shipping threshold, rather than a rule;
+- `@outside_catalog("...")`: the test checks a rule on a specification page
+  this catalog doesn't cover, such as the core overview page;
+- `@older_version("2026-04-08", "...")`: the test checks behaviour from an
+  older release that this specification has changed, so it needs updating.
 
 `framework/requirements.py` looks rules up in the catalog. Before any test
 runs, the runner checks every shopping test's marker against it, and so does

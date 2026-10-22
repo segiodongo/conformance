@@ -17,6 +17,7 @@
 from collections.abc import Callable
 import dataclasses
 import inspect
+import re
 from typing import TypeVar
 import unittest
 
@@ -26,6 +27,15 @@ T = TypeVar("T")
 
 # Where a marker is kept on the test method it labels.
 MARKER_ATTRIBUTE = "_spec_marker"
+MARKER_KINDS = (
+  "spec_assert",
+  "no_rule",
+  "scenario",
+  "outside_catalog",
+  "older_version",
+)
+# UCP versions are release dates.
+VERSION_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
 def requires_capability(
@@ -63,15 +73,17 @@ class SpecMarker:
   """What a test says about the specification rules it checks.
 
   Attributes:
-    kind: "spec_assert", "no_rule" or "scenario".
+    kind: One of `MARKER_KINDS`.
     rule_ids: For "spec_assert", the IDs of the rules the test checks.
-    reason: For "no_rule" and "scenario", why the test cites no rule.
+    reason: For the other kinds, why the test cites no rule in the catalog.
+    version: For "older_version", the specification release the test checks.
 
   """
 
   kind: str
   rule_ids: tuple[str, ...] = ()
   reason: str = ""
+  version: str = ""
 
 
 def spec_assert(*rule_ids: str) -> Callable[[T], T]:
@@ -146,6 +158,56 @@ def scenario(reason: str) -> Callable[[T], T]:
 
   """
   return _label(SpecMarker("scenario", reason=_reason("scenario", reason)))
+
+
+def outside_catalog(reason: str) -> Callable[[T], T]:
+  """Mark a test that checks a rule this catalog does not contain.
+
+  For a test of a rule stated on a specification page the catalog doesn't
+  cover, such as the core overview page. Once the catalog covers that page,
+  the test can cite the rule with `spec_assert`.
+
+  Args:
+    reason: Which page states the rule, and what the rule is.
+
+  Returns:
+    A decorator for a test method.
+
+  Raises:
+    ValueError: If the reason is empty.
+
+  """
+  return _label(
+    SpecMarker("outside_catalog", reason=_reason("outside_catalog", reason))
+  )
+
+
+def older_version(version: str, reason: str) -> Callable[[T], T]:
+  """Mark a test that checks an older version of the specification.
+
+  For a test of behaviour that the catalog's version of the specification
+  has changed or dropped. Each such test is one to update.
+
+  Args:
+    version: The release the test checks, such as "2026-04-08".
+    reason: What changed since that release.
+
+  Returns:
+    A decorator for a test method.
+
+  Raises:
+    ValueError: If the version is not a release date, or the reason is empty.
+
+  """
+  if not isinstance(version, str) or not VERSION_RE.match(version):
+    raise ValueError(f"older_version: {version!r} is not a release date")
+  return _label(
+    SpecMarker(
+      "older_version",
+      reason=_reason("older_version", reason),
+      version=version,
+    )
+  )
 
 
 def spec_marker(

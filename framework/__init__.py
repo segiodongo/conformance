@@ -18,6 +18,8 @@ from framework.agent_profile_server import AgentProfileServer
 from framework.base_test import BaseIntegrationTest
 from framework.decorators import (
   no_rule,
+  older_version,
+  outside_catalog,
   requires_capability,
   scenario,
   spec_assert,
@@ -36,6 +38,8 @@ __all__ = [
   "UcpProfile",
   "fetch_server_profile",
   "no_rule",
+  "older_version",
+  "outside_catalog",
   "requires_capability",
   "scenario",
   "spec_assert",

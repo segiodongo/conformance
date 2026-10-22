@@ -19,6 +19,8 @@ import unittest
 from framework.decorators import (
   SpecMarker,
   no_rule,
+  older_version,
+  outside_catalog,
   scenario,
   spec_assert,
   spec_marker,
@@ -66,12 +68,18 @@ class SpecAssertTest(unittest.TestCase):
         spec_assert(*rule_ids)
 
 
-class NoRuleAndScenarioTest(unittest.TestCase):
-  """Tests for no_rule and scenario."""
+class ReasonMarkerTest(unittest.TestCase):
+  """Tests for the markers that take only a reason."""
+
+  MARKERS = (
+    (no_rule, "no_rule"),
+    (scenario, "scenario"),
+    (outside_catalog, "outside_catalog"),
+  )
 
   def test_records_the_reason(self):
     """Test that each marker keeps its kind and its trimmed reason."""
-    for marker, kind in ((no_rule, "no_rule"), (scenario, "scenario")):
+    for marker, kind in self.MARKERS:
       with self.subTest(kind=kind):
 
         @marker("  described in discount.md without a keyword ")
@@ -85,13 +93,47 @@ class NoRuleAndScenarioTest(unittest.TestCase):
 
   def test_rejects_an_empty_reason(self):
     """Test that a marker without a reason fails at once."""
-    for marker in (no_rule, scenario):
+    for marker, _ in self.MARKERS:
       for reason in ("", "   ", None):
         with (
           self.subTest(marker=marker.__name__, reason=reason),
           self.assertRaises(ValueError),
         ):
           marker(reason)
+
+
+class OlderVersionTest(unittest.TestCase):
+  """Tests for older_version."""
+
+  def test_records_the_version_and_reason(self):
+    """Test that the marker keeps the release and what changed."""
+
+    @older_version("2026-04-08", "consent purposes became reverse-DNS IDs")
+    def test_method():
+      pass
+
+    self.assertEqual(
+      spec_marker(test_method),
+      SpecMarker(
+        "older_version",
+        reason="consent purposes became reverse-DNS IDs",
+        version="2026-04-08",
+      ),
+    )
+
+  def test_rejects_a_bad_version_or_reason(self):
+    """Test that a version that is not a release date, or no reason, fails."""
+    for version, reason in (
+      ("April 2026", "a reason"),
+      ("2026-4-8", "a reason"),
+      ("", "a reason"),
+      ("2026-04-08", " "),
+    ):
+      with (
+        self.subTest(version=version, reason=reason),
+        self.assertRaises(ValueError),
+      ):
+        older_version(version, reason)
 
 
 class LabellingTest(unittest.TestCase):
@@ -108,6 +150,8 @@ class LabellingTest(unittest.TestCase):
       spec_assert(OTHER_RULE),
       no_rule("a reason"),
       scenario("a reason"),
+      outside_catalog("a reason"),
+      older_version("2026-04-08", "a reason"),
     ):
       with self.subTest(second=second), self.assertRaises(ValueError):
         second(test_method)

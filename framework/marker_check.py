@@ -34,7 +34,7 @@ from collections.abc import Iterable
 import dataclasses
 import unittest
 
-from framework.decorators import SpecMarker, spec_marker
+from framework.decorators import MARKER_KINDS, SpecMarker, spec_marker
 from framework.requirements import Catalog, CatalogError, load_catalog
 
 # strict: problems stop the run; warn: report only; off: no check.
@@ -89,11 +89,13 @@ class CheckResult:
 
   def report(self) -> str:
     """Return the findings as text for the console."""
+    counts = ", ".join(
+      f"{self.kinds[kind]} {kind}" for kind in (*MARKER_KINDS[1:], "unmarked")
+    )
     lines = [
       f"Requirements check: {self.checked} tests; "
       f"{self.kinds['spec_assert']} cite rules ({len(self.rules)} distinct "
-      f"rules), {self.kinds['no_rule']} no_rule, "
-      f"{self.kinds['scenario']} scenario, {self.kinds['unmarked']} unmarked"
+      f"rules), {counts}"
     ]
     for title, findings in (
       ("problems", self.problems),
@@ -172,7 +174,7 @@ def check(tests: Iterable[LoadedTest], catalog: Catalog) -> CheckResult:
     if test.marker is None:
       result.kinds["unmarked"] += 1
       result.problems.append(
-        f"{test.test_id}: no marker (spec_assert, no_rule or scenario)"
+        f"{test.test_id}: no marker ({', '.join(MARKER_KINDS)})"
       )
       continue
     result.kinds[test.marker.kind] += 1

@@ -98,20 +98,37 @@ class CheckTest(unittest.TestCase):
         loaded("test_cites", cites("REQ-SHOPPING-CHECKOUT-0001")),
         loaded("test_no_rule", SpecMarker("no_rule", reason="r")),
         loaded("test_scenario", SpecMarker("scenario", reason="r")),
+        loaded("test_core_rule", SpecMarker("outside_catalog", reason="r")),
+        loaded(
+          "test_old",
+          SpecMarker("older_version", reason="r", version="2026-04-08"),
+        ),
         loaded("test_unmarked", None),
         loaded("test_core", None, module="core.protocol_test"),
       ],
       CATALOG,
     )
-    self.assertEqual(result.checked, 4)
+    self.assertEqual(result.checked, 6)
     self.assertEqual(
       dict(result.kinds),
-      {"spec_assert": 1, "no_rule": 1, "scenario": 1, "unmarked": 1},
+      {
+        "spec_assert": 1,
+        "no_rule": 1,
+        "scenario": 1,
+        "outside_catalog": 1,
+        "older_version": 1,
+        "unmarked": 1,
+      },
     )
     self.assertEqual(result.rules, {"REQ-SHOPPING-CHECKOUT-0001"})
     self.assertEqual(len(result.problems), 1)
     self.assertIn("test_unmarked: no marker", result.problems[0])
     self.assertEqual(result.warnings, [])
+    self.assertIn(
+      "1 cite rules (1 distinct rules), 1 no_rule, 1 scenario, "
+      "1 outside_catalog, 1 older_version, 1 unmarked",
+      result.report(),
+    )
 
   def test_problems_for_ids_a_test_must_not_cite(self):
     """Test that unknown, retired and not-a-rule IDs are problems."""
