@@ -21,7 +21,7 @@ to a server advertising the shopping vertical.
 
 from absl.testing import absltest
 from framework.base_test import DEFAULT_UCP_VERSION
-from framework.decorators import requires_capability
+from framework.decorators import outside_catalog, requires_capability
 from shopping.base import ShoppingIntegrationTestBase
 from ucp_sdk.models.schemas.shopping import checkout as checkout
 
@@ -66,6 +66,10 @@ class ShoppingProtocolTest(ShoppingIntegrationTestBase):
       else shopping_services
     )
 
+  @outside_catalog(
+    "overview/index.md: the advertised shopping service, with its "
+    "version, REST transport and endpoint (core discovery rules)"
+  )
   def test_shopping_service_advertisement(self):
     """Test that the shopping service is advertised correctly.
 
@@ -103,6 +107,10 @@ class ShoppingProtocolTest(ShoppingIntegrationTestBase):
     )
     self.assertIsNotNone(shopping_service.get("endpoint"))
 
+  @outside_catalog(
+    "overview/index.md, Request-Time Validation: a request with an "
+    "unsupported version MUST get a version_unsupported error"
+  )
   def test_version_negotiation(self):
     """Test protocol version negotiation via headers.
 
