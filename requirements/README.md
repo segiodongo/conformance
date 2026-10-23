@@ -14,6 +14,7 @@
 | `catalog/requirements.lock.json` | Every rule ID ever issued, with the wording it was issued for                         |
 | `catalog/extraction_report.json` | The extractor's diagnostics for the run                                               |
 | `review.json`                    | A person's decisions on 199 rules the automatic pass couldn't settle                  |
+| `findings.md`                    | What linking the 63 shopping tests to the catalog found: claims, spec and test gaps   |
 | `tools/build_catalog.py`         | Regenerates the `catalog/` folder from the inputs below                               |
 | `tools/suggest_rules.py`         | Suggests rules for each test, in a worksheet under `reports/`, which isn't committed  |
 
