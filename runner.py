@@ -24,9 +24,11 @@ import sys
 import unittest
 from absl import flags
 from framework import marker_check
+from framework import report as requirements_report
 from framework.base_test import BaseIntegrationTest
 from framework.discovery import UcpProfile, fetch_server_profile
 from framework.platform import PlatformProfile
+from framework.requirements import CatalogError
 
 SUITE_REGISTRY: dict[str, list[str]] = {
   "core": [
@@ -263,6 +265,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     "catalog before running: strict stops on problems, warn only reports "
     "them, off skips the check (default: strict).",
   )
+  parser.add_argument(
+    "--requirements_report",
+    metavar="DIR",
+    default=None,
+    help="Write the requirements coverage report for the selected shopping "
+    "tests to DIR. It reads only the catalog and the tests' markers, so it "
+    "works with --dry-run.",
+  )
   return parser.parse_args(argv)
 
 
@@ -316,10 +326,10 @@ def main(argv: list[str] | None = None) -> int:
     f"Resolved {total_tests} test cases across suite '{args.suite}'\n"
   )
 
-  report, stop = marker_check.evaluate(
-    [marker_check.from_unittest(test) for test in _iter_tests(test_suite)],
-    args.requirements_check,
-  )
+  loaded = [
+    marker_check.from_unittest(test) for test in _iter_tests(test_suite)
+  ]
+  report, stop = marker_check.evaluate(loaded, args.requirements_check)
   if report:
     sys.stdout.write("\n" + report)
   if stop:
@@ -329,6 +339,15 @@ def main(argv: list[str] | None = None) -> int:
       "--requirements_check=warn to run anyway.\n"
     )
     return 1
+
+  if args.requirements_report:
+    try:
+      text = requirements_report.generate(loaded, args.requirements_report)
+    except (CatalogError, OSError) as error:
+      sys.stdout.flush()
+      sys.stderr.write(f"\nRequirements report failed: {error}\n")
+      return 1
+    sys.stdout.write("\n" + text)
 
   if args.dry_run:
     sys.stdout.write("\nDry Run - Selected Tests:\n")

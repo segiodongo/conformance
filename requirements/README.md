@@ -102,8 +102,31 @@ pytest:
 
 `--dry-run` runs the check without a server. `--requirements_check=warn`
 (`--requirements-check=warn` with pytest) reports problems without stopping,
-and `off` skips the check. Unit tests for the markers, the loader and the
-check are in `tests/`: run `python -m pytest tests`.
+and `off` skips the check. Unit tests for the markers, the loader, the check
+and the report are in `tests/`: run `python -m pytest tests`.
+
+## Coverage report
+
+`--requirements_report=<dir>` makes the runner write `matrix.json` to a
+directory. The report reads only the catalog and the tests' markers, so it
+needs no server and works with `--dry-run`:
+
+```bash
+uv run ucp-conformance --suite=shopping --dry-run \
+  --requirements_report=requirements/reports
+```
+
+It covers the tests the run selects, with `--suite` and `-k`, and holds:
+
+- for each capability, and for all rules counted once: the rules, the
+  testable rules, the testable MUST and MUST NOT rules, and how many of those
+  at least one test cites;
+- every rule, with the tests that cite it;
+- every shopping test, with its marker.
+
+A rule counts as covered when a `spec_assert` marker cites it: the report says
+which rules have a test, not whether the tests pass. `requirements/reports/`
+isn't committed.
 
 ## Numbers at `f2626c28`
 

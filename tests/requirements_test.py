@@ -30,6 +30,7 @@ from framework.requirements import (
   ID_RE,
   INDEX_FILE,
   LOCK_FILE,
+  Capability,
   CatalogError,
   Rule,
   load_catalog,
@@ -169,6 +170,40 @@ class SmallCatalogTest(unittest.TestCase):
       catalog.with_parents({"dev.ucp.shopping.order"}),
       {"dev.ucp.shopping.order"},
     )
+
+  def test_capability_index(self):
+    """Test that capabilities and the spec commit come from the index."""
+    self.write(
+      [record("REQ-SHOPPING-CART-0001")], {"REQ-SHOPPING-CART-0001": "active"}
+    )
+    self.assertEqual(load_catalog(self.catalog_dir).capabilities, ())
+    self.assertEqual(load_catalog(self.catalog_dir).spec_commit, "")
+    requirements._load.cache_clear()
+    index = {
+      "demo": {"spec_commit": "f2626c28"},
+      "capabilities": [
+        {"name": "dev.ucp.shopping.cart", "kind": "capability"},
+        {
+          "name": "dev.ucp.shopping.discount",
+          "kind": "extension",
+          "extends": ["dev.ucp.shopping.cart"],
+        },
+      ],
+    }
+    (self.catalog_dir / INDEX_FILE).write_text(
+      json.dumps(index), encoding="utf-8"
+    )
+    catalog = load_catalog(self.catalog_dir)
+    self.assertEqual(
+      catalog.capabilities,
+      (
+        Capability("dev.ucp.shopping.cart"),
+        Capability(
+          "dev.ucp.shopping.discount", "extension", ("dev.ucp.shopping.cart",)
+        ),
+      ),
+    )
+    self.assertEqual(catalog.spec_commit, "f2626c28")
 
   def test_reads_the_disk_once(self):
     """Test that later loads of the same directory reuse the first read."""

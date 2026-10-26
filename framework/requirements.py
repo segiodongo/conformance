@@ -76,6 +76,22 @@ class Rule:
 
 
 @dataclasses.dataclass(frozen=True)
+class Capability:
+  """One capability in the catalog's index.
+
+  Attributes:
+    name: Its name, such as `dev.ucp.shopping.checkout`.
+    kind: "extension" for an extension, otherwise "capability".
+    extends: For an extension, the capabilities it extends.
+
+  """
+
+  name: str
+  kind: str = "capability"
+  extends: tuple[str, ...] = ()
+
+
+@dataclasses.dataclass(frozen=True)
 class Catalog:
   """The catalog's rules by stable ID, and the IDs retired from it.
 
@@ -83,6 +99,8 @@ class Catalog:
     rules: Every rule in the catalog, by ID.
     retired: IDs issued for rules the specification no longer states.
     extends: For each extension, the capabilities it extends.
+    capabilities: The capabilities in the catalog's index, in its order.
+    spec_commit: The specification commit the catalog was built from.
 
   """
 
@@ -91,6 +109,8 @@ class Catalog:
   extends: Mapping[str, tuple[str, ...]] = dataclasses.field(
     default_factory=lambda: MappingProxyType({})
   )
+  capabilities: tuple[Capability, ...] = ()
+  spec_commit: str = ""
 
   def status(self, rule_id: str) -> str:
     """Return what an ID names: "rule", "not a rule", "retired" or "unknown".
@@ -182,16 +202,22 @@ def _load(catalog_dir: Path) -> Catalog:
     )
   index_path = catalog_dir / INDEX_FILE
   index = _read(index_path) if index_path.is_file() else {}
-  extends = {
-    entry["name"]: tuple(entry.get("extends", ()))
+  capabilities = tuple(
+    Capability(
+      name=entry["name"],
+      kind=entry.get("kind", "capability"),
+      extends=tuple(entry.get("extends", ())),
+    )
     for entry in index.get("capabilities", [])
-  }
+  )
   return Catalog(
     rules=MappingProxyType(dict(sorted(rules.items()))),
     retired=frozenset(
       entry["id"] for entry in entries if entry["status"] == "retired"
     ),
-    extends=MappingProxyType(extends),
+    extends=MappingProxyType({c.name: c.extends for c in capabilities}),
+    capabilities=capabilities,
+    spec_commit=index.get("demo", {}).get("spec_commit", ""),
   )
 
 
