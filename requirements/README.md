@@ -107,7 +107,7 @@ and the report are in `tests/`: run `python -m pytest tests`.
 
 ## Coverage report
 
-`--requirements_report=<dir>` makes the runner write `matrix.json` to a
+`--requirements_report=<dir>` makes the runner write a coverage report to a
 directory. The report reads only the catalog and the tests' markers, so it
 needs no server and works with `--dry-run`:
 
@@ -116,17 +116,29 @@ uv run ucp-conformance --suite=shopping --dry-run \
   --requirements_report=requirements/reports
 ```
 
-It covers the tests the run selects, with `--suite` and `-k`, and holds:
+It writes the same report three ways:
 
-- for each capability, and for all rules counted once: the rules, the
-  testable rules, the testable MUST and MUST NOT rules, and how many of those
-  at least one test cites;
-- every rule, with the tests that cite it;
-- every shopping test, with its marker.
+| File          | For                                                                                    |
+| ------------- | -------------------------------------------------------------------------------------- |
+| `matrix.md`   | Reading on GitHub                                                                      |
+| `matrix.html` | Reading in a browser: one page, with no scripts and nothing loaded from elsewhere      |
+| `matrix.json` | Tools: every count, every rule with the tests that cite it, every test with its marker |
 
-A rule counts as covered when a `spec_assert` marker cites it: the report says
-which rules have a test, not whether the tests pass. `requirements/reports/`
-isn't committed.
+The Markdown and HTML pages hold:
+
+- **Summary:** for each capability, then each extension, and for all rules
+  counted once: the rules, the testable rules, the testable MUST and MUST NOT
+  rules, and how many of those at least one test cites;
+- **A section per capability:** the rules with a test, then the testable MUST
+  and MUST NOT rules without one, which is the to-do list; the other testable
+  rules and the rules this suite can't test are folded away;
+- **Tests:** every shopping test, grouped by marker;
+- **Notes:** what the counts mean, with a link to `findings.md`.
+
+It covers the tests the run selects, with `--suite` and `-k`. A rule counts
+as covered when a `spec_assert` marker cites it: the report says which rules
+have a test, not whether the tests pass. `requirements/reports/` isn't
+committed.
 
 ## Numbers at `f2626c28`
 

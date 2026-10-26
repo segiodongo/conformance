@@ -19,6 +19,8 @@ repository's catalog and drive the runner with `--dry-run`.
 """
 
 import contextlib
+import dataclasses
+from html.parser import HTMLParser
 import io
 import json
 from pathlib import Path
@@ -266,16 +268,33 @@ class OutputTest(unittest.TestCase):
     with tempfile.TemporaryDirectory() as directory:
       out = Path(directory) / "new" / "reports"
       paths = report.write(self.report, out)
-      self.assertEqual(paths, [out / report.JSON_FILE])
-      first = paths[0].read_bytes()
-      self.assertEqual(json.loads(first), report.to_json(self.report))
+      self.assertEqual(
+        paths,
+        [
+          out / report.JSON_FILE,
+          out / report.MARKDOWN_FILE,
+          out / report.HTML_FILE,
+        ],
+      )
+      first = [path.read_bytes() for path in paths]
+      self.assertEqual(json.loads(first[0]), report.to_json(self.report))
+      self.assertEqual(first[1].decode(), report.to_markdown(self.report))
+      self.assertEqual(first[2].decode(), report.to_html(self.report))
       report.write(self.report, out)
-      self.assertEqual(paths[0].read_bytes(), first)
+      self.assertEqual([path.read_bytes() for path in paths], first)
+
+  def test_write_links_the_findings(self):
+    """Test that write links the findings document relative to the output."""
+    with tempfile.TemporaryDirectory() as directory:
+      findings = Path(directory) / "findings.md"
+      paths = report.write(self.report, Path(directory) / "out", findings)
+      markdown = paths[1].read_text()
+    self.assertIn("- **Findings:** [findings.md](../findings.md)", markdown)
 
   def test_summary(self):
     """Test the console lines."""
     text = report.summary(self.report, [Path("out/matrix.json")])
-    self.assertIn("Requirements report: out/matrix.json", text)
+    self.assertIn("Requirements report: out (matrix.json)", text)
     self.assertIn(
       "catalog at abc123de: 7 rules, 6 testable, 4 of them MUST or MUST NOT",
       text,
@@ -292,6 +311,174 @@ class OutputTest(unittest.TestCase):
     text = report.summary(report.build(empty, ()), [])
     self.assertIn("catalog at an unknown commit: 0 rules", text)
     self.assertIn("have a test, 0 don't", text)
+
+
+class TagBalance(HTMLParser):
+  """Track open elements, to check that a page closes what it opens."""
+
+  VOID = frozenset({"br", "hr", "img", "input", "link", "meta"})
+
+  def __init__(self):
+    """Start with no open elements."""
+    super().__init__()
+    self.open: list[str] = []
+    self.mismatched: list[str] = []
+
+  def handle_starttag(self, tag, attrs):
+    """Open an element, unless it has no end tag."""
+    del attrs
+    if tag not in self.VOID:
+      self.open.append(tag)
+
+  def handle_endtag(self, tag):
+    """Close the innermost element, noting a mismatch."""
+    if not self.open or self.open.pop() != tag:
+      self.mismatched.append(tag)
+
+
+TRICKY = Catalog(
+  rules=MappingProxyType(
+    {
+      "REQ-SHOPPING-CART-0009": dataclasses.replace(
+        rule("REQ-SHOPPING-CART-0009", (CART,)),
+        clause="Use `a|b` or c | d, per [RFC 9535](https://example.com/rfc)"
+        '{ target="_blank" }, never <b>bold</b>; **MUST** apply.',
+      )
+    }
+  ),
+  retired=frozenset(),
+)
+
+
+class RenderTest(unittest.TestCase):
+  """Tests for to_markdown, to_html and rule_groups."""
+
+  def setUp(self):
+    """Build the report for the small catalog."""
+    super().setUp()
+    self.report = report.build(CATALOG, TESTS)
+
+  def test_markdown_summary(self):
+    """Test the headline and the summary table, extensions last."""
+    text = report.to_markdown(self.report)
+    self.assertTrue(text.startswith("# Shopping requirements coverage\n"))
+    self.assertIn(
+      "**2 of the 4 testable MUST and MUST NOT rules have a test (50%), and "
+      "3 of the 6 testable rules.** 6 shopping tests: 4 cite rules, "
+      "1 `no_rule`, 0 `scenario`, 0 `outside_catalog`, 0 `older_version`, "
+      "1 unmarked.",
+      text,
+    )
+    rows = [
+      "| cart | – | 1 | 1 | 0 | 1 | 0 | 1 | 0% |",
+      "| checkout | – | 4 | 3 | 2 | 2 | 1 | 1 | 50% |",
+      "| catalog.lookup | – | 1 | 1 | 1 | 1 | 1 | 0 | 100% |",
+      "| catalog.search | – | 1 | 1 | 1 | 1 | 1 | 0 | 100% |",
+      "| other | – | 1 | 1 | 0 | 0 | 0 | 0 | – |",
+      "| discount | cart, checkout | 0 | 0 | 0 | 0 | 0 | 0 | – |",
+      "| **All rules, each counted once** |  | 7 | 6 | 3 | 4 | 2 | 2 | 50% |",
+    ]
+    positions = [text.index(row) for row in rows]
+    self.assertEqual(positions, sorted(positions))
+
+  def test_markdown_sections(self):
+    """Test a capability's section, the tests and the notes."""
+    text = report.to_markdown(self.report)
+    source = (
+      "[checkout/index.md:1](https://github.com/Universal-Commerce-Protocol/"
+      "ucp/blob/abc123def456/docs/specification/shopping/checkout/index.md"
+      "?plain=1#L1)"
+    )
+    for expected in (
+      "## checkout\n\n`dev.ucp.shopping.checkout`, a capability: 4 rules, 3 "
+      "of them testable. 1 of its 2 testable MUST and MUST NOT rules have a "
+      "test (50%).",
+      "### Rules with a test: 2",
+      "| CHECKOUT-0001 | MUST | The business MUST do "
+      "REQ-SHOPPING-CHECKOUT-0001. | `ExampleTest.test_a`<br>"
+      f"`ExampleTest.test_b` | {source} |",
+      "### Testable MUST and MUST NOT rules without a test: 1",
+      "<summary>Other testable rules without a test: 0</summary>\n\nNone.",
+      "<summary>Not testable by this suite: 1</summary>",
+      "| CHECKOUT-0004 | MUST | The business MUST do "
+      f"REQ-SHOPPING-CHECKOUT-0004. | MCP page | {source} |",
+      "`dev.ucp.shopping.discount`, an extension of cart, checkout: 0 rules",
+      "### Tests that cite rules (`spec_assert`): 4",
+      "| `ExampleTest.test_d` | `shopping/checkout/example_test.py` | "
+      "CHECKOUT-0005, CHECKOUT-0099 |",
+      "| `ExampleTest.test_e` | `shopping/checkout/example_test.py` | "
+      "no keyword |",
+      "### Checks of one store's data or features (`scenario`): 0\n\nNone.",
+      "### Tests without a marker: 1",
+      "- **IDs:** Rule IDs drop the `REQ-SHOPPING-` prefix.",
+      "and the sentence the review found isn't a rule is left out.",
+      "- **Shared rules:** 1 rule belongs to more than one capability.",
+    ):
+      self.assertIn(expected, text)
+    self.assertNotIn("**Findings:**", text)
+    self.assertIn(
+      "- **Findings:** [findings.md](../findings.md) reviews each claim",
+      report.to_markdown(self.report, "../findings.md"),
+    )
+
+  def test_html(self):
+    """Test the page: headline cards, anchors, and only its own resources."""
+    page = report.to_html(self.report, "../findings.md")
+    self.assertTrue(page.startswith("<!DOCTYPE html>\n"))
+    for expected in (
+      '<div class="big">2 / 4</div>',
+      '<a href="#cap-catalog-lookup">catalog.lookup</a>',
+      '<section id="cap-catalog-lookup">',
+      '<span style="width: 50%"></span>',
+      '<tr class="total"><td>All rules, each counted once</td>',
+      "<details open><summary>Rules with a test (2)</summary>",
+      "<details><summary>Not testable by this suite (1)</summary>",
+      "<code>ExampleTest.test_a</code><br><code>ExampleTest.test_b</code>",
+      '<a href="../findings.md">findings.md</a>',
+    ):
+      self.assertIn(expected, page)
+    for external in ("<script", "<link", " src="):
+      self.assertNotIn(external, page)
+    balance = TagBalance()
+    balance.feed(page)
+    self.assertEqual((balance.open, balance.mismatched), ([], []))
+
+  def test_rule_text_is_escaped(self):
+    """Test pipes, links and markup in rule text, in both outputs."""
+    built = report.build(TRICKY, ())
+    markdown = report.to_markdown(built)
+    page = report.to_html(built)
+    self.assertIn(
+      "| CART-0009 | MUST | Use `a\\|b` or c \\| d, per RFC 9535, never "
+      "&lt;b>bold&lt;/b>; **MUST** apply. | checkout/index.md:1 |",
+      markdown,
+    )
+    self.assertIn(
+      "<td>Use <code>a|b</code> or c | d, per RFC 9535, never "
+      "&lt;b&gt;bold&lt;/b&gt;; <strong>MUST</strong> apply.</td>",
+      page,
+    )
+    for text in (markdown, page):
+      self.assertNotIn("example.com", text)
+      self.assertNotIn("_blank", text)
+
+  def test_rule_groups_match_the_counts(self):
+    """Test that each capability's groups add up to its counts."""
+    for row in self.report.capabilities:
+      groups = report.rule_groups(self.report, row.capability.name)
+      tally = row.tally
+      with self.subTest(row.capability.name):
+        self.assertEqual(len(groups.covered), tally.covered)
+        self.assertEqual(len(groups.uncovered_must), tally.uncovered_must)
+        self.assertEqual(
+          len(groups.covered) + len(groups.uncovered_must) + len(groups.other),
+          tally.testable,
+        )
+        self.assertEqual(len(groups.untestable), tally.rules - tally.testable)
+    checkout = report.rule_groups(self.report, CHECKOUT)
+    self.assertEqual(
+      [rule.id for rule in checkout.untestable], ["REQ-SHOPPING-CHECKOUT-0004"]
+    )
 
 
 class RepositoryReportTest(unittest.TestCase):
@@ -328,12 +515,18 @@ class RepositoryReportTest(unittest.TestCase):
     self.assertTrue(built.spec_commit.startswith("f2626c28"))
 
   def test_generate(self):
-    """Test that generate writes matrix.json and describes it."""
+    """Test that generate writes the three files and describes them."""
     with tempfile.TemporaryDirectory() as directory:
       text = report.generate((), directory)
-      data = json.loads((Path(directory) / report.JSON_FILE).read_text())
+      out = Path(directory)
+      data = json.loads((out / report.JSON_FILE).read_text())
+      markdown = (out / report.MARKDOWN_FILE).read_text()
+      page = (out / report.HTML_FILE).read_text()
     self.assertIn("507 rules, 217 testable", text)
+    self.assertIn("(matrix.json, matrix.md, matrix.html)", text)
     self.assertEqual(data["tests"], [])
+    self.assertIn("- **Findings:** [findings.md](", markdown)
+    self.assertIn('<div class="big">0 / 104</div>', page)
 
 
 class RunnerTest(unittest.TestCase):
@@ -360,9 +553,12 @@ class RunnerTest(unittest.TestCase):
         "--dry-run",
         f"--requirements_report={directory}",
       )
-      data = json.loads((Path(directory) / report.JSON_FILE).read_text())
+      out = Path(directory)
+      data = json.loads((out / report.JSON_FILE).read_text())
+      written = sorted(path.name for path in out.iterdir())
     self.assertEqual(code, 0, output)
     self.assertIn("Requirements report: ", output)
+    self.assertEqual(written, ["matrix.html", "matrix.json", "matrix.md"])
     self.assertEqual(len(data["tests"]), 5)
     self.assertEqual(data["markers"]["unmarked"], 0)
 
