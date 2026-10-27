@@ -759,7 +759,7 @@ class RepositoryReportTest(unittest.TestCase):
 
 
 class RunnerTest(unittest.TestCase):
-  """Tests for the runner's --requirements_report option."""
+  """Tests for the runner's --requirements_report option and its summary."""
 
   def run_main(self, *argv: str) -> tuple[int, str]:
     """Run the runner offline; return its exit code and its output."""
@@ -859,6 +859,23 @@ class RunnerTest(unittest.TestCase):
     self.assertEqual(code, 1)
     self.assertIn("Requirements report failed:", output)
     self.assertNotIn("CONFORMANCE TEST SUMMARY", output)
+
+  def test_summary_does_not_count_skipped_tests_as_passed(self):
+    """Test the summary's counts for a pass, a failure and a skip."""
+    with mock.patch.object(
+      runner, "_load_tests", return_value=fake_shopping_suite()
+    ):
+      code, output = self.run_main("--server_url=http://127.0.0.1:9")
+    self.assertEqual(code, 1, output)
+    summary = output[output.index("CONFORMANCE TEST SUMMARY") :]
+    for line in (
+      "Total Executed: 3\n",
+      "Passed: 1\n",
+      "Skipped: 1\n",
+      "Failures: 1\n",
+      "Errors: 0\n",
+    ):
+      self.assertIn(line, summary)
 
 
 if __name__ == "__main__":
