@@ -27,6 +27,7 @@ from framework import marker_check
 from framework import report as requirements_report
 from framework.base_test import BaseIntegrationTest
 from framework.discovery import UcpProfile, fetch_server_profile
+from framework.outcomes import RecordingResult
 from framework.platform import PlatformProfile
 from framework.requirements import CatalogError
 
@@ -270,8 +271,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     metavar="DIR",
     default=None,
     help="Write the requirements coverage report for the selected shopping "
-    "tests to DIR. It reads only the catalog and the tests' markers, so it "
-    "works with --dry-run.",
+    "tests to DIR. With --dry-run it needs no server and says which rules "
+    "have a test; after a run it also gives each test's outcome and each "
+    "rule's result.",
   )
   return parser.parse_args(argv)
 
@@ -342,12 +344,13 @@ def main(argv: list[str] | None = None) -> int:
 
   if args.requirements_report:
     try:
-      text = requirements_report.generate(loaded, args.requirements_report)
+      if args.dry_run:
+        text = requirements_report.generate(loaded, args.requirements_report)
+        sys.stdout.write("\n" + text)
+      else:
+        requirements_report.prepare(args.requirements_report)
     except (CatalogError, OSError) as error:
-      sys.stdout.flush()
-      sys.stderr.write(f"\nRequirements report failed: {error}\n")
-      return 1
-    sys.stdout.write("\n" + text)
+      return _report_failed(error)
 
   if args.dry_run:
     sys.stdout.write("\nDry Run - Selected Tests:\n")
@@ -397,7 +400,9 @@ def main(argv: list[str] | None = None) -> int:
 
   sys.stdout.write("-" * 70 + "\n")
   runner = unittest.TextTestRunner(
-    verbosity=2 if args.verbose else 1, stream=sys.stdout
+    verbosity=2 if args.verbose else 1,
+    stream=sys.stdout,
+    resultclass=RecordingResult,
   )
   result = runner.run(test_suite)
 
@@ -417,7 +422,27 @@ def main(argv: list[str] | None = None) -> int:
   sys.stdout.write(f"Errors: {len(result.errors)}\n")
   sys.stdout.write("=" * 70 + "\n")
 
+  if args.requirements_report:
+    outcomes = result.outcomes_for(test.test_id for test in loaded)
+    try:
+      text = requirements_report.generate(
+        loaded,
+        args.requirements_report,
+        outcomes=outcomes,
+        target=args.server_url,
+      )
+    except (CatalogError, OSError) as error:
+      return _report_failed(error)
+    sys.stdout.write("\n" + text)
+
   return 0 if result.wasSuccessful() else 1
+
+
+def _report_failed(error: Exception) -> int:
+  """Say that the requirements report failed; return the exit code."""
+  sys.stdout.flush()
+  sys.stderr.write(f"\nRequirements report failed: {error}\n")
+  return 1
 
 
 if __name__ == "__main__":

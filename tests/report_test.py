@@ -31,8 +31,9 @@ from unittest import mock
 
 import runner
 from framework import report
-from framework.decorators import SpecMarker
+from framework.decorators import SpecMarker, requires_capability, spec_assert
 from framework.marker_check import LoadedTest
+from framework.outcomes import ERROR, FAILED, NOT_RUN, PASSED, SKIPPED, Outcome
 from framework.requirements import (
   DEFAULT_CATALOG_DIR,
   INDEX_FILE,
@@ -136,6 +137,52 @@ def full_id(name: str) -> str:
   return f"shopping.checkout.example_test.ExampleTest.{name}"
 
 
+# A run: two more tests, and an outcome for every test but test_f.
+RUN_TESTS = (
+  *TESTS,
+  loaded("test_g", cites("REQ-SHOPPING-CART-0001")),
+  loaded("test_h", cites("REQ-SHOPPING-CHECKOUT-0002")),
+)
+OUTCOMES = {
+  full_id("test_a"): Outcome(PASSED),
+  full_id("test_b"): Outcome(FAILED, "total 5 | expected *6* <b>"),
+  full_id("test_c"): Outcome(SKIPPED, "no fixture"),
+  full_id("test_d"): Outcome(ERROR, "KeyError: 'id'"),
+  full_id("test_e"): Outcome(PASSED),
+  full_id("test_g"): Outcome(SKIPPED, "no cart capability"),
+  full_id("test_h"): Outcome(PASSED),
+  "core.protocol_test.ExampleTest.test_core": Outcome(PASSED),
+}
+TARGET = "http://localhost:8182"
+
+
+def fake_shopping_suite() -> unittest.TestSuite:
+  """Return shopping tests that pass, fail and skip, citing real rules.
+
+  The test case class is built here, so that nothing collects it on its own.
+  """
+
+  @requires_capability(CHECKOUT)
+  class FakeTest(unittest.TestCase):
+    @spec_assert("REQ-SHOPPING-CHECKOUT-0010")
+    def test_pass(self):
+      """Pass."""
+
+    @spec_assert("REQ-SHOPPING-CHECKOUT-0011")
+    def test_fail(self):
+      """Fail."""
+      self.fail("total was 5, expected 6")
+
+    @spec_assert("REQ-SHOPPING-CHECKOUT-0105")
+    def test_skip(self):
+      """Skip."""
+      self.skipTest("no second discount code configured")
+
+  FakeTest.__module__ = "shopping.fake_test"
+  FakeTest.__qualname__ = "FakeTest"
+  return unittest.defaultTestLoader.loadTestsFromTestCase(FakeTest)
+
+
 class BuildTest(unittest.TestCase):
   """Tests for build."""
 
@@ -218,7 +265,7 @@ class OutputTest(unittest.TestCase):
     self.report = report.build(CATALOG, TESTS)
 
   def test_json(self):
-    """Test the shape of matrix.json."""
+    """Test the shape of matrix.json, with null run fields after no run."""
     data = report.to_json(self.report)
     self.assertEqual(
       list(data),
@@ -228,6 +275,7 @@ class OutputTest(unittest.TestCase):
         "totals",
         "not_rules",
         "markers",
+        "run",
         "capabilities",
         "rules",
         "tests",
@@ -262,6 +310,10 @@ class OutputTest(unittest.TestCase):
       ["REQ-SHOPPING-CHECKOUT-0005", "REQ-SHOPPING-CHECKOUT-0099"],
     )
     self.assertEqual(data["tests"][0]["capabilities"], [CHECKOUT])
+    self.assertIsNone(data["run"])
+    self.assertIsNone(discount["results"])
+    self.assertIsNone(by_id["REQ-SHOPPING-CHECKOUT-0001"]["result"])
+    self.assertIsNone(data["tests"][0]["outcome"])
 
   def test_write(self):
     """Test that write creates the directory, and writes the same bytes."""
@@ -481,6 +533,183 @@ class RenderTest(unittest.TestCase):
     )
 
 
+class ResultsTest(unittest.TestCase):
+  """Tests for the report after a run, with each test's outcome."""
+
+  def setUp(self):
+    """Build the report for the small catalog, with outcomes."""
+    super().setUp()
+    self.report = report.build(CATALOG, RUN_TESTS, OUTCOMES, TARGET)
+
+  def test_rule_results(self):
+    """Test each rule's result, from its tests' outcomes."""
+    self.assertEqual(
+      {rule.id: self.report.result(rule.id) for rule in self.report.rules},
+      {
+        "REQ-SHOPPING-CART-0001": NOT_RUN,
+        "REQ-SHOPPING-CATALOG-0001": FAILED,
+        "REQ-SHOPPING-CHECKOUT-0001": FAILED,
+        "REQ-SHOPPING-CHECKOUT-0002": PASSED,
+        "REQ-SHOPPING-CHECKOUT-0003": PASSED,
+        "REQ-SHOPPING-CHECKOUT-0004": NOT_RUN,
+        "REQ-SHOPPING-OTHER-0001": report.NO_TEST,
+      },
+    )
+    dry_run = report.build(CATALOG, RUN_TESTS)
+    self.assertIsNone(dry_run.result("REQ-SHOPPING-CHECKOUT-0001"))
+    self.assertIsNone(dry_run.test_counts())
+    self.assertIsNone(report.results(dry_run, dry_run.rules))
+
+  def test_outcomes_and_counts(self):
+    """Test the shopping tests' outcomes, and the counts of results."""
+    outcomes = self.report.outcomes
+    self.assertEqual(len(outcomes), 8)
+    self.assertNotIn("core.protocol_test.ExampleTest.test_core", outcomes)
+    self.assertEqual(
+      outcomes[full_id("test_f")],
+      Outcome(NOT_RUN, "no outcome was recorded"),
+    )
+    self.assertEqual(
+      self.report.test_counts(),
+      {PASSED: 3, FAILED: 1, ERROR: 1, SKIPPED: 2, NOT_RUN: 1},
+    )
+    self.assertEqual(
+      report.results(self.report, self.report.rules),
+      {
+        "passed": 2,
+        "failed": 2,
+        "not_run": 1,
+        "must_passed": 1,
+        "must_failed": 2,
+        "must_not_run": 1,
+      },
+    )
+    checkout = [r for r in self.report.rules if CHECKOUT in r.capabilities]
+    self.assertEqual(
+      report.results(self.report, checkout),
+      {
+        "passed": 2,
+        "failed": 1,
+        "not_run": 0,
+        "must_passed": 1,
+        "must_failed": 1,
+        "must_not_run": 0,
+      },
+    )
+
+  def test_json(self):
+    """Test the run's fields in matrix.json."""
+    data = report.to_json(self.report)
+    self.assertEqual(
+      data["run"],
+      {
+        "target": TARGET,
+        "tests": {
+          "passed": 3,
+          "failed": 1,
+          "error": 1,
+          "skipped": 2,
+          "not_run": 1,
+        },
+        "results": {
+          "passed": 2,
+          "failed": 2,
+          "not_run": 1,
+          "must_passed": 1,
+          "must_failed": 2,
+          "must_not_run": 1,
+        },
+      },
+    )
+    self.assertEqual(
+      data["capabilities"][0]["results"],
+      {
+        "passed": 0,
+        "failed": 0,
+        "not_run": 1,
+        "must_passed": 0,
+        "must_failed": 0,
+        "must_not_run": 1,
+      },
+    )
+    rules = {entry["id"]: entry["result"] for entry in data["rules"]}
+    self.assertEqual(rules["REQ-SHOPPING-CHECKOUT-0001"], "failed")
+    self.assertEqual(rules["REQ-SHOPPING-OTHER-0001"], "no_test")
+    tests = {entry["id"]: entry["outcome"] for entry in data["tests"]}
+    self.assertEqual(
+      tests[full_id("test_b")],
+      {"status": "failed", "detail": "total 5 | expected *6* <b>"},
+    )
+
+  def test_markdown(self):
+    """Test the results in the Markdown, with failure messages escaped."""
+    text = report.to_markdown(self.report)
+    for expected in (
+      "the shopping tests' markers and a run against `http://localhost:8182`.",
+      "**Of the 4 testable MUST and MUST NOT rules with a test, 1 passed, 2 "
+      "failed and 1 wasn't run.** Test outcomes: 3 passed, 1 failed, 1 "
+      "error, 2 skipped, 1 not run.",
+      "## Results",
+      "| cart | 1 | 0 | 0 | 1 | 1 | 0 | 0 | 1 |",
+      "| checkout | 3 | 2 | 1 | 0 | 2 | 1 | 1 | 0 |",
+      "| **All rules, each counted once** | 5 | 2 | 2 | 1 | 4 | 1 | 2 | 1 |",
+      "### Rules that failed: 2",
+      "`ExampleTest.test_b` **failed**: total 5 \\| expected \\*6\\* \\<b\\>",
+      "### Rules whose tests didn't run: 1",
+      "`ExampleTest.test_g` skipped: no cart capability",
+      "Of those 2, 1 passed, 1 failed and 0 weren't run.",
+      "| Rule | Level | Result | Text | Tests | Source |",
+      "| CHECKOUT-0001 | MUST | **failed** | The business MUST do "
+      "REQ-SHOPPING-CHECKOUT-0001. | `ExampleTest.test_a` passed<br>"
+      "`ExampleTest.test_b` **failed** |",
+      "| Test | File | Rules | Result |",
+      "| `ExampleTest.test_d` | `shopping/checkout/example_test.py` | "
+      "CHECKOUT-0005, CHECKOUT-0099 | **error**: KeyError: 'id' |",
+      "| `ExampleTest.test_f` | `shopping/checkout/example_test.py` | "
+      "not run: no outcome was recorded |",
+      "- **Results:** A passing test shows",
+    ):
+      self.assertIn(expected, text)
+
+  def test_html(self):
+    """Test the results in the page, with failure messages escaped."""
+    page = report.to_html(self.report)
+    for expected in (
+      '<div class="big">1 / 4</div>testable MUST and MUST NOT rules with a '
+      "test passed: 2 failed, 1 not run",
+      '<a href="#results">Results</a>',
+      '<h2 id="results">Results</h2>',
+      '<span class="stack"><span class="pass" style="width: 25%"></span>'
+      '<span class="fail" style="width: 50%"></span>'
+      '<span class="skip" style="width: 25%"></span></span>',
+      '<td class="result"><span class="r-failed">failed</span></td>',
+      '<span class="r-failed">failed</span>: total 5 | expected *6* &lt;b&gt;',
+      '<span class="r-skipped">skipped</span>: no cart capability',
+    ):
+      self.assertIn(expected, page)
+    for external in ("<script", "<link", " src="):
+      self.assertNotIn(external, page)
+    balance = TagBalance()
+    balance.feed(page)
+    self.assertEqual((balance.open, balance.mismatched), ([], []))
+
+  def test_dry_run_has_no_results(self):
+    """Test that a report without a run shows no results."""
+    dry_run = report.build(CATALOG, RUN_TESTS)
+    self.assertNotIn("## Results", report.to_markdown(dry_run))
+    self.assertNotIn('href="#results"', report.to_html(dry_run))
+    self.assertNotIn("  results", report.summary(dry_run, []))
+
+  def test_summary(self):
+    """Test the console line with the results."""
+    text = report.summary(self.report, [Path("out/matrix.json")])
+    self.assertIn(
+      "  results against http://localhost:8182: 1 of the 4 testable MUST and "
+      "MUST NOT rules with a test passed, 2 failed, 1 wasn't run\n",
+      text,
+    )
+
+
 class RepositoryReportTest(unittest.TestCase):
   """Tests against this repository's catalog."""
 
@@ -572,6 +801,64 @@ class RunnerTest(unittest.TestCase):
       )
     self.assertEqual(code, 1)
     self.assertIn("Requirements report failed:", output)
+
+  def test_run_writes_the_results(self):
+    """Test that a run writes each test's outcome and each rule's result."""
+    with (
+      tempfile.TemporaryDirectory() as directory,
+      mock.patch.object(
+        runner, "_load_tests", return_value=fake_shopping_suite()
+      ),
+    ):
+      code, output = self.run_main(
+        "--server_url=http://127.0.0.1:9",
+        f"--requirements_report={directory}",
+      )
+      data = json.loads((Path(directory) / report.JSON_FILE).read_text())
+    self.assertEqual(code, 1, output)
+    self.assertIn("CONFORMANCE TEST SUMMARY", output)
+    self.assertIn("results against http://127.0.0.1:9: ", output)
+    self.assertEqual(data["run"]["target"], "http://127.0.0.1:9")
+    self.assertEqual(
+      data["run"]["tests"],
+      {"passed": 1, "failed": 1, "error": 0, "skipped": 1, "not_run": 0},
+    )
+    self.assertEqual(
+      {
+        entry["id"]: entry["result"]
+        for entry in data["rules"]
+        if entry["tests"]
+      },
+      {
+        "REQ-SHOPPING-CHECKOUT-0010": "passed",
+        "REQ-SHOPPING-CHECKOUT-0011": "failed",
+        "REQ-SHOPPING-CHECKOUT-0105": "not_run",
+      },
+    )
+    outcomes = {entry["id"]: entry["outcome"] for entry in data["tests"]}
+    self.assertEqual(
+      outcomes["shopping.fake_test.FakeTest.test_fail"],
+      {"status": "failed", "detail": "total was 5, expected 6"},
+    )
+    self.assertEqual(
+      outcomes["shopping.fake_test.FakeTest.test_skip"],
+      {"status": "skipped", "detail": "no second discount code configured"},
+    )
+
+  def test_unwritable_directory_stops_a_run_before_the_tests(self):
+    """Test that a run checks the report can be written before it starts."""
+    with (
+      tempfile.NamedTemporaryFile() as not_a_directory,
+      mock.patch.object(
+        runner, "_load_tests", return_value=fake_shopping_suite()
+      ),
+    ):
+      code, output = self.run_main(
+        f"--requirements_report={not_a_directory.name}"
+      )
+    self.assertEqual(code, 1)
+    self.assertIn("Requirements report failed:", output)
+    self.assertNotIn("CONFORMANCE TEST SUMMARY", output)
 
 
 if __name__ == "__main__":

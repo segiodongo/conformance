@@ -108,37 +108,57 @@ and the report are in `tests/`: run `python -m pytest tests`.
 ## Coverage report
 
 `--requirements_report=<dir>` makes the runner write a coverage report to a
-directory. The report reads only the catalog and the tests' markers, so it
-needs no server and works with `--dry-run`:
+directory. With `--dry-run`, the report reads only the catalog and the tests'
+markers, so it needs no server, and it says which rules have a test:
 
 ```bash
 uv run ucp-conformance --suite=shopping --dry-run \
   --requirements_report=requirements/reports
 ```
 
+Without `--dry-run`, the runner first checks that it can write the report,
+then runs the tests, then writes the report with each test's outcome and
+each rule's result:
+
+```bash
+uv run ucp-conformance --suite=shopping --server_url=http://localhost:8182 \
+  --requirements_report=requirements/reports
+```
+
 It writes the same report three ways:
 
-| File          | For                                                                                    |
-| ------------- | -------------------------------------------------------------------------------------- |
-| `matrix.md`   | Reading on GitHub                                                                      |
-| `matrix.html` | Reading in a browser: one page, with no scripts and nothing loaded from elsewhere      |
-| `matrix.json` | Tools: every count, every rule with the tests that cite it, every test with its marker |
+| File          | For                                                                                              |
+| ------------- | ------------------------------------------------------------------------------------------------ |
+| `matrix.md`   | Reading on GitHub                                                                                |
+| `matrix.html` | Reading in a browser: one page, with no scripts and nothing loaded from elsewhere                |
+| `matrix.json` | Tools: every count, every rule with its tests and result, every test with its marker and outcome |
 
 The Markdown and HTML pages hold:
 
 - **Summary:** for each capability, then each extension, and for all rules
   counted once: the rules, the testable rules, the testable MUST and MUST NOT
   rules, and how many of those at least one test cites;
-- **A section per capability:** the rules with a test, then the testable MUST
-  and MUST NOT rules without one, which is the to-do list; the other testable
-  rules and the rules this suite can't test are folded away;
-- **Tests:** every shopping test, grouped by marker;
+- **Results,** after a run: for each capability, how many of its testable
+  rules with a test passed, failed or weren't run, then the rules that failed
+  and the rules whose tests didn't run, with their tests' messages;
+- **A section per capability:** the rules with a test, with their results
+  after a run, then the testable MUST and MUST NOT rules without one, which
+  is the to-do list; the other testable rules and the rules this suite can't
+  test are folded away;
+- **Tests:** every shopping test, grouped by marker, with its outcome after a
+  run;
 - **Notes:** what the counts mean, with a link to `findings.md`.
 
-It covers the tests the run selects, with `--suite` and `-k`. A rule counts
-as covered when a `spec_assert` marker cites it: the report says which rules
-have a test, not whether the tests pass. `requirements/reports/` isn't
-committed.
+A rule counts as covered when a `spec_assert` marker cites it. After a run,
+it passed when at least one of the tests that cite it passed and none
+failed; it failed when any of them failed or hit an error; and it wasn't run
+when they were all skipped or didn't run. A passing test shows only what its
+assertions check, which may be part of a rule: `findings.md` lists the
+partial claims. Outcomes come from the runner, so a pytest run doesn't
+record them.
+
+The report covers the tests the run selects, with `--suite` and `-k`.
+`requirements/reports/` isn't committed.
 
 ## Numbers at `f2626c28`
 
