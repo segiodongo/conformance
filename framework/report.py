@@ -16,9 +16,9 @@
 
 Demo only. The runner writes the report with `--requirements_report=<dir>`.
 For each capability, the report counts the rules, the testable rules and the
-testable MUST and MUST NOT rules, and how many of those at least one test
-cites. It also lists every rule with the tests that cite it, and every
-shopping test with its marker.
+testable MUST and MUST NOT rules, and how many of those a test checks fully,
+or only in part (`partly` in a `spec_assert` marker). It also lists every rule
+with the tests that cite it, and every shopping test with its marker.
 
 With `--dry-run`, the report reads only the catalog and the tests' markers,
 so it needs no server, and it says which rules have a test. After a run, it
@@ -59,7 +59,9 @@ from framework.requirements import (
   load_catalog,
 )
 
-FORMAT_VERSION = 1
+# 2: "covered" counts rules a test checks fully; rules checked only in part
+# are counted and listed apart.
+FORMAT_VERSION = 2
 JSON_FILE = "matrix.json"
 MARKDOWN_FILE = "matrix.md"
 HTML_FILE = "matrix.html"
@@ -85,6 +87,11 @@ KIND_TITLES = {
 NO_TEST = "no_test"
 # The results of a rule with a test, in the order the report lists them.
 RULE_RESULTS = (PASSED, FAILED, NOT_RUN)
+# How well a rule is covered: some test checks it fully; its tests all check
+# it only in part (`partly`); or no test cites it.
+FULL = "full"
+PARTIAL = "partial"
+NONE = "none"
 # How the report writes test outcomes and rule results.
 LABELS = {
   PASSED: "passed",
@@ -148,9 +155,13 @@ class Tally:
     rules: How many rules there are.
     testable: How many of them this suite can test.
     testable_must: How many of the testable rules are MUST or MUST NOT.
-    covered: How many testable rules at least one test cites.
-    covered_must: How many testable MUST and MUST NOT rules at least one
-      test cites.
+    covered: How many testable rules some test checks fully.
+    covered_must: How many testable MUST and MUST NOT rules some test checks
+      fully.
+    partial: How many testable rules are cited only by tests that check them
+      in part.
+    partial_must: How many testable MUST and MUST NOT rules are cited only
+      by tests that check them in part.
 
   """
 
@@ -159,15 +170,17 @@ class Tally:
   testable_must: int
   covered: int
   covered_must: int
+  partial: int = 0
+  partial_must: int = 0
 
   @property
   def uncovered_must(self) -> int:
     """Return how many testable MUST and MUST NOT rules no test cites."""
-    return self.testable_must - self.covered_must
+    return self.testable_must - self.covered_must - self.partial_must
 
   @property
   def must_coverage(self) -> float | None:
-    """Return the share of testable MUST and MUST NOT rules a test cites."""
+    """Return the share of testable MUST and MUST NOT rules checked fully."""
     if not self.testable_must:
       return None
     return self.covered_must / self.testable_must
@@ -199,6 +212,7 @@ class TestRow:
     reason: For the other kinds, its marker's reason.
     version: For `older_version`, the release the test checks.
     capabilities: The capabilities the test requires.
+    gaps: The rules it checks only in part, each with what it leaves out.
 
   """
 
@@ -209,6 +223,7 @@ class TestRow:
   reason: str
   version: str
   capabilities: tuple[str, ...]
+  gaps: tuple[tuple[str, str], ...] = ()
 
 
 @dataclasses.dataclass(frozen=True)
@@ -227,6 +242,8 @@ class Report:
     outcomes: After a run, each shopping test's outcome, by test ID; None
       when the tests weren't run.
     target: The server the tests ran against, if known.
+    gaps: For each rule a test cites only in part, keyed by the rule's ID
+      and the test's ID, what that test leaves unchecked.
 
   """
 
@@ -239,18 +256,37 @@ class Report:
   not_rules: int = 0
   outcomes: Mapping[str, Outcome] | None = None
   target: str = ""
+  gaps: Mapping[tuple[str, str], str] = MappingProxyType({})
 
   def markers(self) -> dict[str, int]:
     """Return how many tests carry each kind of marker, or none."""
     counts = collections.Counter(test.kind for test in self.tests)
     return {kind: counts[kind] for kind in (*MARKER_KINDS, UNMARKED)}
 
+  def gap(self, rule_id: str, test_id: str) -> str | None:
+    """Return what a test leaves unchecked of a rule it cites in part.
+
+    Args:
+      rule_id: The rule's ID.
+      test_id: The test's ID.
+
+    Returns:
+      The gap, or None when the test checks the rule fully or doesn't cite
+      it.
+
+    """
+    return self.gaps.get((rule_id, test_id))
+
+  def coverage(self, rule_id: str) -> str:
+    """Return how well tests cover a rule: `FULL`, `PARTIAL` or `NONE`."""
+    return _coverage(rule_id, self.cited_by.get(rule_id, ()), self.gaps)
+
   def result(self, rule_id: str) -> str | None:
     """Return a rule's result, from the outcomes of the tests that cite it.
 
     A rule passed when at least one of its tests passed and none failed or
     hit an error. It failed when any of them did, and it wasn't run when
-    none of them ran.
+    none of them ran. Tests that check the rule only in part count too.
 
     Args:
       rule_id: The rule's ID.
@@ -289,10 +325,11 @@ class RuleGroups:
   """A capability's rules, grouped as the report shows them.
 
   Attributes:
-    covered: The testable rules at least one test cites.
+    covered: The testable rules some test checks fully.
     uncovered_must: The testable MUST and MUST NOT rules no test cites.
     other: The other testable rules no test cites.
     untestable: The rules this suite cannot test.
+    partial: The testable rules cited only by tests that check them in part.
 
   """
 
@@ -300,6 +337,7 @@ class RuleGroups:
   uncovered_must: tuple[Rule, ...]
   other: tuple[Rule, ...]
   untestable: tuple[Rule, ...]
+  partial: tuple[Rule, ...] = ()
 
 
 def build(
@@ -326,10 +364,18 @@ def build(
     key=lambda row: row.test_id,
   )
   cited_by: dict[str, list[str]] = collections.defaultdict(list)
+  gaps: dict[tuple[str, str], str] = {}
   for row in rows:
     for rule_id in dict.fromkeys(row.rule_ids):
       if catalog.status(rule_id) == "rule":
         cited_by[rule_id].append(row.test_id)
+    for rule_id, gap in row.gaps:
+      if catalog.status(rule_id) == "rule":
+        gaps[(rule_id, row.test_id)] = gap
+  coverage = {
+    rule_id: _coverage(rule_id, tests, gaps)
+    for rule_id, tests in cited_by.items()
+  }
   rules = tuple(rule for rule in catalog.rules.values() if rule.is_rule)
   if outcomes is not None:
     missing = Outcome(NOT_RUN, "no outcome was recorded")
@@ -343,12 +389,12 @@ def build(
         capability,
         _tally(
           [rule for rule in rules if capability.name in rule.capabilities],
-          cited_by,
+          coverage,
         ),
       )
       for capability in _capabilities(catalog, rules)
     ),
-    total=_tally(rules, cited_by),
+    total=_tally(rules, coverage),
     rules=rules,
     cited_by=MappingProxyType(
       {rule_id: tuple(ids) for rule_id, ids in sorted(cited_by.items())}
@@ -357,6 +403,7 @@ def build(
     not_rules=len(catalog.rules) - len(rules),
     outcomes=outcomes,
     target=target,
+    gaps=MappingProxyType(dict(sorted(gaps.items()))),
   )
 
 
@@ -375,10 +422,11 @@ def rule_groups(report: Report, capability: str) -> RuleGroups:
   testable = [rule for rule in rules if rule.testable]
   uncited = [rule for rule in testable if rule.id not in report.cited_by]
   return RuleGroups(
-    covered=tuple(rule for rule in testable if rule.id in report.cited_by),
+    covered=tuple(r for r in testable if report.coverage(r.id) == FULL),
     uncovered_must=tuple(r for r in uncited if r.level in MUST_LEVELS),
     other=tuple(r for r in uncited if r.level not in MUST_LEVELS),
     untestable=tuple(rule for rule in rules if not rule.testable),
+    partial=tuple(r for r in testable if report.coverage(r.id) == PARTIAL),
   )
 
 
@@ -443,6 +491,12 @@ def to_json(report: Report) -> dict[str, Any]:
         "testable": rule.testable,
         "testable_reason": rule.testable_reason,
         "tests": list(report.cited_by.get(rule.id, ())),
+        "coverage": report.coverage(rule.id),
+        "gaps": {
+          test_id: gap
+          for test_id in report.cited_by.get(rule.id, ())
+          if (gap := report.gap(rule.id, test_id)) is not None
+        },
         "result": report.result(rule.id),
       }
       for rule in report.rules
@@ -453,6 +507,7 @@ def to_json(report: Report) -> dict[str, Any]:
         "module": test.module,
         "marker": test.kind,
         "rules": list(test.rule_ids),
+        "partial": dict(test.gaps),
         "reason": test.reason,
         "version": test.version,
         "capabilities": list(test.capabilities),
@@ -488,9 +543,10 @@ def to_markdown(report: Report, findings: str | None = None) -> str:
     "",
     "## Summary",
     "",
-    "| Capability | Extends | Rules | Testable | With a test | Testable MUST "
-    "| MUST with a test | MUST without a test | MUST coverage |",
-    "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+    "| Capability | Extends | Rules | Testable | Fully checked | Testable MUST "
+    "| MUST fully checked | MUST checked in part | MUST without a test "
+    "| MUST coverage |",
+    "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
   ]
   for row in _ordered(report):
     extends = ", ".join(_short_cap(name) for name in row.capability.extends)
@@ -551,10 +607,23 @@ def to_html(report: Report, findings: str | None = None) -> str:
     '<div class="cards">',
     _card(
       f"{total.covered_must} / {total.testable_must}",
-      "testable MUST and MUST NOT rules have a test "
+      "testable MUST and MUST NOT rules are fully checked by a test "
       f"({_percent(total.must_coverage)})",
     ),
-    _card(f"{total.covered} / {total.testable}", "testable rules have a test"),
+    *(
+      [
+        _card(
+          str(total.partial_must),
+          "more testable MUST and MUST NOT rules are checked only in part",
+        )
+      ]
+      if total.partial_must
+      else []
+    ),
+    _card(
+      f"{total.covered} / {total.testable}",
+      "testable rules are fully checked by a test",
+    ),
     _card(str(total.rules), "rules in the catalog"),
     _card(
       str(len(report.tests)),
@@ -634,17 +703,20 @@ def summary(report: Report, paths: Sequence[Path]) -> str:
     f"testable, {total.testable_must} of them MUST or MUST NOT\n"
     f"  {len(report.tests)} tests cite {len(report.cited_by)} rules; "
     f"{total.covered_must} of the {total.testable_must} testable MUST and "
-    f"MUST NOT rules have a test"
+    f"MUST NOT rules are fully checked by a test"
     + (f" ({share:.0%})" if share is not None else "")
-    + f", {total.uncovered_must} don't\n"
+    + (
+      f", {total.partial_must} more only in part" if total.partial_must else ""
+    )
+    + f", {total.uncovered_must} have no test\n"
   )
   counts = results(report, report.rules)
   if counts is not None:
     against = f" against {report.target}" if report.target else ""
     text += (
       f"  results{against}: {counts['must_passed']} of the "
-      f"{total.covered_must} testable MUST and MUST NOT rules with a test "
-      f"passed, {counts['must_failed']} failed, "
+      f"{_must_with_a_test(total)} testable MUST and MUST NOT rules with a "
+      f"test passed, {counts['must_failed']} failed, "
       f"{_not_run(counts['must_not_run'])}\n"
     )
   return text
@@ -711,17 +783,51 @@ def _capabilities(catalog: Catalog, rules: Sequence[Rule]) -> list[Capability]:
   return listed + [Capability(name) for name in sorted(others)]
 
 
-def _tally(rules: Sequence[Rule], cited: Mapping[str, object]) -> Tally:
-  """Count rules, testable rules and testable MUSTs, and those cited."""
+def _coverage(
+  rule_id: str,
+  tests: Iterable[str],
+  gaps: Mapping[tuple[str, str], str],
+) -> str:
+  """Return a rule's coverage from the tests that cite it and their gaps."""
+  tests = list(tests)
+  if not tests:
+    return NONE
+  if any((rule_id, test_id) not in gaps for test_id in tests):
+    return FULL
+  return PARTIAL
+
+
+def _tally(rules: Sequence[Rule], coverage: Mapping[str, str]) -> Tally:
+  """Count rules, testable rules and testable MUSTs, and how they're covered.
+
+  Args:
+    rules: The rules to count.
+    coverage: The coverage of each rule a test cites, by rule ID.
+
+  Returns:
+    The counts.
+
+  """
   testable = [rule for rule in rules if rule.testable]
   must = [rule for rule in testable if rule.level in MUST_LEVELS]
+
+  def count(group: Sequence[Rule], level: str) -> int:
+    return sum(coverage.get(rule.id) == level for rule in group)
+
   return Tally(
     rules=len(rules),
     testable=len(testable),
     testable_must=len(must),
-    covered=sum(rule.id in cited for rule in testable),
-    covered_must=sum(rule.id in cited for rule in must),
+    covered=count(testable, FULL),
+    covered_must=count(must, FULL),
+    partial=count(testable, PARTIAL),
+    partial_must=count(must, PARTIAL),
   )
+
+
+def _must_with_a_test(tally: Tally) -> int:
+  """Return how many testable MUSTs some test cites, fully or in part."""
+  return tally.covered_must + tally.partial_must
 
 
 def _tally_json(tally: Tally) -> dict[str, int]:
@@ -732,6 +838,8 @@ def _tally_json(tally: Tally) -> dict[str, int]:
     "testable_must": tally.testable_must,
     "covered": tally.covered,
     "covered_must": tally.covered_must,
+    "partial": tally.partial,
+    "partial_must": tally.partial_must,
     "uncovered_must": tally.uncovered_must,
   }
 
@@ -747,6 +855,7 @@ def _test_row(test: LoadedTest) -> TestRow:
     reason=marker.reason if marker else "",
     version=marker.version if marker else "",
     capabilities=tuple(sorted(test.capabilities)),
+    gaps=marker.gaps if marker else (),
   )
 
 
@@ -792,19 +901,22 @@ def _rules_with_result(report: Report, result: str) -> list[Rule]:
 def _intro(report: Report, code: Callable[[str], str]) -> str:
   """Return the sentence that says what the report is."""
   commit = report.spec_commit[:8] or "an unknown commit"
+  covered = (
+    f"A rule counts as covered when a test's {code('spec_assert')} marker "
+    f"cites it as fully checked; one cited only with {code('partly')} "
+    "counts as checked in part."
+  )
   if report.outcomes is None:
     return (
       f"Built from the requirements catalog at {code(commit)} and the "
-      f"shopping tests' markers. A rule counts as covered when a test's "
-      f"{code('spec_assert')} marker cites it: the report says which rules "
-      "have a test, not whether the tests pass."
+      f"shopping tests' markers. {covered} The report says which rules have "
+      "a test, not whether the tests pass."
     )
   run = f"a run against {code(report.target)}" if report.target else "a run"
   return (
     f"Built from the requirements catalog at {code(commit)}, the shopping "
-    f"tests' markers and {run}. A rule counts as covered when a test's "
-    f"{code('spec_assert')} marker cites it. It passed when at least one of "
-    "those tests passed and none failed, failed when any of them failed or "
+    f"tests' markers and {run}. {covered} A rule passed when at least one "
+    "of its tests passed and none failed, failed when any of them failed or "
     "hit an error, and wasn't run when none of them ran."
   )
 
@@ -812,11 +924,19 @@ def _intro(report: Report, code: Callable[[str], str]) -> str:
 def _headline(report: Report) -> str:
   """Return the sentence with the coverage numbers."""
   total = report.total
-  return (
+  text = (
     f"{total.covered_must} of the {total.testable_must} testable MUST and "
-    f"MUST NOT rules have a test ({_percent(total.must_coverage)}), and "
-    f"{total.covered} of the {total.testable} testable rules."
+    "MUST NOT rules are fully checked by a test "
+    f"({_percent(total.must_coverage)}), and {total.covered} of the "
+    f"{total.testable} testable rules."
   )
+  if total.partial_must:
+    rules = "rule is" if total.partial_must == 1 else "rules are"
+    text += (
+      f" {total.partial_must} more MUST and MUST NOT {rules} checked only in "
+      "part."
+    )
+  return text
 
 
 def _marker_parts(report: Report, code: Callable[[str], str]) -> list[str]:
@@ -839,8 +959,8 @@ def _results_headline(report: Report) -> str:
   """Return the sentence with the results for the testable MUSTs."""
   counts = results(report, report.rules) or {}
   return (
-    f"Of the {report.total.covered_must} testable MUST and MUST NOT rules "
-    f"with a test, {counts.get('must_passed', 0)} passed, "
+    f"Of the {_must_with_a_test(report.total)} testable MUST and MUST NOT "
+    f"rules with a test, {counts.get('must_passed', 0)} passed, "
     f"{counts.get('must_failed', 0)} failed and "
     f"{_not_run(counts.get('must_not_run', 0))}."
   )
@@ -877,13 +997,21 @@ def _capability_sentence(
   sentence = (
     f"{code(capability.name)}, {kind}: {tally.rules} rules, "
     f"{tally.testable} of them testable. {tally.covered_must} of its "
-    f"{tally.testable_must} testable MUST and MUST NOT rules have a test "
-    f"({_percent(tally.must_coverage)})."
+    f"{tally.testable_must} testable MUST and MUST NOT rules are fully "
+    f"checked by a test ({_percent(tally.must_coverage)})"
+    + (f", and {tally.partial_must} more in part" if tally.partial_must else "")
+    + "."
   )
   counts = results(report, _rules_of(report, capability.name))
-  if counts is not None and tally.covered_must:
+  with_a_test = _must_with_a_test(tally)
+  if counts is not None and with_a_test:
+    lead = (
+      f"Of the {with_a_test} with a test"
+      if tally.partial_must
+      else f"Of those {with_a_test}"
+    )
     sentence += (
-      f" Of those {tally.covered_must}, {counts['must_passed']} passed, "
+      f" {lead}, {counts['must_passed']} passed, "
       f"{counts['must_failed']} failed and "
       f"{_not_run(counts['must_not_run'])}."
     )
@@ -936,6 +1064,15 @@ def _notes(
     ),
     ("MUST", "Counts MUST and MUST NOT."),
   ]
+  if report.gaps:
+    notes.append(
+      (
+        "Partial claims",
+        f"A test cites a rule with {code('partly')} when its assertions "
+        "check only part of it, and says what they leave out. A rule only "
+        "such tests cite counts as checked in part, not covered.",
+      )
+    )
   if report.outcomes is not None:
     notes.append(
       (
@@ -991,7 +1128,13 @@ def _test_values(test: TestRow) -> list[str]:
   """Return what the report shows for a test, in its columns' order."""
   values = [_short_test(test.test_id), test.module.replace(".", "/") + ".py"]
   if test.kind == "spec_assert":
-    values.append(", ".join(_short_id(rule_id) for rule_id in test.rule_ids))
+    partial = {rule_id for rule_id, _ in test.gaps}
+    values.append(
+      ", ".join(
+        _short_id(rule_id) + (" (in part)" if rule_id in partial else "")
+        for rule_id in test.rule_ids
+      )
+    )
   elif test.kind == "older_version":
     values += [test.version, test.reason]
   elif test.kind != UNMARKED:
@@ -1094,6 +1237,7 @@ def _md_tally_row(label: str, extends: str, tally: Tally) -> str:
     tally.covered,
     tally.testable_must,
     tally.covered_must,
+    tally.partial_must,
     tally.uncovered_must,
     _percent(tally.must_coverage),
   ]
@@ -1117,9 +1261,13 @@ def _md_outcome(outcome: Outcome) -> str:
   return f"{result}: {_md_plain(outcome.detail)}" if outcome.detail else result
 
 
-def _md_test(report: Report, test_id: str, detail: bool = False) -> str:
-  """Return a test's name, with its outcome after a run."""
+def _md_test(
+  report: Report, test_id: str, detail: bool = False, gap: str | None = None
+) -> str:
+  """Return a test's name, its gap for a partly checked rule, and outcome."""
   name = f"`{_short_test(test_id)}`"
+  if gap is not None:
+    name += f" (in part: {_md_plain(gap)})"
   if report.outcomes is None:
     return name
   outcome = report.outcomes[test_id]
@@ -1163,11 +1311,11 @@ def _md_results_row(label: str, tally: Tally, counts: Mapping[str, int]) -> str:
   """Return a row of the results table."""
   cells = [
     label,
-    tally.covered,
+    tally.covered + tally.partial,
     counts[PASSED],
     counts[FAILED],
     counts[NOT_RUN],
-    tally.covered_must,
+    _must_with_a_test(tally),
     counts["must_passed"],
     counts["must_failed"],
     counts["must_not_run"],
@@ -1183,9 +1331,13 @@ def _md_capability(report: Report, row: CapabilityRow) -> list[str]:
     "",
     _capability_sentence(report, row, _md_code),
     "",
-    f"### Rules with a test: {len(groups.covered)}",
+    f"### Rules fully checked by a test: {len(groups.covered)}",
     "",
     *_md_rules(report, groups.covered, "tests"),
+    "",
+    f"### Rules checked only in part: {len(groups.partial)}",
+    "",
+    *_md_rules(report, groups.partial, "tests"),
     "",
     "### Testable MUST and MUST NOT rules without a test: "
     f"{len(groups.uncovered_must)}",
@@ -1218,7 +1370,8 @@ def _md_rules(report: Report, rules: Sequence[Rule], extra: str) -> list[str]:
     extra: "tests" for the tests that cite each rule, with their outcomes
       and the rule's result after a run; "outcomes" for those tests with
       their outcomes' details; "why" for why a rule isn't testable; or ""
-      for no extra column.
+      for no extra column. A test that checks the rule only in part shows
+      what it leaves out.
 
   Returns:
     The table's lines.
@@ -1236,7 +1389,11 @@ def _md_rules(report: Report, rules: Sequence[Rule], extra: str) -> list[str]:
     if extra in ("tests", "outcomes"):
       tests = report.cited_by.get(rule.id, ())
       detail = extra == "outcomes"
-      cells.append("<br>".join(_md_test(report, t, detail) for t in tests))
+      cells.append(
+        "<br>".join(
+          _md_test(report, t, detail, report.gap(rule.id, t)) for t in tests
+        )
+      )
     elif extra == "why":
       cells.append(_md_cell(rule.testable_reason))
     url = _source_url(report, rule)
@@ -1318,9 +1475,10 @@ def _html_summary(report: Report) -> str:
     "Extends",
     "Rules",
     "Testable",
-    "With a test",
+    "Fully checked",
     "Testable MUST",
-    "MUST with a test",
+    "MUST fully checked",
+    "MUST checked in part",
     "MUST without a test",
     "MUST coverage",
   ]
@@ -1349,6 +1507,7 @@ def _html_tally_cells(label: str, extends: str, tally: Tally) -> str:
       tally.covered,
       tally.testable_must,
       tally.covered_must,
+      tally.partial_must,
       tally.uncovered_must,
     )
   )
@@ -1372,9 +1531,13 @@ def _html_outcome(outcome: Outcome, detail: bool = True) -> str:
   return result
 
 
-def _html_test(report: Report, test_id: str, detail: bool = False) -> str:
-  """Return a test's name, with its outcome after a run."""
+def _html_test(
+  report: Report, test_id: str, detail: bool = False, gap: str | None = None
+) -> str:
+  """Return a test's name, its gap for a partly checked rule, and outcome."""
   name = _html_code(_short_test(test_id))
+  if gap is not None:
+    name += f" (in part: {html.escape(gap)})"
   if report.outcomes is None:
     return name
   return f"{name} {_html_outcome(report.outcomes[test_id], detail)}"
@@ -1384,7 +1547,7 @@ def _results_card(report: Report) -> str:
   """Return the headline card for the results."""
   counts = results(report, report.rules) or {}
   return _card(
-    f"{counts.get('must_passed', 0)} / {report.total.covered_must}",
+    f"{counts.get('must_passed', 0)} / {_must_with_a_test(report.total)}",
     "testable MUST and MUST NOT rules with a test passed: "
     f"{counts.get('must_failed', 0)} failed, "
     f"{counts.get('must_not_run', 0)} not run",
@@ -1440,14 +1603,15 @@ def _html_results_cells(
   label: str, tally: Tally, counts: Mapping[str, int]
 ) -> str:
   """Return a results row's cells, ending with a bar of the MUST results."""
+  with_a_test = _must_with_a_test(tally)
   numbers = "".join(
     f'<td class="num">{value}</td>'
     for value in (
-      tally.covered,
+      tally.covered + tally.partial,
       counts[PASSED],
       counts[FAILED],
       counts[NOT_RUN],
-      tally.covered_must,
+      with_a_test,
       counts["must_passed"],
       counts["must_failed"],
       counts["must_not_run"],
@@ -1455,13 +1619,13 @@ def _html_results_cells(
   )
   spans = "".join(
     f'<span class="{css}" style="width: '
-    f'{round(100 * counts[key] / tally.covered_must)}%"></span>'
+    f'{round(100 * counts[key] / with_a_test)}%"></span>'
     for key, css in (
       ("must_passed", "pass"),
       ("must_failed", "fail"),
       ("must_not_run", "skip"),
     )
-    if tally.covered_must and counts[key]
+    if with_a_test and counts[key]
   )
   return (
     f"<td>{label}</td>{numbers}"
@@ -1473,7 +1637,8 @@ def _html_capability(report: Report, row: CapabilityRow) -> str:
   """Return a capability's section."""
   groups = rule_groups(report, row.capability.name)
   sections = [
-    ("Rules with a test", groups.covered, "tests", True),
+    ("Rules fully checked by a test", groups.covered, "tests", True),
+    ("Rules checked only in part", groups.partial, "tests", True),
     (
       "Testable MUST and MUST NOT rules without a test",
       groups.uncovered_must,
@@ -1527,7 +1692,9 @@ def _html_rules(report: Report, rules: Sequence[Rule], extra: str) -> str:
     if extra in ("tests", "outcomes"):
       tests = report.cited_by.get(rule.id, ())
       detail = extra == "outcomes"
-      names = "<br>".join(_html_test(report, t, detail) for t in tests)
+      names = "<br>".join(
+        _html_test(report, t, detail, report.gap(rule.id, t)) for t in tests
+      )
       cells.append(f"<td>{names}</td>")
     elif extra == "why":
       cells.append(f"<td>{_html_text(rule.testable_reason)}</td>")

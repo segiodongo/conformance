@@ -290,6 +290,8 @@ class OutputTest(unittest.TestCase):
         "testable_must": 4,
         "covered": 3,
         "covered_must": 2,
+        "partial": 0,
+        "partial_must": 0,
         "uncovered_must": 2,
       },
     )
@@ -353,7 +355,7 @@ class OutputTest(unittest.TestCase):
     )
     self.assertIn(
       "6 tests cite 4 rules; 2 of the 4 testable MUST and MUST NOT rules "
-      "have a test (50%), 2 don't",
+      "are fully checked by a test (50%), 2 have no test",
       text,
     )
 
@@ -362,7 +364,7 @@ class OutputTest(unittest.TestCase):
     empty = Catalog(rules=MappingProxyType({}), retired=frozenset())
     text = report.summary(report.build(empty, ()), [])
     self.assertIn("catalog at an unknown commit: 0 rules", text)
-    self.assertIn("have a test, 0 don't", text)
+    self.assertIn("fully checked by a test, 0 have no test", text)
 
 
 class TagBalance(HTMLParser):
@@ -415,20 +417,21 @@ class RenderTest(unittest.TestCase):
     text = report.to_markdown(self.report)
     self.assertTrue(text.startswith("# Shopping requirements coverage\n"))
     self.assertIn(
-      "**2 of the 4 testable MUST and MUST NOT rules have a test (50%), and "
-      "3 of the 6 testable rules.** 6 shopping tests: 4 cite rules, "
-      "1 `no_rule`, 0 `scenario`, 0 `outside_catalog`, 0 `older_version`, "
-      "1 unmarked.",
+      "**2 of the 4 testable MUST and MUST NOT rules are fully checked by a "
+      "test (50%), and 3 of the 6 testable rules.** 6 shopping tests: 4 cite "
+      "rules, 1 `no_rule`, 0 `scenario`, 0 `outside_catalog`, 0 "
+      "`older_version`, 1 unmarked.",
       text,
     )
     rows = [
-      "| cart | – | 1 | 1 | 0 | 1 | 0 | 1 | 0% |",
-      "| checkout | – | 4 | 3 | 2 | 2 | 1 | 1 | 50% |",
-      "| catalog.lookup | – | 1 | 1 | 1 | 1 | 1 | 0 | 100% |",
-      "| catalog.search | – | 1 | 1 | 1 | 1 | 1 | 0 | 100% |",
-      "| other | – | 1 | 1 | 0 | 0 | 0 | 0 | – |",
-      "| discount | cart, checkout | 0 | 0 | 0 | 0 | 0 | 0 | – |",
-      "| **All rules, each counted once** |  | 7 | 6 | 3 | 4 | 2 | 2 | 50% |",
+      "| cart | – | 1 | 1 | 0 | 1 | 0 | 0 | 1 | 0% |",
+      "| checkout | – | 4 | 3 | 2 | 2 | 1 | 0 | 1 | 50% |",
+      "| catalog.lookup | – | 1 | 1 | 1 | 1 | 1 | 0 | 0 | 100% |",
+      "| catalog.search | – | 1 | 1 | 1 | 1 | 1 | 0 | 0 | 100% |",
+      "| other | – | 1 | 1 | 0 | 0 | 0 | 0 | 0 | – |",
+      "| discount | cart, checkout | 0 | 0 | 0 | 0 | 0 | 0 | 0 | – |",
+      "| **All rules, each counted once** |  | 7 | 6 | 3 | 4 | 2 | 0 | 2 "
+      "| 50% |",
     ]
     positions = [text.index(row) for row in rows]
     self.assertEqual(positions, sorted(positions))
@@ -443,9 +446,10 @@ class RenderTest(unittest.TestCase):
     )
     for expected in (
       "## checkout\n\n`dev.ucp.shopping.checkout`, a capability: 4 rules, 3 "
-      "of them testable. 1 of its 2 testable MUST and MUST NOT rules have a "
-      "test (50%).",
-      "### Rules with a test: 2",
+      "of them testable. 1 of its 2 testable MUST and MUST NOT rules are "
+      "fully checked by a test (50%).",
+      "### Rules fully checked by a test: 2",
+      "### Rules checked only in part: 0\n\nNone.",
       "| CHECKOUT-0001 | MUST | The business MUST do "
       "REQ-SHOPPING-CHECKOUT-0001. | `ExampleTest.test_a`<br>"
       f"`ExampleTest.test_b` | {source} |",
@@ -483,7 +487,7 @@ class RenderTest(unittest.TestCase):
       '<section id="cap-catalog-lookup">',
       '<span style="width: 50%"></span>',
       '<tr class="total"><td>All rules, each counted once</td>',
-      "<details open><summary>Rules with a test (2)</summary>",
+      "<details open><summary>Rules fully checked by a test (2)</summary>",
       "<details><summary>Not testable by this suite (1)</summary>",
       "<code>ExampleTest.test_a</code><br><code>ExampleTest.test_b</code>",
       '<a href="../findings.md">findings.md</a>',
@@ -521,15 +525,189 @@ class RenderTest(unittest.TestCase):
       tally = row.tally
       with self.subTest(row.capability.name):
         self.assertEqual(len(groups.covered), tally.covered)
+        self.assertEqual(len(groups.partial), tally.partial)
         self.assertEqual(len(groups.uncovered_must), tally.uncovered_must)
         self.assertEqual(
-          len(groups.covered) + len(groups.uncovered_must) + len(groups.other),
+          len(groups.covered)
+          + len(groups.partial)
+          + len(groups.uncovered_must)
+          + len(groups.other),
           tally.testable,
         )
         self.assertEqual(len(groups.untestable), tally.rules - tally.testable)
     checkout = report.rule_groups(self.report, CHECKOUT)
     self.assertEqual(
       [rule.id for rule in checkout.untestable], ["REQ-SHOPPING-CHECKOUT-0004"]
+    )
+
+
+# Partial claims: test_p checks CHECKOUT-0001 only in part and CHECKOUT-0002
+# fully; test_q checks CHECKOUT-0002 and CART-0001 only in part.
+PARTIAL_TESTS = (
+  loaded(
+    "test_p",
+    SpecMarker(
+      "spec_assert",
+      rule_ids=("REQ-SHOPPING-CHECKOUT-0001", "REQ-SHOPPING-CHECKOUT-0002"),
+      gaps=(("REQ-SHOPPING-CHECKOUT-0001", "whole numbers only"),),
+    ),
+  ),
+  loaded(
+    "test_q",
+    SpecMarker(
+      "spec_assert",
+      rule_ids=("REQ-SHOPPING-CHECKOUT-0002", "REQ-SHOPPING-CART-0001"),
+      gaps=(
+        ("REQ-SHOPPING-CHECKOUT-0002", "headers only"),
+        ("REQ-SHOPPING-CART-0001", "create only"),
+      ),
+    ),
+  ),
+)
+
+
+class PartialClaimTest(unittest.TestCase):
+  """Tests for rules that tests check only in part."""
+
+  def setUp(self):
+    """Build the report for the partial claims."""
+    super().setUp()
+    self.report = report.build(CATALOG, PARTIAL_TESTS)
+
+  def test_coverage_and_gaps(self):
+    """Test that only a full claim covers a rule, and that gaps are kept."""
+    self.assertEqual(
+      {rule.id: self.report.coverage(rule.id) for rule in self.report.rules},
+      {
+        "REQ-SHOPPING-CART-0001": report.PARTIAL,
+        "REQ-SHOPPING-CATALOG-0001": report.NONE,
+        "REQ-SHOPPING-CHECKOUT-0001": report.PARTIAL,
+        "REQ-SHOPPING-CHECKOUT-0002": report.FULL,
+        "REQ-SHOPPING-CHECKOUT-0003": report.NONE,
+        "REQ-SHOPPING-CHECKOUT-0004": report.NONE,
+        "REQ-SHOPPING-OTHER-0001": report.NONE,
+      },
+    )
+    self.assertEqual(
+      self.report.gap("REQ-SHOPPING-CHECKOUT-0001", full_id("test_p")),
+      "whole numbers only",
+    )
+    self.assertIsNone(
+      self.report.gap("REQ-SHOPPING-CHECKOUT-0002", full_id("test_p"))
+    )
+
+  def test_counts_and_groups(self):
+    """Test that partly checked rules are counted apart from covered ones."""
+    total = self.report.total
+    self.assertEqual(
+      total,
+      report.Tally(
+        rules=7,
+        testable=6,
+        testable_must=4,
+        covered=1,
+        covered_must=1,
+        partial=2,
+        partial_must=2,
+      ),
+    )
+    self.assertEqual(total.uncovered_must, 1)
+    self.assertEqual(total.must_coverage, 0.25)
+    checkout = report.rule_groups(self.report, CHECKOUT)
+    self.assertEqual(
+      [rule.id for rule in checkout.covered], ["REQ-SHOPPING-CHECKOUT-0002"]
+    )
+    self.assertEqual(
+      [rule.id for rule in checkout.partial], ["REQ-SHOPPING-CHECKOUT-0001"]
+    )
+    self.assertEqual(checkout.uncovered_must, ())
+
+  def test_json(self):
+    """Test each rule's coverage and gaps, and each test's partial claims."""
+    data = report.to_json(self.report)
+    self.assertEqual(
+      (data["totals"]["partial"], data["totals"]["partial_must"]), (2, 2)
+    )
+    by_id = {entry["id"]: entry for entry in data["rules"]}
+    full = by_id["REQ-SHOPPING-CHECKOUT-0002"]
+    self.assertEqual(full["coverage"], "full")
+    self.assertEqual(full["gaps"], {full_id("test_q"): "headers only"})
+    self.assertEqual(by_id["REQ-SHOPPING-CART-0001"]["coverage"], "partial")
+    self.assertEqual(by_id["REQ-SHOPPING-CATALOG-0001"]["coverage"], "none")
+    self.assertEqual(by_id["REQ-SHOPPING-CATALOG-0001"]["gaps"], {})
+    tests = {entry["id"]: entry for entry in data["tests"]}
+    self.assertEqual(
+      tests[full_id("test_p")]["partial"],
+      {"REQ-SHOPPING-CHECKOUT-0001": "whole numbers only"},
+    )
+
+  def test_markdown_and_html(self):
+    """Test the headline, the extra column, the section and the gaps."""
+    text = report.to_markdown(self.report)
+    for expected in (
+      "**1 of the 4 testable MUST and MUST NOT rules are fully checked by a "
+      "test (25%), and 1 of the 6 testable rules. 2 more MUST and MUST NOT "
+      "rules are checked only in part.**",
+      "| checkout | – | 4 | 3 | 1 | 2 | 1 | 1 | 0 | 50% |",
+      "1 of its 2 testable MUST and MUST NOT rules are fully checked by a "
+      "test (50%), and 1 more in part.",
+      "### Rules checked only in part: 1",
+      "`ExampleTest.test_p` (in part: whole numbers only)",
+      "`ExampleTest.test_p`<br>`ExampleTest.test_q` (in part: headers only)",
+      "| `ExampleTest.test_p` | `shopping/checkout/example_test.py` | "
+      "CHECKOUT-0001 (in part), CHECKOUT-0002 |",
+      "- **Partial claims:** A test cites a rule with `partly`",
+    ):
+      self.assertIn(expected, text)
+    page = report.to_html(self.report)
+    for expected in (
+      '<div class="big">2</div>more testable MUST and MUST NOT rules are '
+      "checked only in part",
+      "<details open><summary>Rules checked only in part (1)</summary>",
+      "<code>ExampleTest.test_q</code> (in part: headers only)",
+    ):
+      self.assertIn(expected, page)
+    balance = TagBalance()
+    balance.feed(page)
+    self.assertEqual((balance.open, balance.mismatched), ([], []))
+
+  def test_summary_and_results(self):
+    """Test the console lines, and that results count partly checked rules."""
+    text = report.summary(self.report, [Path("out/matrix.json")])
+    self.assertIn(
+      "1 of the 4 testable MUST and MUST NOT rules are fully checked by a "
+      "test (25%), 2 more only in part, 1 have no test\n",
+      text,
+    )
+    run = report.build(
+      CATALOG,
+      PARTIAL_TESTS,
+      {
+        full_id("test_p"): Outcome(PASSED),
+        full_id("test_q"): Outcome(FAILED, "missing header"),
+      },
+      TARGET,
+    )
+    self.assertEqual(
+      report.results(run, run.rules),
+      {
+        "passed": 1,
+        "failed": 2,
+        "not_run": 0,
+        "must_passed": 1,
+        "must_failed": 2,
+        "must_not_run": 0,
+      },
+    )
+    self.assertIn(
+      "results against http://localhost:8182: 1 of the 3 testable MUST and "
+      "MUST NOT rules with a test passed, 2 failed, 0 weren't run\n",
+      report.summary(run, []),
+    )
+    self.assertIn(
+      "**Of the 3 testable MUST and MUST NOT rules with a test, 1 passed, 2 "
+      "failed and 0 weren't run.**",
+      report.to_markdown(run),
     )
 
 

@@ -74,9 +74,12 @@ class SpecMarker:
 
   Attributes:
     kind: One of `MARKER_KINDS`.
-    rule_ids: For "spec_assert", the IDs of the rules the test checks.
+    rule_ids: For "spec_assert", the IDs of every rule the test cites, those
+      it checks fully and those it checks only in part, in the order given.
     reason: For the other kinds, why the test cites no rule in the catalog.
     version: For "older_version", the specification release the test checks.
+    gaps: For "spec_assert", the rules the test checks only in part, each
+      with what the test leaves unchecked, in the order given.
 
   """
 
@@ -84,29 +87,84 @@ class SpecMarker:
   rule_ids: tuple[str, ...] = ()
   reason: str = ""
   version: str = ""
+  gaps: tuple[tuple[str, str], ...] = ()
+
+  @property
+  def partial_ids(self) -> frozenset[str]:
+    """Return the IDs of the rules the test checks only in part."""
+    return frozenset(rule_id for rule_id, _ in self.gaps)
 
 
-def spec_assert(*rule_ids: str) -> Callable[[T], T]:
+@dataclasses.dataclass(frozen=True)
+class PartialClaim:
+  """A rule a test checks only in part; see `partly`.
+
+  Attributes:
+    rule_id: The rule's ID.
+    gap: What the test leaves unchecked.
+
+  """
+
+  rule_id: str
+  gap: str
+
+
+def partly(rule_id: str, gap: str) -> PartialClaim:
+  """Cite a rule the test checks only in part, saying what it leaves out.
+
+  Use it inside `spec_assert`, next to the rules the test checks fully:
+
+    @spec_assert(
+      "REQ-SHOPPING-CHECKOUT-0134",  # exactly one "total" entry
+      partly(
+        "REQ-SHOPPING-CHECKOUT-0016",  # line total is price x quantity
+        "whole-number quantities only, so scale and rounding aren't checked",
+      ),
+    )
+
+  The report counts a rule as covered only when some test checks it fully;
+  a rule cited only this way counts as checked in part, with its gap.
+
+  Args:
+    rule_id: The rule's ID.
+    gap: What the test's assertions leave unchecked.
+
+  Returns:
+    The claim, for `spec_assert`.
+
+  Raises:
+    ValueError: If the gap is empty.
+
+  """
+  return PartialClaim(rule_id, _reason("partly", gap))
+
+
+def spec_assert(*claims: str | PartialClaim) -> Callable[[T], T]:
   """Mark a test as checking one or more specification rules.
 
   Rules are cited by their stable ID in the requirements catalog, such as
   `REQ-SHOPPING-CHECKOUT-0133`. Cite the rules the test's assertions check,
-  not every rule the test passes through on the way. Like the other markers,
-  this only labels the test: it runs exactly as before. A test takes one
-  marker.
+  not every rule the test passes through on the way, and wrap a rule the
+  test checks only in part in `partly`. Like the other markers, this only
+  labels the test: it runs exactly as before. A test takes one marker.
 
   Args:
-    *rule_ids: The IDs of the rules the test checks.
+    *claims: The IDs of the rules the test checks fully, and `partly` claims
+      for those it checks only in part.
 
   Returns:
     A decorator for a test method.
 
   Raises:
-    ValueError: If no ID is given, or an ID is malformed or given twice.
+    ValueError: If no rule is given, or an ID is malformed or given twice.
 
   """
-  if not rule_ids:
+  if not claims:
     raise ValueError("spec_assert needs at least one rule ID")
+  rule_ids = tuple(
+    claim.rule_id if isinstance(claim, PartialClaim) else claim
+    for claim in claims
+  )
   malformed = [
     rule_id
     for rule_id in rule_ids
@@ -119,7 +177,12 @@ def spec_assert(*rule_ids: str) -> Callable[[T], T]:
   )
   if repeated:
     raise ValueError(f"spec_assert: rule IDs given twice {repeated}")
-  return _label(SpecMarker("spec_assert", rule_ids=tuple(rule_ids)))
+  gaps = tuple(
+    (claim.rule_id, claim.gap)
+    for claim in claims
+    if isinstance(claim, PartialClaim)
+  )
+  return _label(SpecMarker("spec_assert", rule_ids=rule_ids, gaps=gaps))
 
 
 def no_rule(reason: str) -> Callable[[T], T]:

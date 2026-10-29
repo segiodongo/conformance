@@ -81,7 +81,9 @@ Each shopping test says which rules it checks, with one marker from
 `framework/decorators.py`:
 
 - `@spec_assert("REQ-SHOPPING-CHECKOUT-0133", ...)`: the rules its assertions
-  check, by stable ID, each with a comment giving the rule's wording;
+  check, by stable ID, each with a comment giving the rule's wording. A rule
+  they check only in part is wrapped in `partly(id, gap)`, where the gap says
+  what the test leaves unchecked;
 - `@no_rule("...")`: the spec describes the behaviour without an RFC 2119
   keyword, so there is no rule to cite;
 - `@scenario("...")`: the test checks a store's own data, such as a
@@ -90,6 +92,18 @@ Each shopping test says which rules it checks, with one marker from
   this catalog doesn't cover, such as the core overview page;
 - `@older_version("2026-04-08", "...")`: the test checks behaviour from an
   older release that this specification has changed, so it needs updating.
+
+For example, a totals test that checks one rule fully and another in part:
+
+```python
+@spec_assert(
+  partly(
+    "REQ-SHOPPING-CHECKOUT-0016",  # line total MUST be price x quantity
+    "a quantity of 1 only, so scale and rounding aren't checked",
+  ),
+  "REQ-SHOPPING-CHECKOUT-0134",  # Exactly one "total" MUST be present
+)
+```
 
 `framework/requirements.py` looks rules up in the catalog. Before any test
 runs, the runner checks every shopping test's marker against it, and so does
@@ -137,25 +151,28 @@ The Markdown and HTML pages hold:
 
 - **Summary:** for each capability, then each extension, and for all rules
   counted once: the rules, the testable rules, the testable MUST and MUST NOT
-  rules, and how many of those at least one test cites;
+  rules, and how many of those a test checks fully, or only in part;
 - **Results,** after a run: for each capability, how many of its testable
   rules with a test passed, failed or weren't run, then the rules that failed
   and the rules whose tests didn't run, with their tests' messages;
-- **A section per capability:** the rules with a test, with their results
-  after a run, then the testable MUST and MUST NOT rules without one, which
-  is the to-do list; the other testable rules and the rules this suite can't
-  test are folded away;
+- **A section per capability:** the rules a test checks fully, then those
+  checked only in part, each test with its gap, with their results after a
+  run; then the testable MUST and MUST NOT rules without a test, which is the
+  to-do list; the other testable rules and the rules this suite can't test
+  are folded away;
 - **Tests:** every shopping test, grouped by marker, with its outcome after a
   run;
 - **Notes:** what the counts mean, with a link to `findings.md`.
 
-A rule counts as covered when a `spec_assert` marker cites it. After a run,
-it passed when at least one of the tests that cite it passed and none
-failed; it failed when any of them failed or hit an error; and it wasn't run
-when they were all skipped or didn't run. A passing test shows only what its
-assertions check, which may be part of a rule: `findings.md` lists the
-partial claims. Outcomes come from the runner, so a pytest run doesn't
-record them.
+A rule counts as covered when a `spec_assert` marker cites it as fully
+checked. A rule cited only with `partly` counts as checked in part, not
+covered, and in `matrix.json` each rule's `coverage` is `full`, `partial` or
+`none`. After a run, a rule passed when at least one of the tests that cite
+it passed and none failed; it failed when any of them failed or hit an
+error; and it wasn't run when they were all skipped or didn't run. Tests
+that check the rule only in part count here too, so a pass shows only what
+their assertions check. `findings.md` explains each partial claim. Outcomes
+come from the runner, so a pytest run doesn't record them.
 
 The report covers the tests the run selects, with `--suite` and `-k`.
 `requirements/reports/` isn't committed.

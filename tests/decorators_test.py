@@ -21,6 +21,7 @@ from framework.decorators import (
   no_rule,
   older_version,
   outside_catalog,
+  partly,
   scenario,
   spec_assert,
   spec_marker,
@@ -66,6 +67,40 @@ class SpecAssertTest(unittest.TestCase):
     ):
       with self.subTest(rule_ids=rule_ids), self.assertRaises(ValueError):
         spec_assert(*rule_ids)
+
+  def test_records_partial_claims(self):
+    """Test that partly() rules are cited in order, each with its gap."""
+
+    @spec_assert(RULE, partly(OTHER_RULE, "  whole numbers only "))
+    def test_method():
+      pass
+
+    marker = spec_marker(test_method)
+    self.assertEqual(
+      marker,
+      SpecMarker(
+        "spec_assert",
+        rule_ids=(RULE, OTHER_RULE),
+        gaps=((OTHER_RULE, "whole numbers only"),),
+      ),
+    )
+    self.assertEqual(marker.partial_ids, frozenset({OTHER_RULE}))
+    self.assertEqual(
+      SpecMarker("spec_assert", rule_ids=(RULE,)).partial_ids, frozenset()
+    )
+
+  def test_rejects_bad_partial_claims(self):
+    """Test that an empty gap, a bad ID or a rule cited twice fails."""
+    for gap in ("", "   ", None):
+      with self.subTest(gap=gap), self.assertRaises(ValueError):
+        partly(RULE, gap)
+    for claims in (
+      (partly("REQ-SHOPPING-CHECKOUT", "a gap"),),
+      (RULE, partly(RULE, "a gap")),
+      (partly(RULE, "a gap"), partly(RULE, "another gap")),
+    ):
+      with self.subTest(claims=claims), self.assertRaises(ValueError):
+        spec_assert(*claims)
 
 
 class ReasonMarkerTest(unittest.TestCase):
