@@ -40,6 +40,7 @@ from framework.requirements import (
   Capability,
   Catalog,
   Rule,
+  Statement,
   load_catalog,
 )
 
@@ -273,6 +274,7 @@ class OutputTest(unittest.TestCase):
         "format",
         "spec_commit",
         "totals",
+        "versions",
         "not_rules",
         "markers",
         "run",
@@ -294,6 +296,19 @@ class OutputTest(unittest.TestCase):
         "partial_must": 0,
         "uncovered_must": 2,
       },
+    )
+    # Without a history, the only version is the catalog's own.
+    self.assertEqual(
+      data["versions"],
+      [
+        {
+          "version": "draft",
+          "testable_must": 4,
+          "covered_must": 2,
+          "partial_must": 0,
+          "uncovered_must": 2,
+        }
+      ],
     )
     discount = data["capabilities"][2]
     self.assertEqual(
@@ -711,6 +726,135 @@ class PartialClaimTest(unittest.TestCase):
     )
 
 
+def stated(version: str, level: str = "MUST") -> Statement:
+  """Return how a release states a rule."""
+  return Statement(
+    version, level, "The business MUST do it.", "docs/specification/a.md", 1
+  )
+
+
+# A catalog with a history: a rule that was a SHOULD in its first release, a
+# rule new in the draft, an untestable rule, and a rule only 2026-01-11
+# states.
+HISTORY_VERSIONS = ("2026-01-11", "2026-04-08", "draft")
+REMOVED_RULE = dataclasses.replace(
+  rule("REQ-SHOPPING-CHECKOUT-0090", (CHECKOUT,)),
+  since="2026-01-11",
+  until="2026-04-08",
+  statements=(stated("2026-01-11"),),
+)
+HISTORY_CATALOG = Catalog(
+  rules=MappingProxyType(
+    {
+      r.id: r
+      for r in (
+        dataclasses.replace(
+          rule("REQ-SHOPPING-CHECKOUT-0001", (CHECKOUT,)),
+          since="2026-01-11",
+          statements=(stated("2026-01-11", "SHOULD"), stated("2026-04-08")),
+        ),
+        rule("REQ-SHOPPING-CHECKOUT-0002", (CHECKOUT,), level="MUST NOT"),
+        dataclasses.replace(
+          rule("REQ-SHOPPING-CHECKOUT-0004", (CHECKOUT,), testable=False),
+          since="2026-04-08",
+          statements=(stated("2026-04-08"),),
+        ),
+      )
+    }
+  ),
+  retired=frozenset({REMOVED_RULE.id}),
+  capabilities=(Capability(CHECKOUT),),
+  spec_commit="abc123def456",
+  removed=MappingProxyType({REMOVED_RULE.id: REMOVED_RULE}),
+  versions=HISTORY_VERSIONS,
+)
+HISTORY_TESTS = (
+  loaded("test_a", cites("REQ-SHOPPING-CHECKOUT-0001")),
+  loaded(
+    "test_b",
+    SpecMarker(
+      "spec_assert",
+      rule_ids=(REMOVED_RULE.id,),
+      gaps=((REMOVED_RULE.id, "one case only"),),
+    ),
+  ),
+)
+
+
+class VersionsTest(unittest.TestCase):
+  """Tests for the view by release."""
+
+  def setUp(self):
+    """Build the report for the catalog with a history."""
+    super().setUp()
+    self.report = report.build(HISTORY_CATALOG, HISTORY_TESTS)
+
+  def test_rows(self):
+    """Test each version's counts, at the level that version states."""
+    self.assertEqual(
+      self.report.versions,
+      (
+        # Only the removed rule is a MUST then, and its test checks part.
+        report.VersionRow("2026-01-11", 1, 0, 1),
+        report.VersionRow("2026-04-08", 1, 1, 0),
+        report.VersionRow("draft", 2, 1, 0),
+      ),
+    )
+    draft = self.report.versions[-1]
+    self.assertEqual(
+      (draft.testable_must, draft.covered_must, draft.uncovered_must),
+      (
+        self.report.total.testable_must,
+        self.report.total.covered_must,
+        self.report.total.uncovered_must,
+      ),
+    )
+    self.assertEqual(draft.must_coverage, 0.5)
+    # The removed rule counts only in the view by release.
+    self.assertNotIn(REMOVED_RULE.id, self.report.cited_by)
+    self.assertNotIn(REMOVED_RULE, self.report.rules)
+
+  def test_outputs(self):
+    """Test the table in Markdown and HTML, and the fields in JSON."""
+    markdown = report.to_markdown(self.report)
+    self.assertIn(
+      f"### By release\n\n{report.VERSIONS_INTRO}\n\n"
+      "| Version | Testable MUST stated | MUST fully checked | MUST checked "
+      "in part | MUST without a test | MUST coverage |\n"
+      "| --- | ---: | ---: | ---: | ---: | ---: |\n"
+      "| 2026-01-11 | 1 | 0 | 1 | 0 | 0% |\n"
+      "| 2026-04-08 | 1 | 1 | 0 | 0 | 100% |\n"
+      "| draft (abc123de) | 2 | 1 | 0 | 1 | 50% |\n",
+      markdown,
+    )
+    self.assertIn("- **Releases:** The view by release counts", markdown)
+    page = report.to_html(self.report)
+    self.assertIn("<h3>By release</h3>", page)
+    self.assertIn("<td>draft (abc123de)</td>", page)
+    balance = TagBalance()
+    balance.feed(page)
+    self.assertEqual((balance.open, balance.mismatched), ([], []))
+    data = report.to_json(self.report)
+    self.assertEqual(
+      [row["version"] for row in data["versions"]], list(HISTORY_VERSIONS)
+    )
+    by_id = {entry["id"]: entry for entry in data["rules"]}
+    self.assertEqual(
+      (
+        by_id["REQ-SHOPPING-CHECKOUT-0001"]["since"],
+        by_id["REQ-SHOPPING-CHECKOUT-0001"]["versions"],
+      ),
+      ("2026-01-11", list(HISTORY_VERSIONS)),
+    )
+
+  def test_no_history(self):
+    """Test that a catalog without a history has no view by release."""
+    plain = report.build(CATALOG, TESTS)
+    self.assertEqual([row.version for row in plain.versions], ["draft"])
+    self.assertNotIn("By release", report.to_markdown(plain))
+    self.assertNotIn("By release", report.to_html(plain))
+
+
 class ResultsTest(unittest.TestCase):
   """Tests for the report after a run, with each test's outcome."""
 
@@ -934,6 +1078,23 @@ class RepositoryReportTest(unittest.TestCase):
     self.assertEqual(data["tests"], [])
     self.assertIn("- **Findings:** [findings.md](", markdown)
     self.assertIn('<div class="big">0 / 104</div>', page)
+
+  def test_by_release(self):
+    """Test the testable MUST rules each version states."""
+    built = report.build(load_catalog(), ())
+    self.assertEqual(
+      [(row.version, row.testable_must) for row in built.versions],
+      [
+        ("2026-01-11", 22),
+        ("2026-01-23", 23),
+        ("2026-04-08", 64),
+        ("2026-08-25", 102),
+        ("draft", 104),
+      ],
+    )
+    self.assertEqual(
+      built.versions[-1].testable_must, built.total.testable_must
+    )
 
 
 class RunnerTest(unittest.TestCase):

@@ -27,17 +27,22 @@ import unittest
 from framework import requirements
 from framework.requirements import (
   DEFAULT_CATALOG_DIR,
+  HISTORY_FILE,
   ID_RE,
   INDEX_FILE,
   LOCK_FILE,
   Capability,
   CatalogError,
   Rule,
+  Statement,
   load_catalog,
 )
 
 PAGE = "docs/specification/shopping/cart/index.md"
+# The page as a release before the shopping folder named it.
+OLD_PAGE = "docs/specification/cart.md"
 TESTABLE = {"testable": True, "testable_reason": "aimed at the business"}
+VERSIONS = ["2026-01-11", "2026-04-08", "draft"]
 
 
 def record(
@@ -247,6 +252,92 @@ class SmallCatalogTest(unittest.TestCase):
     with self.assertRaises(CatalogError):
       load_catalog(self.catalog_dir)
 
+  def write_history(self, removed: list[dict[str, Any]]) -> None:
+    """Write a history of three versions with some removed rules."""
+    (self.catalog_dir / HISTORY_FILE).write_text(
+      json.dumps({"versions": VERSIONS, "removed": removed}), encoding="utf-8"
+    )
+
+  def test_reads_the_history(self):
+    """Test the releases a rule records, and a rule only older ones state."""
+    stated = {
+      **TESTABLE,
+      "since": "2026-01-11",
+      "releases": [
+        {
+          "version": "2026-01-11",
+          "file": OLD_PAGE,
+          "start_line": 3,
+          "level": "SHOULD",
+          "text_digest": "aaaaaaaaaa",
+          "clause": "The business **SHOULD** keep it.",
+        },
+        {
+          "version": "2026-04-08",
+          "file": OLD_PAGE,
+          "start_line": 9,
+          "level": "MUST",
+          "text_digest": "bbbbbbbbbb",
+        },
+      ],
+    }
+    self.write(
+      [record("REQ-SHOPPING-CART-0001", demo=stated)],
+      {"REQ-SHOPPING-CART-0001": "active", "REQ-SHOPPING-CART-0002": "retired"},
+    )
+    removed = {
+      **TESTABLE,
+      "since": "2026-01-11",
+      "until": "2026-04-08",
+      "releases": [
+        {
+          "version": "2026-01-11",
+          "file": OLD_PAGE,
+          "start_line": 5,
+          "level": "MUST",
+          "text_digest": "cccccccccc",
+        }
+      ],
+    }
+    self.write_history([record("REQ-SHOPPING-CART-0002", demo=removed)])
+    catalog = load_catalog(self.catalog_dir)
+    self.assertEqual(catalog.versions, tuple(VERSIONS))
+    rule = catalog.rules["REQ-SHOPPING-CART-0001"]
+    self.assertEqual((rule.since, rule.until), ("2026-01-11", None))
+    self.assertEqual(rule.versions, tuple(VERSIONS))
+    self.assertEqual(
+      [rule.level_in(v) for v in ("2026-01-11", "2026-01-23", *VERSIONS[1:])],
+      ["SHOULD", None, "MUST", "MUST"],
+    )
+    self.assertEqual(
+      rule.statements[0],
+      Statement(
+        "2026-01-11", "SHOULD", "The business **SHOULD** keep it.", OLD_PAGE, 3
+      ),
+    )
+    # A statement in the rule's own wording takes the record's clause.
+    self.assertEqual(rule.statements[1].clause, rule.clause)
+    self.assertEqual(catalog.status("REQ-SHOPPING-CART-0002"), "removed")
+    gone = catalog.rule("REQ-SHOPPING-CART-0002")
+    self.assertEqual(
+      (gone.since, gone.until, gone.versions),
+      ("2026-01-11", "2026-04-08", ("2026-01-11",)),
+    )
+    self.assertIsNone(gone.level_in("draft"))
+    self.assertNotIn(gone.id, catalog.rules)
+
+  def test_rejects_a_removed_rule_that_is_not_retired(self):
+    """Test that a removed rule must have a retired ID in the lock."""
+    self.write(
+      [record("REQ-SHOPPING-CART-0001")], {"REQ-SHOPPING-CART-0001": "active"}
+    )
+    for rule_id in ("REQ-SHOPPING-CART-0001", "REQ-SHOPPING-CART-0002"):
+      with self.subTest(rule_id):
+        requirements._load.cache_clear()
+        self.write_history([record(rule_id)])
+        with self.assertRaises(CatalogError):
+          load_catalog(self.catalog_dir)
+
 
 class RepositoryCatalogTest(unittest.TestCase):
   """Tests against this repository's catalog."""
@@ -286,6 +377,27 @@ class RepositoryCatalogTest(unittest.TestCase):
     self.assertEqual(
       self.catalog.status("REQ-CHECKOUT-RENDERING-CONTRACT-05"), "unknown"
     )
+
+  def test_history(self):
+    """Test the releases that state a few rules, and a removed rule."""
+    self.assertEqual(
+      self.catalog.versions,
+      ("2026-01-11", "2026-01-23", "2026-04-08", "2026-08-25", "draft"),
+    )
+    # Stated in every release; 2026-01-11 had no list stem for it.
+    titles = self.catalog.rules["REQ-SHOPPING-FULFILLMENT-0018"]
+    self.assertEqual(titles.since, "2026-01-11")
+    self.assertEqual(titles.versions, self.catalog.versions)
+    # The selection and location identity contract came in 2026-08-25.
+    self.assertEqual(
+      self.catalog.rules["REQ-SHOPPING-FULFILLMENT-0015"].since, "2026-08-25"
+    )
+    # Webhook signatures were detached JWTs until RFC 9421 replaced them.
+    jwt = self.catalog.rule("REQ-SHOPPING-ORDER-0043")
+    self.assertEqual(self.catalog.status(jwt.id), "removed")
+    self.assertEqual((jwt.since, jwt.until), ("2026-01-11", "2026-04-08"))
+    self.assertIn("Request-Signature", jwt.clause)
+    self.assertTrue(all(rule.until for rule in self.catalog.removed.values()))
 
 
 if __name__ == "__main__":

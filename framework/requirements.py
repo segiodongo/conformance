@@ -16,9 +16,10 @@
 
 Demo only. `requirements/tools/build_catalog.py` writes the catalog to
 `requirements/catalog/`: one file of rules per specification page, under
-`shopping/`, and `requirements.lock.json`, which records every rule ID ever
-issued. Tests cite rules by ID with `framework.decorators.spec_assert`; this
-module says what an ID names.
+`shopping/`; `requirements.lock.json`, which records every rule ID ever
+issued; and `history.json`, which records the releases that state each rule
+and the rules that only older releases state. Tests cite rules by ID with
+`framework.decorators.spec_assert`; this module says what an ID names.
 """
 
 from collections.abc import Iterable, Mapping
@@ -36,12 +37,36 @@ DEFAULT_CATALOG_DIR = (
 PAGES_DIR = "shopping"
 LOCK_FILE = "requirements.lock.json"
 INDEX_FILE = "capabilities.json"
+HISTORY_FILE = "history.json"
 # The catalog schema's pattern for a rule ID.
 ID_RE = re.compile(r"^REQ-[A-Z0-9-]+-[0-9]{2,}$")
+# The version of the specification the catalog was built from: newer than
+# every release.
+DRAFT = "draft"
 
 
 class CatalogError(Exception):
   """The catalog is missing, malformed, or out of step with its lock."""
+
+
+@dataclasses.dataclass(frozen=True)
+class Statement:
+  """How one release of the specification states a rule.
+
+  Attributes:
+    version: The release, such as "2026-04-08".
+    level: The rule's RFC 2119 level in that release.
+    clause: The rule's wording in that release.
+    source_file: The page that states it, as the release names the page.
+    line: The line of that page it starts on.
+
+  """
+
+  version: str
+  level: str
+  clause: str
+  source_file: str
+  line: int
 
 
 @dataclasses.dataclass(frozen=True)
@@ -60,6 +85,11 @@ class Rule:
     testable: Whether this suite can test it.
     testable_reason: Why it is or is not testable.
     is_rule: False when the review found it states no requirement.
+    since: The first version that states it: a release, or `DRAFT`.
+    until: For a removed rule, the first version after the last one that
+      states it; None while the catalog's version states it.
+    statements: How each release that states it states it, oldest first.
+      The catalog's own version isn't among them.
 
   """
 
@@ -73,6 +103,32 @@ class Rule:
   testable: bool
   testable_reason: str
   is_rule: bool
+  since: str = DRAFT
+  until: str | None = None
+  statements: tuple[Statement, ...] = ()
+
+  @property
+  def versions(self) -> tuple[str, ...]:
+    """Return every version that states the rule, oldest first."""
+    stated = tuple(statement.version for statement in self.statements)
+    return stated if self.until else (*stated, DRAFT)
+
+  def level_in(self, version: str) -> str | None:
+    """Return the rule's level in a version, or None if it isn't stated.
+
+    Args:
+      version: A release, or `DRAFT` for the catalog's own version.
+
+    Returns:
+      The level that version states, or None.
+
+    """
+    if version == DRAFT:
+      return self.level if self.until is None else None
+    for statement in self.statements:
+      if statement.version == version:
+        return statement.level
+    return None
 
 
 @dataclasses.dataclass(frozen=True)
@@ -101,6 +157,10 @@ class Catalog:
     extends: For each extension, the capabilities it extends.
     capabilities: The capabilities in the catalog's index, in its order.
     spec_commit: The specification commit the catalog was built from.
+    removed: The retired IDs of rules that only older releases state, with
+      the rule each names, by ID.
+    versions: Every version the history covers, oldest first: the
+      releases, then `DRAFT`.
 
   """
 
@@ -111,13 +171,19 @@ class Catalog:
   )
   capabilities: tuple[Capability, ...] = ()
   spec_commit: str = ""
+  removed: Mapping[str, Rule] = dataclasses.field(
+    default_factory=lambda: MappingProxyType({})
+  )
+  versions: tuple[str, ...] = (DRAFT,)
 
   def status(self, rule_id: str) -> str:
-    """Return what an ID names: "rule", "not a rule", "retired" or "unknown".
+    """Return what an ID names.
 
-    A test should cite only IDs whose status is "rule". "not a rule" is a
-    sentence the review found states no requirement. A retired ID's rule was
-    removed or rewritten, so a test citing it needs a new ID.
+    One of: "rule", "not a rule", "removed", "retired" or "unknown". A test
+    should cite only IDs whose status is "rule" or "removed". "not a rule" is
+    a sentence the review found states no requirement. "removed" is a rule
+    that only older releases state. Any other retired ID's rule was removed
+    or rewritten, so a test citing it needs a new ID.
 
     Args:
       rule_id: The ID to look up.
@@ -129,7 +195,14 @@ class Catalog:
     rule = self.rules.get(rule_id)
     if rule is not None:
       return "rule" if rule.is_rule else "not a rule"
+    removed = self.removed.get(rule_id)
+    if removed is not None:
+      return "removed" if removed.is_rule else "not a rule"
     return "retired" if rule_id in self.retired else "unknown"
+
+  def rule(self, rule_id: str) -> Rule | None:
+    """Return the rule an ID names, removed ones included, or None."""
+    return self.rules.get(rule_id) or self.removed.get(rule_id)
 
   def with_parents(self, capabilities: Iterable[str]) -> frozenset[str]:
     """Return capabilities together with every capability they extend.
@@ -165,8 +238,8 @@ def load_catalog(catalog_dir: str | Path | None = None) -> Catalog:
     The catalog.
 
   Raises:
-    CatalogError: If the catalog is missing or malformed, or its rules are
-      not exactly its lock's active IDs.
+    CatalogError: If the catalog is missing or malformed, its rules are not
+      exactly its lock's active IDs, or a removed rule's ID isn't retired.
 
   """
   return _load(Path(catalog_dir or DEFAULT_CATALOG_DIR).resolve())
@@ -185,11 +258,8 @@ def _load(catalog_dir: Path) -> Catalog:
   rules: dict[str, Rule] = {}
   for page in pages:
     for record in _read(page).get("requirements", []):
-      try:
-        rule = _rule(record)
-      except (KeyError, TypeError) as error:
-        raise CatalogError(f"{page}: malformed record ({error})") from error
-      if not ID_RE.match(rule.id) or rule.id in rules:
+      rule = _checked_rule(page, record)
+      if rule.id in rules:
         raise CatalogError(f"{page}: {rule.id} is malformed or repeated")
       rules[rule.id] = rule
   entries = _read(lock_path).get("entries", [])
@@ -200,6 +270,20 @@ def _load(catalog_dir: Path) -> Catalog:
       f"catalog: {sorted(set(rules) - active)[:5]}; only in the lock: "
       f"{sorted(active - set(rules))[:5]}); regenerate the catalog"
     )
+  retired = frozenset(
+    entry["id"] for entry in entries if entry["status"] == "retired"
+  )
+  history_path = catalog_dir / HISTORY_FILE
+  history = _read(history_path) if history_path.is_file() else {}
+  removed: dict[str, Rule] = {}
+  for record in history.get("removed", []):
+    rule = _checked_rule(history_path, record)
+    if rule.id not in retired or rule.id in removed:
+      raise CatalogError(
+        f"{history_path}: removed rule {rule.id} is repeated or not retired "
+        "in the lock; regenerate the catalog"
+      )
+    removed[rule.id] = rule
   index_path = catalog_dir / INDEX_FILE
   index = _read(index_path) if index_path.is_file() else {}
   capabilities = tuple(
@@ -212,12 +296,12 @@ def _load(catalog_dir: Path) -> Catalog:
   )
   return Catalog(
     rules=MappingProxyType(dict(sorted(rules.items()))),
-    retired=frozenset(
-      entry["id"] for entry in entries if entry["status"] == "retired"
-    ),
+    retired=retired,
     extends=MappingProxyType({c.name: c.extends for c in capabilities}),
     capabilities=capabilities,
     spec_commit=index.get("demo", {}).get("spec_commit", ""),
+    removed=MappingProxyType(dict(sorted(removed.items()))),
+    versions=tuple(history.get("versions", (DRAFT,))),
   )
 
 
@@ -227,6 +311,17 @@ def _read(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
   except (OSError, json.JSONDecodeError) as error:
     raise CatalogError(f"cannot read {path}: {error}") from error
+
+
+def _checked_rule(path: Path, record: dict[str, Any]) -> Rule:
+  """Build a rule from a record of a catalog file, or raise CatalogError."""
+  try:
+    rule = _rule(record)
+  except (KeyError, TypeError) as error:
+    raise CatalogError(f"{path}: malformed record ({error})") from error
+  if not ID_RE.match(rule.id):
+    raise CatalogError(f"{path}: {rule.id} is malformed or repeated")
+  return rule
 
 
 def _rule(record: dict[str, Any]) -> Rule:
@@ -245,4 +340,16 @@ def _rule(record: dict[str, Any]) -> Rule:
     testable=bool(demo.get("testable")),
     testable_reason=demo.get("testable_reason", ""),
     is_rule=not demo.get("excluded", False),
+    since=demo.get("since", DRAFT),
+    until=demo.get("until"),
+    statements=tuple(
+      Statement(
+        version=entry["version"],
+        level=entry["level"],
+        clause=entry.get("clause", record["clause"]),
+        source_file=entry["file"],
+        line=entry["start_line"],
+      )
+      for entry in demo.get("releases", ())
+    ),
   )

@@ -53,6 +53,7 @@ from framework.outcomes import (
 )
 from framework.requirements import (
   DEFAULT_CATALOG_DIR,
+  DRAFT,
   Capability,
   Catalog,
   Rule,
@@ -60,7 +61,8 @@ from framework.requirements import (
 )
 
 # 2: "covered" counts rules a test checks fully; rules checked only in part
-# are counted and listed apart.
+# are counted and listed apart. Version 2 also has the view by release
+# (`versions`) and each rule's `since` and `versions`.
 FORMAT_VERSION = 2
 JSON_FILE = "matrix.json"
 MARKDOWN_FILE = "matrix.md"
@@ -92,6 +94,20 @@ RULE_RESULTS = (PASSED, FAILED, NOT_RUN)
 FULL = "full"
 PARTIAL = "partial"
 NONE = "none"
+# The view by release, under the summary.
+VERSIONS_TITLE = "By release"
+VERSIONS_INTRO = (
+  "The testable MUST and MUST NOT rules each release states, rules removed "
+  "since included, and how many a test checks."
+)
+VERSIONS_HEADER = (
+  "Version",
+  "Testable MUST stated",
+  "MUST fully checked",
+  "MUST checked in part",
+  "MUST without a test",
+  "MUST coverage",
+)
 # How the report writes test outcomes and rule results.
 LABELS = {
   PASSED: "passed",
@@ -201,6 +217,38 @@ class CapabilityRow:
 
 
 @dataclasses.dataclass(frozen=True)
+class VersionRow:
+  """One version's line in the report's view by release.
+
+  Attributes:
+    version: A release, or `DRAFT` for the catalog's own version.
+    testable_must: How many testable rules that version states as MUST or
+      MUST NOT, rules removed since included.
+    covered_must: How many of them some test checks fully.
+    partial_must: How many of them are cited only by tests that check them
+      in part.
+
+  """
+
+  version: str
+  testable_must: int
+  covered_must: int
+  partial_must: int = 0
+
+  @property
+  def uncovered_must(self) -> int:
+    """Return how many of the version's testable MUST rules no test cites."""
+    return self.testable_must - self.covered_must - self.partial_must
+
+  @property
+  def must_coverage(self) -> float | None:
+    """Return the share of the version's testable MUST rules checked fully."""
+    if not self.testable_must:
+      return None
+    return self.covered_must / self.testable_must
+
+
+@dataclasses.dataclass(frozen=True)
 class TestRow:
   """One shopping test in the report.
 
@@ -244,6 +292,8 @@ class Report:
     target: The server the tests ran against, if known.
     gaps: For each rule a test cites only in part, keyed by the rule's ID
       and the test's ID, what that test leaves unchecked.
+    versions: For each version the catalog's history covers, oldest first,
+      the testable MUST and MUST NOT rules it states and their coverage.
 
   """
 
@@ -257,6 +307,7 @@ class Report:
   outcomes: Mapping[str, Outcome] | None = None
   target: str = ""
   gaps: Mapping[tuple[str, str], str] = MappingProxyType({})
+  versions: tuple[VersionRow, ...] = ()
 
   def markers(self) -> dict[str, int]:
     """Return how many tests carry each kind of marker, or none."""
@@ -365,18 +416,32 @@ def build(
   )
   cited_by: dict[str, list[str]] = collections.defaultdict(list)
   gaps: dict[tuple[str, str], str] = {}
+  # Removed rules count only in the view by release.
+  removed_cited: dict[str, list[str]] = collections.defaultdict(list)
+  removed_gaps: dict[tuple[str, str], str] = {}
   for row in rows:
     for rule_id in dict.fromkeys(row.rule_ids):
-      if catalog.status(rule_id) == "rule":
+      status = catalog.status(rule_id)
+      if status == "rule":
         cited_by[rule_id].append(row.test_id)
+      elif status == "removed":
+        removed_cited[rule_id].append(row.test_id)
     for rule_id, gap in row.gaps:
-      if catalog.status(rule_id) == "rule":
+      status = catalog.status(rule_id)
+      if status == "rule":
         gaps[(rule_id, row.test_id)] = gap
+      elif status == "removed":
+        removed_gaps[(rule_id, row.test_id)] = gap
   coverage = {
     rule_id: _coverage(rule_id, tests, gaps)
     for rule_id, tests in cited_by.items()
   }
+  removed_coverage = {
+    rule_id: _coverage(rule_id, tests, removed_gaps)
+    for rule_id, tests in removed_cited.items()
+  }
   rules = tuple(rule for rule in catalog.rules.values() if rule.is_rule)
+  removed = tuple(rule for rule in catalog.removed.values() if rule.is_rule)
   if outcomes is not None:
     missing = Outcome(NOT_RUN, "no outcome was recorded")
     outcomes = MappingProxyType(
@@ -404,6 +469,12 @@ def build(
     outcomes=outcomes,
     target=target,
     gaps=MappingProxyType(dict(sorted(gaps.items()))),
+    versions=tuple(
+      _version_row(
+        version, (*rules, *removed), {**coverage, **removed_coverage}
+      )
+      for version in catalog.versions
+    ),
   )
 
 
@@ -466,6 +537,7 @@ def to_json(report: Report) -> dict[str, Any]:
     "format": FORMAT_VERSION,
     "spec_commit": report.spec_commit,
     "totals": _tally_json(report.total),
+    "versions": [_version_json(row) for row in report.versions],
     "not_rules": report.not_rules,
     "markers": report.markers(),
     "run": _run_json(report),
@@ -488,6 +560,8 @@ def to_json(report: Report) -> dict[str, Any]:
         "source_file": rule.source_file,
         "line": rule.line,
         "link": rule.link,
+        "since": rule.since,
+        "versions": list(rule.versions),
         "testable": rule.testable,
         "testable_reason": rule.testable_reason,
         "tests": list(report.cited_by.get(rule.id, ())),
@@ -556,6 +630,8 @@ def to_markdown(report: Report, findings: str | None = None) -> str:
   lines.append(
     _md_tally_row("**All rules, each counted once**", "", report.total)
   )
+  if len(report.versions) > 1:
+    lines += ["", *_md_versions(report)]
   if ran:
     lines += ["", *_md_results(report)]
   for row in _ordered(report):
@@ -634,6 +710,7 @@ def to_html(report: Report, findings: str | None = None) -> str:
     f"<nav>{nav}</nav>",
     '<h2 id="summary">Summary</h2>',
     _html_summary(report),
+    *([_html_versions(report)] if len(report.versions) > 1 else []),
     *(['<h2 id="results">Results</h2>', _html_results(report)] if ran else []),
     '<h2 id="capabilities">Capabilities</h2>',
   ]
@@ -841,6 +918,44 @@ def _tally_json(tally: Tally) -> dict[str, int]:
     "partial": tally.partial,
     "partial_must": tally.partial_must,
     "uncovered_must": tally.uncovered_must,
+  }
+
+
+def _version_row(
+  version: str, rules: Sequence[Rule], coverage: Mapping[str, str]
+) -> VersionRow:
+  """Count the testable MUST rules a version states, and their coverage.
+
+  Args:
+    version: A release, or `DRAFT`.
+    rules: The rules to look at: the catalog's and the removed ones.
+    coverage: The coverage of each rule a test cites, by rule ID.
+
+  Returns:
+    The version's row. A rule counts at the level the version states it.
+
+  """
+  stated = [
+    rule
+    for rule in rules
+    if rule.testable and rule.level_in(version) in MUST_LEVELS
+  ]
+  return VersionRow(
+    version=version,
+    testable_must=len(stated),
+    covered_must=sum(coverage.get(rule.id) == FULL for rule in stated),
+    partial_must=sum(coverage.get(rule.id) == PARTIAL for rule in stated),
+  )
+
+
+def _version_json(row: VersionRow) -> dict[str, Any]:
+  """Return a version's row as JSON, with the uncovered MUSTs."""
+  return {
+    "version": row.version,
+    "testable_must": row.testable_must,
+    "covered_must": row.covered_must,
+    "partial_must": row.partial_must,
+    "uncovered_must": row.uncovered_must,
   }
 
 
@@ -1064,6 +1179,16 @@ def _notes(
     ),
     ("MUST", "Counts MUST and MUST NOT."),
   ]
+  if len(report.versions) > 1:
+    notes.append(
+      (
+        "Releases",
+        "The view by release counts the testable MUST and MUST NOT rules "
+        "each release states, at the level it states them. A rule only "
+        "older releases state is a removed rule: it counts in those "
+        f"releases, never in {code(DRAFT)}, the catalog's own version.",
+      )
+    )
   if report.gaps:
     notes.append(
       (
@@ -1175,6 +1300,13 @@ def _percent(share: float | None) -> str:
   return "–" if share is None else f"{share:.0%}"
 
 
+def _version_label(report: Report, version: str) -> str:
+  """Return a version's label: a release, or the draft with its commit."""
+  if version == DRAFT and report.spec_commit:
+    return f"{DRAFT} ({report.spec_commit[:8]})"
+  return version
+
+
 def _source_label(rule: Rule) -> str:
   """Return the page and line a rule is on."""
   return f"{rule.source_file.removeprefix(SPEC_PAGES)}:{rule.line}"
@@ -1242,6 +1374,29 @@ def _md_tally_row(label: str, extends: str, tally: Tally) -> str:
     _percent(tally.must_coverage),
   ]
   return "| " + " | ".join(str(cell) for cell in cells) + " |"
+
+
+def _md_versions(report: Report) -> list[str]:
+  """Return the view by release."""
+  lines = [
+    f"### {VERSIONS_TITLE}",
+    "",
+    VERSIONS_INTRO,
+    "",
+    "| " + " | ".join(VERSIONS_HEADER) + " |",
+    "| --- |" + " ---: |" * (len(VERSIONS_HEADER) - 1),
+  ]
+  for row in report.versions:
+    cells = [
+      _version_label(report, row.version),
+      row.testable_must,
+      row.covered_must,
+      row.partial_must,
+      row.uncovered_must,
+      _percent(row.must_coverage),
+    ]
+    lines.append("| " + " | ".join(str(cell) for cell in cells) + " |")
+  return lines
 
 
 def _md_plain(text: str) -> str:
@@ -1515,6 +1670,35 @@ def _html_tally_cells(label: str, extends: str, tally: Tally) -> str:
   return (
     f"<td>{label}</td><td>{extends}</td>{numbers}"
     f'<td class="cov">{bar} {_percent(share)}</td>'
+  )
+
+
+def _html_versions(report: Report) -> str:
+  """Return the view by release."""
+  rows = []
+  for row in report.versions:
+    share = row.must_coverage
+    width = 0 if share is None else round(100 * share)
+    numbers = "".join(
+      f'<td class="num">{value}</td>'
+      for value in (
+        row.testable_must,
+        row.covered_must,
+        row.partial_must,
+        row.uncovered_must,
+      )
+    )
+    bar = f'<span class="bar"><span style="width: {width}%"></span></span>'
+    rows.append(
+      f"<td>{html.escape(_version_label(report, row.version))}</td>"
+      f'{numbers}<td class="cov">{bar} {_percent(share)}</td>'
+    )
+  return "\n".join(
+    [
+      f"<h3>{VERSIONS_TITLE}</h3>",
+      f"<p>{VERSIONS_INTRO}</p>",
+      _html_table(VERSIONS_HEADER, rows),
+    ]
   )
 
 

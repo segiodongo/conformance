@@ -21,10 +21,13 @@ checked.
 
 Problems stop the run in strict mode:
 - a test with no marker;
-- a cited ID that is not in the catalog, or that the catalog retired;
+- a cited ID that is not in the catalog, or that the catalog retired without
+  a history;
 - a cited ID that the review found states no requirement.
 
 Warnings never stop it:
+- a cited rule that only older releases state, which the catalog keeps as a
+  removed rule;
 - a cited rule that this suite cannot test;
 - a cited rule outside the capabilities the test requires.
 """
@@ -40,6 +43,9 @@ from framework.requirements import Catalog, CatalogError, load_catalog
 # strict: problems stop the run; warn: report only; off: no check.
 MODES = ("strict", "warn", "off")
 CHECKED_PACKAGE = "shopping"
+# What a marker may cite: a rule of the catalog's specification, or a rule
+# that only older releases state.
+CITABLE = ("rule", "removed")
 STATUS_PROBLEMS = {
   "unknown": "is not in the catalog",
   "retired": "is retired: its rule was removed or rewritten",
@@ -181,13 +187,18 @@ def check(tests: Iterable[LoadedTest], catalog: Catalog) -> CheckResult:
     covered = catalog.with_parents(test.capabilities)
     for rule_id in test.marker.rule_ids:
       status = catalog.status(rule_id)
-      if status != "rule":
+      if status not in CITABLE:
         result.problems.append(
           f"{test.test_id}: {rule_id} {STATUS_PROBLEMS[status]}"
         )
         continue
       result.rules.add(rule_id)
-      rule = catalog.rules[rule_id]
+      rule = catalog.rule(rule_id)
+      if status == "removed":
+        result.warnings.append(
+          f"{test.test_id}: {rule_id} was removed in {rule.until}; only "
+          f"{', '.join(rule.versions)} state it"
+        )
       if not rule.testable:
         result.warnings.append(
           f"{test.test_id}: {rule_id} is not testable by this suite "

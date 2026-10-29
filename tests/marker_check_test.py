@@ -14,6 +14,7 @@
 
 """Unit tests for the marker check in framework.marker_check."""
 
+import dataclasses
 import tempfile
 from types import MappingProxyType, SimpleNamespace
 import unittest
@@ -25,7 +26,7 @@ from framework.decorators import (
   spec_assert,
 )
 from framework.marker_check import LoadedTest
-from framework.requirements import Catalog, Rule
+from framework.requirements import Catalog, Rule, Statement
 
 CART = "dev.ucp.shopping.cart"
 CHECKOUT = "dev.ucp.shopping.checkout"
@@ -191,6 +192,43 @@ class CheckTest(unittest.TestCase):
       f"test_other_capability: REQ-SHOPPING-CART-0001 belongs to {CART}",
       result.warnings[1],
     )
+
+  def test_removed_rule(self):
+    """Test that a removed rule may be cited, with a warning."""
+    removed = dataclasses.replace(
+      rule("REQ-SHOPPING-CHECKOUT-0005", CHECKOUT),
+      since="2026-01-11",
+      until="2026-04-08",
+      statements=(
+        Statement("2026-01-11", "MUST", "The business MUST do it.", "a.md", 1),
+        Statement("2026-01-23", "MUST", "The business MUST do it.", "a.md", 2),
+      ),
+    )
+    catalog = dataclasses.replace(
+      CATALOG,
+      retired=CATALOG.retired | {removed.id},
+      removed=MappingProxyType({removed.id: removed}),
+    )
+    result = marker_check.check(
+      [
+        loaded(
+          "test_old",
+          cites("REQ-SHOPPING-CHECKOUT-0005", "REQ-SHOPPING-CHECKOUT-0004"),
+        )
+      ],
+      catalog,
+    )
+    self.assertEqual(result.rules, {"REQ-SHOPPING-CHECKOUT-0005"})
+    self.assertEqual(
+      result.warnings,
+      [
+        f"{loaded('test_old', None).test_id}: REQ-SHOPPING-CHECKOUT-0005 was "
+        "removed in 2026-04-08; only 2026-01-11, 2026-01-23 state it"
+      ],
+    )
+    # A retired ID without a history still names nothing to cite.
+    self.assertEqual(len(result.problems), 1)
+    self.assertIn("REQ-SHOPPING-CHECKOUT-0004 is retired", result.problems[0])
 
 
 class EvaluateTest(unittest.TestCase):

@@ -12,7 +12,9 @@
 | `catalog/shopping/**/*.json`     | One file per specification page, with every rule on that page                         |
 | `catalog/capabilities.json`      | Each capability: extension or not, what it extends, its schema, pages and rule counts |
 | `catalog/requirements.lock.json` | Every rule ID ever issued, with the wording it was issued for                         |
+| `catalog/history.json`           | The releases read, the rules only older releases state, and rules that left the pages |
 | `catalog/extraction_report.json` | The extractor's diagnostics for the run                                               |
+| `releases.json`                  | The releases the history is read from, at pinned commits, and where their pages were  |
 | `review.json`                    | A person's decisions on 199 rules the automatic pass couldn't settle                  |
 | `findings.md`                    | What linking the 63 shopping tests to the catalog found: claims, spec and test gaps   |
 | `tools/build_catalog.py`         | Regenerates the `catalog/` folder from the inputs below                               |
@@ -65,7 +67,8 @@ Each run matches the rules it finds against the lock, page by page:
    lists the rule as carried over so a person can confirm it's the same rule.
 3. **New:** a rule still left over gets the next number for its prefix.
 4. **Retired:** an active entry that matched nothing is marked `retired`. Its
-   number is never issued again.
+   number is never issued again. A rule only older releases state also has a
+   retired ID (see [Release history](#release-history)).
 
 A rule that moves to another page is retired on the old page and gets a new
 ID on the new one. If one of two identical sentences on a page is removed, the
@@ -74,6 +77,60 @@ copy that stays keeps the older ID, whichever copy was removed.
 These IDs are stable within this demo only. Official IDs will be issued in
 the `ucp` repository, in a different order. Every lock entry records its
 `text_digest`, so demo IDs can be mapped to official ones.
+
+## Release history
+
+The catalog also records which releases state each rule, so that a server
+can be measured against the release it implements. `releases.json` lists the
+releases, each at a pinned commit of its release branch: 2026-01-11,
+2026-01-23, 2026-04-08 and 2026-08-25. The build reads each one's shopping
+pages from a clone of the specification repository. The releases before
+2026-08-25 have no shopping folder, so `releases.json` gives each of their
+shopping pages its path today; its rules then get the capability and
+testability that today's page gives them.
+
+Releases are matched newest first, each against the wording that each rule
+has in the next newer version, starting with the pinned specification:
+
+1. the same wording on the same page, then on another page of the same
+   capability;
+2. the same wording under another list stem, or none, for a wording of at
+   least five words (2026-01-11 has no stem for some lists);
+3. a wording at least 85% alike, on the same page, then on another page of the
+   same capability.
+
+A release's rule that matches nothing is one of two things:
+
+- **Moved out of the shopping pages:** the pinned specification states it on
+  another page, such as `embedded-protocol.md`. It isn't in the catalog.
+- **Removed:** only older releases state it. It gets a stable ID of its own,
+  retired in the lock from the start, and `catalog/history.json` keeps its
+  record: wording, level, capability and page.
+
+Each rule's `demo.since` is the first version that states it, and
+`demo.releases` says how each release states it: the page and line as the
+release names them, the level, the digest, and the wording when it differs.
+A removed rule also has `demo.until`, the first version that doesn't state
+it. The build lists every match on a reworded wording for a person to check.
+If the review finds that the meaning changed, a split in `review.json` makes
+the older wording a removed rule of its own:
+
+```json
+{
+  "splits": [{ "id": "REQ-SHOPPING-…", "before": "2026-08-25", "reason": "…" }]
+}
+```
+
+A test may cite a removed rule; the marker check warns which releases state
+it. The coverage report counts the pinned specification's rules as before,
+and adds a view by release.
+
+One limit: the pinned specification renders the shared REST header rules
+(`UCP-Agent` and `Idempotency-Key`) with the `header_requirements` macro,
+which the extractor reads as plain text. The catalog has no rule for them on
+the checkout, cart, catalog and order REST pages, and the history counts the
+older releases' copies as moved out, because the lodging pages still state
+them in full.
 
 ## Linking tests to rules
 
@@ -152,6 +209,8 @@ The Markdown and HTML pages hold:
 - **Summary:** for each capability, then each extension, and for all rules
   counted once: the rules, the testable rules, the testable MUST and MUST NOT
   rules, and how many of those a test checks fully, or only in part;
+- **By release:** for each release and the draft, the testable MUST and MUST
+  NOT rules it states, removed rules included, and how many a test checks;
 - **Results,** after a run: for each capability, how many of its testable
   rules with a test passed, failed or weren't run, then the rules that failed
   and the rules whose tests didn't run, with their tests' messages;
@@ -201,15 +260,36 @@ This catalog covers rules in the specification pages. Schema field
 descriptions hold 86 more upper-case keyword sentences, which aren't
 included.
 
+### By release
+
+| Version      | Shopping rules | Testable MUST stated | Pinned testable MUST first stated |
+| ------------ | -------------: | -------------------: | --------------------------------: |
+| `2026-01-11` |            140 |                   22 |                                16 |
+| `2026-01-23` |            150 |                   23 |                                 1 |
+| `2026-04-08` |            379 |                   64 |                                44 |
+| `2026-08-25` |            512 |                  102 |                                41 |
+| draft        |            507 |                  104 |                                 2 |
+
+- **Removed rules:** 22, of which 8 are testable MUST rules that the review
+  hasn't looked at yet. Among them are the webhook rules of the first two
+  releases: payloads signed as a detached JWT in a `Request-Signature`
+  header, which 2026-04-08 replaced with RFC 9421 signatures.
+- **Moved out:** 72 statements in older releases: 53 now on
+  `embedded-protocol.md`, and 19 header rules the shopping pages now render
+  with a macro (see [Release history](#release-history)).
+
 ## Regenerate
 
-From the repository root, with a `ucp` checkout at `f2626c28` and a `.github`
-checkout at `1687b56`:
+From the repository root, with a `ucp` checkout at `f2626c28`, a `ucp` clone
+that has the commits in `releases.json` (the `release/*` branches of the
+`Universal-Commerce-Protocol/ucp` repository), and a `.github` checkout at
+`1687b56`:
 
 ```bash
 uv run --no-project requirements/tools/build_catalog.py \
   --spec-root=<ucp checkout> \
   --spec-commit=f2626c28b8288976eee5bda77f3a9b1ddc0132b1 \
+  --releases-repo=<ucp clone> \
   --extractor-dir=<.github checkout>/org-tools/requirements-extractor/scripts
 ```
 
