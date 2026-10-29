@@ -93,7 +93,17 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "aimed at the platform"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/buyer-consent.md",
+            "start_line": 90,
+            "level": "MAY",
+            "text_digest": "e83d2886ae"
+          }
+        ]
       }
     },
     {
@@ -139,7 +149,17 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "warning messages in responses"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/buyer-consent.md",
+            "start_line": 336,
+            "level": "SHOULD",
+            "text_digest": "c9f256df93"
+          }
+        ]
       }
     },
     {
@@ -182,7 +202,17 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "visible: completion is refused"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/buyer-consent.md",
+            "start_line": 354,
+            "level": "MUST NOT",
+            "text_digest": "847433efb5"
+          }
+        ]
       }
     },
     {
@@ -222,7 +252,17 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "the business surfaces them (the extractor read 'buyer')"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/buyer-consent.md",
+            "start_line": 354,
+            "level": "MUST",
+            "text_digest": "ad6ce21b41"
+          }
+        ]
       }
     },
     {
@@ -262,7 +302,17 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "the advertisement is visible; its completeness can't be verified"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/buyer-consent.md",
+            "start_line": 361,
+            "level": "MUST",
+            "text_digest": "0a45016c80"
+          }
+        ]
       }
     },
     {
@@ -306,7 +356,17 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "aimed at the platform"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/buyer-consent.md",
+            "start_line": 361,
+            "level": "MUST",
+            "text_digest": "226370a92e"
+          }
+        ]
       }
     },
     {
@@ -346,7 +406,17 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "aimed at the platform"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/buyer-consent.md",
+            "start_line": 361,
+            "level": "MUST NOT",
+            "text_digest": "13c85fda79"
+          }
+        ]
       }
     },
     {
@@ -390,7 +460,17 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "aimed at the platform"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/buyer-consent.md",
+            "start_line": 372,
+            "level": "MUST",
+            "text_digest": "0251ef1234"
+          }
+        ]
       }
     },
     {
@@ -432,7 +512,17 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "about the consent map the platform submits (the extractor read 'buyer')"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/buyer-consent.md",
+            "start_line": 372,
+            "level": "MUST NOT",
+            "text_digest": "4bdc908f46"
+          }
+        ]
       }
     },
     {
@@ -472,7 +562,17 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "visible: unadvertised entries are ignored"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/buyer-consent.md",
+            "start_line": 379,
+            "level": "MUST",
+            "text_digest": "7affd65168"
+          }
+        ]
       }
     },
     {
@@ -512,7 +612,17 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "aimed at the platform"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/buyer-consent.md",
+            "start_line": 379,
+            "level": "MUST NOT",
+            "text_digest": "7918cf85e6"
+          }
+        ]
       }
     },
     {
@@ -555,7 +665,17 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "aimed at the platform"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/buyer-consent.md",
+            "start_line": 387,
+            "level": "MUST",
+            "text_digest": "9ea5b9f143"
+          }
+        ]
       }
     },
     {
@@ -597,7 +717,17 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "aimed at the platform"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/buyer-consent.md",
+            "start_line": 387,
+            "level": "MUST",
+            "text_digest": "d0e9b52bdd"
+          }
+        ]
       }
     },
     {
@@ -639,7 +769,17 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "aimed at the platform"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/buyer-consent.md",
+            "start_line": 394,
+            "level": "MUST NOT",
+            "text_digest": "72244fd689"
+          }
+        ]
       }
     },
     {
@@ -681,7 +821,17 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "aimed at the platform"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/buyer-consent.md",
+            "start_line": 401,
+            "level": "MAY",
+            "text_digest": "6b49f63890"
+          }
+        ]
       }
     },
     {
@@ -721,7 +871,17 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "aimed at the platform"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/buyer-consent.md",
+            "start_line": 401,
+            "level": "MAY",
+            "text_digest": "40c2df7171"
+          }
+        ]
       }
     },
     {
@@ -761,7 +921,17 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "aimed at the platform"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/buyer-consent.md",
+            "start_line": 401,
+            "level": "SHOULD",
+            "text_digest": "047c97c48a"
+          }
+        ]
       }
     }
   ]

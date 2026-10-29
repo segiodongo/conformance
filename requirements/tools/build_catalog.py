@@ -49,10 +49,19 @@ parent an extension declares.
 Decisions in `requirements/review.json`, made by a person, override the
 automatic testability and can mark a rule as not a rule.
 
+It also records which releases state each rule. `requirements/releases.json`
+lists the releases, each at a pinned commit; their shopping pages are read
+from a clone of the specification repository and matched to the catalog's
+rules by wording, newest release first. Each rule records the releases that
+state it, from `demo.since` on. A rule only older releases state is a
+removed rule: it gets an ID of its own, retired in the lock, and is written
+to `history.json` with `demo.until`, the first version that doesn't state it.
+
 Usage, from the repository root:
 
   uv run --no-project requirements/tools/build_catalog.py \
     --spec-root=<ucp checkout> --spec-commit=<commit> \
+    --releases-repo=<ucp clone with the release commits> \
     --extractor-dir=<.github checkout>/org-tools/requirements-extractor/scripts
 
 With `--check`, nothing is written, and the run fails if any output, the
@@ -61,19 +70,23 @@ lock included, would change.
 
 import argparse
 import collections
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterator, Mapping, Sequence
 import contextlib
 import copy
 import dataclasses
 import difflib
+import fnmatch
 import hashlib
 import importlib
+import io
 import json
 from pathlib import Path, PurePosixPath
 import re
 import shutil
 import subprocess
 import sys
+import tarfile
+import tempfile
 from types import ModuleType
 from typing import Any
 
@@ -114,6 +127,44 @@ ID_RE = re.compile(r"^REQ-[A-Z0-9-]+-[0-9]{2,}$")
 REWORD_SIMILARITY = 0.85
 # The summary lists changed IDs one by one when there are at most this many.
 LIST_LIMIT = 20
+
+# Release history.
+DEFAULT_RELEASES_FILE = REPO_ROOT / "requirements" / "releases.json"
+HISTORY_FILE = "history.json"
+HISTORY_ABOUT = (
+  "Which releases state each rule. A rule in the catalog lists them in "
+  "demo.releases, from demo.since on. A rule that only older releases state "
+  "is under removed, with demo.until, the first version that doesn't state "
+  "it. See requirements/README.md."
+)
+# The pinned specification's version: newer than every release.
+DRAFT = "draft"
+# What is read from each release's commit.
+RELEASE_PATHS = ("mkdocs.yml", DOCS_ROOT.as_posix(), "source/schemas")
+VERSION_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
+# A rule is matched on its wording alone, under another list stem or none,
+# only when the wording has at least this many words: a cell of the checkout
+# obligation matrix reads just "must".
+SAME_TEXT_MIN_WORDS = 5
+# How a release's rule matched the next newer version, in the order the
+# passes run; and the two outcomes for a rule that matched nothing.
+SAME_WORDING = "same wording"
+OTHER_PAGE = "same wording, other page"
+OTHER_STEM = "same wording, other list stem"
+REWORDED = "reworded"
+REWORDED_OTHER_PAGE = "reworded, other page"
+LAST_STATED = "not stated after this release"
+MOVED_OUT = "moved out of the shopping pages"
+MATCH_KINDS = (
+  SAME_WORDING,
+  OTHER_PAGE,
+  OTHER_STEM,
+  REWORDED,
+  REWORDED_OTHER_PAGE,
+  LAST_STATED,
+  MOVED_OUT,
+)
 
 BOLD_KEYWORD_RE = re.compile(
   r"\*\*\s*(?:MUST\s+NOT|MUST|SHALL\s+NOT|SHALL|SHOULD\s+NOT|SHOULD|"
@@ -789,12 +840,784 @@ def without_demo(document: dict[str, Any]) -> dict[str, Any]:
   }
 
 
+@dataclasses.dataclass
+class Extraction:
+  """What one run of the extractor found in a specification.
+
+  Attributes:
+    schemas: The capabilities the specification's schemas declare.
+    resolver: Each page's capability label, and problems found labelling.
+    documents: One catalog document per page, by output path.
+    report_document: The extractor's report.
+    bold_only: The rules found when only bold keywords count, if asked for.
+
+  """
+
+  schemas: dict[str, CapabilitySchema]
+  resolver: DemoResolver
+  documents: dict[Any, dict[str, Any]]
+  report_document: dict[str, Any]
+  bold_only: list[Any]
+
+
+def extract(
+  modules: dict[str, ModuleType],
+  spec_root: Path,
+  spec_dir: PurePosixPath,
+  *,
+  bold_only: bool = False,
+) -> Extraction:
+  """Run the extractor over one folder of a specification.
+
+  With the demo's two options: every page gets a capability from its bullet
+  or its file path, and upper-case keywords count whether bold or not.
+
+  Args:
+    modules: The extractor's modules.
+    spec_root: The specification checkout.
+    spec_dir: The folder to read, relative to `spec_root`.
+    bold_only: Also run counting only bold keywords, as the extractor does.
+
+  Returns:
+    What the extractor found.
+
+  """
+  catalog, classifier, config = (
+    modules["catalog"],
+    modules["classifier"],
+    modules["config"],
+  )
+  schemas = schema_capabilities(spec_root)
+  resolver = DemoResolver(config.declared_capability, set(schemas))
+  original_find = classifier.find_keywords
+
+  def find_all_keywords(text: str, keywords: tuple[str, ...]) -> list[Any]:
+    return [
+      dataclasses.replace(hit, bolded=True)
+      for hit in original_find(text, keywords)
+    ]
+
+  with (
+    replaced(config, "SPEC_DIRS", [Path(spec_dir)]),
+    replaced(config, "resolve_capability", resolver),
+  ):
+    bold = catalog.build(spec_root)[0] if bold_only else []
+    with replaced(classifier, "find_keywords", find_all_keywords):
+      requirements, report = catalog.build(spec_root)
+    documents = catalog.catalog_documents(requirements, report, spec_root)
+    report_document = catalog.report_document(requirements, report, spec_root)
+  return Extraction(schemas, resolver, documents, report_document, bold)
+
+
+def annotate(record: dict[str, Any], label: PageLabel) -> None:
+  """Give a rule its page's capabilities and the demo's `demo` object."""
+  if record["capabilities"]:
+    record["capabilities"] = list(label.capabilities)
+  transport, testable, reason = testability(record)
+  record["demo"] = {
+    "positional_id": record["id"],
+    "capability_source": label.source,
+    "keyword_style": keyword_style(record["clause"]),
+    "transport": transport,
+    "testable": testable,
+    "testable_reason": reason,
+  }
+
+
+def in_shopping(file: str) -> bool:
+  """Return whether a page is in the shopping folder."""
+  return file.startswith(f"{SHOPPING_DIR}/")
+
+
+@dataclasses.dataclass(frozen=True)
+class Release:
+  """A release of the specification, read at a pinned commit.
+
+  Attributes:
+    version: The release, such as "2026-04-08".
+    ref: The branch it was pinned from.
+    commit: The commit it is read at.
+
+  """
+
+  version: str
+  ref: str
+  commit: str
+
+
+@dataclasses.dataclass(frozen=True)
+class ReleaseConfig:
+  """The releases the history is read from, and where their pages are.
+
+  Attributes:
+    releases: The releases, oldest first.
+    flat_pages: For a release without a shopping folder, each shopping
+      page's path today, by its path in the release; both relative to the
+      specification's docs.
+    other_pages: Patterns for that release's pages outside the shopping
+      vertical.
+
+  """
+
+  releases: tuple[Release, ...] = ()
+  flat_pages: Mapping[str, str] = dataclasses.field(default_factory=dict)
+  other_pages: tuple[str, ...] = ()
+
+  @property
+  def versions(self) -> tuple[str, ...]:
+    """Return every version, oldest first: the releases, then the draft."""
+    return (*(release.version for release in self.releases), DRAFT)
+
+
+def load_releases(path: Path, problems: list[str]) -> ReleaseConfig:
+  """Load the releases the history is read from, and check them.
+
+  Args:
+    path: The releases file.
+    problems: Collects anything malformed.
+
+  Returns:
+    The releases and the page map; none when the file can't be read.
+
+  """
+  try:
+    document = json.loads(path.read_text(encoding="utf-8"))
+    config = ReleaseConfig(
+      releases=tuple(
+        Release(entry["version"], entry["ref"], entry["commit"])
+        for entry in document["releases"]
+      ),
+      flat_pages=dict(document["flat_pages"]),
+      other_pages=tuple(document["other_pages"]),
+    )
+  except (OSError, json.JSONDecodeError, KeyError, TypeError) as error:
+    problems.append(f"releases: cannot read {path}: {error}")
+    return ReleaseConfig()
+  versions = [release.version for release in config.releases]
+  if not all(VERSION_RE.match(v) for v in versions) or versions != sorted(
+    set(versions)
+  ):
+    problems.append(
+      f"releases: versions must be distinct dates, oldest first: {versions}"
+    )
+  short = [r.version for r in config.releases if not COMMIT_RE.match(r.commit)]
+  if short:
+    problems.append(f"releases: commits must be full hashes: {short}")
+  elsewhere = sorted(
+    page
+    for page in config.flat_pages.values()
+    if not page.startswith(f"{SHOPPING_DIR.name}/")
+  )
+  if elsewhere:
+    problems.append(
+      f"releases: flat pages mapped outside the shopping folder: {elsewhere}"
+    )
+  return config
+
+
+def load_splits(path: Path, problems: list[str]) -> dict[str, str]:
+  """Load the review's splits: older wordings found to be other rules.
+
+  A split says that releases before a version state another rule in the
+  wording that matched an ID. That wording becomes a removed rule of its
+  own, and the ID's history starts at the version.
+
+  Args:
+    path: The review file; a missing file, or one without splits, has none.
+    problems: Collects malformed splits.
+
+  Returns:
+    For each split ID, the first version whose wording is that rule.
+
+  """
+  if not path.exists():
+    return {}
+  splits: dict[str, str] = {}
+  document = json.loads(path.read_text(encoding="utf-8"))
+  for entry in document.get("splits", []):
+    rule_id, first = entry.get("id"), entry.get("before")
+    if (
+      not isinstance(rule_id, str)
+      or not ID_RE.match(rule_id)
+      or rule_id in splits
+      or not (first == DRAFT or VERSION_RE.match(str(first)))
+      or not entry.get("reason")
+    ):
+      problems.append(f"review: malformed split {entry!r}")
+      continue
+    splits[rule_id] = first
+  return splits
+
+
+def stage_release(
+  repo: Path, release: Release, config: ReleaseConfig, dest: Path
+) -> tuple[dict[str, str], list[str]]:
+  """Write a release's pages and schemas, shopping pages at today's paths.
+
+  A release with a shopping folder is written as it is. In one without, each
+  page in `config.flat_pages` moves to its path today, so its rules get the
+  capability and testability the pinned specification's page gives them.
+
+  Args:
+    repo: A clone of the specification repository with the release's commit.
+    release: The release.
+    config: The page map.
+    dest: An empty directory to write to.
+
+  Returns:
+    Each moved page's path in the release, by its path today; and the
+    release's pages that are neither in the page map nor other pages.
+
+  Raises:
+    subprocess.CalledProcessError: If the clone doesn't have the commit.
+
+  """
+  archive = subprocess.run(
+    [
+      "git",
+      "-C",
+      str(repo),
+      "archive",
+      "--format=tar",
+      release.commit,
+      *RELEASE_PATHS,
+    ],
+    capture_output=True,
+    check=True,
+  ).stdout
+  with tarfile.open(fileobj=io.BytesIO(archive)) as tar:
+    tar.extractall(dest, filter="data")
+  docs = dest / DOCS_ROOT
+  if (docs / SHOPPING_DIR.name).is_dir():
+    return {}, []
+  moved: dict[str, str] = {}
+  unknown: list[str] = []
+  for path in sorted(docs.rglob("*.md")):
+    page = path.relative_to(docs).as_posix()
+    if page in config.flat_pages:
+      target = docs / config.flat_pages[page]
+      target.parent.mkdir(parents=True, exist_ok=True)
+      path.rename(target)
+      moved[(DOCS_ROOT / config.flat_pages[page]).as_posix()] = (
+        DOCS_ROOT / page
+      ).as_posix()
+    elif not any(
+      fnmatch.fnmatchcase(page, pattern) for pattern in config.other_pages
+    ):
+      unknown.append(page)
+  return moved, unknown
+
+
+@dataclasses.dataclass(frozen=True)
+class Wording:
+  """A rule's wording, as the history compares it.
+
+  Attributes:
+    file: The rule's page, at its path in the pinned specification.
+    text_digest: The digest of its context and wording.
+    context: Its normalized compound parent, if it has one.
+    text: Its normalized wording.
+
+  """
+
+  file: str
+  text_digest: str
+  context: str | None
+  text: str
+
+  @property
+  def compared(self) -> str:
+    """Return what is compared to find a rewording."""
+    return match_text(self.context, self.text)
+
+
+def wording_of(
+  record: dict[str, Any], normalize: Callable[[str], str]
+) -> Wording:
+  """Return the wording of an extracted rule."""
+  parent = record["compound_parent"]
+  return Wording(
+    file=record["source"]["file"],
+    text_digest=record["text_digest"],
+    context=normalize(parent) if parent else None,
+    text=record["normalized"],
+  )
+
+
+@dataclasses.dataclass(frozen=True)
+class Stated:
+  """A rule as one release states it.
+
+  Attributes:
+    version: The release.
+    wording: The rule's wording, with its page at the path it has today.
+    position: Where it sits on its page: its first line, then the
+      extractor's document order.
+    file: Its page, at the path the release gives it.
+    level: Its level, as corrected by the review if it was.
+    prefix: The ID prefix for its page.
+    record: Its catalog record from the release.
+
+  """
+
+  version: str
+  wording: Wording
+  position: tuple[int, int]
+  file: str
+  level: str
+  prefix: str
+  record: dict[str, Any] = dataclasses.field(
+    default_factory=dict, compare=False, repr=False
+  )
+
+
+def similarity(before: str, after: str) -> float:
+  """Return how alike two wordings are, or 0 under `REWORD_SIMILARITY`."""
+  matcher = difflib.SequenceMatcher(None, before, after, autojunk=False)
+  if (
+    matcher.real_quick_ratio() < REWORD_SIMILARITY
+    or matcher.quick_ratio() < REWORD_SIMILARITY
+  ):
+    return 0.0
+  ratio = matcher.ratio()
+  return ratio if ratio >= REWORD_SIMILARITY else 0.0
+
+
+def match_release(
+  stated: Sequence[Stated],
+  candidates: Mapping[str, Wording],
+  related: Callable[[str, str], bool] | None = None,
+) -> list[tuple[str, str] | None]:
+  """Match a release's rules to the rules of the next newer version.
+
+  Five passes, each giving a rule at most one candidate and a candidate at
+  most one rule; rules go in page order and candidates in key order:
+
+  1. the same wording on the same page;
+  2. the same wording on another, related page, for a rule that moved;
+  3. the same wording under another list stem, or none, on the same page,
+     for a wording of at least `SAME_TEXT_MIN_WORDS` words;
+  4. a wording at least `REWORD_SIMILARITY` alike on the same page, most
+     alike first;
+  5. the same, on another related page.
+
+  Args:
+    stated: The release's rules.
+    candidates: The rules of newer versions, by key, each with its wording
+      in the next newer version that states it.
+    related: Whether a rule can move between two pages, such as two pages
+      of one capability. By default it can move between any two.
+
+  Returns:
+    For each of the release's rules, the key it matched and how, or None.
+
+  """
+  found: list[tuple[str, str] | None] = [None] * len(stated)
+  claimed: set[str] = set()
+  order = sorted(
+    range(len(stated)),
+    key=lambda i: (stated[i].wording.file, stated[i].position),
+  )
+  keys = sorted(candidates)
+
+  def take(i: int, key: str, kind: str) -> None:
+    found[i] = (key, kind)
+    claimed.add(key)
+
+  def allowed(key: str, wording: Wording, same_page: bool) -> bool:
+    page = candidates[key].file
+    if same_page:
+      return page == wording.file
+    return page != wording.file and (
+      related is None or related(page, wording.file)
+    )
+
+  by_digest = collections.defaultdict(list)
+  for key in keys:
+    by_digest[candidates[key].text_digest].append(key)
+  for same_page, kind in ((True, SAME_WORDING), (False, OTHER_PAGE)):
+    for i in order:
+      if found[i] is not None:
+        continue
+      wording = stated[i].wording
+      for key in by_digest[wording.text_digest]:
+        if key not in claimed and allowed(key, wording, same_page):
+          take(i, key, kind)
+          break
+  for i in order:
+    wording = stated[i].wording
+    if found[i] is not None or len(wording.text.split()) < SAME_TEXT_MIN_WORDS:
+      continue
+    for key in keys:
+      if (
+        key not in claimed
+        and allowed(key, wording, same_page=True)
+        and candidates[key].text == wording.text
+      ):
+        take(i, key, OTHER_STEM)
+        break
+  compared = {key: candidates[key].compared for key in keys}
+  for same_page, kind in ((True, REWORDED), (False, REWORDED_OTHER_PAGE)):
+    pairs = []
+    for rank, i in enumerate(order):
+      if found[i] is not None:
+        continue
+      wording = stated[i].wording
+      for key in keys:
+        if key in claimed or not allowed(key, wording, same_page):
+          continue
+        alike = similarity(compared[key], wording.compared)
+        if alike:
+          pairs.append((-alike, key, rank, i))
+    for _, key, _, i in sorted(pairs):
+      if found[i] is None and key not in claimed:
+        take(i, key, kind)
+  return found
+
+
+def moved_to(wording: Wording, outside: Sequence[Wording]) -> list[str]:
+  """Return the pages outside the shopping pages that state a wording now.
+
+  Every page with the same wording counts; failing that, the page of the
+  most alike wording, if one is at least `REWORD_SIMILARITY` alike.
+
+  Args:
+    wording: A release's rule that no newer shopping rule matched.
+    outside: The rules the pinned specification states outside the
+      shopping pages.
+
+  Returns:
+    The pages, in path order; empty if none states the wording.
+
+  """
+  long_enough = len(wording.text.split()) >= SAME_TEXT_MIN_WORDS
+  same = {
+    other.file
+    for other in outside
+    if other.text_digest == wording.text_digest
+    or (long_enough and other.text == wording.text)
+  }
+  if same:
+    return sorted(same)
+  alike, page = max(
+    (
+      (similarity(other.compared, wording.compared), other.file)
+      for other in outside
+    ),
+    default=(0.0, ""),
+  )
+  return [page] if alike else []
+
+
+@dataclasses.dataclass
+class History:
+  """Which releases state each rule.
+
+  Attributes:
+    stated: For each rule, how each release that states it states it,
+      oldest first. A rule of the pinned specification is keyed by its ID;
+      a removed rule by its key in `removed`.
+    matched: For each release, how many of its rules matched each way, by
+      the kinds in `MATCH_KINDS`.
+    removed: The keys of rules no newer version states, in the order found:
+      newest release first.
+    moved_out: Rules of a release that the pinned specification states
+      outside the shopping pages, each with the pages that state it now.
+    reworded: Matches on a reworded wording, for a person to check: the
+      release's rule, the key it matched, the newer wording, and how alike
+      the two are.
+    split: The IDs whose split took effect.
+
+  """
+
+  stated: dict[str, list[Stated]] = dataclasses.field(
+    default_factory=lambda: collections.defaultdict(list)
+  )
+  matched: dict[str, collections.Counter[str]] = dataclasses.field(
+    default_factory=dict
+  )
+  removed: list[str] = dataclasses.field(default_factory=list)
+  moved_out: list[tuple[Stated, list[str]]] = dataclasses.field(
+    default_factory=list
+  )
+  reworded: list[tuple[Stated, str, Wording, float]] = dataclasses.field(
+    default_factory=list
+  )
+  split: set[str] = dataclasses.field(default_factory=set)
+
+
+def trace_history(
+  versions: Sequence[str],
+  stated: Mapping[str, Sequence[Stated]],
+  current: Mapping[str, Wording],
+  outside: Sequence[Wording],
+  splits: Mapping[str, str] | None = None,
+  related: Callable[[str, str], bool] | None = None,
+) -> History:
+  """Trace the catalog's rules back through the releases, newest first.
+
+  Each release's rules are matched by `match_release` to the wording each
+  rule has in the next newer version that states it, starting with the
+  pinned specification. A rule that matches none moved out of the shopping
+  pages if the pinned specification states it outside them. Otherwise it is
+  a removed rule, which older releases are matched to in turn.
+
+  Args:
+    versions: Every version, oldest first, ending with `DRAFT`.
+    stated: Each release's rules, by version.
+    current: The wording of each rule of the pinned specification, by ID.
+    outside: The rules the pinned specification states outside the
+      shopping pages.
+    splits: For an ID whose older wording the review found is another rule,
+      the first version whose wording is this rule.
+    related: Whether a rule can move between two pages; see
+      `match_release`.
+
+  Returns:
+    The history.
+
+  """
+  splits = splits or {}
+  history = History()
+  candidates = dict(current)
+  for version in reversed(versions[:-1]):
+    index = versions.index(version)
+    blocked = {
+      rule_id
+      for rule_id, first in splits.items()
+      if index < versions.index(first) and rule_id in candidates
+    }
+    rules = stated[version]
+    found = match_release(
+      rules,
+      {key: w for key, w in candidates.items() if key not in blocked},
+      related,
+    )
+    counts: collections.Counter[str] = collections.Counter()
+    keyed: list[tuple[Stated, str]] = []
+    for rule, match in zip(rules, found, strict=True):
+      if match is None:
+        pages = moved_to(rule.wording, outside)
+        if pages:
+          history.moved_out.append((rule, pages))
+          counts[MOVED_OUT] += 1
+          continue
+        key, kind = f"~{len(history.removed):05d}", LAST_STATED
+        history.removed.append(key)
+      else:
+        key, kind = match
+      counts[kind] += 1
+      if kind in (REWORDED, REWORDED_OTHER_PAGE):
+        newer = candidates[key]
+        alike = similarity(newer.compared, rule.wording.compared)
+        history.reworded.append((rule, key, newer, alike))
+      keyed.append((rule, key))
+    for rule_id in blocked:
+      if index + 1 == versions.index(splits[rule_id]) and any(
+        match_release(rules, {rule_id: candidates[rule_id]}, related)
+      ):
+        history.split.add(rule_id)
+    for rule, key in keyed:
+      history.stated[key].insert(0, rule)
+      candidates[key] = rule.wording
+    history.matched[version] = counts
+  return history
+
+
+def stated_order(stated: Stated) -> tuple[Any, ...]:
+  """Return the order new IDs go out in: core page first, then page order."""
+  file = stated.wording.file
+  return (
+    stated.prefix,
+    PurePosixPath(file).name != "index.md",
+    file,
+    stated.position,
+  )
+
+
+def assign_removed_ids(
+  removed: Sequence[Sequence[Stated]],
+  entries: Sequence[dict[str, Any]],
+  spec_commit: str,
+) -> tuple[list[str], list[dict[str, Any]], list[str]]:
+  """Give each removed rule a stable ID.
+
+  A removed rule takes the ID of a retired lock entry that has one of its
+  wordings, on its newest page first; failing that, of one whose wording is
+  at least `REWORD_SIMILARITY` alike to its newest, most alike first.
+  Otherwise it gets the next number for its prefix, in a new entry retired
+  from the start: the pinned specification doesn't state it. Rules go in
+  the order `stated_order` gives their newest statements.
+
+  Args:
+    removed: Each removed rule's statements, oldest first.
+    entries: The lock's entries. They are not modified.
+    spec_commit: The pinned specification's commit, for new entries.
+
+  Returns:
+    Each removed rule's ID; the lock's entries after, in ID order; and the
+    new IDs.
+
+  """
+  entries = [copy.deepcopy(entry) for entry in entries]
+  retired = sorted(
+    (entry for entry in entries if entry["status"] == "retired"),
+    key=lambda entry: split_id(entry["id"]),
+  )
+  ids: list[str | None] = [None] * len(removed)
+  claimed: set[str] = set()
+  order = sorted(
+    range(len(removed)), key=lambda i: stated_order(removed[i][-1])
+  )
+  for same_page in (True, False):
+    for i in order:
+      if ids[i] is not None:
+        continue
+      newest = removed[i][-1].wording
+      digests = {statement.wording.text_digest for statement in removed[i]}
+      for entry in retired:
+        known = {entry["text_digest"], *entry["previous_digests"]}
+        on_page = entry["file"] == newest.file
+        if (
+          entry["id"] not in claimed
+          and on_page == same_page
+          and digests & known
+        ):
+          ids[i] = entry["id"]
+          claimed.add(entry["id"])
+          break
+  for same_page in (True, False):
+    pairs = []
+    for rank, i in enumerate(order):
+      if ids[i] is not None:
+        continue
+      newest = removed[i][-1].wording
+      for entry in retired:
+        on_page = entry["file"] == newest.file
+        if entry["id"] in claimed or on_page != same_page:
+          continue
+        alike = similarity(
+          match_text(entry["context"], entry["text"]), newest.compared
+        )
+        if alike:
+          pairs.append((-alike, split_id(entry["id"]), rank, i, entry["id"]))
+    for *_, i, rule_id in sorted(pairs):
+      if ids[i] is None and rule_id not in claimed:
+        ids[i] = rule_id
+        claimed.add(rule_id)
+  highest: collections.Counter[str] = collections.Counter()
+  for entry in entries:
+    prefix, number = split_id(entry["id"])
+    highest[prefix] = max(highest[prefix], number)
+  minted = []
+  for i in order:
+    if ids[i] is not None:
+      continue
+    newest = removed[i][-1]
+    highest[newest.prefix] += 1
+    rule_id = f"{newest.prefix}-{highest[newest.prefix]:0{ID_NUMBER_WIDTH}d}"
+    older = [statement.wording.text_digest for statement in removed[i][:-1]]
+    entries.append(
+      {
+        "id": rule_id,
+        "file": newest.wording.file,
+        "text_digest": newest.wording.text_digest,
+        "context": newest.wording.context,
+        "text": newest.wording.text,
+        "previous_digests": [
+          digest
+          for digest in dict.fromkeys(older)
+          if digest != newest.wording.text_digest
+        ],
+        "status": "retired",
+        "minted_at": spec_commit,
+        "retired_at": spec_commit,
+      }
+    )
+    ids[i] = rule_id
+    minted.append(rule_id)
+  entries.sort(key=lambda entry: split_id(entry["id"]))
+  return [rule_id or "" for rule_id in ids], entries, minted
+
+
+def lifespan(
+  stated_in: Sequence[str], versions: Sequence[str]
+) -> tuple[str, str | None]:
+  """Return a rule's first version, and the first version after its last.
+
+  Args:
+    stated_in: The versions that state the rule, oldest first.
+    versions: Every version, oldest first, ending with `DRAFT`.
+
+  Returns:
+    `since` and `until`; `until` is None while the draft states the rule.
+
+  """
+  last = versions.index(stated_in[-1])
+  until = versions[last + 1] if last + 1 < len(versions) else None
+  return stated_in[0], until
+
+
+def statements(
+  stated: Sequence[Stated], own_digest: str
+) -> list[dict[str, Any]]:
+  """Describe how each release states a rule, oldest first.
+
+  Each entry gives the release; the page and line as the release has them;
+  the level and the wording's digest; and the wording itself when it isn't
+  the record's own.
+  """
+  entries = []
+  for statement in stated:
+    entry = {
+      "version": statement.version,
+      "file": statement.file,
+      "start_line": statement.position[0],
+      "level": statement.level,
+      "text_digest": statement.wording.text_digest,
+    }
+    if statement.wording.text_digest != own_digest:
+      entry["clause"] = statement.record["clause"]
+    entries.append(entry)
+  return entries
+
+
+def removed_record(
+  stated: Sequence[Stated],
+  rule_id: str,
+  versions: Sequence[str],
+  published_page: Callable[[str], str],
+) -> dict[str, Any]:
+  """Return the record of a rule that only older releases state.
+
+  It is the newest release's record, at that release's page, with the
+  rule's stable ID and its history in `demo`.
+  """
+  newest = stated[-1]
+  record = copy.deepcopy(newest.record)
+  record["id"] = rule_id
+  record["source"]["file"] = newest.file
+  record["source"]["page"] = published_page(newest.file)
+  since, until = lifespan([statement.version for statement in stated], versions)
+  record["demo"]["since"] = since
+  record["demo"]["until"] = until
+  record["demo"]["releases"] = statements(stated, record["text_digest"])
+  return record
+
+
 def main(argv: list[str] | None = None) -> int:
   """Build the catalog, write it, and print a summary."""
   parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
   parser.add_argument("--spec-root", type=Path, required=True)
   parser.add_argument("--spec-commit", required=True)
   parser.add_argument("--extractor-dir", type=Path, required=True)
+  parser.add_argument(
+    "--releases-repo",
+    type=Path,
+    required=True,
+    help="a clone of the specification repository with the release commits",
+  )
+  parser.add_argument("--releases", type=Path, default=DEFAULT_RELEASES_FILE)
   parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
   parser.add_argument("--review", type=Path, default=DEFAULT_REVIEW_FILE)
   parser.add_argument(
@@ -808,32 +1631,18 @@ def main(argv: list[str] | None = None) -> int:
   out = sys.stdout.write
 
   modules = load_extractor(args.extractor_dir.resolve())
-  catalog, classifier, config, identity = (
+  catalog, config, identity = (
     modules["catalog"],
-    modules["classifier"],
     modules["config"],
     modules["identity"],
   )
   extractor_commit, extractor_dirty = git_commit(args.extractor_dir)
-  schemas = schema_capabilities(spec_root)
+  pinned = extract(modules, spec_root, SHOPPING_DIR, bold_only=True)
+  schemas, resolver = pinned.schemas, pinned.resolver
   names = set(schemas)
-  resolver = DemoResolver(config.declared_capability, names)
-  config.SPEC_DIRS = [Path(SHOPPING_DIR)]
-
-  original_find = classifier.find_keywords
-
-  def find_all_keywords(text: str, keywords: tuple[str, ...]) -> list[Any]:
-    return [
-      dataclasses.replace(hit, bolded=True)
-      for hit in original_find(text, keywords)
-    ]
-
-  with replaced(config, "resolve_capability", resolver):
-    bold_only, _ = catalog.build(spec_root)
-    with replaced(classifier, "find_keywords", find_all_keywords):
-      requirements, report = catalog.build(spec_root)
-    documents = catalog.catalog_documents(requirements, report, spec_root)
-    report_document = catalog.report_document(requirements, report, spec_root)
+  documents = pinned.documents
+  report_document = pinned.report_document
+  bold_only = pinned.bold_only
 
   demo_header = {
     "spec_commit": args.spec_commit,
@@ -849,18 +1658,8 @@ def main(argv: list[str] | None = None) -> int:
   for path, document in documents.items():
     label = resolver.labels[document["source_file"]]
     for record in document["requirements"]:
-      if record["capabilities"]:
-        record["capabilities"] = list(label.capabilities)
-      transport, testable, reason = testability(record)
-      record["demo"] = {
-        "positional_id": record["id"],
-        "capability_source": label.source,
-        "keyword_style": keyword_style(record["clause"]),
-        "transport": transport,
-        "testable": testable,
-        "testable_reason": reason,
-      }
-      pre_review[record["id"]] = (testable, record["level"])
+      annotate(record, label)
+      pre_review[record["id"]] = (record["demo"]["testable"], record["level"])
       key = (record["source"]["file"], record["text_digest"])
       if key in reviews:
         used_reviews.add(key)
@@ -880,6 +1679,10 @@ def main(argv: list[str] | None = None) -> int:
     digest = hashlib.sha256(joined.encode("utf-8")).hexdigest()
     return digest[: config.ID_DIGEST_LENGTH]
 
+  def prefix_of(labels: dict[str, PageLabel], file: str) -> str:
+    slug = config.capability_slug(labels[file].id_name)
+    return f"{config.READABLE_ID_PREFIX}-{slug}"
+
   lock_path = out_dir / LOCK_FILE
   lock_load_problems: list[str] = []
   lock = load_lock(lock_path, digest_of, lock_load_problems)
@@ -888,8 +1691,7 @@ def main(argv: list[str] | None = None) -> int:
     return 1
   rules = [
     LockRule(
-      prefix=f"{config.READABLE_ID_PREFIX}-"
-      + config.capability_slug(resolver.labels[r["source"]["file"]].id_name),
+      prefix=prefix_of(resolver.labels, r["source"]["file"]),
       file=r["source"]["file"],
       text_digest=r["text_digest"],
       context=identity.normalize(r["compound_parent"])
@@ -906,6 +1708,116 @@ def main(argv: list[str] | None = None) -> int:
   stable_ids = {r["demo"]["positional_id"]: r["id"] for r in records}
   for entry in report_document["diagnostics"].get("duplicate_requirements", []):
     entry["ids"] = [stable_ids.get(i, i) for i in entry["ids"]]
+
+  # Release history: read each release, trace the rules back through them,
+  # and give removed rules IDs of their own.
+  history_problems: list[str] = []
+  releases = load_releases(args.releases.resolve(), history_problems)
+  splits = load_splits(args.review.resolve(), history_problems)
+  versions = releases.versions
+  everything = extract(modules, spec_root, DOCS_ROOT)
+  outside = [
+    wording_of(record, identity.normalize)
+    for document in everything.documents.values()
+    for record in document["requirements"]
+    if not in_shopping(record["source"]["file"])
+  ]
+  stated_by_version: dict[str, list[Stated]] = {}
+  page_capabilities: dict[str, set[str]] = collections.defaultdict(set)
+  for file, label in resolver.labels.items():
+    page_capabilities[file].update(label.capabilities)
+  for release in releases.releases:
+    with tempfile.TemporaryDirectory() as staging:
+      root = Path(staging)
+      try:
+        moved, unknown = stage_release(
+          args.releases_repo.resolve(), release, releases, root
+        )
+      except subprocess.CalledProcessError as error:
+        out(
+          f"PROBLEMS:\n  - release {release.version}: cannot read commit "
+          f"{release.commit[:8]} from {args.releases_repo}: "
+          f"{error.stderr.decode(errors='replace').strip()}\n"
+        )
+        return 1
+      found = extract(modules, root, DOCS_ROOT)
+      declared = config.spec_version(root)
+    if declared != release.version:
+      history_problems.append(
+        f"release {release.version}: its mkdocs.yml says {declared}"
+      )
+    if unknown:
+      history_problems.append(
+        f"release {release.version}: pages neither mapped nor listed as "
+        f"other pages: {unknown}"
+      )
+    history_problems.extend(
+      f"release {release.version}: {problem}"
+      for problem in found.resolver.problems
+      if in_shopping(problem.split(":", 1)[0])
+    )
+    stated_by_version[release.version] = []
+    for document in found.documents.values():
+      if not in_shopping(document["source_file"]):
+        continue
+      label = found.resolver.labels[document["source_file"]]
+      page_capabilities[document["source_file"]].update(label.capabilities)
+      for record in document["requirements"]:
+        annotate(record, label)
+        file = record["source"]["file"]
+        key = (file, record["text_digest"])
+        if key in reviews:
+          used_reviews.add(key)
+          apply_review(record, reviews[key])
+        stated_by_version[release.version].append(
+          Stated(
+            version=release.version,
+            wording=wording_of(record, identity.normalize),
+            position=(record["source"]["start_line"], record["document_order"]),
+            file=moved.get(file, file),
+            level=effective_level(record),
+            prefix=prefix_of(found.resolver.labels, file),
+            record=record,
+          )
+        )
+
+  def related(page: str, other: str) -> bool:
+    """Return whether two pages share a capability."""
+    return bool(page_capabilities[page] & page_capabilities[other])
+
+  history = trace_history(
+    versions,
+    stated_by_version,
+    {
+      entry["id"]: Wording(
+        entry["file"], entry["text_digest"], entry["context"], entry["text"]
+      )
+      for entry in assigned.entries
+      if entry["status"] == "active"
+    },
+    outside,
+    splits,
+    related,
+  )
+  removed_ids, lock_entries, minted_removed = assign_removed_ids(
+    [history.stated[key] for key in history.removed],
+    assigned.entries,
+    args.spec_commit,
+  )
+  keys = dict(zip(history.removed, removed_ids, strict=True))
+  for record in records:
+    stated = history.stated.get(record["id"], [])
+    record["demo"]["since"] = stated[0].version if stated else DRAFT
+    record["demo"]["releases"] = statements(stated, record["text_digest"])
+  removed_records = sorted(
+    (
+      removed_record(
+        history.stated[key], keys[key], versions, config.published_page
+      )
+      for key in history.removed
+    ),
+    key=lambda record: split_id(record["id"]),
+  )
 
   # Checks. Anything here is unexpected and fails the run.
   problems = list(resolver.problems) + review_problems
@@ -956,6 +1868,48 @@ def main(argv: list[str] | None = None) -> int:
         )
       if not in_extensions and kinds.get(name) == "extension":
         problems.append(f"{rel_path} is labelled with the extension {name}")
+  problems.extend(history_problems)
+  idle_splits = sorted(set(splits) - history.split)
+  if idle_splits:
+    problems.append(
+      f"review: splits that change nothing (the ID isn't stated in that "
+      f"version, or no older wording matches it): {idle_splits}"
+    )
+  removed_actors = sorted(
+    {
+      r["target_actor"]
+      for r in removed_records
+      if r["demo"]["testable"] is None
+    },
+    key=str,
+  )
+  if removed_actors:
+    problems.append(
+      f"actors this tool does not know, in removed rules: {removed_actors}"
+    )
+  removed_unresolved = [
+    r["id"] for r in removed_records if not r["capabilities"]
+  ]
+  if removed_unresolved:
+    problems.append(
+      f"{len(removed_unresolved)} removed rules have no capability: "
+      f"{removed_unresolved[:5]}"
+    )
+  retired_ids = {e["id"] for e in lock_entries if e["status"] == "retired"}
+  if len(set(removed_ids)) != len(removed_ids) or not retired_ids.issuperset(
+    removed_ids
+  ):
+    problems.append("lock: removed rules must have distinct, retired IDs")
+  problems.extend(
+    lock_problems(
+      assigned.entries,
+      LockResult(
+        ids=assigned.ids,
+        entries=lock_entries,
+        minted=minted_removed,
+      ),
+    )
+  )
 
   # Write, or with --check only compare.
   report_document = {**report_document, "demo": demo_header}
@@ -965,13 +1919,49 @@ def main(argv: list[str] | None = None) -> int:
     "capability",
     "capabilities": index,
   }
+  history_document = {
+    "about": HISTORY_ABOUT,
+    "demo": demo_header,
+    "versions": list(versions),
+    "releases": [
+      {
+        "version": release.version,
+        "ref": release.ref,
+        "commit": release.commit,
+        "rules": len(stated_by_version[release.version]),
+        "matched": {
+          kind: history.matched[release.version][kind] for kind in MATCH_KINDS
+        },
+      }
+      for release in releases.releases
+    ],
+    "removed": removed_records,
+    "moved_out": [
+      {
+        "version": rule.version,
+        "file": rule.file,
+        "start_line": rule.position[0],
+        "clause": rule.record["clause"],
+        "now_on": pages,
+      }
+      for rule, pages in sorted(
+        history.moved_out,
+        key=lambda item: (
+          versions.index(item[0].version),
+          item[0].file,
+          item[0].position,
+        ),
+      )
+    ],
+  }
   outputs = {
     out_dir / path: catalog.serialize(document)
     for path, document in documents.items()
   }
   outputs[out_dir / REPORT_FILE] = catalog.serialize(report_document)
   outputs[out_dir / INDEX_FILE] = catalog.serialize(index_document)
-  outputs[lock_path] = catalog.serialize(lock_document(assigned.entries))
+  outputs[out_dir / HISTORY_FILE] = catalog.serialize(history_document)
+  outputs[lock_path] = catalog.serialize(lock_document(lock_entries))
   pages_dir = out_dir / "shopping"
   old_pages = set(pages_dir.rglob("*.json")) if pages_dir.exists() else set()
   out_of_date = sorted(
@@ -1131,12 +2121,12 @@ def main(argv: list[str] | None = None) -> int:
       f"actor set or corrected: {actor_fixes}\n"
     )
 
-  statuses = collections.Counter(e["status"] for e in assigned.entries)
+  statuses = collections.Counter(e["status"] for e in lock_entries)
   out(
     f"\nstable IDs ({LOCK_FILE}): kept {len(assigned.kept)}, carried over "
     f"{len(assigned.carried)}, new {len(assigned.minted)}, retired "
     f"{len(assigned.retired)}, restored {len(assigned.restored)}\n"
-    f"  the lock holds {len(assigned.entries)} IDs: {statuses['active']} "
+    f"  the lock holds {len(lock_entries)} IDs: {statuses['active']} "
     f"active, {statuses['retired']} retired\n"
   )
   if assigned.minted:
@@ -1161,17 +2151,82 @@ def main(argv: list[str] | None = None) -> int:
       for rule_id in listed:
         out(f"  {title}: {rule_id} at {where[rule_id]}\n")
   wording = {e["id"]: e["text"] for e in assigned.entries}
-  for rule_id, similarity, before in assigned.carried:
+  for rule_id, alike, before in assigned.carried:
     out(
-      f"  carried over: {rule_id} at {where[rule_id]}, {similarity:.0%} "
+      f"  carried over: {rule_id} at {where[rule_id]}, {alike:.0%} "
       "alike; check it is the same rule\n"
       f"    was: {before[:100]}\n    now: {wording[rule_id][:100]}\n"
     )
 
+  def must_in(record: dict[str, Any]) -> list[str]:
+    """Return the versions in which a testable rule is a MUST."""
+    if not is_active(record) or not record["demo"]["testable"]:
+      return []
+    stated = [(s["version"], s["level"]) for s in record["demo"]["releases"]]
+    if record["demo"].get("until") is None:
+      stated.append((DRAFT, effective_level(record)))
+    return [version for version, level in stated if level in MUST_LEVELS]
+
+  out(
+    f"\nrelease history ({args.releases.name}, {HISTORY_FILE}): "
+    f"{len(releases.releases)} releases\n"
+  )
+  for release in releases.releases:
+    counts = history.matched[release.version]
+    out(
+      f"  {release.version} ({release.commit[:8]}): "
+      f"{len(stated_by_version[release.version])} shopping rules; "
+      + ", ".join(
+        f"{kind} {counts[kind]}" for kind in MATCH_KINDS if counts[kind]
+      )
+      + "\n"
+    )
+  first = collections.Counter(
+    r["demo"]["since"] for r in records if is_active(r)
+  )
+  first_must = collections.Counter(
+    r["demo"]["since"] for r in records if DRAFT in must_in(r)
+  )
+  stated_must = collections.Counter(
+    version for r in (*records, *removed_records) for version in must_in(r)
+  )
+  for title, counts in (
+    ("rules by first version", first),
+    ("testable MUST rules by first version", first_must),
+    ("testable MUST rules each version states", stated_must),
+  ):
+    out(
+      f"  {title}: "
+      + ", ".join(f"{v} {counts[v]}" for v in versions if counts[v])
+      + "\n"
+    )
+  removed_must = [r for r in removed_records if must_in(r)]
+  out(
+    f"  removed rules: {len(removed_records)}, {len(removed_must)} of them "
+    f"testable MUST; new IDs {len(minted_removed)}\n"
+  )
+  for record in removed_must:
+    if "review" not in record["demo"]:
+      out(
+        f"    not reviewed: {record['id']} ({record['demo']['since']} to "
+        f"{record['demo']['releases'][-1]['version']}, "
+        f"{record['demo']['testable_reason']}): {record['clause'][:90]}\n"
+      )
+  if history.moved_out:
+    out(f"  moved out of the shopping pages: {len(history.moved_out)}\n")
+  for rule, key, newer, alike in history.reworded:
+    out(
+      f"  reworded: {keys.get(key, key)} in {rule.version} at "
+      f"{rule.file.removeprefix(f'{DOCS_ROOT}/')}:{rule.position[0]}, "
+      f"{alike:.0%} alike; check it is the same rule\n"
+      f"    was: {rule.wording.text[:100]}\n    now: {newer.text[:100]}\n"
+    )
+
   out(
     f"\n{'would write' if args.check else 'wrote'} {len(documents)} page "
-    f"files, {REPORT_FILE}, {INDEX_FILE} and {LOCK_FILE} to {out_dir}; "
-    f"{len(out_of_date)} files {'differ' if args.check else 'changed'}\n"
+    f"files, {REPORT_FILE}, {INDEX_FILE}, {HISTORY_FILE} and {LOCK_FILE} to "
+    f"{out_dir}; {len(out_of_date)} files "
+    f"{'differ' if args.check else 'changed'}\n"
   )
   if args.check and out_of_date:
     out("check: nothing was written; out of date:\n")
@@ -1189,7 +2244,8 @@ def main(argv: list[str] | None = None) -> int:
   out(
     "checks: every rule has a capability and its own stable ID, all names "
     "are declared, no conflicts, every extension page belongs to an "
-    "extension, every page fits the catalog schema\n"
+    "extension, every page fits the catalog schema, every release was read "
+    "and every removed rule has a retired ID\n"
   )
   return 0
 

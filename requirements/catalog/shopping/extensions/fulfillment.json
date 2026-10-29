@@ -90,7 +90,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 80,
+            "level": "MUST",
+            "text_digest": "cdbd5fec10"
+          }
+        ]
       }
     },
     {
@@ -127,7 +137,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 83,
+            "level": "MUST",
+            "text_digest": "fe8277d08b"
+          }
+        ]
       }
     },
     {
@@ -164,7 +184,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 88,
+            "level": "MAY",
+            "text_digest": "40ffef1f4a"
+          }
+        ]
       }
     },
     {
@@ -207,7 +237,17 @@
           "actor": "SPEC_AUTHORS",
           "testable": false,
           "reason": "the MAY is for the method's defining contract"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 222,
+            "level": "MAY",
+            "text_digest": "eb39670f05"
+          }
+        ]
       }
     },
     {
@@ -244,7 +284,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": false,
-        "testable_reason": "aimed at the platform"
+        "testable_reason": "aimed at the platform",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 231,
+            "level": "MAY",
+            "text_digest": "2526f4c07e"
+          }
+        ]
       }
     },
     {
@@ -284,7 +334,17 @@
           "actor": "SPEC_AUTHORS",
           "testable": false,
           "reason": "aimed at future spec revisions and extensions"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 252,
+            "level": "MAY",
+            "text_digest": "3049f1a8c3"
+          }
+        ]
       }
     },
     {
@@ -327,7 +387,17 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "constrains the request"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 260,
+            "level": "MUST",
+            "text_digest": "09193f5629"
+          }
+        ]
       }
     },
     {
@@ -364,7 +434,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": false,
-        "testable_reason": "aimed at the platform"
+        "testable_reason": "aimed at the platform",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 308,
+            "level": "MUST NOT",
+            "text_digest": "b44067a978"
+          }
+        ]
       }
     },
     {
@@ -402,7 +482,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 308,
+            "level": "MUST",
+            "text_digest": "ebf819f726"
+          }
+        ]
       }
     },
     {
@@ -438,7 +528,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 308,
+            "level": "MAY",
+            "text_digest": "0656640d46"
+          }
+        ]
       }
     },
     {
@@ -480,7 +580,17 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "about which IDs the platform may send"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 353,
+            "level": "MAY",
+            "text_digest": "62c051ee37"
+          }
+        ]
       }
     },
     {
@@ -522,7 +632,17 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "response content"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 360,
+            "level": "MUST",
+            "text_digest": "bdf46e29a3"
+          }
+        ]
       }
     },
     {
@@ -565,7 +685,17 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "response content"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 361,
+            "level": "MUST",
+            "text_digest": "ac1221953c"
+          }
+        ]
       }
     },
     {
@@ -599,7 +729,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 366,
+            "level": "MUST",
+            "text_digest": "cb549868ae"
+          }
+        ]
       }
     },
     {
@@ -635,7 +775,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 366,
+            "level": "MUST NOT",
+            "text_digest": "3405a629ce"
+          }
+        ]
       }
     },
     {
@@ -671,7 +821,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 374,
+            "level": "MUST",
+            "text_digest": "de41b39472"
+          }
+        ]
       }
     },
     {
@@ -709,7 +869,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 374,
+            "level": "MUST",
+            "text_digest": "4b4188b3b6"
+          }
+        ]
       }
     },
     {
@@ -743,7 +913,39 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 178,
+            "level": "MUST",
+            "text_digest": "69636c2e67",
+            "clause": "**MUST** distinguish this option from its siblings"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 177,
+            "level": "MUST",
+            "text_digest": "c7748bb9e7"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 177,
+            "level": "MUST",
+            "text_digest": "c7748bb9e7"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 405,
+            "level": "MUST",
+            "text_digest": "c7748bb9e7"
+          }
+        ]
       }
     },
     {
@@ -777,7 +979,39 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 179,
+            "level": "SHOULD",
+            "text_digest": "7a4c2d337c",
+            "clause": "**SHOULD** include method and speed (e.g., \"Express Shipping\", \"Curbside Pickup\")"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 178,
+            "level": "SHOULD",
+            "text_digest": "7dcad6bd86"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 178,
+            "level": "SHOULD",
+            "text_digest": "7dcad6bd86"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 406,
+            "level": "SHOULD",
+            "text_digest": "7dcad6bd86"
+          }
+        ]
       }
     },
     {
@@ -813,7 +1047,39 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 181,
+            "level": "MUST",
+            "text_digest": "9aa994e2ba",
+            "clause": "**MUST** be sufficient for buyer decision if `description` is absent"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 179,
+            "level": "MUST",
+            "text_digest": "3c15b23155"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 179,
+            "level": "MUST",
+            "text_digest": "3c15b23155"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 407,
+            "level": "MUST",
+            "text_digest": "3c15b23155"
+          }
+        ]
       }
     },
     {
@@ -850,7 +1116,39 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 185,
+            "level": "MUST NOT",
+            "text_digest": "a73cf69190",
+            "clause": "**MUST NOT** repeat `title` or `total`—provides supplementary context only"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 183,
+            "level": "MUST NOT",
+            "text_digest": "57af5875a4"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 183,
+            "level": "MUST NOT",
+            "text_digest": "57af5875a4"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 411,
+            "level": "MUST NOT",
+            "text_digest": "57af5875a4"
+          }
+        ]
       }
     },
     {
@@ -884,7 +1182,39 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 186,
+            "level": "SHOULD",
+            "text_digest": "acc11310b9",
+            "clause": "**SHOULD** include timing, carrier, or other decision-relevant details"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 184,
+            "level": "SHOULD",
+            "text_digest": "7e4d50e16f"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 184,
+            "level": "SHOULD",
+            "text_digest": "7e4d50e16f"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 412,
+            "level": "SHOULD",
+            "text_digest": "7e4d50e16f"
+          }
+        ]
       }
     },
     {
@@ -918,7 +1248,39 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 187,
+            "level": "SHOULD",
+            "text_digest": "e31699662f",
+            "clause": "**SHOULD** be a complete phrase (e.g., \"Arrives Dec 12-15 via FedEx\")"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 185,
+            "level": "SHOULD",
+            "text_digest": "b82083a42f"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 185,
+            "level": "SHOULD",
+            "text_digest": "b82083a42f"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 413,
+            "level": "SHOULD",
+            "text_digest": "b82083a42f"
+          }
+        ]
       }
     },
     {
@@ -952,7 +1314,39 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 188,
+            "level": "MAY",
+            "text_digest": "b69042155a",
+            "clause": "**MAY** be omitted if title is self-explanatory"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 186,
+            "level": "MAY",
+            "text_digest": "210c8c5962"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 186,
+            "level": "MAY",
+            "text_digest": "210c8c5962"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 414,
+            "level": "MAY",
+            "text_digest": "210c8c5962"
+          }
+        ]
       }
     },
     {
@@ -986,7 +1380,39 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 192,
+            "level": "MUST",
+            "text_digest": "98ebc9e32a",
+            "clause": "**MUST** be a standalone sentence explaining what, when, and where"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 190,
+            "level": "MUST",
+            "text_digest": "d8d326773b"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 190,
+            "level": "MUST",
+            "text_digest": "d8d326773b"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 418,
+            "level": "MUST",
+            "text_digest": "d8d326773b"
+          }
+        ]
       }
     },
     {
@@ -1020,7 +1446,39 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 193,
+            "level": "SHOULD",
+            "text_digest": "1f6551d13b",
+            "clause": "**SHOULD** be usable verbatim in platform dialogue (e.g., \"Pants available for pickup at Downtown Store today at 2pm\")"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 191,
+            "level": "SHOULD",
+            "text_digest": "b8449b14d9"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 191,
+            "level": "SHOULD",
+            "text_digest": "b8449b14d9"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 419,
+            "level": "SHOULD",
+            "text_digest": "b8449b14d9"
+          }
+        ]
       }
     },
     {
@@ -1056,7 +1514,39 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 198,
+            "level": "SHOULD",
+            "text_digest": "4ffe4368f5",
+            "clause": "Businesses **SHOULD** return `options[]` in a meaningful order (e.g., cheapest first, fastest first)"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 196,
+            "level": "SHOULD",
+            "text_digest": "a953e97c48"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 196,
+            "level": "SHOULD",
+            "text_digest": "a953e97c48"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 424,
+            "level": "SHOULD",
+            "text_digest": "a953e97c48"
+          }
+        ]
       }
     },
     {
@@ -1090,7 +1580,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": false,
-        "testable_reason": "aimed at the platform"
+        "testable_reason": "aimed at the platform",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 426,
+            "level": "SHOULD",
+            "text_digest": "765f49eb7f"
+          }
+        ]
       }
     },
     {
@@ -1124,7 +1624,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": false,
-        "testable_reason": "aimed at the platform"
+        "testable_reason": "aimed at the platform",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 426,
+            "level": "MAY",
+            "text_digest": "b4c3462586"
+          }
+        ]
       }
     },
     {
@@ -1158,7 +1668,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 426,
+            "level": "MUST",
+            "text_digest": "676047abce"
+          }
+        ]
       }
     },
     {
@@ -1192,7 +1712,38 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": false,
-        "testable_reason": "aimed at the platform"
+        "testable_reason": "aimed at the platform",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 204,
+            "level": "SHOULD",
+            "text_digest": "0a0dc9bdef"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 202,
+            "level": "SHOULD",
+            "text_digest": "0a0dc9bdef"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 202,
+            "level": "SHOULD",
+            "text_digest": "0a0dc9bdef"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 432,
+            "level": "SHOULD",
+            "text_digest": "0a0dc9bdef"
+          }
+        ]
       }
     },
     {
@@ -1226,7 +1777,38 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": false,
-        "testable_reason": "aimed at the platform"
+        "testable_reason": "aimed at the platform",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 211,
+            "level": "MAY",
+            "text_digest": "ae5940e52e"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 209,
+            "level": "MAY",
+            "text_digest": "ae5940e52e"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 209,
+            "level": "MAY",
+            "text_digest": "ae5940e52e"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 440,
+            "level": "MAY",
+            "text_digest": "ae5940e52e"
+          }
+        ]
       }
     },
     {
@@ -1262,7 +1844,38 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": false,
-        "testable_reason": "aimed at the platform"
+        "testable_reason": "aimed at the platform",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 216,
+            "level": "SHOULD",
+            "text_digest": "10dcc01036"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 215,
+            "level": "SHOULD",
+            "text_digest": "10dcc01036"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 215,
+            "level": "SHOULD",
+            "text_digest": "10dcc01036"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 446,
+            "level": "SHOULD",
+            "text_digest": "10dcc01036"
+          }
+        ]
       }
     },
     {
@@ -1298,7 +1911,38 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": false,
-        "testable_reason": "aimed at the platform"
+        "testable_reason": "aimed at the platform",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 266,
+            "level": "SHOULD",
+            "text_digest": "c3d38466fe"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 263,
+            "level": "SHOULD",
+            "text_digest": "c3d38466fe"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 263,
+            "level": "SHOULD",
+            "text_digest": "c3d38466fe"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 502,
+            "level": "SHOULD",
+            "text_digest": "c3d38466fe"
+          }
+        ]
       }
     },
     {
@@ -1335,7 +1979,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 525,
+            "level": "MUST",
+            "text_digest": "c663a9746e"
+          }
+        ]
       }
     },
     {
@@ -1377,7 +2031,17 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "'consumers' are platforms"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 541,
+            "level": "MUST",
+            "text_digest": "2cf57b7024"
+          }
+        ]
       }
     },
     {
@@ -1419,7 +2083,17 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "'consumers' are platforms"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 541,
+            "level": "MUST NOT",
+            "text_digest": "443d2106bc"
+          }
+        ]
       }
     },
     {
@@ -1461,7 +2135,17 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "permission on catalog response content"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 549,
+            "level": "MAY",
+            "text_digest": "2212f639d3"
+          }
+        ]
       }
     },
     {
@@ -1495,7 +2179,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 549,
+            "level": "SHOULD",
+            "text_digest": "62d55044f9"
+          }
+        ]
       }
     },
     {
@@ -1535,7 +2229,17 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "permission; visible when used"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 555,
+            "level": "MAY",
+            "text_digest": "a1a4de15f2"
+          }
+        ]
       }
     },
     {
@@ -1579,7 +2283,17 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "permission on catalog response content"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 555,
+            "level": "MAY",
+            "text_digest": "185fc4c8c0"
+          }
+        ]
       }
     },
     {
@@ -1615,7 +2329,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 564,
+            "level": "SHOULD",
+            "text_digest": "417161b1bb"
+          }
+        ]
       }
     },
     {
@@ -1649,7 +2373,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 594,
+            "level": "MAY",
+            "text_digest": "f9ed828394"
+          }
+        ]
       }
     },
     {
@@ -1683,7 +2417,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": false,
-        "testable_reason": "aimed at the platform"
+        "testable_reason": "aimed at the platform",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 600,
+            "level": "SHOULD",
+            "text_digest": "3a8712da69"
+          }
+        ]
       }
     },
     {
@@ -1719,7 +2463,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 600,
+            "level": "SHOULD",
+            "text_digest": "100391f5f5"
+          }
+        ]
       }
     },
     {
@@ -1761,7 +2515,17 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "about the platform profile"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 724,
+            "level": "MAY",
+            "text_digest": "ae3b66a72c"
+          }
+        ]
       }
     },
     {
@@ -1801,7 +2565,17 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "permission; visible when used"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 727,
+            "level": "MAY",
+            "text_digest": "37e1ff580a"
+          }
+        ]
       }
     },
     {
@@ -1835,7 +2609,39 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 324,
+            "level": "MUST",
+            "text_digest": "d5a3626ecd",
+            "clause": "Business **MUST** consolidate all items into a **single group per method**"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 323,
+            "level": "MUST",
+            "text_digest": "5a0da8cb6d"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 323,
+            "level": "MUST",
+            "text_digest": "5a0da8cb6d"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 786,
+            "level": "MUST",
+            "text_digest": "5a0da8cb6d"
+          }
+        ]
       }
     },
     {
@@ -1869,7 +2675,39 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 327,
+            "level": "MAY",
+            "text_digest": "57382e3863",
+            "clause": "Business **MAY** still return multiple methods (e.g., shipping + pickup) if cart items require it"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 325,
+            "level": "MAY",
+            "text_digest": "f390899b31"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 325,
+            "level": "MAY",
+            "text_digest": "f390899b31"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 788,
+            "level": "MAY",
+            "text_digest": "f390899b31"
+          }
+        ]
       }
     },
     {
@@ -1903,7 +2741,39 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 332,
+            "level": "MAY",
+            "text_digest": "75e8361a86",
+            "clause": "Business **MAY** return multiple groups per method based on inventory, packaging, or warehouse logic"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 330,
+            "level": "MAY",
+            "text_digest": "ea0855e957"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/fulfillment.md",
+            "start_line": 330,
+            "level": "MAY",
+            "text_digest": "ea0855e957"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 793,
+            "level": "MAY",
+            "text_digest": "ea0855e957"
+          }
+        ]
       }
     },
     {
@@ -1941,7 +2811,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": false,
-        "testable_reason": "aimed at the platform"
+        "testable_reason": "aimed at the platform",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 800,
+            "level": "SHOULD",
+            "text_digest": "746f0c1c71"
+          }
+        ]
       }
     },
     {
@@ -1977,7 +2857,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": false,
-        "testable_reason": "aimed at the platform"
+        "testable_reason": "aimed at the platform",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 800,
+            "level": "SHOULD NOT",
+            "text_digest": "f3e16becc1"
+          }
+        ]
       }
     },
     {
@@ -2013,7 +2903,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 807,
+            "level": "SHOULD",
+            "text_digest": "79e7a637e6"
+          }
+        ]
       }
     },
     {
@@ -2047,7 +2947,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 807,
+            "level": "SHOULD NOT",
+            "text_digest": "15788b383d"
+          }
+        ]
       }
     },
     {
@@ -2090,7 +3000,17 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "permission; visible when used"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/fulfillment.md",
+            "start_line": 823,
+            "level": "MAY",
+            "text_digest": "378c4f8068"
+          }
+        ]
       }
     }
   ]

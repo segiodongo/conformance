@@ -87,7 +87,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "response bodies"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order-rest.md",
+            "start_line": 66,
+            "level": "MUST",
+            "text_digest": "de72b2d0de"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/rest.md",
+            "start_line": 68,
+            "level": "MUST",
+            "text_digest": "de72b2d0de"
+          }
+        ]
       }
     },
     {
@@ -128,7 +145,24 @@
           "testable": true,
           "reason": "visible: the endpoint's TLS version",
           "note": "the local sample server serves plain HTTP, so it fails this"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order-rest.md",
+            "start_line": 71,
+            "level": "MUST",
+            "text_digest": "86f31bc40b"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/rest.md",
+            "start_line": 73,
+            "level": "MUST",
+            "text_digest": "86f31bc40b"
+          }
+        ]
       }
     },
     {
@@ -168,7 +202,24 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "listed under 'Platforms implementing the REST binding:'"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order-rest.md",
+            "start_line": 252,
+            "level": "MUST",
+            "text_digest": "15463fa061"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/rest.md",
+            "start_line": 257,
+            "level": "MUST",
+            "text_digest": "15463fa061"
+          }
+        ]
       }
     },
     {
@@ -210,7 +261,24 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "listed under 'Platforms implementing the REST binding:'"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order-rest.md",
+            "start_line": 253,
+            "level": "MUST",
+            "text_digest": "c299106814"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/rest.md",
+            "start_line": 258,
+            "level": "MUST",
+            "text_digest": "c299106814"
+          }
+        ]
       }
     },
     {
@@ -252,7 +320,24 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "listed under 'Platforms implementing the REST binding:'"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order-rest.md",
+            "start_line": 254,
+            "level": "SHOULD",
+            "text_digest": "a6262d6e2e"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/rest.md",
+            "start_line": 259,
+            "level": "SHOULD",
+            "text_digest": "a6262d6e2e"
+          }
+        ]
       }
     },
     {
@@ -293,7 +378,24 @@
           "testable": true,
           "reason": "visible: the endpoint's TLS version",
           "note": "same rule as REQ-SHOPPING-ORDER-0035"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order-rest.md",
+            "start_line": 260,
+            "level": "MUST",
+            "text_digest": "10eaedb9f9"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/rest.md",
+            "start_line": 265,
+            "level": "MUST",
+            "text_digest": "10eaedb9f9"
+          }
+        ]
       }
     },
     {
@@ -333,7 +435,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "visible: response signature headers"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order-rest.md",
+            "start_line": 261,
+            "level": "SHOULD",
+            "text_digest": "f797370582"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/rest.md",
+            "start_line": 266,
+            "level": "SHOULD",
+            "text_digest": "f797370582"
+          }
+        ]
       }
     }
   ]

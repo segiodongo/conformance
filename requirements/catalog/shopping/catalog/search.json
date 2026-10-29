@@ -96,7 +96,24 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "constrains the request"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/catalog/search.md",
+            "start_line": 40,
+            "level": "MUST",
+            "text_digest": "40c24b8fcb"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/search.md",
+            "start_line": 40,
+            "level": "MUST",
+            "text_digest": "40c24b8fcb"
+          }
+        ]
       }
     },
     {
@@ -136,7 +153,24 @@
           "actor": "SPEC_AUTHORS",
           "testable": false,
           "reason": "aimed at extension authors"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/catalog/search.md",
+            "start_line": 40,
+            "level": "MAY",
+            "text_digest": "00372ac58e"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/search.md",
+            "start_line": 40,
+            "level": "MAY",
+            "text_digest": "00372ac58e"
+          }
+        ]
       }
     },
     {
@@ -176,7 +210,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "visible: an empty request is rejected"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/catalog/search.md",
+            "start_line": 47,
+            "level": "MUST",
+            "text_digest": "eb6fa97298"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/search.md",
+            "start_line": 47,
+            "level": "MUST",
+            "text_digest": "eb6fa97298"
+          }
+        ]
       }
     },
     {
@@ -216,7 +267,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "visible: an error for an empty or invalid request"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/catalog/search.md",
+            "start_line": 47,
+            "level": "SHOULD",
+            "text_digest": "b25650806a"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/search.md",
+            "start_line": 47,
+            "level": "SHOULD",
+            "text_digest": "b25650806a"
+          }
+        ]
       }
     },
     {
@@ -256,7 +324,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "permission; visible when used"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/catalog/search.md",
+            "start_line": 55,
+            "level": "MAY",
+            "text_digest": "a4f12b4af8"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/search.md",
+            "start_line": 55,
+            "level": "MAY",
+            "text_digest": "a4f12b4af8"
+          }
+        ]
       }
     },
     {
@@ -290,7 +375,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/search.md",
+            "start_line": 66,
+            "level": "MAY",
+            "text_digest": "723735e908"
+          }
+        ]
       }
     },
     {
@@ -326,7 +421,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/search.md",
+            "start_line": 71,
+            "level": "MUST",
+            "text_digest": "df9ab2c9da"
+          }
+        ]
       }
     },
     {
@@ -360,7 +465,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/search.md",
+            "start_line": 71,
+            "level": "MAY",
+            "text_digest": "92b975f598"
+          }
+        ]
       }
     },
     {
@@ -394,7 +509,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/search.md",
+            "start_line": 76,
+            "level": "MAY",
+            "text_digest": "048b735954"
+          }
+        ]
       }
     },
     {
@@ -428,7 +553,17 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": false,
-        "testable_reason": "aimed at the platform"
+        "testable_reason": "aimed at the platform",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/search.md",
+            "start_line": 76,
+            "level": "MUST NOT",
+            "text_digest": "5eb21c8c87"
+          }
+        ]
       }
     }
   ]

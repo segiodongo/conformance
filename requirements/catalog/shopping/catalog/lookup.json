@@ -90,7 +90,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "permission; a table-cell restatement of the lookup identifier rules"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/catalog/lookup.md",
+            "start_line": 37,
+            "level": "MAY",
+            "text_digest": "05e08eb33c"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/lookup.md",
+            "start_line": 37,
+            "level": "MAY",
+            "text_digest": "05e08eb33c"
+          }
+        ]
       }
     },
     {
@@ -130,7 +147,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "'implementations' are the business's server"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/catalog/lookup.md",
+            "start_line": 51,
+            "level": "MUST",
+            "text_digest": "4d7409c0dd"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/lookup.md",
+            "start_line": 51,
+            "level": "MUST",
+            "text_digest": "4d7409c0dd"
+          }
+        ]
       }
     },
     {
@@ -170,7 +204,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "permission; visible when used"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/catalog/lookup.md",
+            "start_line": 51,
+            "level": "MAY",
+            "text_digest": "bb0139a517"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/lookup.md",
+            "start_line": 51,
+            "level": "MAY",
+            "text_digest": "bb0139a517"
+          }
+        ]
       }
     },
     {
@@ -210,7 +261,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "the server deduplicates; visible in the response"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/catalog/lookup.md",
+            "start_line": 56,
+            "level": "MUST",
+            "text_digest": "fddacf45d0"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/lookup.md",
+            "start_line": 56,
+            "level": "MUST",
+            "text_digest": "fddacf45d0"
+          }
+        ]
       }
     },
     {
@@ -250,7 +318,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "permission; visible when used"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/catalog/lookup.md",
+            "start_line": 56,
+            "level": "MAY",
+            "text_digest": "1976ef2539"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/lookup.md",
+            "start_line": 56,
+            "level": "MAY",
+            "text_digest": "1976ef2539"
+          }
+        ]
       }
     },
     {
@@ -290,7 +375,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "visible in the response"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/catalog/lookup.md",
+            "start_line": 56,
+            "level": "MUST",
+            "text_digest": "25191003c1"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/lookup.md",
+            "start_line": 56,
+            "level": "MUST",
+            "text_digest": "25191003c1"
+          }
+        ]
       }
     },
     {
@@ -332,7 +434,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "visible in the response"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/catalog/lookup.md",
+            "start_line": 68,
+            "level": "MUST NOT",
+            "text_digest": "67d7d28db3"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/lookup.md",
+            "start_line": 68,
+            "level": "MUST NOT",
+            "text_digest": "67d7d28db3"
+          }
+        ]
       }
     },
     {
@@ -372,7 +491,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "visible: send 10 identifiers"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/catalog/lookup.md",
+            "start_line": 76,
+            "level": "SHOULD",
+            "text_digest": "0bedb69a17"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/lookup.md",
+            "start_line": 76,
+            "level": "SHOULD",
+            "text_digest": "0bedb69a17"
+          }
+        ]
       }
     },
     {
@@ -412,7 +548,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "permission; visible through the error"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/catalog/lookup.md",
+            "start_line": 76,
+            "level": "MAY",
+            "text_digest": "1531d8ed95"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/lookup.md",
+            "start_line": 76,
+            "level": "MAY",
+            "text_digest": "1531d8ed95"
+          }
+        ]
       }
     },
     {
@@ -454,7 +607,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "visible: HTTP 400 request_too_large"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/catalog/lookup.md",
+            "start_line": 76,
+            "level": "MUST",
+            "text_digest": "160c793a93"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/lookup.md",
+            "start_line": 76,
+            "level": "MUST",
+            "text_digest": "160c793a93"
+          }
+        ]
       }
     },
     {
@@ -497,7 +667,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "response content"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/catalog/lookup.md",
+            "start_line": 128,
+            "level": "SHOULD",
+            "text_digest": "2d2516174f"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/lookup.md",
+            "start_line": 128,
+            "level": "SHOULD",
+            "text_digest": "2d2516174f"
+          }
+        ]
       }
     },
     {
@@ -537,7 +724,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "response content"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/catalog/lookup.md",
+            "start_line": 131,
+            "level": "MUST",
+            "text_digest": "00e5f417b1"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/lookup.md",
+            "start_line": 131,
+            "level": "MUST",
+            "text_digest": "00e5f417b1"
+          }
+        ]
       }
     },
     {
@@ -577,7 +781,24 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "constrains the `selected` input the client sends"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/catalog/lookup.md",
+            "start_line": 154,
+            "level": "MUST",
+            "text_digest": "50e0b6763f"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/lookup.md",
+            "start_line": 154,
+            "level": "MUST",
+            "text_digest": "50e0b6763f"
+          }
+        ]
       }
     },
     {
@@ -620,7 +841,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "response content"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/catalog/lookup.md",
+            "start_line": 164,
+            "level": "MUST",
+            "text_digest": "f39f08283c"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/lookup.md",
+            "start_line": 164,
+            "level": "MUST",
+            "text_digest": "f39f08283c"
+          }
+        ]
       }
     },
     {
@@ -662,7 +900,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "permission on response content"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/catalog/lookup.md",
+            "start_line": 164,
+            "level": "MAY",
+            "text_digest": "cc0f65f541"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/lookup.md",
+            "start_line": 164,
+            "level": "MAY",
+            "text_digest": "cc0f65f541"
+          }
+        ]
       }
     },
     {
@@ -704,7 +959,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "response content"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/catalog/lookup.md",
+            "start_line": 181,
+            "level": "SHOULD",
+            "text_digest": "515545af2a"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/lookup.md",
+            "start_line": 181,
+            "level": "SHOULD",
+            "text_digest": "515545af2a"
+          }
+        ]
       }
     }
   ]

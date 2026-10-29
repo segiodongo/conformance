@@ -97,7 +97,31 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "visible in REST checkout responses; applies only to businesses that offer embedded checkout"
-        }
+        },
+        "since": "2026-01-23",
+        "releases": [
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 124,
+            "level": "MUST",
+            "text_digest": "d3a16bd983"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 124,
+            "level": "MUST",
+            "text_digest": "d3a16bd983"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 125,
+            "level": "MUST",
+            "text_digest": "d3a16bd983"
+          }
+        ]
       }
     },
     {
@@ -133,7 +157,31 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-23",
+        "releases": [
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 175,
+            "level": "MAY",
+            "text_digest": "b9d5e402e6"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 175,
+            "level": "MAY",
+            "text_digest": "b9d5e402e6"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 177,
+            "level": "MAY",
+            "text_digest": "b9d5e402e6"
+          }
+        ]
       }
     },
     {
@@ -167,7 +215,38 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 122,
+            "level": "SHOULD",
+            "text_digest": "40901b2bee"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 179,
+            "level": "SHOULD",
+            "text_digest": "40901b2bee"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 179,
+            "level": "SHOULD",
+            "text_digest": "40901b2bee"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 181,
+            "level": "SHOULD",
+            "text_digest": "40901b2bee"
+          }
+        ]
       }
     },
     {
@@ -204,7 +283,38 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 127,
+            "level": "MUST",
+            "text_digest": "3230757599"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 185,
+            "level": "MUST",
+            "text_digest": "3230757599"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 185,
+            "level": "MUST",
+            "text_digest": "3230757599"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 187,
+            "level": "MUST",
+            "text_digest": "3230757599"
+          }
+        ]
       }
     },
     {
@@ -238,7 +348,24 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 193,
+            "level": "MUST",
+            "text_digest": "db1f71589a"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 195,
+            "level": "MUST",
+            "text_digest": "db1f71589a"
+          }
+        ]
       }
     },
     {
@@ -274,7 +401,31 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-23",
+        "releases": [
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 197,
+            "level": "SHOULD",
+            "text_digest": "036cb43223"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 200,
+            "level": "SHOULD",
+            "text_digest": "036cb43223"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 202,
+            "level": "SHOULD",
+            "text_digest": "036cb43223"
+          }
+        ]
       }
     },
     {
@@ -314,7 +465,39 @@
           "actor": "BUSINESS",
           "testable": false,
           "reason": "documentation; not visible through the API"
-        }
+        },
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 148,
+            "level": "MUST",
+            "text_digest": "839daaba3c",
+            "clause": "Businesses **MUST** document their expected token format and validation process"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 207,
+            "level": "MUST",
+            "text_digest": "81afb6fb27"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 213,
+            "level": "MUST",
+            "text_digest": "81afb6fb27"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 215,
+            "level": "MUST",
+            "text_digest": "81afb6fb27"
+          }
+        ]
       }
     },
     {
@@ -354,7 +537,38 @@
           "actor": "BUSINESS",
           "testable": false,
           "reason": "internal policy in the embedded flow"
-        }
+        },
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 167,
+            "level": "MUST",
+            "text_digest": "e5b5268361"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 225,
+            "level": "MUST",
+            "text_digest": "e5b5268361"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 231,
+            "level": "MUST",
+            "text_digest": "e5b5268361"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 233,
+            "level": "MUST",
+            "text_digest": "e5b5268361"
+          }
+        ]
       }
     },
     {
@@ -390,7 +604,24 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 280,
+            "level": "SHOULD",
+            "text_digest": "33e3f0b0e5"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 282,
+            "level": "SHOULD",
+            "text_digest": "33e3f0b0e5"
+          }
+        ]
       }
     },
     {
@@ -424,7 +655,24 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 289,
+            "level": "SHOULD",
+            "text_digest": "cbd466887a"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 291,
+            "level": "SHOULD",
+            "text_digest": "cbd466887a"
+          }
+        ]
       }
     },
     {
@@ -460,7 +708,24 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 291,
+            "level": "MUST",
+            "text_digest": "830bc43945"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 293,
+            "level": "MUST",
+            "text_digest": "830bc43945"
+          }
+        ]
       }
     },
     {
@@ -500,7 +765,24 @@
           "actor": "BUSINESS",
           "testable": false,
           "reason": "embedded checkout UI behaviour"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 294,
+            "level": "MAY",
+            "text_digest": "1e3b81573d"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 296,
+            "level": "MAY",
+            "text_digest": "1e3b81573d"
+          }
+        ]
       }
     },
     {
@@ -536,7 +818,31 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-23",
+        "releases": [
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 275,
+            "level": "SHOULD",
+            "text_digest": "cf58d72baa"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 319,
+            "level": "SHOULD",
+            "text_digest": "cf58d72baa"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 321,
+            "level": "SHOULD",
+            "text_digest": "cf58d72baa"
+          }
+        ]
       }
     },
     {
@@ -578,7 +884,31 @@
           "actor": "BUSINESS",
           "testable": false,
           "reason": "embedded protocol negotiation, not REST"
-        }
+        },
+        "since": "2026-01-23",
+        "releases": [
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 276,
+            "level": "SHOULD NOT",
+            "text_digest": "2c534b146e"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 320,
+            "level": "SHOULD NOT",
+            "text_digest": "2c534b146e"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 322,
+            "level": "SHOULD NOT",
+            "text_digest": "2c534b146e"
+          }
+        ]
       }
     },
     {
@@ -620,7 +950,31 @@
           "actor": "BUSINESS",
           "testable": false,
           "reason": "embedded protocol message"
-        }
+        },
+        "since": "2026-01-23",
+        "releases": [
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 276,
+            "level": "MUST",
+            "text_digest": "bf3f2784f2"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 320,
+            "level": "MUST",
+            "text_digest": "bf3f2784f2"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 322,
+            "level": "MUST",
+            "text_digest": "bf3f2784f2"
+          }
+        ]
       }
     },
     {
@@ -654,7 +1008,38 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 202,
+            "level": "MAY",
+            "text_digest": "7c0f80c2dd"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 281,
+            "level": "MAY",
+            "text_digest": "7c0f80c2dd"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 325,
+            "level": "MAY",
+            "text_digest": "7c0f80c2dd"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 327,
+            "level": "MAY",
+            "text_digest": "7c0f80c2dd"
+          }
+        ]
       }
     },
     {
@@ -691,7 +1076,38 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 214,
+            "level": "MUST",
+            "text_digest": "a7063be24b"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 293,
+            "level": "MUST",
+            "text_digest": "a7063be24b"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 337,
+            "level": "MUST",
+            "text_digest": "a7063be24b"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 339,
+            "level": "MUST",
+            "text_digest": "a7063be24b"
+          }
+        ]
       }
     },
     {
@@ -725,7 +1141,40 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 214,
+            "level": "MUST",
+            "text_digest": "bb20885011",
+            "clause": "If a requested delegation is not accepted, the Embedded Checkout **MUST** handle that capability using its own UI."
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 293,
+            "level": "MUST",
+            "text_digest": "bb20885011",
+            "clause": "If a requested delegation is not accepted, the Embedded Checkout **MUST** handle that capability using its own UI."
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 337,
+            "level": "MUST",
+            "text_digest": "71b19fcb62"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 339,
+            "level": "MUST",
+            "text_digest": "71b19fcb62"
+          }
+        ]
       }
     },
     {
@@ -759,7 +1208,39 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 225,
+            "level": "MUST",
+            "text_digest": "a669b3acaa",
+            "clause": "**MUST** fire the appropriate `{action}_request` message when that action is triggered"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 304,
+            "level": "MUST",
+            "text_digest": "b24866bb8b"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 348,
+            "level": "MUST",
+            "text_digest": "b24866bb8b"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 350,
+            "level": "MUST",
+            "text_digest": "b24866bb8b"
+          }
+        ]
       }
     },
     {
@@ -793,7 +1274,39 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 227,
+            "level": "MUST",
+            "text_digest": "2bb80500b4",
+            "clause": "**MUST** wait for the host's response before proceeding"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 306,
+            "level": "MUST",
+            "text_digest": "b33f69b0a1"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 350,
+            "level": "MUST",
+            "text_digest": "b33f69b0a1"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 352,
+            "level": "MUST",
+            "text_digest": "b33f69b0a1"
+          }
+        ]
       }
     },
     {
@@ -827,7 +1340,39 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 228,
+            "level": "MUST NOT",
+            "text_digest": "f835209480",
+            "clause": "**MUST NOT** show its own UI for that delegated action"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 307,
+            "level": "MUST NOT",
+            "text_digest": "12912430f0"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 351,
+            "level": "MUST NOT",
+            "text_digest": "12912430f0"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 353,
+            "level": "MUST NOT",
+            "text_digest": "12912430f0"
+          }
+        ]
       }
     },
     {
@@ -861,7 +1406,39 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 232,
+            "level": "MUST",
+            "text_digest": "360fe2def1",
+            "clause": "**MUST** respond to every `{action}_request` message it receives"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 311,
+            "level": "MUST",
+            "text_digest": "623e486ff4"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 355,
+            "level": "MUST",
+            "text_digest": "623e486ff4"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 357,
+            "level": "MUST",
+            "text_digest": "623e486ff4"
+          }
+        ]
       }
     },
     {
@@ -895,7 +1472,39 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 233,
+            "level": "MUST",
+            "text_digest": "bbf4019dfe",
+            "clause": "**MUST** respond with an appropriate error if the user cancels"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 312,
+            "level": "MUST",
+            "text_digest": "ef9672232b"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 356,
+            "level": "MUST",
+            "text_digest": "ef9672232b"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 358,
+            "level": "MUST",
+            "text_digest": "ef9672232b"
+          }
+        ]
       }
     },
     {
@@ -929,7 +1538,39 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 234,
+            "level": "SHOULD",
+            "text_digest": "a5596dbc90",
+            "clause": "**SHOULD** show loading/processing states while handling delegation"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 313,
+            "level": "SHOULD",
+            "text_digest": "d709c5a4ac"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 357,
+            "level": "SHOULD",
+            "text_digest": "d709c5a4ac"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 359,
+            "level": "SHOULD",
+            "text_digest": "d709c5a4ac"
+          }
+        ]
       }
     },
     {
@@ -963,7 +1604,38 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 252,
+            "level": "SHOULD",
+            "text_digest": "9af2ffa86a"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 331,
+            "level": "SHOULD",
+            "text_digest": "9af2ffa86a"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 376,
+            "level": "SHOULD",
+            "text_digest": "9af2ffa86a"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 378,
+            "level": "SHOULD",
+            "text_digest": "9af2ffa86a"
+          }
+        ]
       }
     },
     {
@@ -997,7 +1669,39 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 259,
+            "level": "SHOULD",
+            "text_digest": "524f2330ab",
+            "clause": "The embedded checkout **SHOULD** block or intercept navigation attempts to URLs outside the checkout flow"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 338,
+            "level": "SHOULD",
+            "text_digest": "064ee17546"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 383,
+            "level": "SHOULD",
+            "text_digest": "064ee17546"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 385,
+            "level": "SHOULD",
+            "text_digest": "064ee17546"
+          }
+        ]
       }
     },
     {
@@ -1031,7 +1735,39 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 261,
+            "level": "SHOULD",
+            "text_digest": "da73d17c08",
+            "clause": "The embedded checkout **SHOULD** remove or disable UI elements that would navigate away from checkout (e.g., external links, navigation bars)"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 340,
+            "level": "SHOULD",
+            "text_digest": "eea24f25f2"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 385,
+            "level": "SHOULD",
+            "text_digest": "eea24f25f2"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 387,
+            "level": "SHOULD",
+            "text_digest": "eea24f25f2"
+          }
+        ]
       }
     },
     {
@@ -1065,7 +1801,39 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 263,
+            "level": "MAY",
+            "text_digest": "63b0f768b1",
+            "clause": "The embedder **MAY** implement additional navigation restrictions at the container level"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 342,
+            "level": "MAY",
+            "text_digest": "258443814e"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 387,
+            "level": "MAY",
+            "text_digest": "258443814e"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 389,
+            "level": "MAY",
+            "text_digest": "258443814e"
+          }
+        ]
       }
     },
     {
@@ -1099,7 +1867,38 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 266,
+            "level": "MAY",
+            "text_digest": "35d3489e9b"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 345,
+            "level": "MAY",
+            "text_digest": "35d3489e9b"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 390,
+            "level": "MAY",
+            "text_digest": "35d3489e9b"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 392,
+            "level": "MAY",
+            "text_digest": "35d3489e9b"
+          }
+        ]
       }
     },
     {
@@ -1133,7 +1932,38 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 274,
+            "level": "SHOULD",
+            "text_digest": "1df2a4b4f1"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 353,
+            "level": "SHOULD",
+            "text_digest": "1df2a4b4f1"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 398,
+            "level": "SHOULD",
+            "text_digest": "1df2a4b4f1"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 400,
+            "level": "SHOULD",
+            "text_digest": "1df2a4b4f1"
+          }
+        ]
       }
     },
     {
@@ -1171,7 +2001,24 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 407,
+            "level": "MUST",
+            "text_digest": "d27d8e1378"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 409,
+            "level": "MUST",
+            "text_digest": "d27d8e1378"
+          }
+        ]
       }
     },
     {
@@ -1205,7 +2052,24 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 407,
+            "level": "MUST NOT",
+            "text_digest": "e31c7d39c1"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 409,
+            "level": "MUST NOT",
+            "text_digest": "e31c7d39c1"
+          }
+        ]
       }
     },
     {
@@ -1239,7 +2103,38 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 372,
+            "level": "MUST",
+            "text_digest": "629595ef1a"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 450,
+            "level": "MUST",
+            "text_digest": "629595ef1a"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 430,
+            "level": "MUST",
+            "text_digest": "629595ef1a"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 432,
+            "level": "MUST",
+            "text_digest": "629595ef1a"
+          }
+        ]
       }
     },
     {
@@ -1273,7 +2168,38 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 383,
+            "level": "MAY",
+            "text_digest": "49e984cded"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 461,
+            "level": "MAY",
+            "text_digest": "49e984cded"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 443,
+            "level": "MAY",
+            "text_digest": "49e984cded"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 445,
+            "level": "MAY",
+            "text_digest": "49e984cded"
+          }
+        ]
       }
     },
     {
@@ -1307,7 +2233,38 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 383,
+            "level": "MUST",
+            "text_digest": "6610687fbf"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 461,
+            "level": "MUST",
+            "text_digest": "6610687fbf"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 443,
+            "level": "MUST",
+            "text_digest": "6610687fbf"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 445,
+            "level": "MUST",
+            "text_digest": "6610687fbf"
+          }
+        ]
       }
     },
     {
@@ -1343,7 +2300,38 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 402,
+            "level": "MUST",
+            "text_digest": "a3d2f4d56f"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 480,
+            "level": "MUST",
+            "text_digest": "a3d2f4d56f"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 463,
+            "level": "MUST",
+            "text_digest": "a3d2f4d56f"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 465,
+            "level": "MUST",
+            "text_digest": "a3d2f4d56f"
+          }
+        ]
       }
     },
     {
@@ -1380,7 +2368,31 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-23",
+        "releases": [
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 490,
+            "level": "MUST",
+            "text_digest": "5983dfa675"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 473,
+            "level": "MUST",
+            "text_digest": "5983dfa675"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 475,
+            "level": "MUST",
+            "text_digest": "5983dfa675"
+          }
+        ]
       }
     },
     {
@@ -1416,7 +2428,38 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 443,
+            "level": "MUST",
+            "text_digest": "66c2becef2"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 522,
+            "level": "MUST",
+            "text_digest": "66c2becef2"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 516,
+            "level": "MUST",
+            "text_digest": "66c2becef2"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 520,
+            "level": "MUST",
+            "text_digest": "66c2becef2"
+          }
+        ]
       }
     },
     {
@@ -1454,7 +2497,24 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 522,
+            "level": "MUST",
+            "text_digest": "2e7656caf9"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 526,
+            "level": "MUST",
+            "text_digest": "2e7656caf9"
+          }
+        ]
       }
     },
     {
@@ -1488,7 +2548,24 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 522,
+            "level": "MUST NOT",
+            "text_digest": "d4a5ed6089"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 526,
+            "level": "MUST NOT",
+            "text_digest": "d4a5ed6089"
+          }
+        ]
       }
     },
     {
@@ -1524,7 +2601,24 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 527,
+            "level": "MUST NOT",
+            "text_digest": "5e3413cd0d"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 531,
+            "level": "MUST NOT",
+            "text_digest": "5e3413cd0d"
+          }
+        ]
       }
     },
     {
@@ -1560,7 +2654,24 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 532,
+            "level": "MUST",
+            "text_digest": "abdc68d4ce"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 536,
+            "level": "MUST",
+            "text_digest": "abdc68d4ce"
+          }
+        ]
       }
     },
     {
@@ -1596,7 +2707,24 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 532,
+            "level": "MUST NOT",
+            "text_digest": "8c8a34c733"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 536,
+            "level": "MUST NOT",
+            "text_digest": "8c8a34c733"
+          }
+        ]
       }
     },
     {
@@ -1632,7 +2760,38 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 469,
+            "level": "MAY",
+            "text_digest": "d761ce51d7"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 548,
+            "level": "MAY",
+            "text_digest": "d761ce51d7"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 556,
+            "level": "MAY",
+            "text_digest": "d761ce51d7"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 561,
+            "level": "MAY",
+            "text_digest": "d761ce51d7"
+          }
+        ]
       }
     },
     {
@@ -1668,7 +2827,38 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 469,
+            "level": "MUST",
+            "text_digest": "eb3704265c"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 548,
+            "level": "MUST",
+            "text_digest": "eb3704265c"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 556,
+            "level": "MUST",
+            "text_digest": "eb3704265c"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 561,
+            "level": "MUST",
+            "text_digest": "eb3704265c"
+          }
+        ]
       }
     },
     {
@@ -1704,7 +2894,38 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 469,
+            "level": "MUST",
+            "text_digest": "9dbc2de6b2"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 548,
+            "level": "MUST",
+            "text_digest": "9dbc2de6b2"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 556,
+            "level": "MUST",
+            "text_digest": "9dbc2de6b2"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 561,
+            "level": "MUST",
+            "text_digest": "9dbc2de6b2"
+          }
+        ]
       }
     },
     {
@@ -1741,7 +2962,38 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 489,
+            "level": "MUST",
+            "text_digest": "7604d830f0"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 568,
+            "level": "MUST",
+            "text_digest": "7604d830f0"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 577,
+            "level": "MUST",
+            "text_digest": "7604d830f0"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 583,
+            "level": "MUST",
+            "text_digest": "7604d830f0"
+          }
+        ]
       }
     },
     {
@@ -1775,7 +3027,38 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 489,
+            "level": "MUST",
+            "text_digest": "a809664137"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 568,
+            "level": "MUST",
+            "text_digest": "a809664137"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 577,
+            "level": "MUST",
+            "text_digest": "a809664137"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 583,
+            "level": "MUST",
+            "text_digest": "a809664137"
+          }
+        ]
       }
     },
     {
@@ -1811,7 +3094,38 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 494,
+            "level": "MAY",
+            "text_digest": "273736b04d"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 574,
+            "level": "MAY",
+            "text_digest": "273736b04d"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 583,
+            "level": "MAY",
+            "text_digest": "273736b04d"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 589,
+            "level": "MAY",
+            "text_digest": "273736b04d"
+          }
+        ]
       }
     },
     {
@@ -1847,7 +3161,24 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 623,
+            "level": "MUST",
+            "text_digest": "b4ddfaed6e"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 630,
+            "level": "MUST",
+            "text_digest": "b4ddfaed6e"
+          }
+        ]
       }
     },
     {
@@ -1881,7 +3212,24 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 644,
+            "level": "MUST",
+            "text_digest": "dfcef5c6f2"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 652,
+            "level": "MUST",
+            "text_digest": "dfcef5c6f2"
+          }
+        ]
       }
     },
     {
@@ -1917,7 +3265,24 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 644,
+            "level": "MAY",
+            "text_digest": "c45fb9f3f1"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 652,
+            "level": "MAY",
+            "text_digest": "c45fb9f3f1"
+          }
+        ]
       }
     },
     {
@@ -1951,7 +3316,24 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 644,
+            "level": "MUST NOT",
+            "text_digest": "0c350741c8"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 652,
+            "level": "MUST NOT",
+            "text_digest": "0c350741c8"
+          }
+        ]
       }
     },
     {
@@ -1987,7 +3369,24 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 660,
+            "level": "MUST",
+            "text_digest": "a49ddfe7c1"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 668,
+            "level": "MUST",
+            "text_digest": "a49ddfe7c1"
+          }
+        ]
       }
     },
     {
@@ -2029,7 +3428,24 @@
           "actor": "BUSINESS",
           "testable": false,
           "reason": "embedded protocol message"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 845,
+            "level": "MUST",
+            "text_digest": "99e001b8a5"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 852,
+            "level": "MUST",
+            "text_digest": "99e001b8a5"
+          }
+        ]
       }
     },
     {
@@ -2074,7 +3490,24 @@
           "actor": "BUSINESS",
           "testable": false,
           "reason": "embedded protocol message"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 850,
+            "level": "MUST",
+            "text_digest": "5023f77e0f"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 857,
+            "level": "MUST",
+            "text_digest": "5023f77e0f"
+          }
+        ]
       }
     },
     {
@@ -2108,7 +3541,38 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 819,
+            "level": "MUST",
+            "text_digest": "2f8c3a174a"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 892,
+            "level": "MUST",
+            "text_digest": "2f8c3a174a"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1018,
+            "level": "MUST",
+            "text_digest": "2f8c3a174a"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 1026,
+            "level": "MUST",
+            "text_digest": "2f8c3a174a"
+          }
+        ]
       }
     },
     {
@@ -2145,7 +3609,39 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 819,
+            "level": "MUST",
+            "text_digest": "749fc22145",
+            "clause": "In successful responses, the host **MUST** respond with a partial update to the `checkout` object, with only the `payment.instruments` and `payment.selected_instrument_id` fields updated."
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 892,
+            "level": "MUST",
+            "text_digest": "f8653b81c3"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1018,
+            "level": "MUST",
+            "text_digest": "f8653b81c3"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 1026,
+            "level": "MUST",
+            "text_digest": "f8653b81c3"
+          }
+        ]
       }
     },
     {
@@ -2179,7 +3675,38 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 819,
+            "level": "MUST",
+            "text_digest": "e0c6543fed"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 892,
+            "level": "MUST",
+            "text_digest": "e0c6543fed"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1018,
+            "level": "MUST",
+            "text_digest": "e0c6543fed"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 1026,
+            "level": "MUST",
+            "text_digest": "e0c6543fed"
+          }
+        ]
       }
     },
     {
@@ -2213,7 +3740,38 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 912,
+            "level": "MUST",
+            "text_digest": "0d386b4856"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 986,
+            "level": "MUST",
+            "text_digest": "0d386b4856"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1121,
+            "level": "MUST",
+            "text_digest": "0d386b4856"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 1132,
+            "level": "MUST",
+            "text_digest": "0d386b4856"
+          }
+        ]
       }
     },
     {
@@ -2251,7 +3809,39 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 912,
+            "level": "MUST",
+            "text_digest": "aea822da3d",
+            "clause": "In successful responses, the host **MUST** supply a partial update to the `checkout` object, updating only the instrument indicated by `payment.selected_instrument_id` with the new `credentials` field."
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 986,
+            "level": "MUST",
+            "text_digest": "22353ff600"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1121,
+            "level": "MUST",
+            "text_digest": "22353ff600"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 1132,
+            "level": "MUST",
+            "text_digest": "22353ff600"
+          }
+        ]
       }
     },
     {
@@ -2287,7 +3877,38 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 912,
+            "level": "MUST",
+            "text_digest": "03e22bb1c3"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 986,
+            "level": "MUST",
+            "text_digest": "03e22bb1c3"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1121,
+            "level": "MUST",
+            "text_digest": "03e22bb1c3"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 1132,
+            "level": "MUST",
+            "text_digest": "03e22bb1c3"
+          }
+        ]
       }
     },
     {
@@ -2321,7 +3942,39 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 974,
+            "level": "MUST NOT",
+            "text_digest": "44a3475bda",
+            "clause": "The host **MUST NOT** silently release a token based solely on the message."
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1050,
+            "level": "MUST NOT",
+            "text_digest": "a207de5e37"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1194,
+            "level": "MUST NOT",
+            "text_digest": "a207de5e37"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 1207,
+            "level": "MUST NOT",
+            "text_digest": "a207de5e37"
+          }
+        ]
       }
     },
     {
@@ -2355,7 +4008,38 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1091,
+            "level": "MUST",
+            "text_digest": "3060692cd2"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1167,
+            "level": "MUST",
+            "text_digest": "3060692cd2"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1311,
+            "level": "MUST",
+            "text_digest": "3060692cd2"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 1324,
+            "level": "MUST",
+            "text_digest": "3060692cd2"
+          }
+        ]
       }
     },
     {
@@ -2393,7 +4077,38 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1091,
+            "level": "MUST",
+            "text_digest": "2f14a5d57a"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1167,
+            "level": "MUST",
+            "text_digest": "2f14a5d57a"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1311,
+            "level": "MUST",
+            "text_digest": "2f14a5d57a"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 1324,
+            "level": "MUST",
+            "text_digest": "2f14a5d57a"
+          }
+        ]
       }
     },
     {
@@ -2429,7 +4144,38 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1091,
+            "level": "MUST",
+            "text_digest": "fd862f1fd7"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1167,
+            "level": "MUST",
+            "text_digest": "fd862f1fd7"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1311,
+            "level": "MUST",
+            "text_digest": "fd862f1fd7"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 1324,
+            "level": "MUST",
+            "text_digest": "fd862f1fd7"
+          }
+        ]
       }
     },
     {
@@ -2465,7 +4211,24 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1387,
+            "level": "MUST",
+            "text_digest": "f863ba3cef"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 1402,
+            "level": "MUST",
+            "text_digest": "f863ba3cef"
+          }
+        ]
       }
     },
     {
@@ -2501,7 +4264,24 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1410,
+            "level": "MUST",
+            "text_digest": "be256dd9cb"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 1425,
+            "level": "MUST",
+            "text_digest": "be256dd9cb"
+          }
+        ]
       }
     },
     {
@@ -2537,7 +4317,24 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1415,
+            "level": "MUST",
+            "text_digest": "f74c8b5260"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 1430,
+            "level": "MUST",
+            "text_digest": "f74c8b5260"
+          }
+        ]
       }
     },
     {
@@ -2571,7 +4368,24 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1416,
+            "level": "SHOULD",
+            "text_digest": "ac546d4675"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 1431,
+            "level": "SHOULD",
+            "text_digest": "ac546d4675"
+          }
+        ]
       }
     },
     {
@@ -2605,7 +4419,24 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1418,
+            "level": "MUST",
+            "text_digest": "1e520ee6a8"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 1433,
+            "level": "MUST",
+            "text_digest": "1e520ee6a8"
+          }
+        ]
       }
     },
     {
@@ -2641,7 +4472,24 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1420,
+            "level": "MUST",
+            "text_digest": "df7a51899a"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 1435,
+            "level": "MUST",
+            "text_digest": "df7a51899a"
+          }
+        ]
       }
     },
     {
@@ -2675,7 +4523,24 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1423,
+            "level": "MAY",
+            "text_digest": "55e3e568a0"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 1438,
+            "level": "MAY",
+            "text_digest": "55e3e568a0"
+          }
+        ]
       }
     },
     {
@@ -2709,7 +4574,24 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1425,
+            "level": "MUST NOT",
+            "text_digest": "cf9241666a"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 1440,
+            "level": "MUST NOT",
+            "text_digest": "cf9241666a"
+          }
+        ]
       }
     },
     {
@@ -2745,7 +4627,24 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1429,
+            "level": "MAY",
+            "text_digest": "1e42c2ea27"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 1444,
+            "level": "MAY",
+            "text_digest": "1e42c2ea27"
+          }
+        ]
       }
     },
     {
@@ -2779,7 +4678,24 @@
         "keyword_style": "bold",
         "transport": "embedded",
         "testable": false,
-        "testable_reason": "embedded protocol page"
+        "testable_reason": "embedded protocol page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1506,
+            "level": "MAY",
+            "text_digest": "95b351b8f1"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 1524,
+            "level": "MAY",
+            "text_digest": "95b351b8f1"
+          }
+        ]
       }
     },
     {
@@ -2819,7 +4735,38 @@
           "actor": "HOST",
           "testable": false,
           "reason": "aimed at the host"
-        }
+        },
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1236,
+            "level": "SHOULD",
+            "text_digest": "8f97f24d67"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1311,
+            "level": "SHOULD",
+            "text_digest": "8f97f24d67"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/embedded-checkout.md",
+            "start_line": 1523,
+            "level": "SHOULD",
+            "text_digest": "8f97f24d67"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/embedded.md",
+            "start_line": 1541,
+            "level": "SHOULD",
+            "text_digest": "8f97f24d67"
+          }
+        ]
       }
     }
   ]

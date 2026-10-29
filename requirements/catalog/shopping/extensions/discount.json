@@ -91,7 +91,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "permission; visible in discovery"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/discount.md",
+            "start_line": 59,
+            "level": "MAY",
+            "text_digest": "75a607ee1b"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/discount.md",
+            "start_line": 60,
+            "level": "MAY",
+            "text_digest": "75a607ee1b"
+          }
+        ]
       }
     },
     {
@@ -131,7 +148,24 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "aimed at the platform"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/discount.md",
+            "start_line": 59,
+            "level": "SHOULD",
+            "text_digest": "15ac700129"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/discount.md",
+            "start_line": 60,
+            "level": "SHOULD",
+            "text_digest": "15ac700129"
+          }
+        ]
       }
     },
     {
@@ -173,7 +207,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "visible: codes carried into the checkout"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/discount.md",
+            "start_line": 143,
+            "level": "MUST",
+            "text_digest": "cf1b7d46ea"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/discount.md",
+            "start_line": 144,
+            "level": "MUST",
+            "text_digest": "cf1b7d46ea"
+          }
+        ]
       }
     },
     {
@@ -215,7 +266,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "messages in responses"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/discount.md",
+            "start_line": 143,
+            "level": "SHOULD",
+            "text_digest": "99931074ea"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/discount.md",
+            "start_line": 144,
+            "level": "SHOULD",
+            "text_digest": "99931074ea"
+          }
+        ]
       }
     },
     {
@@ -257,7 +325,38 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "warning type in responses"
-        }
+        },
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/discount.md",
+            "start_line": 151,
+            "level": "SHOULD",
+            "text_digest": "05ed0d297c"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/discount.md",
+            "start_line": 151,
+            "level": "SHOULD",
+            "text_digest": "05ed0d297c"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/discount.md",
+            "start_line": 167,
+            "level": "SHOULD",
+            "text_digest": "05ed0d297c"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/discount.md",
+            "start_line": 167,
+            "level": "SHOULD",
+            "text_digest": "05ed0d297c"
+          }
+        ]
       }
     },
     {
@@ -293,7 +392,24 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/discount.md",
+            "start_line": 196,
+            "level": "MUST",
+            "text_digest": "9e72b57cbb"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/discount.md",
+            "start_line": 196,
+            "level": "MUST",
+            "text_digest": "9e72b57cbb"
+          }
+        ]
       }
     },
     {
@@ -327,7 +443,24 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": false,
-        "testable_reason": "aimed at the platform"
+        "testable_reason": "aimed at the platform",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/discount.md",
+            "start_line": 196,
+            "level": "MUST",
+            "text_digest": "d72ee70a9e"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/discount.md",
+            "start_line": 196,
+            "level": "MUST",
+            "text_digest": "d72ee70a9e"
+          }
+        ]
       }
     },
     {
@@ -363,7 +496,24 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/discount.md",
+            "start_line": 205,
+            "level": "MUST",
+            "text_digest": "77b348abb6"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/discount.md",
+            "start_line": 205,
+            "level": "MUST",
+            "text_digest": "77b348abb6"
+          }
+        ]
       }
     },
     {
@@ -404,7 +554,24 @@
           "testable": true,
           "reason": "completion behaviour",
           "note": "restates REQ-SHOPPING-CHECKOUT-0047"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/discount.md",
+            "start_line": 225,
+            "level": "MUST",
+            "text_digest": "b7f23c4704"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/extensions/discount.md",
+            "start_line": 225,
+            "level": "MUST",
+            "text_digest": "b7f23c4704"
+          }
+        ]
       }
     }
   ]

@@ -88,7 +88,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "binds both sides; the response half is visible"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/cart-rest.md",
+            "start_line": 74,
+            "level": "MUST",
+            "text_digest": "017f445b50"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/cart/rest.md",
+            "start_line": 76,
+            "level": "MUST",
+            "text_digest": "017f445b50"
+          }
+        ]
       }
     },
     {
@@ -129,7 +146,24 @@
           "testable": true,
           "reason": "visible: the endpoint's TLS version",
           "note": "the local sample server serves plain HTTP, so it fails this"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/cart-rest.md",
+            "start_line": 79,
+            "level": "MUST",
+            "text_digest": "86f31bc40b"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/cart/rest.md",
+            "start_line": 81,
+            "level": "MUST",
+            "text_digest": "86f31bc40b"
+          }
+        ]
       }
     },
     {
@@ -169,7 +203,24 @@
           "actor": "BUSINESS",
           "testable": false,
           "reason": "a menu of allowed authentication methods; nothing a test can fail"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/cart-rest.md",
+            "start_line": 537,
+            "level": "MAY",
+            "text_digest": "9655f6d29f"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/cart/rest.md",
+            "start_line": 548,
+            "level": "MAY",
+            "text_digest": "9655f6d29f"
+          }
+        ]
       }
     },
     {
@@ -203,7 +254,24 @@
         "keyword_style": "bold",
         "transport": "rest",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/cart-rest.md",
+            "start_line": 547,
+            "level": "MAY",
+            "text_digest": "b40d58d234"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/cart/rest.md",
+            "start_line": 558,
+            "level": "MAY",
+            "text_digest": "b40d58d234"
+          }
+        ]
       }
     }
   ]

@@ -131,6 +131,17 @@ error for an unsupported version. Two check rules in `signatures.md`: the
 components a signature covers, and that a business's profile URL points to
 `/.well-known/ucp`.
 
+### Rules rendered by a macro
+
+The shopping REST pages render their shared header requirements with the
+`header_requirements` macro (ucp#819): `UCP-Agent` on every request, and how a
+server handles an `Idempotency-Key`. The extractor reads the macro call, not
+the text it renders, so the catalog has none of these rules for the checkout,
+cart, catalog and order REST pages. The release history found them: the
+checkout, cart and catalog REST pages state them in full up to 2026-08-25,
+and the lodging pages still do. Expanding the macro before extraction would
+add them, and change the counts above.
+
 ## Test findings
 
 - **Accepts what the spec doesn't describe:** the 6 `ValidationTest` tests

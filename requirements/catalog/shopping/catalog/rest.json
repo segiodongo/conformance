@@ -90,7 +90,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "permission on REST response content"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/catalog/rest.md",
+            "start_line": 286,
+            "level": "MAY",
+            "text_digest": "440c8529d2"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/rest.md",
+            "start_line": 293,
+            "level": "MAY",
+            "text_digest": "440c8529d2"
+          }
+        ]
       }
     },
     {
@@ -131,7 +148,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "permission on REST response content"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/catalog/rest.md",
+            "start_line": 606,
+            "level": "MAY",
+            "text_digest": "440c8529d2"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/rest.md",
+            "start_line": 636,
+            "level": "MAY",
+            "text_digest": "440c8529d2"
+          }
+        ]
       }
     },
     {
@@ -173,7 +207,24 @@
           "testable": false,
           "reason": "lead-in to a list; the obligations are the list items"
         },
-        "excluded": true
+        "excluded": true,
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/catalog/rest.md",
+            "start_line": 657,
+            "level": "MUST",
+            "text_digest": "350f72606a"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/rest.md",
+            "start_line": 688,
+            "level": "MUST",
+            "text_digest": "350f72606a"
+          }
+        ]
       }
     },
     {
@@ -214,7 +265,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "visible: both endpoints respond"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/catalog/rest.md",
+            "start_line": 659,
+            "level": "MUST",
+            "text_digest": "35a3e3f4dd"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/rest.md",
+            "start_line": 690,
+            "level": "MUST",
+            "text_digest": "35a3e3f4dd"
+          }
+        ]
       }
     },
     {
@@ -259,7 +327,24 @@
           "reason": "visible: HTTP 200 with fewer products",
           "level": "MUST",
           "note": "the list's lead-in makes this a MUST; extracted as MAY"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/catalog/rest.md",
+            "start_line": 662,
+            "level": "MUST",
+            "text_digest": "f52390f942"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/catalog/rest.md",
+            "start_line": 694,
+            "level": "MUST",
+            "text_digest": "f52390f942"
+          }
+        ]
       }
     }
   ]

@@ -91,7 +91,38 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "binds both sides; the response half is visible"
-        }
+        },
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/checkout-rest.md",
+            "start_line": 36,
+            "level": "MUST",
+            "text_digest": "017f445b50"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/checkout-rest.md",
+            "start_line": 36,
+            "level": "MUST",
+            "text_digest": "017f445b50"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/checkout-rest.md",
+            "start_line": 36,
+            "level": "MUST",
+            "text_digest": "017f445b50"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/rest.md",
+            "start_line": 71,
+            "level": "MUST",
+            "text_digest": "017f445b50"
+          }
+        ]
       }
     },
     {
@@ -132,7 +163,38 @@
           "testable": true,
           "reason": "visible: the endpoint's TLS version",
           "note": "the local sample server serves plain HTTP, so it fails this"
-        }
+        },
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/checkout-rest.md",
+            "start_line": 41,
+            "level": "MUST",
+            "text_digest": "86f31bc40b"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/checkout-rest.md",
+            "start_line": 41,
+            "level": "MUST",
+            "text_digest": "86f31bc40b"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/checkout-rest.md",
+            "start_line": 41,
+            "level": "MUST",
+            "text_digest": "86f31bc40b"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/rest.md",
+            "start_line": 76,
+            "level": "MUST",
+            "text_digest": "86f31bc40b"
+          }
+        ]
       }
     },
     {
@@ -166,7 +228,17 @@
         "keyword_style": "bold",
         "transport": "rest",
         "testable": false,
-        "testable_reason": "aimed at the platform"
+        "testable_reason": "aimed at the platform",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/rest.md",
+            "start_line": 231,
+            "level": "MUST",
+            "text_digest": "4bb048462f"
+          }
+        ]
       }
     },
     {
@@ -202,7 +274,17 @@
         "keyword_style": "bold",
         "transport": "rest",
         "testable": false,
-        "testable_reason": "aimed at the platform"
+        "testable_reason": "aimed at the platform",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/rest.md",
+            "start_line": 231,
+            "level": "MUST NOT",
+            "text_digest": "abb33abf65"
+          }
+        ]
       }
     },
     {
@@ -236,7 +318,17 @@
         "keyword_style": "bold",
         "transport": "rest",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/rest.md",
+            "start_line": 231,
+            "level": "MUST",
+            "text_digest": "171c8ac33e"
+          }
+        ]
       }
     },
     {
@@ -272,7 +364,17 @@
         "keyword_style": "bold",
         "transport": "rest",
         "testable": false,
-        "testable_reason": "aimed at the platform"
+        "testable_reason": "aimed at the platform",
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/rest.md",
+            "start_line": 242,
+            "level": "MUST",
+            "text_digest": "036655993f"
+          }
+        ]
       }
     },
     {
@@ -306,7 +408,24 @@
         "keyword_style": "bold",
         "transport": "rest",
         "testable": false,
-        "testable_reason": "aimed at the platform"
+        "testable_reason": "aimed at the platform",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/checkout-rest.md",
+            "start_line": 1339,
+            "level": "MAY",
+            "text_digest": "d1ab83442a"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/rest.md",
+            "start_line": 1412,
+            "level": "MAY",
+            "text_digest": "d1ab83442a"
+          }
+        ]
       }
     },
     {
@@ -346,7 +465,24 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "about the requests the platform signs"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/checkout-rest.md",
+            "start_line": 1346,
+            "level": "MUST",
+            "text_digest": "2b1505e5e0"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/rest.md",
+            "start_line": 1419,
+            "level": "MUST",
+            "text_digest": "2b1505e5e0"
+          }
+        ]
       }
     },
     {
@@ -386,7 +522,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "visible: response signature headers"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/checkout-rest.md",
+            "start_line": 1378,
+            "level": "SHOULD",
+            "text_digest": "833d001a11"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/rest.md",
+            "start_line": 1451,
+            "level": "SHOULD",
+            "text_digest": "833d001a11"
+          }
+        ]
       }
     },
     {
@@ -426,7 +579,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "permission; visible when used"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/checkout-rest.md",
+            "start_line": 1382,
+            "level": "MAY",
+            "text_digest": "eb1ea646bd"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/rest.md",
+            "start_line": 1455,
+            "level": "MAY",
+            "text_digest": "eb1ea646bd"
+          }
+        ]
       }
     },
     {
@@ -466,7 +636,38 @@
           "actor": "BUSINESS",
           "testable": false,
           "reason": "a menu of allowed authentication methods; nothing a test can fail"
-        }
+        },
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/checkout-rest.md",
+            "start_line": 1340,
+            "level": "MAY",
+            "text_digest": "9655f6d29f"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/checkout-rest.md",
+            "start_line": 1254,
+            "level": "MAY",
+            "text_digest": "9655f6d29f"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/checkout-rest.md",
+            "start_line": 1405,
+            "level": "MAY",
+            "text_digest": "9655f6d29f"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/rest.md",
+            "start_line": 1478,
+            "level": "MAY",
+            "text_digest": "9655f6d29f"
+          }
+        ]
       }
     },
     {
@@ -500,7 +701,38 @@
         "keyword_style": "bold",
         "transport": "rest",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/checkout-rest.md",
+            "start_line": 1349,
+            "level": "MAY",
+            "text_digest": "629a6e09eb"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/checkout-rest.md",
+            "start_line": 1263,
+            "level": "MAY",
+            "text_digest": "629a6e09eb"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/checkout-rest.md",
+            "start_line": 1417,
+            "level": "MAY",
+            "text_digest": "629a6e09eb"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/rest.md",
+            "start_line": 1490,
+            "level": "MAY",
+            "text_digest": "629a6e09eb"
+          }
+        ]
       }
     }
   ]

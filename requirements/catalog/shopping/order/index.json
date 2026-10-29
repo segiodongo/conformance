@@ -90,7 +90,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "order response content"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order.md",
+            "start_line": 34,
+            "level": "MUST",
+            "text_digest": "db110c82c0"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/index.md",
+            "start_line": 34,
+            "level": "MUST",
+            "text_digest": "db110c82c0"
+          }
+        ]
       }
     },
     {
@@ -124,7 +141,24 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order.md",
+            "start_line": 47,
+            "level": "SHOULD",
+            "text_digest": "cc3d0c0f7a"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/index.md",
+            "start_line": 47,
+            "level": "SHOULD",
+            "text_digest": "cc3d0c0f7a"
+          }
+        ]
       }
     },
     {
@@ -162,7 +196,24 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order.md",
+            "start_line": 47,
+            "level": "MAY",
+            "text_digest": "680173e292"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/index.md",
+            "start_line": 47,
+            "level": "MAY",
+            "text_digest": "680173e292"
+          }
+        ]
       }
     },
     {
@@ -204,7 +255,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "permission on order content"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order.md",
+            "start_line": 92,
+            "level": "MAY",
+            "text_digest": "5e0b5a836c"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/index.md",
+            "start_line": 105,
+            "level": "MAY",
+            "text_digest": "5e0b5a836c"
+          }
+        ]
       }
     },
     {
@@ -244,7 +312,17 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "permission on order content"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/index.md",
+            "start_line": 112,
+            "level": "MAY",
+            "text_digest": "f650fb481d"
+          }
+        ]
       }
     },
     {
@@ -286,7 +364,17 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "order adjustment content (measure-priced items only)"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/index.md",
+            "start_line": 374,
+            "level": "MUST",
+            "text_digest": "b3887dba91"
+          }
+        ]
       }
     },
     {
@@ -329,7 +417,17 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "order adjustment content (measure-priced items only)"
-        }
+        },
+        "since": "2026-08-25",
+        "releases": [
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/index.md",
+            "start_line": 374,
+            "level": "MUST",
+            "text_digest": "7e7fe0b12a"
+          }
+        ]
       }
     },
     {
@@ -363,7 +461,24 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order.md",
+            "start_line": 289,
+            "level": "MUST",
+            "text_digest": "8259428a26"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/index.md",
+            "start_line": 554,
+            "level": "MUST",
+            "text_digest": "8259428a26"
+          }
+        ]
       }
     },
     {
@@ -397,7 +512,24 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order.md",
+            "start_line": 313,
+            "level": "MUST",
+            "text_digest": "5f3bf1ba25"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/index.md",
+            "start_line": 578,
+            "level": "MUST",
+            "text_digest": "5f3bf1ba25"
+          }
+        ]
       }
     },
     {
@@ -431,7 +563,24 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order.md",
+            "start_line": 325,
+            "level": "MAY",
+            "text_digest": "68f3d605bf"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/index.md",
+            "start_line": 590,
+            "level": "MAY",
+            "text_digest": "68f3d605bf"
+          }
+        ]
       }
     },
     {
@@ -465,7 +614,24 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order.md",
+            "start_line": 336,
+            "level": "MAY",
+            "text_digest": "7562bd96a3"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/index.md",
+            "start_line": 601,
+            "level": "MAY",
+            "text_digest": "7562bd96a3"
+          }
+        ]
       }
     },
     {
@@ -505,7 +671,24 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "listed under 'Platform:'"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order.md",
+            "start_line": 395,
+            "level": "MUST",
+            "text_digest": "d79ebec396"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/index.md",
+            "start_line": 662,
+            "level": "MUST",
+            "text_digest": "d79ebec396"
+          }
+        ]
       }
     },
     {
@@ -545,7 +728,24 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "listed under 'Platform:'"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order.md",
+            "start_line": 396,
+            "level": "SHOULD",
+            "text_digest": "8fb9d0d3c3"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/index.md",
+            "start_line": 663,
+            "level": "SHOULD",
+            "text_digest": "8fb9d0d3c3"
+          }
+        ]
       }
     },
     {
@@ -585,7 +785,24 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "listed under 'Platform:'"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order.md",
+            "start_line": 398,
+            "level": "SHOULD",
+            "text_digest": "e3b0e4d162"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/index.md",
+            "start_line": 665,
+            "level": "SHOULD",
+            "text_digest": "e3b0e4d162"
+          }
+        ]
       }
     },
     {
@@ -625,7 +842,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "visible: unauthenticated requests are refused"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order.md",
+            "start_line": 403,
+            "level": "MUST",
+            "text_digest": "af7faa7edc"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/index.md",
+            "start_line": 670,
+            "level": "MUST",
+            "text_digest": "af7faa7edc"
+          }
+        ]
       }
     },
     {
@@ -665,7 +899,38 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "visible: webhook signatures (verifying them is the platform's half)"
-        }
+        },
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/order.md",
+            "start_line": 303,
+            "level": "MUST",
+            "text_digest": "6b50b563f9"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/order.md",
+            "start_line": 295,
+            "level": "MUST",
+            "text_digest": "6b50b563f9"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order.md",
+            "start_line": 459,
+            "level": "MUST",
+            "text_digest": "6b50b563f9"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/index.md",
+            "start_line": 729,
+            "level": "MUST",
+            "text_digest": "6b50b563f9"
+          }
+        ]
       }
     },
     {
@@ -699,7 +964,9 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": false,
-        "testable_reason": "aimed at the platform"
+        "testable_reason": "aimed at the platform",
+        "since": "draft",
+        "releases": []
       }
     },
     {
@@ -733,7 +1000,9 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": true,
-        "testable_reason": "aimed at the business"
+        "testable_reason": "aimed at the business",
+        "since": "draft",
+        "releases": []
       }
     },
     {
@@ -767,7 +1036,24 @@
         "keyword_style": "bold",
         "transport": "core",
         "testable": false,
-        "testable_reason": "aimed at the platform"
+        "testable_reason": "aimed at the platform",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order.md",
+            "start_line": 512,
+            "level": "MUST",
+            "text_digest": "0392cffe09"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/index.md",
+            "start_line": 782,
+            "level": "MUST",
+            "text_digest": "0392cffe09"
+          }
+        ]
       }
     },
     {
@@ -807,7 +1093,24 @@
           "actor": "PLATFORM",
           "testable": false,
           "reason": "listed under 'Platform:'"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order.md",
+            "start_line": 531,
+            "level": "MUST",
+            "text_digest": "f7fb88a8ea"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/index.md",
+            "start_line": 801,
+            "level": "MUST",
+            "text_digest": "f7fb88a8ea"
+          }
+        ]
       }
     },
     {
@@ -847,7 +1150,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "listed under 'Business:'; visible in webhooks"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order.md",
+            "start_line": 536,
+            "level": "MUST",
+            "text_digest": "cd10b52eeb"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/index.md",
+            "start_line": 806,
+            "level": "MUST",
+            "text_digest": "cd10b52eeb"
+          }
+        ]
       }
     },
     {
@@ -887,7 +1207,24 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "listed under 'Business:'; visible in webhooks"
-        }
+        },
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order.md",
+            "start_line": 537,
+            "level": "MUST",
+            "text_digest": "a5e8107f1f"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/index.md",
+            "start_line": 807,
+            "level": "MUST",
+            "text_digest": "a5e8107f1f"
+          }
+        ]
       }
     },
     {
@@ -927,7 +1264,39 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "listed under 'Business:'; visible in webhooks"
-        }
+        },
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/order.md",
+            "start_line": 347,
+            "level": "MUST",
+            "text_digest": "6b412de096",
+            "clause": "**MUST** send \"Order created\" event with fully populated order entity"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/order.md",
+            "start_line": 337,
+            "level": "MUST",
+            "text_digest": "103d1048ca"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order.md",
+            "start_line": 540,
+            "level": "MUST",
+            "text_digest": "103d1048ca"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/index.md",
+            "start_line": 810,
+            "level": "MUST",
+            "text_digest": "103d1048ca"
+          }
+        ]
       }
     },
     {
@@ -967,7 +1336,39 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "listed under 'Business:'; visible in webhooks"
-        }
+        },
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/order.md",
+            "start_line": 348,
+            "level": "MUST",
+            "text_digest": "195ac0deb4",
+            "clause": "**MUST** send full order entity on updates (not incremental deltas)"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/order.md",
+            "start_line": 338,
+            "level": "MUST",
+            "text_digest": "4b626e6827"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order.md",
+            "start_line": 541,
+            "level": "MUST",
+            "text_digest": "4b626e6827"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/index.md",
+            "start_line": 811,
+            "level": "MUST",
+            "text_digest": "4b626e6827"
+          }
+        ]
       }
     },
     {
@@ -1007,7 +1408,39 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "listed under 'Business:'; visible in webhooks"
-        }
+        },
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/order.md",
+            "start_line": 349,
+            "level": "MUST",
+            "text_digest": "d6da9182bb",
+            "clause": "**MUST** retry failed webhook deliveries"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/order.md",
+            "start_line": 339,
+            "level": "MUST",
+            "text_digest": "1f2d85ce9c"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order.md",
+            "start_line": 542,
+            "level": "MUST",
+            "text_digest": "1f2d85ce9c"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/index.md",
+            "start_line": 812,
+            "level": "MUST",
+            "text_digest": "1f2d85ce9c"
+          }
+        ]
       }
     },
     {
@@ -1047,7 +1480,9 @@
           "actor": "BUSINESS",
           "testable": true,
           "reason": "listed under 'Business:'; visible in webhooks"
-        }
+        },
+        "since": "draft",
+        "releases": []
       }
     }
   ]

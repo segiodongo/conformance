@@ -85,7 +85,24 @@
         "keyword_style": "bold",
         "transport": "mcp",
         "testable": false,
-        "testable_reason": "MCP binding page"
+        "testable_reason": "MCP binding page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order-mcp.md",
+            "start_line": 59,
+            "level": "MUST",
+            "text_digest": "7d9d798bfd"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/mcp.md",
+            "start_line": 61,
+            "level": "MUST",
+            "text_digest": "7d9d798bfd"
+          }
+        ]
       }
     },
     {
@@ -119,7 +136,24 @@
         "keyword_style": "bold",
         "transport": "mcp",
         "testable": false,
-        "testable_reason": "MCP binding page"
+        "testable_reason": "MCP binding page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order-mcp.md",
+            "start_line": 81,
+            "level": "MAY",
+            "text_digest": "160daf898a"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/mcp.md",
+            "start_line": 84,
+            "level": "MAY",
+            "text_digest": "160daf898a"
+          }
+        ]
       }
     },
     {
@@ -155,7 +189,24 @@
         "keyword_style": "bold",
         "transport": "mcp",
         "testable": false,
-        "testable_reason": "MCP binding page"
+        "testable_reason": "MCP binding page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order-mcp.md",
+            "start_line": 276,
+            "level": "MUST",
+            "text_digest": "dfdf1af93d"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/mcp.md",
+            "start_line": 283,
+            "level": "MUST",
+            "text_digest": "dfdf1af93d"
+          }
+        ]
       }
     },
     {
@@ -189,7 +240,24 @@
         "keyword_style": "bold",
         "transport": "mcp",
         "testable": false,
-        "testable_reason": "MCP binding page"
+        "testable_reason": "MCP binding page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order-mcp.md",
+            "start_line": 284,
+            "level": "MUST",
+            "text_digest": "50d0db61d3"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/mcp.md",
+            "start_line": 291,
+            "level": "MUST",
+            "text_digest": "50d0db61d3"
+          }
+        ]
       }
     },
     {
@@ -225,7 +293,24 @@
         "keyword_style": "bold",
         "transport": "mcp",
         "testable": false,
-        "testable_reason": "MCP binding page"
+        "testable_reason": "MCP binding page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order-mcp.md",
+            "start_line": 285,
+            "level": "MUST",
+            "text_digest": "61b7633392"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/mcp.md",
+            "start_line": 292,
+            "level": "MUST",
+            "text_digest": "61b7633392"
+          }
+        ]
       }
     },
     {
@@ -261,7 +346,24 @@
         "keyword_style": "bold",
         "transport": "mcp",
         "testable": false,
-        "testable_reason": "MCP binding page"
+        "testable_reason": "MCP binding page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order-mcp.md",
+            "start_line": 286,
+            "level": "SHOULD",
+            "text_digest": "a8dce026f4"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/mcp.md",
+            "start_line": 293,
+            "level": "SHOULD",
+            "text_digest": "a8dce026f4"
+          }
+        ]
       }
     },
     {
@@ -297,7 +399,24 @@
         "keyword_style": "bold",
         "transport": "mcp",
         "testable": false,
-        "testable_reason": "MCP binding page"
+        "testable_reason": "MCP binding page",
+        "since": "2026-04-08",
+        "releases": [
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/order-mcp.md",
+            "start_line": 292,
+            "level": "MUST",
+            "text_digest": "62046948e1"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/order/mcp.md",
+            "start_line": 299,
+            "level": "MUST",
+            "text_digest": "62046948e1"
+          }
+        ]
       }
     }
   ]

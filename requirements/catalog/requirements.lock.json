@@ -1697,6 +1697,50 @@
       "retired_at": null
     },
     {
+      "id": "REQ-SHOPPING-CATALOG-SEARCH-0011",
+      "file": "docs/specification/shopping/catalog/search.md",
+      "text_digest": "34e52599f3",
+      "context": null,
+      "text": "cursors are opaque strings that implementations may encode as stateless keyset tokens",
+      "previous_digests": [],
+      "status": "retired",
+      "minted_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1",
+      "retired_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1"
+    },
+    {
+      "id": "REQ-SHOPPING-CATALOG-SEARCH-0012",
+      "file": "docs/specification/shopping/catalog/search.md",
+      "text_digest": "e2548c97cc",
+      "context": null,
+      "text": "implementations should accept a page size of at least 10",
+      "previous_digests": [],
+      "status": "retired",
+      "minted_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1",
+      "retired_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1"
+    },
+    {
+      "id": "REQ-SHOPPING-CATALOG-SEARCH-0013",
+      "file": "docs/specification/shopping/catalog/search.md",
+      "text_digest": "f908ab09df",
+      "context": null,
+      "text": "when the requested limit exceeds the implementation's maximum, implementations may clamp to their maximum silently - returning fewer results without error",
+      "previous_digests": [],
+      "status": "retired",
+      "minted_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1",
+      "retired_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1"
+    },
+    {
+      "id": "REQ-SHOPPING-CATALOG-SEARCH-0014",
+      "file": "docs/specification/shopping/catalog/search.md",
+      "text_digest": "095d4127a1",
+      "context": null,
+      "text": "clients must not assume the response size equals the requested limit",
+      "previous_digests": [],
+      "status": "retired",
+      "minted_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1",
+      "retired_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1"
+    },
+    {
       "id": "REQ-SHOPPING-CHECKOUT-0001",
       "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "cd05227e99",
@@ -4469,6 +4513,138 @@
       "retired_at": null
     },
     {
+      "id": "REQ-SHOPPING-CHECKOUT-0253",
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "97c37dbeb6",
+      "context": null,
+      "text": "must include at least one message with severity: escalation when returning status = requires_escalation",
+      "previous_digests": [],
+      "status": "retired",
+      "minted_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1",
+      "retired_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1"
+    },
+    {
+      "id": "REQ-SHOPPING-CHECKOUT-0254",
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "c90c72488b",
+      "context": null,
+      "text": "verification failure must only affect the messages array",
+      "previous_digests": [],
+      "status": "retired",
+      "minted_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1",
+      "retired_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1"
+    },
+    {
+      "id": "REQ-SHOPPING-CHECKOUT-0255",
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "9be5fa6ad5",
+      "context": null,
+      "text": "messages should use the path field to identify which specific claim(s) could not be verified",
+      "previous_digests": [],
+      "status": "retired",
+      "minted_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1",
+      "retired_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1"
+    },
+    {
+      "id": "REQ-SHOPPING-CHECKOUT-0256",
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "787575634f",
+      "context": null,
+      "text": "the platform may then provide valid proof and resubmit, restructure the checkout (e.g., remove ineligible items, update claims), or abandon the attempt",
+      "previous_digests": [],
+      "status": "retired",
+      "minted_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1",
+      "retired_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1"
+    },
+    {
+      "id": "REQ-SHOPPING-CHECKOUT-0257",
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "df29ac59fe",
+      "context": null,
+      "text": "businesses should use these values when authoritative data (e.g. address) is absent",
+      "previous_digests": [],
+      "status": "retired",
+      "minted_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1",
+      "retired_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1"
+    },
+    {
+      "id": "REQ-SHOPPING-CHECKOUT-0258",
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "e3dad067b0",
+      "context": null,
+      "text": "businesses may ignore unsupported values without returning errors",
+      "previous_digests": [],
+      "status": "retired",
+      "minted_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1",
+      "retired_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1"
+    },
+    {
+      "id": "REQ-SHOPPING-CHECKOUT-0259",
+      "file": "docs/specification/shopping/checkout/embedded.md",
+      "text_digest": "ae029d1342",
+      "context": null,
+      "text": "when a host receives a checkout response with a continue_url from a business that advertises ecp support, it may initiate an ecp session by loading the url in an embedded context",
+      "previous_digests": [],
+      "status": "retired",
+      "minted_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1",
+      "retired_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1"
+    },
+    {
+      "id": "REQ-SHOPPING-CHECKOUT-0260",
+      "file": "docs/specification/shopping/checkout/embedded.md",
+      "text_digest": "ab577222b9",
+      "context": null,
+      "text": "the host must create at least one of the following globals",
+      "previous_digests": [],
+      "status": "retired",
+      "minted_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1",
+      "retired_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1"
+    },
+    {
+      "id": "REQ-SHOPPING-CHECKOUT-0261",
+      "file": "docs/specification/shopping/checkout/embedded.md",
+      "text_digest": "e265cfa568",
+      "context": null,
+      "text": "to ensure security, both parties must implement appropriate",
+      "previous_digests": [],
+      "status": "retired",
+      "minted_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1",
+      "retired_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1"
+    },
+    {
+      "id": "REQ-SHOPPING-CHECKOUT-0262",
+      "file": "docs/specification/shopping/checkout/embedded.md",
+      "text_digest": "d1b39a8397",
+      "context": null,
+      "text": "the message responder should use error codes mapped to w3c domexception names where possible",
+      "previous_digests": [],
+      "status": "retired",
+      "minted_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1",
+      "retired_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1"
+    },
+    {
+      "id": "REQ-SHOPPING-CHECKOUT-0263",
+      "file": "docs/specification/shopping/checkout/mcp.md",
+      "text_digest": "be3be2c530",
+      "context": null,
+      "text": "mcp clients must include the ucp platform profile uri with every request",
+      "previous_digests": [],
+      "status": "retired",
+      "minted_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1",
+      "retired_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1"
+    },
+    {
+      "id": "REQ-SHOPPING-CHECKOUT-0264",
+      "file": "docs/specification/shopping/checkout/mcp.md",
+      "text_digest": "50d66b978b",
+      "context": null,
+      "text": "the _meta.ucp.profile field must be present in every mcp tool invocation to enable version compatibility checking and capability negotiation",
+      "previous_digests": [],
+      "status": "retired",
+      "minted_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1",
+      "retired_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1"
+    },
+    {
       "id": "REQ-SHOPPING-DISCOUNT-0001",
       "file": "docs/specification/shopping/extensions/discount.md",
       "text_digest": "75a607ee1b",
@@ -5173,6 +5349,30 @@
       "retired_at": null
     },
     {
+      "id": "REQ-SHOPPING-FULFILLMENT-0056",
+      "file": "docs/specification/shopping/extensions/fulfillment.md",
+      "text_digest": "adb26a1879",
+      "context": "for ordering",
+      "text": "platforms should render options in the provided order",
+      "previous_digests": [
+        "08886e0103"
+      ],
+      "status": "retired",
+      "minted_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1",
+      "retired_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1"
+    },
+    {
+      "id": "REQ-SHOPPING-FULFILLMENT-0057",
+      "file": "docs/specification/shopping/extensions/fulfillment.md",
+      "text_digest": "7ea8962c4d",
+      "context": null,
+      "text": "extensions that extend fulfillment with new method types (e.g., local_delivery) must add an extension schema that",
+      "previous_digests": [],
+      "status": "retired",
+      "minted_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1",
+      "retired_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1"
+    },
+    {
       "id": "REQ-SHOPPING-ORDER-0001",
       "file": "docs/specification/shopping/order/index.md",
       "text_digest": "db110c82c0",
@@ -5611,6 +5811,58 @@
       "status": "active",
       "minted_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1",
       "retired_at": null
+    },
+    {
+      "id": "REQ-SHOPPING-ORDER-0041",
+      "file": "docs/specification/shopping/order/index.md",
+      "text_digest": "92ea191b2b",
+      "context": "platform",
+      "text": "must respond quickly with a 2xx http status code to acknowledge receipt",
+      "previous_digests": [
+        "de55178249"
+      ],
+      "status": "retired",
+      "minted_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1",
+      "retired_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1"
+    },
+    {
+      "id": "REQ-SHOPPING-ORDER-0042",
+      "file": "docs/specification/shopping/order/index.md",
+      "text_digest": "0531f624a3",
+      "context": "business",
+      "text": "must sign all webhook payloads using a key from their signing_keys array (published in /.well-known/ucp)",
+      "previous_digests": [
+        "618f425437"
+      ],
+      "status": "retired",
+      "minted_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1",
+      "retired_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1"
+    },
+    {
+      "id": "REQ-SHOPPING-ORDER-0043",
+      "file": "docs/specification/shopping/order/index.md",
+      "text_digest": "f4c2f03458",
+      "context": "business",
+      "text": "the signature must be included in the request-signature header as a detached jwt (rfc 7797)",
+      "previous_digests": [
+        "e0936ede0f"
+      ],
+      "status": "retired",
+      "minted_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1",
+      "retired_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1"
+    },
+    {
+      "id": "REQ-SHOPPING-ORDER-0044",
+      "file": "docs/specification/shopping/order/index.md",
+      "text_digest": "e27fc7ad69",
+      "context": "business",
+      "text": "must include business identifier in webhook path or headers",
+      "previous_digests": [
+        "f1fc3a26a6"
+      ],
+      "status": "retired",
+      "minted_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1",
+      "retired_at": "f2626c28b8288976eee5bda77f3a9b1ddc0132b1"
     }
   ]
 }

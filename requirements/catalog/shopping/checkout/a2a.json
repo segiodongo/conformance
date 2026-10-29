@@ -82,7 +82,38 @@
         "keyword_style": "bold",
         "transport": "a2a",
         "testable": false,
-        "testable_reason": "A2A binding page"
+        "testable_reason": "A2A binding page",
+        "since": "2026-01-11",
+        "releases": [
+          {
+            "version": "2026-01-11",
+            "file": "docs/specification/checkout-a2a.md",
+            "start_line": 138,
+            "level": "MUST",
+            "text_digest": "3fd4c0c210"
+          },
+          {
+            "version": "2026-01-23",
+            "file": "docs/specification/checkout-a2a.md",
+            "start_line": 139,
+            "level": "MUST",
+            "text_digest": "3fd4c0c210"
+          },
+          {
+            "version": "2026-04-08",
+            "file": "docs/specification/checkout-a2a.md",
+            "start_line": 139,
+            "level": "MUST",
+            "text_digest": "3fd4c0c210"
+          },
+          {
+            "version": "2026-08-25",
+            "file": "docs/specification/shopping/checkout/a2a.md",
+            "start_line": 141,
+            "level": "MUST",
+            "text_digest": "3fd4c0c210"
+          }
+        ]
       }
     }
   ]
