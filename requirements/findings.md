@@ -14,14 +14,19 @@
   (18%): order 8 of 17, fulfillment 4 of 16 and checkout 7 of 37. Cart,
   catalog, discount and buyer consent have none.
 - **Depth:** of those 19, 11 are checked in full, 6 in part, and 2 depend on
-  how the rule's scope is read (see [Claims reviewed](#claims-reviewed)).
+  how the rule's scope is read (see [Claims reviewed](#claims-reviewed)). The
+  markers cite those 8 with `partly`, so the coverage report counts 11 of the
+  104 (11%) as fully checked and 8 as checked in part.
 - **Sample server:** all 63 tests pass against `samples` at `360adbc`, with the
   marker check on.
 
 ## Claims reviewed
 
 Every rule a `spec_assert` marker cites was checked against the test's
-assertions. No marker changed.
+assertions. Each claim marked Partial or Reading below is cited with
+`partly`, with a gap taken from its note, so the report counts that test as
+checking the rule in part. CHECKOUT-0142 stays fully checked through
+`TotalsTest`.
 
 - **Full:** the assertions check the rule as stated, for the case the test
   sets up.

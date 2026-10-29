@@ -18,7 +18,12 @@ import datetime
 import uuid
 from absl import flags
 from absl.testing import absltest
-from framework.decorators import requires_capability, scenario, spec_assert
+from framework.decorators import (
+  partly,
+  requires_capability,
+  scenario,
+  spec_assert,
+)
 from pydantic import AnyUrl
 from shopping.base import get_valid_payment_payload
 from shopping.base import shopping_test_data
@@ -58,7 +63,11 @@ class OrderTest(ShoppingIntegrationTestBase):
   """
 
   @spec_assert(
-    "REQ-SHOPPING-ORDER-0008",  # full order entity on every response
+    partly(
+      "REQ-SHOPPING-ORDER-0008",  # full order entity on every response
+      "Get Order only, with the schema's required fields taken as the full "
+      "entity",
+    ),
   )
   def test_order_retrieval(self) -> None:
     """Test successful order retrieval.

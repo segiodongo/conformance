@@ -15,7 +15,12 @@
 """Checkout Lifecycle tests for the UCP SDK Server."""
 
 from absl.testing import absltest
-from framework.decorators import no_rule, requires_capability, spec_assert
+from framework.decorators import (
+  no_rule,
+  partly,
+  requires_capability,
+  spec_assert,
+)
 from shopping.base import ShoppingIntegrationTestBase, get_valid_payment_payload
 from ucp_sdk.models.schemas.shopping import (
   checkout_update_request as checkout_update_req,
@@ -543,7 +548,11 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
     )
 
   @spec_assert(
-    "REQ-SHOPPING-CHECKOUT-0119",  # cancel of a completed checkout SHOULD fail
+    partly(
+      "REQ-SHOPPING-CHECKOUT-0119",  # cancel after completion SHOULD fail
+      "only a status other than 200, so an in-band error fails and the "
+      "error's content isn't checked",
+    ),
   )
   def test_cannot_cancel_completed_checkout(self):
     """Test that a completed checkout cannot be canceled.

@@ -15,7 +15,7 @@
 """Validation tests for the UCP SDK Server."""
 
 from absl.testing import absltest
-from framework.decorators import requires_capability, spec_assert
+from framework.decorators import partly, requires_capability, spec_assert
 from shopping.base import get_valid_payment_payload
 from shopping.base import ShoppingIntegrationTestBase
 from ucp_sdk.models.schemas.shopping import (
@@ -246,8 +246,15 @@ class ValidationTest(ShoppingIntegrationTestBase):
     )
 
   @spec_assert(
-    "REQ-SHOPPING-CHECKOUT-0010",  # a revision comes with a messages[] entry
-    "REQ-SHOPPING-CHECKOUT-0011",  # MUST NOT silently reinterpret quantity
+    partly(
+      "REQ-SHOPPING-CHECKOUT-0010",  # a revision comes with a messages[] entry
+      "exercised with limited stock, not an off-increment quantity, and "
+      "only a quantity_adjusted warning counts as the message",
+    ),
+    partly(
+      "REQ-SHOPPING-CHECKOUT-0011",  # MUST NOT silently reinterpret quantity
+      "exercised with limited stock, not an off-increment quantity",
+    ),
     "REQ-SHOPPING-CHECKOUT-0105",  # SHOULD provide accurate error messages
   )
   def test_update_inventory_validation(self) -> None:

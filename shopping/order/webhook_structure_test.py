@@ -53,6 +53,7 @@ from framework.base_test import FLAGS
 from framework.decorators import (
   no_rule,
   older_version,
+  partly,
   requires_capability,
   spec_assert,
 )
@@ -262,7 +263,10 @@ class WebhookStructureTest(ShoppingIntegrationTestBase):
 
   # ── order.md "Events": fully populated order entity ─────────────────────
   @spec_assert(
-    "REQ-SHOPPING-ORDER-0023",  # MUST send "Order created" with full entity
+    partly(
+      "REQ-SHOPPING-ORDER-0023",  # MUST send "Order created" with full entity
+      "the schema's required fields taken as a fully populated entity",
+    ),
   )
   def test_order_created_event_is_full_order_entity(self) -> None:
     """The 'Order created' delivery body is the full order entity."""
@@ -270,7 +274,10 @@ class WebhookStructureTest(ShoppingIntegrationTestBase):
     self._assert_full_order_entity(event["payload"], checkout_id, order_id)
 
   @spec_assert(
-    "REQ-SHOPPING-ORDER-0024",  # full order entity on updates, not deltas
+    partly(
+      "REQ-SHOPPING-ORDER-0024",  # full order entity on updates, not deltas
+      "the schema's required fields taken as the full entity",
+    ),
   )
   def test_update_event_is_full_order_entity(self) -> None:
     """An update delivery is the full current-state snapshot, not a delta."""
@@ -332,7 +339,11 @@ class WebhookStructureTest(ShoppingIntegrationTestBase):
 
   @spec_assert(
     "REQ-SHOPPING-ORDER-0021",  # UCP-Agent header with the profile URL
-    "REQ-SHOPPING-ORDER-0022",  # sign payloads with RFC 9421 headers
+    partly(
+      "REQ-SHOPPING-ORDER-0022",  # sign payloads with RFC 9421 headers
+      "the RFC 9421 headers and Content-Digest only; the signature itself "
+      "isn't verified",
+    ),
   )
   def test_signed_delivery_carries_required_headers_and_digest(self) -> None:
     """A signed delivery carries all four headers; the digest matches."""

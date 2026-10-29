@@ -43,7 +43,7 @@ server under test.
 """
 
 from absl.testing import absltest
-from framework.decorators import requires_capability, spec_assert
+from framework.decorators import partly, requires_capability, spec_assert
 from shopping.base import ShoppingIntegrationTestBase
 from ucp_sdk.models.schemas.shopping import checkout as checkout
 from ucp_sdk.models.schemas.shopping import checkout_create_request
@@ -113,7 +113,11 @@ class FulfillmentStructureTest(ShoppingIntegrationTestBase):
     )
 
   @spec_assert(
-    "REQ-SHOPPING-FULFILLMENT-0018",  # option title MUST distinguish siblings
+    partly(
+      "REQ-SHOPPING-FULFILLMENT-0018",  # option title MUST distinguish siblings
+      "distinct, non-empty titles only; whether they tell options apart for "
+      "a buyer can't be checked by machine",
+    ),
   )
   def test_option_titles_distinguish_siblings(self) -> None:
     """FUL-001: sibling ``options[].title`` are non-empty and distinct.

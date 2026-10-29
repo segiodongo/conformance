@@ -34,7 +34,12 @@ code is supplied or when the business does not advertise the capability.
 """
 
 from absl.testing import absltest
-from framework.decorators import no_rule, requires_capability, spec_assert
+from framework.decorators import (
+  no_rule,
+  partly,
+  requires_capability,
+  spec_assert,
+)
 from shopping.base import ShoppingIntegrationTestBase
 from ucp_sdk.models.schemas.shopping import checkout as checkout
 
@@ -111,7 +116,10 @@ class DiscountSemanticsTest(ShoppingIntegrationTestBase):
 
   # ── discount total is negative (discount.md / total.json) ───────────────
   @spec_assert(
-    "REQ-SHOPPING-CHECKOUT-0142",  # subtractive types MUST be negative
+    partly(
+      "REQ-SHOPPING-CHECKOUT-0142",  # subtractive types MUST be negative
+      "the discount entry only, not items_discount",
+    ),
   )
   def test_discount_total_is_negative(self):
     """A discount's totals[] entry is negative (total.json exclusiveMax 0)."""
