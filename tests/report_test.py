@@ -1146,7 +1146,7 @@ class RunnerTest(unittest.TestCase):
     with (
       tempfile.TemporaryDirectory() as directory,
       mock.patch.object(
-        runner, "_load_tests", return_value=fake_shopping_suite()
+        runner, "_load_tests", return_value=(fake_shopping_suite(), [])
       ),
     ):
       code, output = self.run_main(
@@ -1189,7 +1189,7 @@ class RunnerTest(unittest.TestCase):
     with (
       tempfile.NamedTemporaryFile() as not_a_directory,
       mock.patch.object(
-        runner, "_load_tests", return_value=fake_shopping_suite()
+        runner, "_load_tests", return_value=(fake_shopping_suite(), [])
       ),
     ):
       code, output = self.run_main(
@@ -1202,7 +1202,7 @@ class RunnerTest(unittest.TestCase):
   def test_summary_does_not_count_skipped_tests_as_passed(self):
     """Test the summary's counts for a pass, a failure and a skip."""
     with mock.patch.object(
-      runner, "_load_tests", return_value=fake_shopping_suite()
+      runner, "_load_tests", return_value=(fake_shopping_suite(), [])
     ):
       code, output = self.run_main("--server_url=http://127.0.0.1:9")
     self.assertEqual(code, 1, output)

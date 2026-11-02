@@ -303,7 +303,7 @@ class TargetDirTest(unittest.TestCase):
           self.assertIn(message, err.getvalue())
 
   def test_runner_uses_the_target(self):
-    """Test a dry run that takes its server and profile from a target."""
+    """Test a run that takes its server and profile from a target."""
     with tempfile.TemporaryDirectory() as directory:
       write_target(
         directory,
@@ -314,7 +314,9 @@ class TargetDirTest(unittest.TestCase):
           "webhook_base_url": "https://hooks.example",
         },
       )
-      run = run_main(f"--target_dir={directory}", names=("discovery_url",))
+      run = run_main(
+        f"--target_dir={directory}", names=("discovery_url",), dry_run=False
+      )
     self.assertEqual(run["code"], 0, run["output"])
     self.assertIn("Target Server: https://shop.example\n", run["output"])
     self.assertIn(f"Target Folder: {directory}\n", run["output"])
