@@ -160,7 +160,9 @@ class FulfillmentStructureTest(ShoppingIntegrationTestBase):
         )
 
     if groups_with_options == 0:
-      self.skipTest("server generated no fulfillment options to assert on")
+      self.skip_no_trigger(
+        "a destination the server generates fulfillment options for"
+      )
 
   @spec_assert(
     "REQ-SHOPPING-FULFILLMENT-0048",  # single group per method by default
@@ -282,7 +284,9 @@ class FulfillmentStructureTest(ShoppingIntegrationTestBase):
       )
 
     if methods_with_groups == 0:
-      self.skipTest("server returned no fulfillment groups to assert on")
+      self.skip_no_trigger(
+        "a destination the server returns fulfillment groups for"
+      )
 
 
 if __name__ == "__main__":

@@ -30,6 +30,7 @@ from framework.base_test import BaseIntegrationTest
 from framework.decorators import SpecMarker, requires_capability, spec_assert
 from framework.discovery import UcpProfile
 from framework.outcomes import (
+  CAPABILITY,
   NOT_APPLICABLE,
   PASSED,
   SKIPPED,
@@ -469,7 +470,10 @@ class SetUpGateTest(unittest.TestCase):
     result, ids = run_gated(server, CATALOG)
     outcome = result.outcomes[ids["test_unstated"]]
     self.assertEqual(outcome.status, SKIPPED)
-    self.assertIn("does not support required capability", outcome.detail)
+    self.assertEqual(outcome.category, CAPABILITY)
+    self.assertEqual(
+      outcome.detail, "'dev.ucp.shopping.checkout' (min_version: any)"
+    )
 
   def test_without_a_profile_or_catalog_nothing_is_gated(self):
     """Test that the gate stands aside without a profile or a catalog."""

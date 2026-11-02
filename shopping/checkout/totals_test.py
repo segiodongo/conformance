@@ -205,8 +205,8 @@ class TotalsTest(ShoppingIntegrationTestBase):
     totals = self._discounted_checkout_totals()
     discounts = [t for t in totals if t.get("type") in _NEGATIVE_TYPES]
     if not discounts:
-      self.skipTest(
-        "Server emitted no discount entry; sign invariant not applicable."
+      self.skip_not_exercised(
+        "the server emitted no discount entry in totals[]"
       )
     for entry in discounts:
       self.assertLess(

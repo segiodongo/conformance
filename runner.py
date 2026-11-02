@@ -15,6 +15,7 @@
 """Dynamic CLI test runner and capability orchestrator for UCP."""
 
 import argparse
+import collections
 from collections.abc import Iterator
 import importlib
 import json
@@ -32,7 +33,13 @@ from framework.discovery import (
   fetch_server_profile,
   resolve_discovery_url,
 )
-from framework.outcomes import RecordingResult, is_not_applicable
+from framework.outcomes import (
+  SKIP_CATEGORIES,
+  SKIP_LABELS,
+  RecordingResult,
+  is_not_applicable,
+  skip_category,
+)
 from framework.platform import PlatformProfile
 from framework.requirements import CatalogError
 
@@ -582,9 +589,14 @@ def main(argv: list[str] | None = None) -> int:
 
   # testsRun counts skipped tests too, so take them out of the passes. A
   # skip that says the test doesn't apply to the server's version is
-  # reported apart from the other skips.
+  # reported apart from the other skips, which are broken down by category.
   not_applicable = sum(
     1 for _, reason in result.skipped if is_not_applicable(reason)
+  )
+  categories = collections.Counter(
+    skip_category(reason)[0]
+    for _, reason in result.skipped
+    if not is_not_applicable(reason)
   )
   passed = (
     result.testsRun
@@ -597,6 +609,13 @@ def main(argv: list[str] | None = None) -> int:
   sys.stdout.write(f"Total Executed: {result.testsRun}\n")
   sys.stdout.write(f"Passed: {passed}\n")
   sys.stdout.write(f"Skipped: {len(result.skipped) - not_applicable}\n")
+  if categories:
+    by_reason = ", ".join(
+      f"{SKIP_LABELS[category]} {categories[category]}"
+      for category in SKIP_CATEGORIES
+      if categories[category]
+    )
+    sys.stdout.write(f"  by reason: {by_reason}\n")
   if not_applicable:
     sys.stdout.write(f"Not applicable: {not_applicable}\n")
   sys.stdout.write(f"Failures: {len(result.failures)}\n")

@@ -289,9 +289,9 @@ class WebhookStructureTest(ShoppingIntegrationTestBase):
       headers=headers,
     )
     if ship_response.status_code == 403:
-      self.skipTest(
-        "simulation secret rejected (/testing/simulate-shipping -> 403); "
-        "configure --simulation_secret to match the server under test"
+      self.skip_environment(
+        "the simulation secret was rejected (/testing/simulate-shipping -> "
+        "403); pass --simulation_secret matching the server under test"
       )
     if ship_response.status_code in (404, 405):
       self.skipTest(
@@ -323,17 +323,18 @@ class WebhookStructureTest(ShoppingIntegrationTestBase):
   def _signed_event(self) -> dict[str, Any]:
     """Place an order and return its delivery, skipping if unsigned.
 
-    A delivery with NONE of the signature headers means the server does not
-    implement webhook signing at all; the structural assertions would all
-    fail on the same root cause, so skip with one loud message instead
-    (order.md: payloads MUST be signed — this skip is a finding, not a pass).
+    For the checks that read a signature's parts. A delivery with NONE of
+    the signature headers means the server does not sign webhooks at all,
+    which `test_signed_delivery_carries_required_headers_and_digest` fails
+    (order.md: payloads MUST be signed); the checks that build on that skip
+    rather than fail again on the same root cause.
     """
     _, _, event = self._place_order()
     if not any(event["headers"].get(h) for h in _SIGNATURE_HEADERS):
-      self.skipTest(
-        "server sends unsigned webhook deliveries (no UCP-Agent, Signature, "
-        "Signature-Input or Content-Digest header); order.md 'Webhook "
-        "Signature Verification' MUSTs are not exercised"
+      self.skip_not_exercised(
+        "the server sends unsigned webhook deliveries (no UCP-Agent, "
+        "Signature, Signature-Input or Content-Digest header), which "
+        "test_signed_delivery_carries_required_headers_and_digest fails"
       )
     return event
 
@@ -347,7 +348,7 @@ class WebhookStructureTest(ShoppingIntegrationTestBase):
   )
   def test_signed_delivery_carries_required_headers_and_digest(self) -> None:
     """A signed delivery carries all four headers; the digest matches."""
-    event = self._signed_event()
+    _, _, event = self._place_order()
     headers = event["headers"]
     missing = [h for h in _SIGNATURE_HEADERS if not headers.get(h)]
     self.assertFalse(

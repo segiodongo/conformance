@@ -22,6 +22,11 @@ implements states none of the rules the test cites (see
 `framework.versions`); it is recorded as not applicable, an outcome of its
 own that never counts against the server. A test with no outcome at the end
 of the run didn't run, for example because its class's `setUpClass` failed.
+
+Every other skip says why, with a reason that starts with one of
+`SKIP_PREFIXES`; the start names the skip's category, which the runner's
+summary and the report count. A test's base class has a method per category
+(`skip_no_trigger` and so on) that writes the prefix.
 """
 
 from collections.abc import Iterable
@@ -39,6 +44,33 @@ NOT_RUN = "not_run"
 STATUSES = (PASSED, FAILED, ERROR, SKIPPED, NOT_APPLICABLE, NOT_RUN)
 # How a skip reason begins when the test doesn't apply to the server's version.
 NOT_APPLICABLE_PREFIX = "not applicable:"
+# Why a test was skipped, or didn't run. The fixtures declare no trigger for
+# what the test needs; the run's own settings or surroundings stop it; the
+# server's responses gave it nothing to check; the server doesn't advertise a
+# capability it requires; or something else, such as a check on hold for a
+# specification fix, or a fixture that failed before the test started.
+NO_TRIGGER = "no_trigger"
+ENVIRONMENT = "environment"
+NOT_EXERCISED = "not_exercised"
+CAPABILITY = "capability"
+OTHER = "other"
+# Every category, in the order the report lists them.
+SKIP_CATEGORIES = (NO_TRIGGER, ENVIRONMENT, NOT_EXERCISED, CAPABILITY, OTHER)
+# How a skip reason begins for each category that has a prefix.
+SKIP_PREFIXES = {
+  NO_TRIGGER: "no trigger declared:",
+  ENVIRONMENT: "environment:",
+  NOT_EXERCISED: "not exercised:",
+  CAPABILITY: "capability not advertised:",
+}
+# How the runner and the report name each category.
+SKIP_LABELS = {
+  NO_TRIGGER: "no trigger declared",
+  ENVIRONMENT: "environment",
+  NOT_EXERCISED: "not exercised",
+  CAPABILITY: "capability not advertised",
+  OTHER: "other reason",
+}
 # The longest detail kept, in characters.
 MAX_DETAIL = 200
 # How unittest names a class or module fixture that failed or skipped, as in
@@ -51,6 +83,37 @@ def is_not_applicable(reason: str) -> bool:
   return reason.startswith(NOT_APPLICABLE_PREFIX)
 
 
+def skip_reason(category: str, text: str) -> str:
+  """Return a skip reason that starts with a category's prefix.
+
+  Args:
+    category: One of `SKIP_PREFIXES`' keys.
+    text: What the test needed, or what stopped it.
+
+  Returns:
+    The reason, such as "no trigger declared: a known customer".
+
+  """
+  return f"{SKIP_PREFIXES[category]} {text}"
+
+
+def skip_category(reason: str) -> tuple[str, str]:
+  """Return a skip reason's category, and its text without the prefix.
+
+  Args:
+    reason: The reason a test was skipped with.
+
+  Returns:
+    One of `SKIP_CATEGORIES`, and the reason's text after the category's
+    prefix: the whole reason when it has none, which makes it `OTHER`.
+
+  """
+  for category, prefix in SKIP_PREFIXES.items():
+    if reason.startswith(prefix):
+      return category, reason.removeprefix(prefix).strip()
+  return OTHER, reason
+
+
 @dataclasses.dataclass(frozen=True)
 class Outcome:
   """What happened to one test.
@@ -59,11 +122,15 @@ class Outcome:
     status: One of `STATUSES`.
     detail: Why the test was skipped or didn't run, or its failure or error
       message, on one line and shortened.
+    category: For a skipped test or one that didn't run, why, as one of
+      `SKIP_CATEGORIES`; empty for other outcomes, and for a skip recorded
+      without one, which counts as `OTHER`.
 
   """
 
   status: str
   detail: str = ""
+  category: str = ""
 
 
 class RecordingResult(unittest.TextTestResult):
@@ -101,13 +168,14 @@ class RecordingResult(unittest.TextTestResult):
     self._record(test, Outcome(ERROR, _message(err, with_type=True)))
 
   def addSkip(self, test, reason):  # noqa: N802
-    """Record a skip, with its reason; a prefixed one as not applicable."""
+    """Record a skip with its category; a not-applicable one on its own."""
     super().addSkip(test, reason)
     if is_not_applicable(reason):
       detail = reason.removeprefix(NOT_APPLICABLE_PREFIX)
       self._record(test, Outcome(NOT_APPLICABLE, _shorten(detail)))
     else:
-      self._record(test, Outcome(SKIPPED, _shorten(reason)))
+      category, detail = skip_category(reason)
+      self._record(test, Outcome(SKIPPED, _shorten(detail), category))
 
   def addExpectedFailure(self, test, err):  # noqa: N802
     """Record an expected failure as a failure: the check didn't pass."""
@@ -159,7 +227,7 @@ class RecordingResult(unittest.TextTestResult):
     for parent in (class_name, module):
       if parent in self.fixtures:
         return self.fixtures[parent]
-    return Outcome(NOT_RUN, "no outcome was recorded")
+    return Outcome(NOT_RUN, "no outcome was recorded", OTHER)
 
   def _record(self, test: object, outcome: Outcome) -> None:
     """Keep a test's first outcome, unless a failure or error follows."""
@@ -187,7 +255,7 @@ class RecordingResult(unittest.TextTestResult):
     fixture, parent = match.groups()
     if outcome.status not in (SKIPPED, NOT_APPLICABLE):
       outcome = Outcome(
-        NOT_RUN, _shorten(f"{fixture} failed: {outcome.detail}")
+        NOT_RUN, _shorten(f"{fixture} failed: {outcome.detail}"), OTHER
       )
     self.fixtures.setdefault(parent, outcome)
 

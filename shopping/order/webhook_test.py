@@ -184,9 +184,7 @@ class WebhookTest(ShoppingIntegrationTestBase):
     """Test that webhook contains correct address for known customer/address."""
     customer = self.fixture_ctx.get_known_customer()
     if not customer or not customer.get("addresses"):
-      self.skipTest(
-        "No known customer with stored addresses configured in fixtures."
-      )
+      self.skip_no_trigger("a known customer with stored addresses")
     buyer_info = {
       "fullName": customer.get("full_name", ""),
       "email": customer["email"],
@@ -311,7 +309,7 @@ class WebhookTest(ShoppingIntegrationTestBase):
     """Test that webhook contains correct address when a new one is provided."""
     customer = self.fixture_ctx.get_known_customer()
     if not customer:
-      self.skipTest("No known customer configured in fixtures.")
+      self.skip_no_trigger("a known customer")
     buyer_info = {
       "fullName": customer.get("full_name", ""),
       "email": customer["email"],

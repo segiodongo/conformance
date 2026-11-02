@@ -209,6 +209,33 @@ whatever its tests did: it neither passes nor fails, and it leaves the
 denominator of the results. Coverage is unaffected: it is measured against
 the pinned specification, as before.
 
+## Why a test was skipped
+
+Every other skip says why, with a reason that starts with its category. A
+test skips through one of the base class's methods, which write the prefix:
+
+| Method                    | Reason starts with           | For                                                                                                                                                    |
+| ------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `skip_no_trigger(...)`    | `no trigger declared:`       | The fixtures don't declare what the test needs, such as a known customer with two stored addresses                                                     |
+| `skip_environment(...)`   | `environment:`               | The run's own settings or surroundings: no server URL, a server that can't reach this machine's webhook port, a rejected simulation secret             |
+| `skip_not_exercised(...)` | `not exercised:`             | The server's responses gave the test nothing to check: an optional feature it doesn't use, such as discount `allocations[]`, or data they didn't carry |
+| (the framework)           | `capability not advertised:` | A capability the test requires, from `@requires_capability`, that the server doesn't advertise                                                         |
+| `skipTest(...)`           | anything else                | Another reason, such as a check on hold for a specification fix; the report counts it as "other reason"                                                |
+
+The runner's summary breaks the skips down by reason. In the coverage
+report, a rule whose tests all skipped or didn't run is "not run", and
+takes the first reason its tests give, in this order: no trigger declared,
+environment, other reason, not exercised, capability not advertised. A rule
+one test could run with a trigger is therefore "no trigger declared",
+whatever its other tests say. The report breaks the MUST and MUST NOT rules
+not run down by reason, and `matrix.json` gives each test's `category` and
+each not-run rule's `not_run_category`.
+
+"Not run" never counts as passed. The report's **upgrade list** is what a
+server should act on: the rules that failed, plus the rules not run because
+the fixtures declare no trigger for their tests. Rules not run for the other
+reasons, and rules the server's version doesn't state, are left out.
+
 ## Coverage report
 
 `--requirements_report=<dir>` makes the runner write a coverage report to a
@@ -246,9 +273,9 @@ The Markdown and HTML pages hold:
   NOT rules it states, removed rules included, and how many a test checks;
 - **Results,** after a run: for each capability, how many of its testable
   rules with a test passed, failed, weren't run or don't apply to the
-  server's version, then the rules that failed, the rules whose tests didn't
-  run and the rules the server's version doesn't state, with their tests'
-  messages;
+  server's version; the upgrade list; then the rules that failed, the rules
+  whose tests didn't run, broken down by reason, and the rules the server's
+  version doesn't state, with their tests' messages;
 - **A section per capability:** the rules a test checks fully, then those
   checked only in part, each test with its gap, with their results after a
   run; then the testable MUST and MUST NOT rules without a test, which is the

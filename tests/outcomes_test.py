@@ -23,16 +23,26 @@ import unittest
 
 from framework import outcomes
 from framework.outcomes import (
+  CAPABILITY,
+  ENVIRONMENT,
   ERROR,
   FAILED,
   MAX_DETAIL,
+  NO_TRIGGER,
   NOT_APPLICABLE,
   NOT_APPLICABLE_PREFIX,
+  NOT_EXERCISED,
   NOT_RUN,
+  OTHER,
   PASSED,
+  SKIP_CATEGORIES,
+  SKIP_LABELS,
+  SKIP_PREFIXES,
   SKIPPED,
   Outcome,
   RecordingResult,
+  skip_category,
+  skip_reason,
 )
 
 
@@ -105,7 +115,7 @@ class RecordingResultTest(unittest.TestCase):
         name(Example, "test_error"): Outcome(ERROR, "KeyError: 'totals'"),
         name(Example, "test_bare_error"): Outcome(ERROR, "RuntimeError"),
         name(Example, "test_skip"): Outcome(
-          SKIPPED, "no second discount code configured"
+          SKIPPED, "no second discount code configured", OTHER
         ),
         name(Example, "test_expected_failure"): Outcome(
           FAILED, "expected failure: known gap"
@@ -160,7 +170,7 @@ class RecordingResultTest(unittest.TestCase):
     )
     self.assertEqual(
       result.outcomes[name(Example, "test_skips_one")],
-      Outcome(SKIPPED, "no fixture"),
+      Outcome(SKIPPED, "no fixture", OTHER),
     )
 
   def test_class_fixtures(self):
@@ -193,10 +203,12 @@ class RecordingResultTest(unittest.TestCase):
       list(found.values()),
       [
         Outcome(
-          NOT_RUN, "setUpClass failed: ConnectionError: server unreachable"
+          NOT_RUN,
+          "setUpClass failed: ConnectionError: server unreachable",
+          OTHER,
         ),
-        Outcome(SKIPPED, "no order capability"),
-        Outcome(NOT_RUN, "no outcome was recorded"),
+        Outcome(SKIPPED, "no order capability", OTHER),
+        Outcome(NOT_RUN, "no outcome was recorded", OTHER),
       ],
     )
 
@@ -214,7 +226,10 @@ class RecordingResultTest(unittest.TestCase):
     self.assertEqual(
       list(found.items()),
       [
-        ("missing.Test.test", Outcome(NOT_RUN, "no outcome was recorded")),
+        (
+          "missing.Test.test",
+          Outcome(NOT_RUN, "no outcome was recorded", OTHER),
+        ),
         (name(Example, "test_pass"), Outcome(PASSED)),
       ],
     )
@@ -231,6 +246,93 @@ class RecordingResultTest(unittest.TestCase):
     self.assertEqual(len(detail), MAX_DETAIL)
     self.assertTrue(detail.endswith("…"))
     self.assertEqual(outcomes.STATUSES[-1], NOT_RUN)
+
+  def test_skip_categories(self):
+    """Test that a skip's category comes from the start of its reason."""
+
+    class Example(unittest.TestCase):
+      def test_no_trigger(self):
+        """Skip for a trigger the fixtures don't declare."""
+        self.skipTest(skip_reason(NO_TRIGGER, "a known customer"))
+
+      def test_environment(self):
+        """Skip for the run's surroundings."""
+        self.skipTest(skip_reason(ENVIRONMENT, "the server is remote"))
+
+      def test_not_exercised(self):
+        """Skip for a response that carried nothing to check."""
+        self.skipTest(skip_reason(NOT_EXERCISED, "no allocations[]"))
+
+      def test_capability(self):
+        """Skip for a capability the server doesn't advertise."""
+        self.skipTest(skip_reason(CAPABILITY, "'dev.ucp.shopping.cart'"))
+
+      def test_other(self):
+        """Skip with a reason that has no category."""
+        self.skipTest("not graded until the spec is self-consistent")
+
+    result = run(Example)
+    self.assertEqual(
+      {
+        method: result.outcomes[name(Example, method)]
+        for method in (
+          "test_no_trigger",
+          "test_environment",
+          "test_not_exercised",
+          "test_capability",
+          "test_other",
+        )
+      },
+      {
+        "test_no_trigger": Outcome(SKIPPED, "a known customer", NO_TRIGGER),
+        "test_environment": Outcome(
+          SKIPPED, "the server is remote", ENVIRONMENT
+        ),
+        "test_not_exercised": Outcome(
+          SKIPPED, "no allocations[]", NOT_EXERCISED
+        ),
+        "test_capability": Outcome(
+          SKIPPED, "'dev.ucp.shopping.cart'", CAPABILITY
+        ),
+        "test_other": Outcome(
+          SKIPPED, "not graded until the spec is self-consistent", OTHER
+        ),
+      },
+    )
+
+
+class SkipReasonTest(unittest.TestCase):
+  """Tests for building and reading categorised skip reasons."""
+
+  def test_round_trip(self):
+    """Test that every prefixed category is read back."""
+    for category in SKIP_PREFIXES:
+      with self.subTest(category=category):
+        reason = skip_reason(category, "what the test needed")
+        self.assertEqual(
+          skip_category(reason), (category, "what the test needed")
+        )
+
+  def test_wording(self):
+    """Test the prefixes, which the tests' skip messages start with."""
+    self.assertEqual(
+      skip_reason(NO_TRIGGER, "a known customer"),
+      "no trigger declared: a known customer",
+    )
+    self.assertEqual(
+      skip_reason(CAPABILITY, "'dev.ucp.shopping.cart' (min_version: any)"),
+      "capability not advertised: 'dev.ucp.shopping.cart' (min_version: any)",
+    )
+
+  def test_other(self):
+    """Test that a reason with no prefix is OTHER, kept whole."""
+    self.assertEqual(skip_category("no fixture"), (OTHER, "no fixture"))
+    self.assertEqual(skip_category(""), (OTHER, ""))
+
+  def test_every_category_has_a_label(self):
+    """Test that the categories, the labels and the prefixes agree."""
+    self.assertEqual(set(SKIP_LABELS), set(SKIP_CATEGORIES))
+    self.assertEqual(set(SKIP_PREFIXES), set(SKIP_CATEGORIES) - {OTHER})
 
 
 if __name__ == "__main__":

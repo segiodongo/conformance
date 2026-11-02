@@ -44,11 +44,18 @@ from framework.decorators import MARKER_KINDS
 from framework.discovery import UcpProfile
 from framework.marker_check import LoadedTest, in_scope
 from framework.outcomes import (
+  CAPABILITY,
+  ENVIRONMENT,
   ERROR,
   FAILED,
+  NO_TRIGGER,
   NOT_APPLICABLE,
+  NOT_EXERCISED,
   NOT_RUN,
+  OTHER,
   PASSED,
+  SKIP_CATEGORIES,
+  SKIP_LABELS,
   SKIPPED,
   STATUSES,
   Outcome,
@@ -68,7 +75,9 @@ from framework.versions import rule_applies
 # (`versions`) and each rule's `since` and `versions`.
 # 3: the `not_applicable` test outcome and rule result, for rules the version
 # the server implements doesn't state.
-FORMAT_VERSION = 3
+# 4: each skipped test's `category`, each not-run rule's `not_run_category`,
+# the `not_run_by_category` counts and the `upgrade_list`.
+FORMAT_VERSION = 4
 JSON_FILE = "matrix.json"
 MARKDOWN_FILE = "matrix.md"
 HTML_FILE = "matrix.html"
@@ -99,6 +108,19 @@ RESULT_LISTS = (
   ("Rules that failed", FAILED),
   ("Rules whose tests didn't run", NOT_RUN),
   ("Rules the version the server implements doesn't state", NOT_APPLICABLE),
+)
+# Why a rule wasn't run, when its tests give different reasons: the first of
+# these that any of them gives. A trigger the merchant can declare comes
+# first, then the run's environment, then a reason without a category, which
+# wants a look; a server that didn't exercise the rule or doesn't advertise
+# a capability leaves nothing to do.
+NOT_RUN_PRECEDENCE = (NO_TRIGGER, ENVIRONMENT, OTHER, NOT_EXERCISED, CAPABILITY)
+# The rules a server should act on: those that failed, and those not run
+# because the fixtures declare no trigger for them.
+UPGRADE_TITLE = "Upgrade list"
+UPGRADE_INTRO = (
+  "The rules that failed, and the rules not run because the fixtures "
+  "declare no trigger for their tests."
 )
 # How well a rule is covered: some test checks it fully; its tests all check
 # it only in part (`partly`); or no test cites it.
@@ -380,6 +402,33 @@ class Report:
       return PASSED
     return NOT_RUN
 
+  def not_run_category(self, rule_id: str) -> str | None:
+    """Return why a rule wasn't run, from its tests' skip categories.
+
+    The first of `NOT_RUN_PRECEDENCE` that any of the rule's tests gives: a
+    rule one test could run with a trigger is `NO_TRIGGER`, whatever the
+    others say.
+
+    Args:
+      rule_id: The rule's ID.
+
+    Returns:
+      One of `SKIP_CATEGORIES`, or None when the rule's result isn't
+      `NOT_RUN`.
+
+    """
+    if self.result(rule_id) != NOT_RUN:
+      return None
+    categories = {
+      self.outcomes[test_id].category or OTHER
+      for test_id in self.cited_by.get(rule_id, ())
+      if self.outcomes[test_id].status in (SKIPPED, NOT_RUN)
+    }
+    return next(
+      (category for category in NOT_RUN_PRECEDENCE if category in categories),
+      OTHER,
+    )
+
   def test_counts(self) -> dict[str, int] | None:
     """Return how many tests had each outcome; None if they weren't run."""
     if self.outcomes is None:
@@ -467,7 +516,7 @@ def build(
   removed = tuple(rule for rule in catalog.removed.values() if rule.is_rule)
   inapplicable: frozenset[str] = frozenset()
   if outcomes is not None:
-    missing = Outcome(NOT_RUN, "no outcome was recorded")
+    missing = Outcome(NOT_RUN, "no outcome was recorded", OTHER)
     outcomes = MappingProxyType(
       {row.test_id: outcomes.get(row.test_id, missing) for row in rows}
     )
@@ -554,6 +603,68 @@ def results(report: Report, rules: Iterable[Rule]) -> dict[str, int] | None:
   return counts
 
 
+def not_run_by_category(
+  report: Report, rules: Iterable[Rule]
+) -> dict[str, dict[str, int]] | None:
+  """Count why the testable rules with a test weren't run, among some rules.
+
+  Args:
+    report: The report.
+    rules: The rules to look at; only the testable ones with a test whose
+      result is `NOT_RUN` count.
+
+  Returns:
+    For `"all"` of them and for the `"must"` ones, how many weren't run for
+    each of `SKIP_CATEGORIES`; None when the tests weren't run.
+
+  """
+  if report.outcomes is None:
+    return None
+  counts = {
+    "all": dict.fromkeys(SKIP_CATEGORIES, 0),
+    "must": dict.fromkeys(SKIP_CATEGORIES, 0),
+  }
+  for rule in rules:
+    if not rule.testable or rule.id not in report.cited_by:
+      continue
+    category = report.not_run_category(rule.id)
+    if category is None:
+      continue
+    counts["all"][category] += 1
+    if rule.level in MUST_LEVELS:
+      counts["must"][category] += 1
+  return counts
+
+
+def upgrade_list(report: Report) -> list[Rule]:
+  """Return the rules the server should act on, in the catalog's order.
+
+  The testable rules with a test that failed, and those not run because the
+  fixtures declare no trigger for their tests: declaring one makes the test
+  run. Rules not run for other reasons, and rules the server's version
+  doesn't state, are left out.
+
+  Args:
+    report: The report, after a run.
+
+  Returns:
+    The rules; none when the tests weren't run.
+
+  """
+  if report.outcomes is None:
+    return []
+  return [
+    rule
+    for rule in report.rules
+    if rule.testable
+    and rule.id in report.cited_by
+    and (
+      report.result(rule.id) == FAILED
+      or report.not_run_category(rule.id) == NO_TRIGGER
+    )
+  ]
+
+
 def to_json(report: Report) -> dict[str, Any]:
   """Return the report as the object written to `matrix.json`.
 
@@ -574,6 +685,9 @@ def to_json(report: Report) -> dict[str, Any]:
         "extends": list(row.capability.extends),
         **_tally_json(row.tally),
         "results": results(report, _rules_of(report, row.capability.name)),
+        "not_run_by_category": not_run_by_category(
+          report, _rules_of(report, row.capability.name)
+        ),
       }
       for row in report.capabilities
     ],
@@ -598,6 +712,9 @@ def to_json(report: Report) -> dict[str, Any]:
           if (gap := report.gap(rule.id, test_id)) is not None
         },
         "result": report.result(rule.id),
+        "not_run_category": report.not_run_category(rule.id)
+        if report.outcomes is not None
+        else None,
       }
       for rule in report.rules
     ],
@@ -825,6 +942,16 @@ def summary(report: Report, paths: Sequence[Path]) -> str:
       + (f", {_not_applicable(not_applicable)}" if not_applicable else "")
       + "\n"
     )
+    by_category = not_run_by_category(report, report.rules)
+    if by_category and counts["must_not_run"]:
+      why = _why_not_run(by_category["must"], "MUST and MUST NOT ")
+      text += f"  {why[0].lower()}{why[1:].rstrip('.')}\n"
+    upgrades = upgrade_list(report)
+    must = sum(rule.level in MUST_LEVELS for rule in upgrades)
+    text += (
+      f"  {UPGRADE_TITLE.lower()}: {len(upgrades)} rules ({must} MUST or MUST "
+      "NOT) failed or lack a trigger\n"
+    )
   return text
 
 
@@ -1043,15 +1170,28 @@ def _run_json(report: Report) -> dict[str, Any] | None:
     "target": report.target,
     "tests": report.test_counts(),
     "results": results(report, report.rules),
+    "not_run_by_category": not_run_by_category(report, report.rules),
+    "upgrade_list": [rule.id for rule in upgrade_list(report)],
   }
 
 
-def _outcome_json(report: Report, test_id: str) -> dict[str, str] | None:
-  """Return a test's outcome as JSON, or None without a run."""
+def _outcome_json(report: Report, test_id: str) -> dict[str, Any] | None:
+  """Return a test's outcome as JSON, or None without a run.
+
+  A skipped test, or one that didn't run, has a category; the others have
+  null.
+  """
   if report.outcomes is None:
     return None
   outcome = report.outcomes[test_id]
-  return {"status": outcome.status, "detail": outcome.detail}
+  category = None
+  if outcome.status in (SKIPPED, NOT_RUN):
+    category = outcome.category or OTHER
+  return {
+    "status": outcome.status,
+    "detail": outcome.detail,
+    "category": category,
+  }
 
 
 def _rules_of(report: Report, capability: str) -> list[Rule]:
@@ -1142,12 +1282,16 @@ def _results_headline(report: Report) -> str:
   counts = results(report, report.rules) or dict.fromkeys(
     (*RULE_RESULTS, *(f"must_{result}" for result in RULE_RESULTS)), 0
   )
-  return (
+  text = (
     f"Of the {_must_applicable(report.total, counts)} testable MUST and MUST "
     f"NOT rules with a test, {counts['must_passed']} passed, "
     f"{counts['must_failed']} failed and {_not_run(counts['must_not_run'])}."
     + _not_applicable_sentence(counts["must_not_applicable"])
   )
+  by_category = not_run_by_category(report, report.rules)
+  if by_category and counts["must_not_run"]:
+    text += f" {_why_not_run(by_category['must'], 'MUST and MUST NOT ')}"
+  return text
 
 
 def _outcome_counts(report: Report) -> str:
@@ -1164,6 +1308,40 @@ def _outcome_counts(report: Report) -> str:
 def _not_run(count: int) -> str:
   """Return how many rules weren't run, as a phrase."""
   return f"{count} wasn't run" if count == 1 else f"{count} weren't run"
+
+
+def _why_not_run(counts: Mapping[str, int], levels: str = "") -> str:
+  """Return the sentence that breaks down why rules weren't run.
+
+  Args:
+    counts: How many rules weren't run for each of `SKIP_CATEGORIES`.
+    levels: What the rules are, such as "MUST and MUST NOT ", or "" for
+      rules of every level.
+
+  Returns:
+    The sentence, such as "The 3 MUST and MUST NOT rules that weren't run,
+    by reason: no trigger declared 2, environment 1."; "" when none.
+
+  """
+  total = sum(counts.values())
+  if not total:
+    return ""
+  parts = ", ".join(
+    f"{SKIP_LABELS[category]} {counts[category]}"
+    for category in SKIP_CATEGORIES
+    if counts[category]
+  )
+  rules = f"{levels}rule" if total == 1 else f"{levels}rules"
+  verb = "wasn't" if total == 1 else "weren't"
+  return f"The {total} {rules} that {verb} run, by reason: {parts}."
+
+
+def _outcome_label(outcome: Outcome) -> str:
+  """Return an outcome's label, with a skip's category in brackets."""
+  label = LABELS[outcome.status]
+  if outcome.status == SKIPPED and outcome.category not in ("", OTHER):
+    return f"{label} ({SKIP_LABELS[outcome.category]})"
+  return label
 
 
 _APPLIES_TAIL = "apply to the version the server implements"
@@ -1299,6 +1477,19 @@ def _notes(
         "applicable when the version the server implements states none of "
         "the rules it cites, and a rule is not applicable when that version "
         "doesn't state it: neither counts for or against the server.",
+      )
+    )
+    notes.append(
+      (
+        "Skips",
+        "A skipped test says why: no trigger declared (the fixtures lack "
+        "what it needs), environment (the run's own settings or "
+        "surroundings), not exercised (the server's responses gave it "
+        "nothing to check), capability not advertised, or another reason. A "
+        "rule that wasn't run takes the first of those its tests give, in "
+        f"that order. The {UPGRADE_TITLE.lower()} is the rules that failed "
+        "plus those not run for want of a trigger: the ones a server can act "
+        "on.",
       )
     )
   shared = sum(len(rule.capabilities) > 1 for rule in report.rules)
@@ -1505,8 +1696,10 @@ def _md_result(status: str) -> str:
 
 
 def _md_outcome(outcome: Outcome) -> str:
-  """Return a test's outcome, with its detail."""
+  """Return a test's outcome, with its category and detail."""
   result = _md_result(outcome.status)
+  if outcome.status == SKIPPED:
+    result = _outcome_label(outcome)
   return f"{result}: {_md_plain(outcome.detail)}" if outcome.detail else result
 
 
@@ -1548,9 +1741,15 @@ def _md_results(report: Report) -> list[str]:
       results(report, report.rules),
     )
   )
+  upgrades = upgrade_list(report)
+  lines += ["", f"### {UPGRADE_TITLE}: {len(upgrades)}", "", UPGRADE_INTRO, ""]
+  lines += _md_rules(report, upgrades, "outcomes")
+  by_category = not_run_by_category(report, report.rules) or {}
   for title, result in RESULT_LISTS:
     rules = _rules_with_result(report, result)
     lines += ["", f"### {title}: {len(rules)}", ""]
+    if result == NOT_RUN and rules:
+      lines += [_why_not_run(by_category["all"]), ""]
     lines += _md_rules(report, rules, "outcomes")
   return lines
 
@@ -1803,8 +2002,16 @@ def _html_result(status: str) -> str:
 
 
 def _html_outcome(outcome: Outcome, detail: bool = True) -> str:
-  """Return a test's outcome, with its detail unless asked not to."""
-  result = _html_result(outcome.status)
+  """Return a test's outcome, with its detail unless asked not to.
+
+  A skipped test's category follows its label.
+  """
+  label = _outcome_label(outcome) if outcome.status == SKIPPED else None
+  result = (
+    f'<span class="r-{outcome.status}">{html.escape(label)}</span>'
+    if label
+    else _html_result(outcome.status)
+  )
   if detail and outcome.detail:
     return f"{result}: {html.escape(outcome.detail)}"
   return result
@@ -1866,17 +2073,22 @@ def _html_results(report: Report) -> str:
   table = _html_table(header, rows).replace(
     "</table>", f'<tr class="total">{total}</tr>\n</table>'
   )
+  upgrades = upgrade_list(report)
   parts = [
     f"<p><strong>{_results_headline(report)}</strong> "
     f"{_outcome_counts(report)}</p>",
     table,
+    f"<h3>{UPGRADE_TITLE}: {len(upgrades)}</h3>",
+    f'<p class="note">{UPGRADE_INTRO}</p>',
+    _html_rules(report, upgrades, "outcomes"),
   ]
+  by_category = not_run_by_category(report, report.rules) or {}
   for title, result in RESULT_LISTS:
     rules = _rules_with_result(report, result)
-    parts += [
-      f"<h3>{title}: {len(rules)}</h3>",
-      _html_rules(report, rules, "outcomes"),
-    ]
+    parts.append(f"<h3>{title}: {len(rules)}</h3>")
+    if result == NOT_RUN and rules:
+      parts.append(f'<p class="note">{_why_not_run(by_category["all"])}</p>')
+    parts.append(_html_rules(report, rules, "outcomes"))
   return "\n".join(parts)
 
 

@@ -43,6 +43,7 @@ from framework.outcomes import (
   SKIPPED,
   Outcome,
 )
+from framework.outcomes import OTHER as OTHER_REASON
 from framework.requirements import (
   DEFAULT_CATALOG_DIR,
   INDEX_FILE,
@@ -900,7 +901,7 @@ class ResultsTest(unittest.TestCase):
     self.assertNotIn("core.protocol_test.ExampleTest.test_core", outcomes)
     self.assertEqual(
       outcomes[full_id("test_f")],
-      Outcome(NOT_RUN, "no outcome was recorded"),
+      Outcome(NOT_RUN, "no outcome was recorded", OTHER_REASON),
     )
     self.assertEqual(
       self.report.test_counts(),
@@ -966,6 +967,36 @@ class ResultsTest(unittest.TestCase):
           "must_not_run": 1,
           "must_not_applicable": 0,
         },
+        "not_run_by_category": {
+          "all": {
+            "no_trigger": 0,
+            "environment": 0,
+            "not_exercised": 0,
+            "capability": 0,
+            "other": 1,
+          },
+          "must": {
+            "no_trigger": 0,
+            "environment": 0,
+            "not_exercised": 0,
+            "capability": 0,
+            "other": 1,
+          },
+        },
+        "upgrade_list": [
+          "REQ-SHOPPING-CATALOG-0001",
+          "REQ-SHOPPING-CHECKOUT-0001",
+        ],
+      },
+    )
+    self.assertEqual(
+      data["capabilities"][0]["not_run_by_category"]["must"],
+      {
+        "no_trigger": 0,
+        "environment": 0,
+        "not_exercised": 0,
+        "capability": 0,
+        "other": 1,
       },
     )
     self.assertEqual(
@@ -987,8 +1018,25 @@ class ResultsTest(unittest.TestCase):
     tests = {entry["id"]: entry["outcome"] for entry in data["tests"]}
     self.assertEqual(
       tests[full_id("test_b")],
-      {"status": "failed", "detail": "total 5 | expected *6* <b>"},
+      {
+        "status": "failed",
+        "detail": "total 5 | expected *6* <b>",
+        "category": None,
+      },
     )
+    self.assertEqual(
+      tests[full_id("test_g")],
+      {
+        "status": "skipped",
+        "detail": "no cart capability",
+        "category": "other",
+      },
+    )
+    not_run = {
+      entry["id"]: entry["not_run_category"] for entry in data["rules"]
+    }
+    self.assertEqual(not_run["REQ-SHOPPING-CART-0001"], "other")
+    self.assertIsNone(not_run["REQ-SHOPPING-CHECKOUT-0001"])
 
   def test_markdown(self):
     """Test the results in the Markdown, with failure messages escaped."""
@@ -996,8 +1044,9 @@ class ResultsTest(unittest.TestCase):
     for expected in (
       "the shopping tests' markers and a run against `http://localhost:8182`.",
       "**Of the 4 testable MUST and MUST NOT rules with a test, 1 passed, 2 "
-      "failed and 1 wasn't run.** Test outcomes: 3 passed, 1 failed, 1 "
-      "error, 2 skipped, 0 not applicable, 1 not run.",
+      "failed and 1 wasn't run. The 1 MUST and MUST NOT rule that wasn't "
+      "run, by reason: other reason 1.** Test outcomes: 3 passed, 1 failed, "
+      "1 error, 2 skipped, 0 not applicable, 1 not run.",
       "## Results",
       "| cart | 1 | 0 | 0 | 1 | 0 | 1 | 0 | 0 | 1 | 0 |",
       "| checkout | 3 | 2 | 1 | 0 | 0 | 2 | 1 | 1 | 0 | 0 |",
@@ -1200,11 +1249,193 @@ class NotApplicableTest(unittest.TestCase):
   def test_json(self):
     """Test the result and the counts in matrix.json."""
     data = report.to_json(self.report)
-    self.assertEqual(data["format"], 3)
+    self.assertEqual(data["format"], 4)
     rules = {entry["id"]: entry["result"] for entry in data["rules"]}
     self.assertEqual(rules["REQ-SHOPPING-CHECKOUT-0002"], "not_applicable")
     self.assertEqual(data["run"]["tests"]["not_applicable"], 1)
     self.assertEqual(data["run"]["results"]["must_not_applicable"], 1)
+
+
+# A run where every rule but one wasn't run, each for a different reason.
+# CHECKOUT-0001's two tests give two reasons; a trigger wins. CHECKOUT-0002
+# has one test skipped for the environment and one that never started.
+NOT_RUN_TESTS = (
+  loaded("test_t1", cites("REQ-SHOPPING-CHECKOUT-0001")),
+  loaded("test_t2", cites("REQ-SHOPPING-CHECKOUT-0001")),
+  loaded("test_e", cites("REQ-SHOPPING-CHECKOUT-0002")),
+  loaded("test_m", cites("REQ-SHOPPING-CHECKOUT-0002")),
+  loaded("test_x", cites("REQ-SHOPPING-CHECKOUT-0003")),
+  loaded("test_c", cites("REQ-SHOPPING-CART-0001")),
+  loaded("test_o", cites("REQ-SHOPPING-OTHER-0001")),
+  loaded("test_f", cites("REQ-SHOPPING-CATALOG-0001")),
+)
+NOT_RUN_OUTCOMES = {
+  full_id("test_t1"): Outcome(SKIPPED, "a known customer", "no_trigger"),
+  full_id("test_t2"): Outcome(
+    SKIPPED, "'dev.ucp.shopping.cart' (min_version: any)", "capability"
+  ),
+  full_id("test_e"): Outcome(
+    SKIPPED, "the simulation secret was rejected", "environment"
+  ),
+  full_id("test_x"): Outcome(
+    SKIPPED, "the server emits no discount allocations[]", "not_exercised"
+  ),
+  full_id("test_c"): Outcome(
+    SKIPPED, "'dev.ucp.shopping.cart' (min_version: any)", "capability"
+  ),
+  full_id("test_o"): Outcome(SKIPPED, "not graded until the spec is fixed"),
+  full_id("test_f"): Outcome(FAILED, "missing header"),
+}
+
+
+class NotRunTest(unittest.TestCase):
+  """Tests for why rules weren't run, and for the upgrade list."""
+
+  def setUp(self):
+    """Build the report for the run."""
+    super().setUp()
+    self.report = report.build(CATALOG, NOT_RUN_TESTS, NOT_RUN_OUTCOMES, TARGET)
+
+  def test_rule_categories(self):
+    """Test each not-run rule's reason, with a trigger winning."""
+    self.assertEqual(
+      {
+        rule.id: self.report.not_run_category(rule.id)
+        for rule in self.report.rules
+      },
+      {
+        "REQ-SHOPPING-CART-0001": "capability",
+        "REQ-SHOPPING-CATALOG-0001": None,
+        "REQ-SHOPPING-CHECKOUT-0001": "no_trigger",
+        "REQ-SHOPPING-CHECKOUT-0002": "environment",
+        "REQ-SHOPPING-CHECKOUT-0003": "not_exercised",
+        "REQ-SHOPPING-CHECKOUT-0004": None,
+        "REQ-SHOPPING-OTHER-0001": "other",
+      },
+    )
+    # The test that never started reads as not run for another reason.
+    self.assertEqual(
+      self.report.outcomes[full_id("test_m")],
+      Outcome(NOT_RUN, "no outcome was recorded", OTHER_REASON),
+    )
+    dry_run = report.build(CATALOG, NOT_RUN_TESTS)
+    self.assertIsNone(dry_run.not_run_category("REQ-SHOPPING-CHECKOUT-0001"))
+    self.assertIsNone(report.not_run_by_category(dry_run, dry_run.rules))
+    self.assertEqual(report.upgrade_list(dry_run), [])
+
+  def test_counts_and_upgrade_list(self):
+    """Test the breakdown by reason and the rules to act on."""
+    self.assertEqual(
+      report.not_run_by_category(self.report, self.report.rules),
+      {
+        "all": {
+          "no_trigger": 1,
+          "environment": 1,
+          "not_exercised": 1,
+          "capability": 1,
+          "other": 1,
+        },
+        "must": {
+          "no_trigger": 1,
+          "environment": 1,
+          "not_exercised": 0,
+          "capability": 1,
+          "other": 0,
+        },
+      },
+    )
+    self.assertEqual(
+      [rule.id for rule in report.upgrade_list(self.report)],
+      ["REQ-SHOPPING-CATALOG-0001", "REQ-SHOPPING-CHECKOUT-0001"],
+    )
+
+  def test_summary(self):
+    """Test the console lines with the breakdown and the upgrade list."""
+    text = report.summary(self.report, [])
+    self.assertIn(
+      "  results against http://localhost:8182: 0 of the 4 testable MUST and "
+      "MUST NOT rules with a test passed, 1 failed, 3 weren't run\n"
+      "  the 3 MUST and MUST NOT rules that weren't run, by reason: no "
+      "trigger declared 1, environment 1, capability not advertised 1\n"
+      "  upgrade list: 2 rules (2 MUST or MUST NOT) failed or lack a trigger\n",
+      text,
+    )
+
+  def test_markdown(self):
+    """Test the headline, the upgrade list and the not-run breakdown."""
+    text = report.to_markdown(self.report)
+    for expected in (
+      "**Of the 4 testable MUST and MUST NOT rules with a test, 0 passed, 1 "
+      "failed and 3 weren't run. The 3 MUST and MUST NOT rules that weren't "
+      "run, by reason: no trigger declared 1, environment 1, capability not "
+      "advertised 1.**",
+      "### Upgrade list: 2\n\nThe rules that failed, and the rules not run "
+      "because the fixtures declare no trigger for their tests.\n\n"
+      "| Rule | Level | Text | Tests | Source |",
+      "### Rules whose tests didn't run: 5\n\nThe 5 rules that weren't run, "
+      "by reason: no trigger declared 1, environment 1, not exercised 1, "
+      "capability not advertised 1, other reason 1.\n",
+      "`ExampleTest.test_t1` skipped (no trigger declared): a known customer"
+      "<br>`ExampleTest.test_t2` skipped (capability not advertised): "
+      "'dev.ucp.shopping.cart' (min\\_version: any)",
+      "`ExampleTest.test_e` skipped (environment): the simulation secret was "
+      "rejected<br>`ExampleTest.test_m` not run: no outcome was recorded",
+      "`ExampleTest.test_o` skipped: not graded until the spec is fixed",
+      "- **Skips:** A skipped test says why: no trigger declared",
+    ):
+      self.assertIn(expected, text)
+    # The upgrade list holds the failed rule and the one lacking a trigger.
+    upgrade = text.split("### Upgrade list: 2")[1].split("### Rules that")[0]
+    self.assertIn("| CATALOG-0001 |", upgrade)
+    self.assertIn("| CHECKOUT-0001 |", upgrade)
+    self.assertNotIn("| CART-0001 |", upgrade)
+
+  def test_html(self):
+    """Test the labels and sections in the page."""
+    page = report.to_html(self.report)
+    for expected in (
+      '<span class="r-skipped">skipped (no trigger declared)</span>: a known '
+      "customer",
+      '<span class="r-skipped">skipped</span>: not graded until the spec is '
+      "fixed",
+      "<h3>Upgrade list: 2</h3>",
+      '<p class="note">The rules that failed, and the rules not run because '
+      "the fixtures declare no trigger for their tests.</p>",
+      '<p class="note">The 5 rules that weren\'t run, by reason: no trigger '
+      "declared 1, environment 1, not exercised 1, capability not advertised "
+      "1, other reason 1.</p>",
+    ):
+      self.assertIn(expected, page)
+    balance = TagBalance()
+    balance.feed(page)
+    self.assertEqual((balance.open, balance.mismatched), ([], []))
+
+  def test_json(self):
+    """Test the categories, the breakdown and the list in matrix.json."""
+    data = report.to_json(self.report)
+    self.assertEqual(
+      data["run"]["upgrade_list"],
+      ["REQ-SHOPPING-CATALOG-0001", "REQ-SHOPPING-CHECKOUT-0001"],
+    )
+    self.assertEqual(
+      data["run"]["not_run_by_category"]["must"],
+      {
+        "no_trigger": 1,
+        "environment": 1,
+        "not_exercised": 0,
+        "capability": 1,
+        "other": 0,
+      },
+    )
+    rules = {entry["id"]: entry["not_run_category"] for entry in data["rules"]}
+    self.assertEqual(rules["REQ-SHOPPING-CHECKOUT-0001"], "no_trigger")
+    self.assertIsNone(rules["REQ-SHOPPING-CATALOG-0001"])
+    tests = {
+      entry["id"]: entry["outcome"]["category"] for entry in data["tests"]
+    }
+    self.assertEqual(tests[full_id("test_t1")], "no_trigger")
+    self.assertEqual(tests[full_id("test_m")], "other")
+    self.assertIsNone(tests[full_id("test_f")])
 
 
 class RepositoryReportTest(unittest.TestCase):
@@ -1359,12 +1590,27 @@ class RunnerTest(unittest.TestCase):
     outcomes = {entry["id"]: entry["outcome"] for entry in data["tests"]}
     self.assertEqual(
       outcomes["shopping.fake_test.FakeTest.test_fail"],
-      {"status": "failed", "detail": "total was 5, expected 6"},
+      {
+        "status": "failed",
+        "detail": "total was 5, expected 6",
+        "category": None,
+      },
     )
     self.assertEqual(
       outcomes["shopping.fake_test.FakeTest.test_skip"],
-      {"status": "skipped", "detail": "no second discount code configured"},
+      {
+        "status": "skipped",
+        "detail": "no second discount code configured",
+        "category": "other",
+      },
     )
+    # The failed rule is on the upgrade list; the one skipped without a
+    # category isn't.
+    self.assertEqual(
+      data["run"]["upgrade_list"], ["REQ-SHOPPING-CHECKOUT-0011"]
+    )
+    self.assertIn("Skipped: 1\n  by reason: other reason 1\n", output)
+    self.assertIn("upgrade list: 1 rules (1 MUST or MUST NOT)", output)
 
   def test_unwritable_directory_stops_a_run_before_the_tests(self):
     """Test that a run checks the report can be written before it starts."""

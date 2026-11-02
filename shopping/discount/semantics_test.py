@@ -171,7 +171,7 @@ class DiscountSemanticsTest(ShoppingIntegrationTestBase):
         f"{a.get('amount')})",
       )
     if checked == 0:
-      self.skipTest("server does not emit discount allocations[]")
+      self.skip_not_exercised("the server emits no discount allocations[]")
 
   # ── DSC-027: client-supplied applied[] must not change pricing ──────────
   @no_rule(
@@ -246,7 +246,7 @@ class DiscountSemanticsTest(ShoppingIntegrationTestBase):
     """Submitting discounts.codes replaces any previously submitted codes."""
     second = self.fixture_ctx.get_test_discount_code_2()
     if not second:
-      self.skipTest("no valid_discount_code_2 configured for the replace test")
+      self.skip_no_trigger("a second valid discount code")
     base, _ = self._new_checkout()
     applied_raw = self._apply_codes(base, [self._code])
     applied_obj = checkout.Checkout(**applied_raw)

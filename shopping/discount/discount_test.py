@@ -142,7 +142,7 @@ class DiscountTest(ShoppingIntegrationTestBase):
     valid_code_1 = self.fixture_ctx.get_test_discount_code()
     valid_code_2 = self.fixture_ctx.get_test_discount_code_2()
     if not valid_code_2:
-      self.skipTest("Second valid discount code not configured in fixtures.")
+      self.skip_no_trigger("a second valid discount code")
 
     expected_price = self.fixture_ctx.get_test_price()
     percentage1 = self.fixture_ctx.get_expected_discount_percentage()
@@ -247,7 +247,7 @@ class DiscountTest(ShoppingIntegrationTestBase):
     """
     fixed_code = self.fixture_ctx.get_test_fixed_discount_code()
     if not fixed_code:
-      self.skipTest("Fixed discount code not configured in fixtures.")
+      self.skip_no_trigger("a fixed-amount discount code")
 
     expected_price = self.fixture_ctx.get_test_price()
     expected_discount = self.fixture_ctx.get_expected_fixed_discount_reduction()

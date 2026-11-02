@@ -227,9 +227,8 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
     """
     dynamic = self.fixture_ctx.get_dynamic_fulfillment()
     if dynamic is None:
-      self.skipTest(
-        "No dynamic fulfillment cases configured in fixtures "
-        "(test_fixtures.dynamic_fulfillment)."
+      self.skip_no_trigger(
+        "dynamic fulfillment cases (test_fixtures.dynamic_fulfillment)"
       )
 
     response_json = self.create_checkout_session(select_fulfillment=False)
@@ -348,9 +347,7 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
     """Test that a known customer with no stored address gets no injection."""
     customer = self.fixture_ctx.get_known_customer_without_address()
     if not customer:
-      self.skipTest(
-        "No known customer without stored addresses configured in fixtures."
-      )
+      self.skip_no_trigger("a known customer without stored addresses")
     response_json = self.create_checkout_session(
       buyer=self._build_buyer_payload(customer),
       select_fulfillment=False,
@@ -383,9 +380,7 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
     """Test that a known customer's stored addresses get injected."""
     customer = self.fixture_ctx.get_known_customer()
     if not customer or not customer.get("addresses"):
-      self.skipTest(
-        "No known customer with stored addresses configured in fixtures."
-      )
+      self.skip_no_trigger("a known customer with stored addresses")
     stored_addresses = customer["addresses"]
 
     response_json = self.create_checkout_session(
@@ -427,8 +422,8 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
     customer = self.fixture_ctx.get_known_customer()
     stored_addresses = customer.get("addresses", []) if customer else []
     if len(stored_addresses) < 2:
-      self.skipTest(
-        "Known customer with at least two stored addresses not configured."
+      self.skip_no_trigger(
+        "a known customer with at least two stored addresses"
       )
 
     response_json = self.create_checkout_session(
@@ -513,7 +508,7 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
     """Test that providing a new address works for a known customer."""
     customer = self.fixture_ctx.get_known_customer()
     if not customer:
-      self.skipTest("No known customer configured in fixtures.")
+      self.skip_no_trigger("a known customer")
 
     response_json = self.create_checkout_session(
       buyer=self._build_buyer_payload(customer)
@@ -536,7 +531,10 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
       self._address_matches(new_address, stored)
       for stored in customer.get("addresses", [])
     ):
-      self.skipTest("Configured test destination duplicates a stored address.")
+      self.skip_no_trigger(
+        "a test destination that is not one of the known customer's stored "
+        "addresses"
+      )
 
     fulfillment_payload = {
       "methods": [
@@ -600,9 +598,7 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
     """
     customer = self.fixture_ctx.get_known_customer()
     if not customer or not customer.get("addresses"):
-      self.skipTest(
-        "No known customer with stored addresses configured in fixtures."
-      )
+      self.skip_no_trigger("a known customer with stored addresses")
     stored_address = customer["addresses"][0]
 
     response_json = self.create_checkout_session(
@@ -678,9 +674,7 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
     """Test that free shipping is offered above the configured threshold."""
     threshold = self.fixture_ctx.get_free_shipping_min_subtotal()
     if threshold is None:
-      self.skipTest(
-        "No free-shipping subtotal threshold configured in fixtures."
-      )
+      self.skip_no_trigger("a free-shipping subtotal threshold")
 
     # Order enough items to push the subtotal strictly above the threshold.
     price = self.fixture_ctx.get_test_price()
@@ -730,9 +724,7 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
     """Test that free shipping is offered for eligible items."""
     eligible_sku = self.fixture_ctx.get_free_shipping_item_sku()
     if eligible_sku is None:
-      self.skipTest(
-        "No free-shipping-eligible item SKU configured in fixtures."
-      )
+      self.skip_no_trigger("a free-shipping-eligible item SKU")
 
     response_json = self.create_checkout_session(item_id=eligible_sku)
     checkout_obj = checkout.Checkout(**response_json)
