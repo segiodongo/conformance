@@ -225,11 +225,7 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
     When the fulfillment address is updated to the international destination,
     then the option id declared for it in the fixtures is available.
     """
-    dynamic = self.fixture_ctx.get_dynamic_fulfillment()
-    if dynamic is None:
-      self.skip_no_trigger(
-        "dynamic fulfillment cases (test_fixtures.dynamic_fulfillment)"
-      )
+    dynamic = self.require_trigger("dynamic_fulfillment")
 
     response_json = self.create_checkout_session(select_fulfillment=False)
     checkout_obj = checkout.Checkout(**response_json)
@@ -345,9 +341,7 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
   )
   def test_known_customer_no_address(self) -> None:
     """Test that a known customer with no stored address gets no injection."""
-    customer = self.fixture_ctx.get_known_customer_without_address()
-    if not customer:
-      self.skip_no_trigger("a known customer without stored addresses")
+    customer = self.require_trigger("known_customer_without_address")
     response_json = self.create_checkout_session(
       buyer=self._build_buyer_payload(customer),
       select_fulfillment=False,
@@ -378,9 +372,9 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
   )
   def test_known_customer_one_address(self) -> None:
     """Test that a known customer's stored addresses get injected."""
-    customer = self.fixture_ctx.get_known_customer()
-    if not customer or not customer.get("addresses"):
-      self.skip_no_trigger("a known customer with stored addresses")
+    customer = self.require_trigger("known_customer")
+    if not customer.get("addresses"):
+      self.skip_no_trigger("known_customer with stored addresses")
     stored_addresses = customer["addresses"]
 
     response_json = self.create_checkout_session(
@@ -419,12 +413,10 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
   )
   def test_known_customer_multiple_addresses_selection(self) -> None:
     """Test selecting between multiple addresses for a known customer."""
-    customer = self.fixture_ctx.get_known_customer()
-    stored_addresses = customer.get("addresses", []) if customer else []
+    customer = self.require_trigger("known_customer")
+    stored_addresses = customer.get("addresses", [])
     if len(stored_addresses) < 2:
-      self.skip_no_trigger(
-        "a known customer with at least two stored addresses"
-      )
+      self.skip_no_trigger("known_customer with at least two stored addresses")
 
     response_json = self.create_checkout_session(
       buyer=self._build_buyer_payload(customer),
@@ -506,9 +498,7 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
   )
   def test_known_customer_new_address(self) -> None:
     """Test that providing a new address works for a known customer."""
-    customer = self.fixture_ctx.get_known_customer()
-    if not customer:
-      self.skip_no_trigger("a known customer")
+    customer = self.require_trigger("known_customer")
 
     response_json = self.create_checkout_session(
       buyer=self._build_buyer_payload(customer)
@@ -532,8 +522,8 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
       for stored in customer.get("addresses", [])
     ):
       self.skip_no_trigger(
-        "a test destination that is not one of the known customer's stored "
-        "addresses"
+        "a shipping_locations.domestic_destination that is not one of "
+        "known_customer's stored addresses"
       )
 
     fulfillment_payload = {
@@ -596,9 +586,9 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
     When an update provides an address matching an existing one (content-wise),
     Then the server should reuse the existing address ID.
     """
-    customer = self.fixture_ctx.get_known_customer()
-    if not customer or not customer.get("addresses"):
-      self.skip_no_trigger("a known customer with stored addresses")
+    customer = self.require_trigger("known_customer")
+    if not customer.get("addresses"):
+      self.skip_no_trigger("known_customer with stored addresses")
     stored_address = customer["addresses"][0]
 
     response_json = self.create_checkout_session(
@@ -672,9 +662,7 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
   )
   def test_free_shipping_on_expensive_order(self) -> None:
     """Test that free shipping is offered above the configured threshold."""
-    threshold = self.fixture_ctx.get_free_shipping_min_subtotal()
-    if threshold is None:
-      self.skip_no_trigger("a free-shipping subtotal threshold")
+    threshold = self.require_trigger("free_shipping_min_subtotal")
 
     # Order enough items to push the subtotal strictly above the threshold.
     price = self.fixture_ctx.get_test_price()
@@ -722,9 +710,7 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
   @scenario("a zero-cost option for the store's free-shipping item (fixtures)")
   def test_free_shipping_for_specific_item(self) -> None:
     """Test that free shipping is offered for eligible items."""
-    eligible_sku = self.fixture_ctx.get_free_shipping_item_sku()
-    if eligible_sku is None:
-      self.skip_no_trigger("a free-shipping-eligible item SKU")
+    eligible_sku = self.require_trigger("free_shipping_item_sku")
 
     response_json = self.create_checkout_session(item_id=eligible_sku)
     checkout_obj = checkout.Checkout(**response_json)

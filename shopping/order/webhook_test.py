@@ -182,9 +182,9 @@ class WebhookTest(ShoppingIntegrationTestBase):
   )
   def test_webhook_order_address_known_customer(self) -> None:
     """Test that webhook contains correct address for known customer/address."""
-    customer = self.fixture_ctx.get_known_customer()
-    if not customer or not customer.get("addresses"):
-      self.skip_no_trigger("a known customer with stored addresses")
+    customer = self.require_trigger("known_customer")
+    if not customer.get("addresses"):
+      self.skip_no_trigger("known_customer with stored addresses")
     buyer_info = {
       "fullName": customer.get("full_name", ""),
       "email": customer["email"],
@@ -307,9 +307,7 @@ class WebhookTest(ShoppingIntegrationTestBase):
   )
   def test_webhook_order_address_new_address(self) -> None:
     """Test that webhook contains correct address when a new one is provided."""
-    customer = self.fixture_ctx.get_known_customer()
-    if not customer:
-      self.skip_no_trigger("a known customer")
+    customer = self.require_trigger("known_customer")
     buyer_info = {
       "fullName": customer.get("full_name", ""),
       "email": customer["email"],

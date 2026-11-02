@@ -244,9 +244,7 @@ class DiscountSemanticsTest(ShoppingIntegrationTestBase):
   )
   def test_codes_replace_previous_set(self):
     """Submitting discounts.codes replaces any previously submitted codes."""
-    second = self.fixture_ctx.get_test_discount_code_2()
-    if not second:
-      self.skip_no_trigger("a second valid discount code")
+    second = self.require_trigger("valid_discount_code_2")
     base, _ = self._new_checkout()
     applied_raw = self._apply_codes(base, [self._code])
     applied_obj = checkout.Checkout(**applied_raw)

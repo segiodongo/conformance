@@ -161,7 +161,8 @@ class FulfillmentStructureTest(ShoppingIntegrationTestBase):
 
     if groups_with_options == 0:
       self.skip_no_trigger(
-        "a destination the server generates fulfillment options for"
+        "a shipping_locations.domestic_destination the server generates "
+        "fulfillment options for"
       )
 
   @spec_assert(
@@ -285,7 +286,8 @@ class FulfillmentStructureTest(ShoppingIntegrationTestBase):
 
     if methods_with_groups == 0:
       self.skip_no_trigger(
-        "a destination the server returns fulfillment groups for"
+        "a shipping_locations.domestic_destination the server returns "
+        "fulfillment groups for"
       )
 
 

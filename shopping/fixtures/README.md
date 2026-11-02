@@ -1,0 +1,97 @@
+# Shopping fixtures: the keys a server under test declares
+
+The shopping tests take two JSON files and a folder of CSV data about the
+server under test. `shopping/fixtures/flower_shop/` holds the set for the
+sample server, which is what the runner uses when nothing else is given:
+
+| Option                | File                                       | What it declares                                                                               |
+| --------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| `--conformance_input` | `conformance_input.json`                   | The release and capabilities the merchant claims, and the items the error tests use            |
+| `--fixture_config`    | `test_fixtures.json`                       | The item, codes, addresses and promotions the tests exercise, including the **triggers** below |
+| `--test_data_dir`     | `payment_instruments.csv`, `addresses.csv` | The payment instrument and billing address checkout completion sends                           |
+
+A target folder's `target.json` can give all three (see `--target_dir` in
+`runner.py`); each is also readable from a `FLAGS_<option>` environment
+variable for pytest runs. `shopping/base.py` reads the files through
+`DynamicFixtureContext`; the tests never open them.
+
+## Triggers
+
+A **trigger** is a key of `test_fixtures` that a server may leave out. Each
+names a situation a test needs the server to be able to produce. A test asks
+for one with `self.require_trigger("<key>")`, which returns the value or
+skips the test with the reason `no trigger declared: <key>`. The runner's
+summary and the coverage report count such skips as "no trigger declared",
+and the report's upgrade list holds the rules whose tests they stopped: to
+run them, declare the key.
+
+| Key                              | Shape                                                                                                                                                                                                                                    | Tests that need it                                                                                                                                                                                                                                                                                                                                                                                           |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `valid_discount_code_2`          | A second valid percentage code, with `expected_discount_percentage_2` (`20.0` for 20 %)                                                                                                                                                  | `discount_test.test_multiple_discounts_accepted`, `semantics_test.test_codes_replace_previous_set`                                                                                                                                                                                                                                                                                                           |
+| `valid_fixed_discount_code`      | A fixed-amount code, with `expected_fixed_discount_reduction` in major units (`5.0` for 5.00)                                                                                                                                            | `discount_test.test_fixed_amount_discount`                                                                                                                                                                                                                                                                                                                                                                   |
+| `known_customer`                 | `{"full_name", "email", "addresses": [...]}`: a buyer the server knows, with the addresses it stores for them, in response-schema field names (`street_address`, `address_locality`, `address_region`, `postal_code`, `address_country`) | `fulfillment_test.test_known_customer_new_address`, `webhook_test.test_webhook_order_address_new_address`; with at least one stored address: `fulfillment_test.test_known_customer_one_address`, `fulfillment_test.test_known_user_existing_address_reuse`, `webhook_test.test_webhook_order_address_known_customer`; with at least two: `fulfillment_test.test_known_customer_multiple_addresses_selection` |
+| `known_customer_without_address` | `{"full_name", "email"}`: a buyer the server knows but stores no address for                                                                                                                                                             | `fulfillment_test.test_known_customer_no_address`                                                                                                                                                                                                                                                                                                                                                            |
+| `free_shipping_min_subtotal`     | The subtotal, in major units, above which shipping is free                                                                                                                                                                               | `fulfillment_test.test_free_shipping_on_expensive_order`                                                                                                                                                                                                                                                                                                                                                     |
+| `free_shipping_item_sku`         | The SKU of an item that ships free on its own                                                                                                                                                                                            | `fulfillment_test.test_free_shipping_for_specific_item`                                                                                                                                                                                                                                                                                                                                                      |
+| `dynamic_fulfillment`            | `{"domestic": {"destination", "expected_option_id"}, "international": {...}}`: a destination each, and the fulfillment option the server offers for it                                                                                   | `fulfillment_test.test_dynamic_fulfillment`                                                                                                                                                                                                                                                                                                                                                                  |
+
+A test that needs more of a declared trigger than its presence, such as a
+`known_customer` with two stored addresses, checks that itself and skips
+with the key and the shape it needs: `no trigger declared: known_customer
+with at least two stored addresses`.
+
+`DynamicFixtureContext.TRIGGERS` lists the keys with the getter that reads
+each (`get_known_customer` and so on); a getter returns `None` for a key
+that is absent or malformed, which is what makes `require_trigger` skip. A
+new trigger is one entry there, one getter, and a row in this table.
+
+## Keys every server declares
+
+These have a getter too, but a default instead of a skip, so the tests run
+against any server. Declare them so the tests use your data.
+
+| Key                                       | Shape                                                                                   | Read by                                                                                                                                                                                                                                                        |
+| ----------------------------------------- | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `valid_item.sku`                          | An item the server sells                                                                | Every test that creates a checkout (`get_test_sku`)                                                                                                                                                                                                            |
+| `valid_item.expected_price`               | Its unit price in major units (`35.0` for 35.00)                                        | The totals, discount and fulfillment tests (`get_test_price`)                                                                                                                                                                                                  |
+| `valid_discount_code`                     | A valid percentage code, with `expected_discount_percentage`                            | The discount and totals tests (`get_test_discount_code`)                                                                                                                                                                                                       |
+| `shipping_locations.domestic_destination` | `{"street", "city", "state", "postal_code", "country"}`: an address the server ships to | Every checkout that selects fulfillment (`get_test_destination`); the fulfillment structure tests skip with `no trigger declared: a shipping_locations.domestic_destination the server generates fulfillment options for` when the server offers it no options |
+
+`conformance_input.json` is the merchant's own declaration, read directly:
+
+| Key                     | Read by                                                            |
+| ----------------------- | ------------------------------------------------------------------ |
+| `ucp_version`           | The release the test agent advertises, and checkout requests carry |
+| `required_capabilities` | `core/protocol_test.py`, which checks the server advertises each   |
+| `currency`              | Checkout requests                                                  |
+| `items`                 | A fallback for `valid_item` when `test_fixtures.json` lacks it     |
+| `out_of_stock_item`     | `validation_test`: an item the server has none of, by `id`         |
+| `non_existent_item`     | `validation_test`: an `id` the server doesn't sell                 |
+
+## Keys to come
+
+The work packages that take the shopping suite to full MUST coverage each
+add the triggers they need, as entries in `TRIGGERS` and rows above. None of
+these is read by a test yet, and the flower-shop fixtures declare none until
+the sample server is upgraded to meet the tests:
+
+- **Catalog:** a product with variants and options, a variant ID, an item
+  with a `unit_price`, the default page size.
+- **Eligibility and provisional discounts:** a claim the server accepts, a
+  pricing claim, an unverifiable claim.
+- **Fulfillment:** an invalid destination, pickup locations, a catalog item
+  with `fulfills_to`.
+- **Totals, messages and links:** triggers for custom totals and `lines[]`,
+  an item that needs a disclosure.
+- **Completion states:** an async-completion trigger, an escalation item.
+- **Actions:** a trigger for an outstanding Action.
+- **Quantity units:** items sold or priced by measure, a settlement trigger.
+- **Buyer consent:** advertised purposes and segments.
+- **Order edits:** an order-edit trigger.
+
+## Checking a target folder
+
+`uv run ucp-conformance --target_dir=<folder> --suite=shopping --dry-run`
+lists the tests without contacting the server. A run's summary then says
+how many tests skipped for `no trigger declared`, and the coverage report
+(`--requirements_report=<dir>`) names the rules they would check.

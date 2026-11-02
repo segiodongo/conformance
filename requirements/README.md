@@ -212,7 +212,9 @@ the pinned specification, as before.
 ## Why a test was skipped
 
 Every other skip says why, with a reason that starts with its category. A
-test skips through one of the base class's methods, which write the prefix:
+test skips through one of the base class's methods, which write the prefix
+(a shopping test asks for a fixture key with `self.require_trigger("<key>")`,
+which skips the same way; see `shopping/fixtures/README.md`):
 
 | Method                    | Reason starts with           | For                                                                                                                                                    |
 | ------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |

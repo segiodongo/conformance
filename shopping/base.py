@@ -238,7 +238,27 @@ class DynamicFulfillmentFixture(TypedDict):
 
 
 class DynamicFixtureContext:
-  """Context for loading dynamic test fixtures from configuration."""
+  """Context for loading dynamic test fixtures from configuration.
+
+  The keys a server may leave out of `test_fixtures` are its *triggers*:
+  each names a situation a test needs the server to be able to produce, such
+  as a known customer with stored addresses. `TRIGGERS` lists them with the
+  getter that reads each; a getter returns None when the key is absent or
+  malformed, and `ShoppingIntegrationTestBase.require_trigger` turns that
+  into a skip that names the key. The keys are described in
+  `shopping/fixtures/README.md`.
+  """
+
+  # Each trigger key and the getter that reads it, in the README's order.
+  TRIGGERS = {
+    "valid_discount_code_2": "get_test_discount_code_2",
+    "valid_fixed_discount_code": "get_test_fixed_discount_code",
+    "known_customer": "get_known_customer",
+    "known_customer_without_address": "get_known_customer_without_address",
+    "free_shipping_min_subtotal": "get_free_shipping_min_subtotal",
+    "free_shipping_item_sku": "get_free_shipping_item_sku",
+    "dynamic_fulfillment": "get_dynamic_fulfillment",
+  }
 
   def __init__(
     self,
@@ -257,6 +277,27 @@ class DynamicFixtureContext:
     else:
       self._config = {}
     self._fallback_config = fallback_config or {}
+
+  def trigger(self, name: str) -> Any:
+    """Return what the server declares for a trigger, or None if nothing.
+
+    Args:
+      name: A key of `TRIGGERS`.
+
+    Returns:
+      The key's value as its getter reads it, or None when the server
+      declares no such key, or a malformed one.
+
+    Raises:
+      KeyError: If the name isn't a trigger. That is a mistake in a test,
+        not a gap in the fixtures, so it isn't a skip.
+
+    """
+    if name not in self.TRIGGERS:
+      raise KeyError(
+        f"{name!r} is not a trigger; see DynamicFixtureContext.TRIGGERS"
+      )
+    return getattr(self, self.TRIGGERS[name])()
 
   def get_test_sku(self) -> str:
     """Get the test SKU or item ID to use in checkout tests."""
@@ -611,6 +652,27 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
   def get_order_url(self, order_id: str) -> str:
     """Construct a full URL for an order resource."""
     return self.get_shopping_url(f"/orders/{order_id}")
+
+  def require_trigger(self, name: str) -> Any:
+    """Return what the fixtures declare for a trigger, or skip the test.
+
+    The skip reads "no trigger declared: <name>", which names the key of
+    `test_fixtures` to add (see `shopping/fixtures/README.md`). A test that
+    needs more of a declared trigger, such as a known customer with two
+    stored addresses, checks that itself and skips with `skip_no_trigger`,
+    naming the key and the shape it needs.
+
+    Args:
+      name: A key of `DynamicFixtureContext.TRIGGERS`.
+
+    Returns:
+      The key's value, as its getter reads it.
+
+    """
+    value = self.fixture_ctx.trigger(name)
+    if value is None:
+      self.skip_no_trigger(name)
+    return value
 
   def assert_totals_consistent(
     self, checkout_obj, expected_subtotal, expected_discount=0

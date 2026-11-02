@@ -140,9 +140,7 @@ class DiscountTest(ShoppingIntegrationTestBase):
     and both should be present in the applied list.
     """
     valid_code_1 = self.fixture_ctx.get_test_discount_code()
-    valid_code_2 = self.fixture_ctx.get_test_discount_code_2()
-    if not valid_code_2:
-      self.skip_no_trigger("a second valid discount code")
+    valid_code_2 = self.require_trigger("valid_discount_code_2")
 
     expected_price = self.fixture_ctx.get_test_price()
     percentage1 = self.fixture_ctx.get_expected_discount_percentage()
@@ -245,9 +243,7 @@ class DiscountTest(ShoppingIntegrationTestBase):
     Then the total amount should be reduced, and the
     applied discount details should be present.
     """
-    fixed_code = self.fixture_ctx.get_test_fixed_discount_code()
-    if not fixed_code:
-      self.skip_no_trigger("a fixed-amount discount code")
+    fixed_code = self.require_trigger("valid_fixed_discount_code")
 
     expected_price = self.fixture_ctx.get_test_price()
     expected_discount = self.fixture_ctx.get_expected_fixed_discount_reduction()

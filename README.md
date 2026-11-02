@@ -51,7 +51,7 @@ The conformance tests are designed to be run against _any_ UCP server implementa
 
 Your server must be populated with test data (products, inventory, shipping rates, discounts) that match the expectations defined in your test configuration.
 
-You can use the default [flower_shop test data](shopping/fixtures/flower_shop) as a reference for what data is needed.
+You can use the default [flower_shop test data](shopping/fixtures/flower_shop) as a reference for what data is needed. [shopping/fixtures/README.md](shopping/fixtures/README.md) lists every key the tests read, and which tests skip when an optional key (a _trigger_) is left out.
 
 ### 2. Configure Conformance Input (`conformance_input.json`)
 
