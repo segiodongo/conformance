@@ -32,8 +32,17 @@ from unittest import mock
 import runner
 from framework import report
 from framework.decorators import SpecMarker, requires_capability, spec_assert
+from framework.discovery import UcpProfile
 from framework.marker_check import LoadedTest
-from framework.outcomes import ERROR, FAILED, NOT_RUN, PASSED, SKIPPED, Outcome
+from framework.outcomes import (
+  ERROR,
+  FAILED,
+  NOT_APPLICABLE,
+  NOT_RUN,
+  PASSED,
+  SKIPPED,
+  Outcome,
+)
 from framework.requirements import (
   DEFAULT_CATALOG_DIR,
   INDEX_FILE,
@@ -709,9 +718,11 @@ class PartialClaimTest(unittest.TestCase):
         "passed": 1,
         "failed": 2,
         "not_run": 0,
+        "not_applicable": 0,
         "must_passed": 1,
         "must_failed": 2,
         "must_not_run": 0,
+        "must_not_applicable": 0,
       },
     )
     self.assertIn(
@@ -893,7 +904,14 @@ class ResultsTest(unittest.TestCase):
     )
     self.assertEqual(
       self.report.test_counts(),
-      {PASSED: 3, FAILED: 1, ERROR: 1, SKIPPED: 2, NOT_RUN: 1},
+      {
+        PASSED: 3,
+        FAILED: 1,
+        ERROR: 1,
+        SKIPPED: 2,
+        NOT_APPLICABLE: 0,
+        NOT_RUN: 1,
+      },
     )
     self.assertEqual(
       report.results(self.report, self.report.rules),
@@ -901,9 +919,11 @@ class ResultsTest(unittest.TestCase):
         "passed": 2,
         "failed": 2,
         "not_run": 1,
+        "not_applicable": 0,
         "must_passed": 1,
         "must_failed": 2,
         "must_not_run": 1,
+        "must_not_applicable": 0,
       },
     )
     checkout = [r for r in self.report.rules if CHECKOUT in r.capabilities]
@@ -913,9 +933,11 @@ class ResultsTest(unittest.TestCase):
         "passed": 2,
         "failed": 1,
         "not_run": 0,
+        "not_applicable": 0,
         "must_passed": 1,
         "must_failed": 1,
         "must_not_run": 0,
+        "must_not_applicable": 0,
       },
     )
 
@@ -931,15 +953,18 @@ class ResultsTest(unittest.TestCase):
           "failed": 1,
           "error": 1,
           "skipped": 2,
+          "not_applicable": 0,
           "not_run": 1,
         },
         "results": {
           "passed": 2,
           "failed": 2,
           "not_run": 1,
+          "not_applicable": 0,
           "must_passed": 1,
           "must_failed": 2,
           "must_not_run": 1,
+          "must_not_applicable": 0,
         },
       },
     )
@@ -949,9 +974,11 @@ class ResultsTest(unittest.TestCase):
         "passed": 0,
         "failed": 0,
         "not_run": 1,
+        "not_applicable": 0,
         "must_passed": 0,
         "must_failed": 0,
         "must_not_run": 1,
+        "must_not_applicable": 0,
       },
     )
     rules = {entry["id"]: entry["result"] for entry in data["rules"]}
@@ -970,11 +997,12 @@ class ResultsTest(unittest.TestCase):
       "the shopping tests' markers and a run against `http://localhost:8182`.",
       "**Of the 4 testable MUST and MUST NOT rules with a test, 1 passed, 2 "
       "failed and 1 wasn't run.** Test outcomes: 3 passed, 1 failed, 1 "
-      "error, 2 skipped, 1 not run.",
+      "error, 2 skipped, 0 not applicable, 1 not run.",
       "## Results",
-      "| cart | 1 | 0 | 0 | 1 | 1 | 0 | 0 | 1 |",
-      "| checkout | 3 | 2 | 1 | 0 | 2 | 1 | 1 | 0 |",
-      "| **All rules, each counted once** | 5 | 2 | 2 | 1 | 4 | 1 | 2 | 1 |",
+      "| cart | 1 | 0 | 0 | 1 | 0 | 1 | 0 | 0 | 1 | 0 |",
+      "| checkout | 3 | 2 | 1 | 0 | 0 | 2 | 1 | 1 | 0 | 0 |",
+      "| **All rules, each counted once** | 5 | 2 | 2 | 1 | 0 | 4 | 1 | 2 "
+      "| 1 | 0 |",
       "### Rules that failed: 2",
       "`ExampleTest.test_b` **failed**: total 5 \\| expected \\*6\\* \\<b\\>",
       "### Rules whose tests didn't run: 1",
@@ -1030,6 +1058,153 @@ class ResultsTest(unittest.TestCase):
       "MUST NOT rules with a test passed, 2 failed, 1 wasn't run\n",
       text,
     )
+
+
+# A run against a server on 2026-04-08, with the catalog with a history:
+# CHECKOUT-0001 is stated, CHECKOUT-0002 only the draft states.
+NA_TESTS = (
+  loaded("test_a", cites("REQ-SHOPPING-CHECKOUT-0001")),
+  loaded("test_n", cites("REQ-SHOPPING-CHECKOUT-0002")),
+  loaded(
+    "test_both",
+    cites("REQ-SHOPPING-CHECKOUT-0001", "REQ-SHOPPING-CHECKOUT-0002"),
+  ),
+)
+NA_OUTCOMES = {
+  full_id("test_a"): Outcome(PASSED),
+  full_id("test_n"): Outcome(
+    NOT_APPLICABLE,
+    "the server implements 2026-04-08, which doesn't state "
+    "REQ-SHOPPING-CHECKOUT-0002 (not yet in a release)",
+  ),
+  full_id("test_both"): Outcome(PASSED),
+}
+SERVER_2026_04_08 = UcpProfile(
+  {
+    "ucp": {
+      "version": "2026-04-08",
+      "capabilities": [{"name": CHECKOUT, "version": "2026-04-08"}],
+    }
+  }
+)
+
+
+class NotApplicableTest(unittest.TestCase):
+  """Tests for rules the version the server implements doesn't state."""
+
+  def setUp(self):
+    """Build the report for the run, with the server's profile."""
+    super().setUp()
+    self.report = report.build(
+      HISTORY_CATALOG, NA_TESTS, NA_OUTCOMES, TARGET, SERVER_2026_04_08
+    )
+
+  def test_rule_results(self):
+    """Test that an unstated rule is not applicable, whatever its tests did."""
+    self.assertEqual(self.report.inapplicable, {"REQ-SHOPPING-CHECKOUT-0002"})
+    self.assertEqual(self.report.result("REQ-SHOPPING-CHECKOUT-0001"), PASSED)
+    # test_both passed, but the server's version doesn't state the rule.
+    self.assertEqual(
+      self.report.result("REQ-SHOPPING-CHECKOUT-0002"), NOT_APPLICABLE
+    )
+    self.assertEqual(
+      report.results(self.report, self.report.rules),
+      {
+        "passed": 1,
+        "failed": 0,
+        "not_run": 0,
+        "not_applicable": 1,
+        "must_passed": 1,
+        "must_failed": 0,
+        "must_not_run": 0,
+        "must_not_applicable": 1,
+      },
+    )
+    self.assertEqual(
+      self.report.test_counts(),
+      {
+        PASSED: 2,
+        FAILED: 0,
+        ERROR: 0,
+        SKIPPED: 0,
+        NOT_APPLICABLE: 1,
+        NOT_RUN: 0,
+      },
+    )
+
+  def test_without_the_profile(self):
+    """Test that without the profile, not-applicable tests name the rules."""
+    built = report.build(HISTORY_CATALOG, NA_TESTS, NA_OUTCOMES, TARGET)
+    self.assertEqual(built.inapplicable, {"REQ-SHOPPING-CHECKOUT-0002"})
+    # With only the test that also cites a stated rule, nothing says the
+    # rule is unstated: the profile is what settles it.
+    both_only = {full_id("test_both"): Outcome(PASSED)}
+    built = report.build(HISTORY_CATALOG, NA_TESTS[2:], both_only, TARGET)
+    self.assertEqual(built.result("REQ-SHOPPING-CHECKOUT-0002"), PASSED)
+    built = report.build(
+      HISTORY_CATALOG, NA_TESTS[2:], both_only, TARGET, SERVER_2026_04_08
+    )
+    self.assertEqual(built.result("REQ-SHOPPING-CHECKOUT-0002"), NOT_APPLICABLE)
+
+  def test_summary(self):
+    """Test the console line: unstated rules leave the denominator."""
+    self.assertIn(
+      "  results against http://localhost:8182: 1 of the 1 testable MUST and "
+      "MUST NOT rules with a test passed, 0 failed, 0 weren't run, 1 doesn't "
+      "apply to the version the server implements\n",
+      report.summary(self.report, []),
+    )
+
+  def test_markdown(self):
+    """Test the wording and the list in the Markdown."""
+    text = report.to_markdown(self.report)
+    for expected in (
+      "A rule the version the server implements doesn't state is not "
+      "applicable, and neither passes nor fails.",
+      "**Of the 1 testable MUST and MUST NOT rules with a test, 1 passed, 0 "
+      "failed and 0 weren't run. 1 more rule with a test doesn't apply to "
+      "the version the server implements.** Test outcomes: 2 passed, 0 "
+      "failed, 0 errors, 0 skipped, 1 not applicable, 0 not run.",
+      "| checkout | 2 | 1 | 0 | 0 | 1 | 2 | 1 | 0 | 0 | 1 |",
+      "### Rules the version the server implements doesn't state: 1",
+      "| CHECKOUT-0002 | MUST NOT | The business MUST NOT do "
+      "REQ-SHOPPING-CHECKOUT-0002. | `ExampleTest.test_both` passed<br>"
+      "`ExampleTest.test_n` not applicable: the server implements "
+      "2026-04-08, which doesn't state REQ-SHOPPING-CHECKOUT-0002 (not yet "
+      "in a release) |",
+      "| CHECKOUT-0002 | MUST NOT | not applicable | The business MUST NOT do "
+      "REQ-SHOPPING-CHECKOUT-0002. | `ExampleTest.test_both` passed<br>"
+      "`ExampleTest.test_n` not applicable |",
+      "Of the 1 with a test, 1 passed, 0 failed and 0 weren't run. 1 more "
+      "rule with a test doesn't apply to the version the server implements.",
+      "neither counts for or against the server.",
+    ):
+      self.assertIn(expected, text)
+
+  def test_html(self):
+    """Test the card, the result and the bar in the page."""
+    page = report.to_html(self.report)
+    for expected in (
+      '<div class="big">1 / 1</div>testable MUST and MUST NOT rules with a '
+      "test passed: 0 failed, 0 not run, 1 more not applicable",
+      '<span class="r-not_applicable">not applicable</span>',
+      '<span class="pass" style="width: 50%"></span>'
+      '<span class="na" style="width: 50%"></span>',
+      "<h3>Rules the version the server implements doesn't state: 1</h3>",
+    ):
+      self.assertIn(expected, page)
+    balance = TagBalance()
+    balance.feed(page)
+    self.assertEqual((balance.open, balance.mismatched), ([], []))
+
+  def test_json(self):
+    """Test the result and the counts in matrix.json."""
+    data = report.to_json(self.report)
+    self.assertEqual(data["format"], 3)
+    rules = {entry["id"]: entry["result"] for entry in data["rules"]}
+    self.assertEqual(rules["REQ-SHOPPING-CHECKOUT-0002"], "not_applicable")
+    self.assertEqual(data["run"]["tests"]["not_applicable"], 1)
+    self.assertEqual(data["run"]["results"]["must_not_applicable"], 1)
 
 
 class RepositoryReportTest(unittest.TestCase):
@@ -1160,7 +1335,14 @@ class RunnerTest(unittest.TestCase):
     self.assertEqual(data["run"]["target"], "http://127.0.0.1:9")
     self.assertEqual(
       data["run"]["tests"],
-      {"passed": 1, "failed": 1, "error": 0, "skipped": 1, "not_run": 0},
+      {
+        "passed": 1,
+        "failed": 1,
+        "error": 0,
+        "skipped": 1,
+        "not_applicable": 0,
+        "not_run": 0,
+      },
     )
     self.assertEqual(
       {

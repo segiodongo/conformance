@@ -26,6 +26,8 @@ from framework.outcomes import (
   ERROR,
   FAILED,
   MAX_DETAIL,
+  NOT_APPLICABLE,
+  NOT_APPLICABLE_PREFIX,
   NOT_RUN,
   PASSED,
   SKIPPED,
@@ -85,6 +87,13 @@ class RecordingResultTest(unittest.TestCase):
       def test_unexpected_success(self):
         """Pass unexpectedly."""
 
+      def test_not_applicable(self):
+        """Skip because the server's version doesn't state the rule."""
+        self.skipTest(
+          f"{NOT_APPLICABLE_PREFIX} the server implements 2026-04-08, which "
+          "doesn't state REQ-SHOPPING-CHECKOUT-0016 (introduced in 2026-08-25)"
+        )
+
     result = run(Example)
     self.assertEqual(
       result.outcomes,
@@ -104,10 +113,17 @@ class RecordingResultTest(unittest.TestCase):
         name(Example, "test_unexpected_success"): Outcome(
           PASSED, "unexpected success"
         ),
+        name(Example, "test_not_applicable"): Outcome(
+          NOT_APPLICABLE,
+          "the server implements 2026-04-08, which doesn't state "
+          "REQ-SHOPPING-CHECKOUT-0016 (introduced in 2026-08-25)",
+        ),
       },
     )
     self.assertEqual((len(result.failures), len(result.errors)), (1, 2))
-    self.assertEqual(result.testsRun, 7)
+    # unittest counts a not-applicable test among the skipped.
+    self.assertEqual(len(result.skipped), 2)
+    self.assertEqual(result.testsRun, 8)
 
   def test_subtests(self):
     """Test that a failing or skipped subtest counts for its test."""

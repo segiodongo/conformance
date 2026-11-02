@@ -32,7 +32,7 @@ from framework.discovery import (
   fetch_server_profile,
   resolve_discovery_url,
 )
-from framework.outcomes import RecordingResult
+from framework.outcomes import RecordingResult, is_not_applicable
 from framework.platform import PlatformProfile
 from framework.requirements import CatalogError
 
@@ -580,7 +580,12 @@ def main(argv: list[str] | None = None) -> int:
   )
   result = runner.run(test_suite)
 
-  # testsRun counts skipped tests too, so take them out of the passes.
+  # testsRun counts skipped tests too, so take them out of the passes. A
+  # skip that says the test doesn't apply to the server's version is
+  # reported apart from the other skips.
+  not_applicable = sum(
+    1 for _, reason in result.skipped if is_not_applicable(reason)
+  )
   passed = (
     result.testsRun
     - len(result.failures)
@@ -591,7 +596,9 @@ def main(argv: list[str] | None = None) -> int:
   sys.stdout.write("CONFORMANCE TEST SUMMARY\n")
   sys.stdout.write(f"Total Executed: {result.testsRun}\n")
   sys.stdout.write(f"Passed: {passed}\n")
-  sys.stdout.write(f"Skipped: {len(result.skipped)}\n")
+  sys.stdout.write(f"Skipped: {len(result.skipped) - not_applicable}\n")
+  if not_applicable:
+    sys.stdout.write(f"Not applicable: {not_applicable}\n")
   sys.stdout.write(f"Failures: {len(result.failures)}\n")
   sys.stdout.write(f"Errors: {len(result.errors)}\n")
   sys.stdout.write("=" * 70 + "\n")
@@ -604,6 +611,7 @@ def main(argv: list[str] | None = None) -> int:
         args.requirements_report,
         outcomes=outcomes,
         target=args.server_url,
+        profile=server_profile,
       )
     except (CatalogError, OSError) as error:
       return _report_failed(error)

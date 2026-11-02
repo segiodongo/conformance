@@ -16,9 +16,12 @@
 
 Demo only. The runner records each test's outcome so that the requirements
 report can say, for each rule, whether the tests that cite it passed. A test
-passes, fails an assertion, stops on an error, or is skipped. A test with no
-outcome at the end of the run didn't run, for example because its class's
-`setUpClass` failed.
+passes, fails an assertion, stops on an error, or is skipped. A skip whose
+reason starts with `NOT_APPLICABLE_PREFIX` says the version the server
+implements states none of the rules the test cites (see
+`framework.versions`); it is recorded as not applicable, an outcome of its
+own that never counts against the server. A test with no outcome at the end
+of the run didn't run, for example because its class's `setUpClass` failed.
 """
 
 from collections.abc import Iterable
@@ -30,14 +33,22 @@ PASSED = "passed"
 FAILED = "failed"
 ERROR = "error"
 SKIPPED = "skipped"
+NOT_APPLICABLE = "not_applicable"
 NOT_RUN = "not_run"
 # Every status, in the order the report lists them.
-STATUSES = (PASSED, FAILED, ERROR, SKIPPED, NOT_RUN)
+STATUSES = (PASSED, FAILED, ERROR, SKIPPED, NOT_APPLICABLE, NOT_RUN)
+# How a skip reason begins when the test doesn't apply to the server's version.
+NOT_APPLICABLE_PREFIX = "not applicable:"
 # The longest detail kept, in characters.
 MAX_DETAIL = 200
 # How unittest names a class or module fixture that failed or skipped, as in
 # "setUpClass (shopping.checkout.example_test.ExampleTest)".
 _FIXTURE = re.compile(r"(\w+) \((.+)\)")
+
+
+def is_not_applicable(reason: str) -> bool:
+  """Return whether a skip reason says the test doesn't apply to the server."""
+  return reason.startswith(NOT_APPLICABLE_PREFIX)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -90,9 +101,13 @@ class RecordingResult(unittest.TextTestResult):
     self._record(test, Outcome(ERROR, _message(err, with_type=True)))
 
   def addSkip(self, test, reason):  # noqa: N802
-    """Record a skip, with its reason."""
+    """Record a skip, with its reason; a prefixed one as not applicable."""
     super().addSkip(test, reason)
-    self._record(test, Outcome(SKIPPED, _shorten(reason)))
+    if is_not_applicable(reason):
+      detail = reason.removeprefix(NOT_APPLICABLE_PREFIX)
+      self._record(test, Outcome(NOT_APPLICABLE, _shorten(detail)))
+    else:
+      self._record(test, Outcome(SKIPPED, _shorten(reason)))
 
   def addExpectedFailure(self, test, err):  # noqa: N802
     """Record an expected failure as a failure: the check didn't pass."""
@@ -158,7 +173,8 @@ class RecordingResult(unittest.TextTestResult):
     test_id = test.id()
     earlier = self.outcomes.get(test_id)
     if earlier is None or (
-      earlier.status in (PASSED, SKIPPED) and outcome.status in (FAILED, ERROR)
+      earlier.status in (PASSED, SKIPPED, NOT_APPLICABLE)
+      and outcome.status in (FAILED, ERROR)
     ):
       self.outcomes[test_id] = outcome
 
@@ -169,7 +185,7 @@ class RecordingResult(unittest.TextTestResult):
     if not match:
       return
     fixture, parent = match.groups()
-    if outcome.status != SKIPPED:
+    if outcome.status not in (SKIPPED, NOT_APPLICABLE):
       outcome = Outcome(
         NOT_RUN, _shorten(f"{fixture} failed: {outcome.detail}")
       )

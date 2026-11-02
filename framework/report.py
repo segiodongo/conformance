@@ -41,10 +41,12 @@ from types import MappingProxyType
 from typing import Any
 
 from framework.decorators import MARKER_KINDS
+from framework.discovery import UcpProfile
 from framework.marker_check import LoadedTest, in_scope
 from framework.outcomes import (
   ERROR,
   FAILED,
+  NOT_APPLICABLE,
   NOT_RUN,
   PASSED,
   SKIPPED,
@@ -59,11 +61,14 @@ from framework.requirements import (
   Rule,
   load_catalog,
 )
+from framework.versions import rule_applies
 
 # 2: "covered" counts rules a test checks fully; rules checked only in part
 # are counted and listed apart. Version 2 also has the view by release
 # (`versions`) and each rule's `since` and `versions`.
-FORMAT_VERSION = 2
+# 3: the `not_applicable` test outcome and rule result, for rules the version
+# the server implements doesn't state.
+FORMAT_VERSION = 3
 JSON_FILE = "matrix.json"
 MARKDOWN_FILE = "matrix.md"
 HTML_FILE = "matrix.html"
@@ -88,7 +93,13 @@ KIND_TITLES = {
 # The result of a rule no test cites.
 NO_TEST = "no_test"
 # The results of a rule with a test, in the order the report lists them.
-RULE_RESULTS = (PASSED, FAILED, NOT_RUN)
+RULE_RESULTS = (PASSED, FAILED, NOT_RUN, NOT_APPLICABLE)
+# The lists under the results table, with their titles.
+RESULT_LISTS = (
+  ("Rules that failed", FAILED),
+  ("Rules whose tests didn't run", NOT_RUN),
+  ("Rules the version the server implements doesn't state", NOT_APPLICABLE),
+)
 # How well a rule is covered: some test checks it fully; its tests all check
 # it only in part (`partly`); or no test cites it.
 FULL = "full"
@@ -114,6 +125,7 @@ LABELS = {
   FAILED: "failed",
   ERROR: "error",
   SKIPPED: "skipped",
+  NOT_APPLICABLE: "not applicable",
   NOT_RUN: "not run",
   NO_TEST: "no test",
 }
@@ -155,9 +167,11 @@ tr.total td { font-weight: 600; background: #f6f8fa; }
 .stack .pass { background: #1a7f37; }
 .stack .fail { background: #cf222e; }
 .stack .skip { background: #bf8700; }
+.stack .na { background: #8c959f; }
 .r-passed { color: #1a7f37; }
 .r-failed, .r-error { color: #cf222e; font-weight: 600; }
 .r-skipped, .r-not_run { color: #9a6700; }
+.r-not_applicable { color: #59636e; }
 details { margin: 10px 0; }
 summary { cursor: pointer; font-weight: 600; }
 """
@@ -294,6 +308,8 @@ class Report:
       and the test's ID, what that test leaves unchecked.
     versions: For each version the catalog's history covers, oldest first,
       the testable MUST and MUST NOT rules it states and their coverage.
+    inapplicable: After a run, the IDs of the rules the version the server
+      implements doesn't state; see `framework.versions`.
 
   """
 
@@ -308,6 +324,7 @@ class Report:
   target: str = ""
   gaps: Mapping[tuple[str, str], str] = MappingProxyType({})
   versions: tuple[VersionRow, ...] = ()
+  inapplicable: frozenset[str] = frozenset()
 
   def markers(self) -> dict[str, int]:
     """Return how many tests carry each kind of marker, or none."""
@@ -335,26 +352,28 @@ class Report:
   def result(self, rule_id: str) -> str | None:
     """Return a rule's result, from the outcomes of the tests that cite it.
 
-    A rule passed when at least one of its tests passed and none failed or
-    hit an error. It failed when any of them did, and it wasn't run when
+    A rule the version the server implements doesn't state is not
+    applicable: it neither passes nor fails, whatever its tests did. Any
+    other rule passed when at least one of its tests passed and none failed
+    or hit an error. It failed when any of them did, and it wasn't run when
     none of them ran. Tests that check the rule only in part count too.
 
     Args:
       rule_id: The rule's ID.
 
     Returns:
-      `PASSED`, `FAILED` or `NOT_RUN`, or `NO_TEST` when no test cites the
-      rule; None when the tests weren't run.
+      `PASSED`, `FAILED`, `NOT_RUN` or `NOT_APPLICABLE`, or `NO_TEST` when no
+      test cites the rule; None when the tests weren't run.
 
     """
     if self.outcomes is None:
       return None
-    statuses = {
-      self.outcomes[test_id].status
-      for test_id in self.cited_by.get(rule_id, ())
-    }
-    if not statuses:
+    tests = self.cited_by.get(rule_id, ())
+    if not tests:
       return NO_TEST
+    if rule_id in self.inapplicable:
+      return NOT_APPLICABLE
+    statuses = {self.outcomes[test_id].status for test_id in tests}
     if statuses & {FAILED, ERROR}:
       return FAILED
     if PASSED in statuses:
@@ -396,6 +415,7 @@ def build(
   tests: Iterable[LoadedTest],
   outcomes: Mapping[str, Outcome] | None = None,
   target: str = "",
+  profile: UcpProfile | None = None,
 ) -> Report:
   """Build the report for the shopping tests among the loaded tests.
 
@@ -405,6 +425,9 @@ def build(
     outcomes: After a run, the tests' outcomes by test ID. A shopping test
       without one didn't run.
     target: The server the tests ran against.
+    profile: The server's discovery profile, which says which version it
+      implements. Without it, the rules a not-applicable test cites are the
+      ones taken as not stated.
 
   Returns:
     The report.
@@ -442,11 +465,13 @@ def build(
   }
   rules = tuple(rule for rule in catalog.rules.values() if rule.is_rule)
   removed = tuple(rule for rule in catalog.removed.values() if rule.is_rule)
+  inapplicable: frozenset[str] = frozenset()
   if outcomes is not None:
     missing = Outcome(NOT_RUN, "no outcome was recorded")
     outcomes = MappingProxyType(
       {row.test_id: outcomes.get(row.test_id, missing) for row in rows}
     )
+    inapplicable = _inapplicable(catalog, rules, cited_by, outcomes, profile)
   return Report(
     spec_commit=catalog.spec_commit,
     capabilities=tuple(
@@ -475,6 +500,7 @@ def build(
       )
       for version in catalog.versions
     ),
+    inapplicable=inapplicable,
   )
 
 
@@ -790,11 +816,14 @@ def summary(report: Report, paths: Sequence[Path]) -> str:
   counts = results(report, report.rules)
   if counts is not None:
     against = f" against {report.target}" if report.target else ""
+    not_applicable = counts["must_not_applicable"]
     text += (
       f"  results{against}: {counts['must_passed']} of the "
-      f"{_must_with_a_test(total)} testable MUST and MUST NOT rules with a "
-      f"test passed, {counts['must_failed']} failed, "
-      f"{_not_run(counts['must_not_run'])}\n"
+      f"{_must_applicable(total, counts)} testable MUST and MUST NOT rules "
+      f"with a test passed, {counts['must_failed']} failed, "
+      f"{_not_run(counts['must_not_run'])}"
+      + (f", {_not_applicable(not_applicable)}" if not_applicable else "")
+      + "\n"
     )
   return text
 
@@ -805,6 +834,7 @@ def generate(
   catalog_dir: str | Path | None = None,
   outcomes: Mapping[str, Outcome] | None = None,
   target: str = "",
+  profile: UcpProfile | None = None,
 ) -> str:
   """Build the report for the loaded tests, write it, and describe it.
 
@@ -815,6 +845,7 @@ def generate(
       findings document beside it, if any, is linked from the report.
     outcomes: After a run, the tests' outcomes by test ID.
     target: The server the tests ran against.
+    profile: The server's discovery profile, if it was fetched.
 
   Returns:
     A few lines for the console.
@@ -825,7 +856,7 @@ def generate(
 
   """
   catalog_root = Path(catalog_dir or DEFAULT_CATALOG_DIR).resolve()
-  report = build(load_catalog(catalog_root), tests, outcomes, target)
+  report = build(load_catalog(catalog_root), tests, outcomes, target, profile)
   findings = catalog_root.parent / FINDINGS_FILE
   paths = write(report, directory, findings if findings.is_file() else None)
   return summary(report, paths)
@@ -858,6 +889,31 @@ def _capabilities(catalog: Catalog, rules: Sequence[Rule]) -> list[Capability]:
   names = {capability.name for capability in listed}
   others = {name for rule in rules for name in rule.capabilities} - names
   return listed + [Capability(name) for name in sorted(others)]
+
+
+def _inapplicable(
+  catalog: Catalog,
+  rules: Sequence[Rule],
+  cited_by: Mapping[str, Sequence[str]],
+  outcomes: Mapping[str, Outcome],
+  profile: UcpProfile | None,
+) -> frozenset[str]:
+  """Return the IDs of the rules the server's version doesn't state.
+
+  With the server's profile, each rule is compared with the version the
+  server advertises for its capability. Without it, a rule is taken as not
+  stated when a test that cites it was skipped as not applicable: such a
+  test cites no rule the server's version states.
+  """
+  if profile is not None:
+    return frozenset(
+      rule.id for rule in rules if not rule_applies(rule, catalog, profile)
+    )
+  return frozenset(
+    rule_id
+    for rule_id, tests in cited_by.items()
+    if any(outcomes[test_id].status == NOT_APPLICABLE for test_id in tests)
+  )
 
 
 def _coverage(
@@ -905,6 +961,11 @@ def _tally(rules: Sequence[Rule], coverage: Mapping[str, str]) -> Tally:
 def _must_with_a_test(tally: Tally) -> int:
   """Return how many testable MUSTs some test cites, fully or in part."""
   return tally.covered_must + tally.partial_must
+
+
+def _must_applicable(tally: Tally, counts: Mapping[str, int]) -> int:
+  """Return how many testable MUSTs with a test the server's version states."""
+  return _must_with_a_test(tally) - counts["must_not_applicable"]
 
 
 def _tally_json(tally: Tally) -> dict[str, int]:
@@ -1028,12 +1089,18 @@ def _intro(report: Report, code: Callable[[str], str]) -> str:
       "a test, not whether the tests pass."
     )
   run = f"a run against {code(report.target)}" if report.target else "a run"
-  return (
+  text = (
     f"Built from the requirements catalog at {code(commit)}, the shopping "
     f"tests' markers and {run}. {covered} A rule passed when at least one "
     "of its tests passed and none failed, failed when any of them failed or "
     "hit an error, and wasn't run when none of them ran."
   )
+  if report.inapplicable:
+    text += (
+      " A rule the version the server implements doesn't state is not "
+      "applicable, and neither passes nor fails."
+    )
+  return text
 
 
 def _headline(report: Report) -> str:
@@ -1072,12 +1139,14 @@ def _marker_counts(report: Report, code: Callable[[str], str]) -> str:
 
 def _results_headline(report: Report) -> str:
   """Return the sentence with the results for the testable MUSTs."""
-  counts = results(report, report.rules) or {}
+  counts = results(report, report.rules) or dict.fromkeys(
+    (*RULE_RESULTS, *(f"must_{result}" for result in RULE_RESULTS)), 0
+  )
   return (
-    f"Of the {_must_with_a_test(report.total)} testable MUST and MUST NOT "
-    f"rules with a test, {counts.get('must_passed', 0)} passed, "
-    f"{counts.get('must_failed', 0)} failed and "
-    f"{_not_run(counts.get('must_not_run', 0))}."
+    f"Of the {_must_applicable(report.total, counts)} testable MUST and MUST "
+    f"NOT rules with a test, {counts['must_passed']} passed, "
+    f"{counts['must_failed']} failed and {_not_run(counts['must_not_run'])}."
+    + _not_applicable_sentence(counts["must_not_applicable"])
   )
 
 
@@ -1088,13 +1157,31 @@ def _outcome_counts(report: Report) -> str:
   return (
     f"Test outcomes: {counts[PASSED]} passed, {counts[FAILED]} failed, "
     f"{counts[ERROR]} {errors}, {counts[SKIPPED]} skipped, "
-    f"{counts[NOT_RUN]} not run."
+    f"{counts[NOT_APPLICABLE]} not applicable, {counts[NOT_RUN]} not run."
   )
 
 
 def _not_run(count: int) -> str:
   """Return how many rules weren't run, as a phrase."""
   return f"{count} wasn't run" if count == 1 else f"{count} weren't run"
+
+
+_APPLIES_TAIL = "apply to the version the server implements"
+
+
+def _not_applicable(count: int) -> str:
+  """Return how many rules the server's version doesn't state, as a phrase."""
+  verb = "doesn't" if count == 1 else "don't"
+  return f"{count} {verb} {_APPLIES_TAIL}"
+
+
+def _not_applicable_sentence(count: int) -> str:
+  """Return the sentence about rules with a test that don't apply, or ""."""
+  if not count:
+    return ""
+  if count == 1:
+    return f" 1 more rule with a test doesn't {_APPLIES_TAIL}."
+  return f" {count} more rules with a test don't {_APPLIES_TAIL}."
 
 
 def _capability_sentence(
@@ -1120,16 +1207,20 @@ def _capability_sentence(
   counts = results(report, _rules_of(report, capability.name))
   with_a_test = _must_with_a_test(tally)
   if counts is not None and with_a_test:
-    lead = (
-      f"Of the {with_a_test} with a test"
-      if tally.partial_must
-      else f"Of those {with_a_test}"
-    )
-    sentence += (
-      f" {lead}, {counts['must_passed']} passed, "
-      f"{counts['must_failed']} failed and "
-      f"{_not_run(counts['must_not_run'])}."
-    )
+    applicable = _must_applicable(tally, counts)
+    not_applicable = counts["must_not_applicable"]
+    if applicable:
+      lead = (
+        f"Of the {applicable} with a test"
+        if tally.partial_must or not_applicable
+        else f"Of those {applicable}"
+      )
+      sentence += (
+        f" {lead}, {counts['must_passed']} passed, "
+        f"{counts['must_failed']} failed and "
+        f"{_not_run(counts['must_not_run'])}."
+      )
+    sentence += _not_applicable_sentence(not_applicable)
   return sentence
 
 
@@ -1204,7 +1295,10 @@ def _notes(
         "Results",
         "A passing test shows the server did what the test's assertions "
         "check, which may be only part of the rule it cites. A skipped test "
-        "counts as not run, and an error counts as a failure.",
+        "counts as not run, and an error counts as a failure. A test is not "
+        "applicable when the version the server implements states none of "
+        "the rules it cites, and a rule is not applicable when that version "
+        "doesn't state it: neither counts for or against the server.",
       )
     )
   shared = sum(len(rule.capabilities) > 1 for rule in report.rules)
@@ -1436,9 +1530,11 @@ def _md_results(report: Report) -> list[str]:
   lines = [
     "## Results",
     "",
-    "| Capability | With a test | Passed | Failed | Not run "
-    "| MUST with a test | MUST passed | MUST failed | MUST not run |",
-    "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+    "| Capability | With a test | Passed | Failed | Not run | Not applicable "
+    "| MUST with a test | MUST passed | MUST failed | MUST not run "
+    "| MUST not applicable |",
+    "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: "
+    "| ---: |",
   ]
   for row in _ordered(report):
     counts = results(report, _rules_of(report, row.capability.name))
@@ -1452,10 +1548,7 @@ def _md_results(report: Report) -> list[str]:
       results(report, report.rules),
     )
   )
-  for title, result in (
-    ("Rules that failed", FAILED),
-    ("Rules whose tests didn't run", NOT_RUN),
-  ):
+  for title, result in RESULT_LISTS:
     rules = _rules_with_result(report, result)
     lines += ["", f"### {title}: {len(rules)}", ""]
     lines += _md_rules(report, rules, "outcomes")
@@ -1470,10 +1563,12 @@ def _md_results_row(label: str, tally: Tally, counts: Mapping[str, int]) -> str:
     counts[PASSED],
     counts[FAILED],
     counts[NOT_RUN],
+    counts[NOT_APPLICABLE],
     _must_with_a_test(tally),
     counts["must_passed"],
     counts["must_failed"],
     counts["must_not_run"],
+    counts["must_not_applicable"],
   ]
   return "| " + " | ".join(str(cell) for cell in cells) + " |"
 
@@ -1729,12 +1824,15 @@ def _html_test(
 
 def _results_card(report: Report) -> str:
   """Return the headline card for the results."""
-  counts = results(report, report.rules) or {}
+  counts = results(report, report.rules) or dict.fromkeys(
+    (*RULE_RESULTS, *(f"must_{result}" for result in RULE_RESULTS)), 0
+  )
+  not_applicable = counts["must_not_applicable"]
   return _card(
-    f"{counts.get('must_passed', 0)} / {_must_with_a_test(report.total)}",
+    f"{counts['must_passed']} / {_must_applicable(report.total, counts)}",
     "testable MUST and MUST NOT rules with a test passed: "
-    f"{counts.get('must_failed', 0)} failed, "
-    f"{counts.get('must_not_run', 0)} not run",
+    f"{counts['must_failed']} failed, {counts['must_not_run']} not run"
+    + (f", {not_applicable} more not applicable" if not_applicable else ""),
   )
 
 
@@ -1746,10 +1844,12 @@ def _html_results(report: Report) -> str:
     "Passed",
     "Failed",
     "Not run",
+    "Not applicable",
     "MUST with a test",
     "MUST passed",
     "MUST failed",
     "MUST not run",
+    "MUST not applicable",
     "MUST results",
   ]
   rows = []
@@ -1771,10 +1871,7 @@ def _html_results(report: Report) -> str:
     f"{_outcome_counts(report)}</p>",
     table,
   ]
-  for title, result in (
-    ("Rules that failed", FAILED),
-    ("Rules whose tests didn't run", NOT_RUN),
-  ):
+  for title, result in RESULT_LISTS:
     rules = _rules_with_result(report, result)
     parts += [
       f"<h3>{title}: {len(rules)}</h3>",
@@ -1795,10 +1892,12 @@ def _html_results_cells(
       counts[PASSED],
       counts[FAILED],
       counts[NOT_RUN],
+      counts[NOT_APPLICABLE],
       with_a_test,
       counts["must_passed"],
       counts["must_failed"],
       counts["must_not_run"],
+      counts["must_not_applicable"],
     )
   )
   spans = "".join(
@@ -1808,6 +1907,7 @@ def _html_results_cells(
       ("must_passed", "pass"),
       ("must_failed", "fail"),
       ("must_not_run", "skip"),
+      ("must_not_applicable", "na"),
     )
     if with_a_test and counts[key]
   )

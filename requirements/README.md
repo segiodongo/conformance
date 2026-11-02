@@ -176,6 +176,39 @@ pytest:
 and `off` skips the check. Unit tests for the markers, the loader, the check
 and the report are in `tests/`: run `python -m pytest tests`.
 
+## Rules the server's version doesn't state
+
+A server advertises the release each of its capabilities implements, such as
+`2026-04-08`, and the catalog records which releases state each rule. Before
+a `spec_assert` test runs, `framework/versions.py` compares the rules it
+cites with the version the server advertises for their capability (or its
+profile's version, when the capability has none). If that version states
+none of them, the test doesn't apply and is skipped with a reason that says
+why:
+
+```text
+not applicable: the server implements 2026-04-08, which doesn't state
+REQ-SHOPPING-FULFILLMENT-0012 (introduced in 2026-08-25)
+```
+
+A rule the server's version removed reads `removed in 2026-04-08`, and one
+only the draft states, `not yet in a release`. A test that cites one stated
+rule among others runs. Tests without rules (`no_rule`, `scenario` and the
+rest) always run, and so does everything when the server's profile can't be
+fetched.
+
+A version the catalog doesn't know is read as the newest release that isn't
+newer than it. A version newer than every release, a version older than all
+of them, and a server that advertises no version are read as the draft, the
+catalog's own version.
+
+The runner records such a skip as **not applicable**, an outcome of its own,
+and lists it apart from the other skips in its summary. In the coverage
+report a rule the server's version doesn't state is not applicable too,
+whatever its tests did: it neither passes nor fails, and it leaves the
+denominator of the results. Coverage is unaffected: it is measured against
+the pinned specification, as before.
+
 ## Coverage report
 
 `--requirements_report=<dir>` makes the runner write a coverage report to a
@@ -212,8 +245,10 @@ The Markdown and HTML pages hold:
 - **By release:** for each release and the draft, the testable MUST and MUST
   NOT rules it states, removed rules included, and how many a test checks;
 - **Results,** after a run: for each capability, how many of its testable
-  rules with a test passed, failed or weren't run, then the rules that failed
-  and the rules whose tests didn't run, with their tests' messages;
+  rules with a test passed, failed, weren't run or don't apply to the
+  server's version, then the rules that failed, the rules whose tests didn't
+  run and the rules the server's version doesn't state, with their tests'
+  messages;
 - **A section per capability:** the rules a test checks fully, then those
   checked only in part, each test with its gap, with their results after a
   run; then the testable MUST and MUST NOT rules without a test, which is the
@@ -228,10 +263,12 @@ checked. A rule cited only with `partly` counts as checked in part, not
 covered, and in `matrix.json` each rule's `coverage` is `full`, `partial` or
 `none`. After a run, a rule passed when at least one of the tests that cite
 it passed and none failed; it failed when any of them failed or hit an
-error; and it wasn't run when they were all skipped or didn't run. Tests
-that check the rule only in part count here too, so a pass shows only what
-their assertions check. `findings.md` explains each partial claim. Outcomes
-come from the runner, so a pytest run doesn't record them.
+error; and it wasn't run when they were all skipped or didn't run. A rule
+the version the server implements doesn't state is not applicable instead
+(see [Rules the server's version doesn't state](#rules-the-servers-version-doesnt-state)).
+Tests that check the rule only in part count here too, so a pass shows only
+what their assertions check. `findings.md` explains each partial claim.
+Outcomes come from the runner, so a pytest run doesn't record them.
 
 The report covers the tests the run selects, with `--suite` and `-k`.
 `requirements/reports/` isn't committed.

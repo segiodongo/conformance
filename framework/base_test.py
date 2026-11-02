@@ -15,6 +15,7 @@
 """Base integration test class decoupled from specific business verticals."""
 
 import contextlib
+import functools
 import json
 import logging
 import os
@@ -25,11 +26,14 @@ from absl import flags
 from absl.testing import absltest
 from framework.agent_profile_server import AgentProfileServer
 from framework.constants import DEFAULT_UCP_VERSION
+from framework.decorators import spec_marker
 from framework.discovery import (
   UcpProfile,
   fetch_server_profile,
   resolve_discovery_url,
 )
+from framework.requirements import Catalog, CatalogError, load_catalog
+from framework.versions import applicability
 import httpx
 
 # Re-exported so suites can keep importing the default release from the base
@@ -168,6 +172,16 @@ def agent_profile_url() -> str:
   )
 
 
+@functools.cache
+def _catalog() -> Catalog | None:
+  """Return the catalog, or None (with one warning) if it can't be loaded."""
+  try:
+    return load_catalog()
+  except CatalogError as error:
+    logging.warning("Could not load the requirements catalog: %s", error)
+    return None
+
+
 class BaseIntegrationTest(absltest.TestCase):
   """Agnostic foundation for all UCP protocol and capability tests."""
 
@@ -218,6 +232,10 @@ class BaseIntegrationTest(absltest.TestCase):
     # Capability filtering check from @requires_capability decorator
     self._verify_required_capabilities()
 
+    # Version check from a @spec_assert marker: the rules the test cites
+    # must be stated by the version the server implements.
+    self._verify_rules_apply()
+
     self.client = httpx.Client(base_url=self.base_url, timeout=15.0)
     self.addCleanup(self.client.close)
 
@@ -258,6 +276,25 @@ class BaseIntegrationTest(absltest.TestCase):
             f"Server does not support required capability: '{cap_name}' "
             f"(min_version: {min_ver or 'any'})"
           )
+
+  def _verify_rules_apply(self) -> None:
+    """Skip the test if the server's version states none of its rules.
+
+    Only a test that cites rules with `spec_assert` can be skipped here, and
+    only when the server's profile is known. The skip reason starts with
+    the not-applicable prefix, so the runner records it apart from other
+    skips. A catalog that can't be loaded is logged once, not fatal: the
+    marker check reports it when asked.
+    """
+    marker = spec_marker(self)
+    if marker is None or self.server_profile is None:
+      return
+    catalog = _catalog()
+    if catalog is None:
+      return
+    result = applicability(marker, catalog, self.server_profile)
+    if not result.applies:
+      self.skipTest(result.skip_reason)
 
   def _start_agent_server(self) -> None:
     agent_port = FLAGS.mock_agent_port if FLAGS.is_parsed() else 8285
