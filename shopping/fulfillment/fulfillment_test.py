@@ -409,6 +409,7 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
 
   @spec_assert(
     "REQ-SHOPPING-FULFILLMENT-0012",  # same selected_destination_id returned
+    "REQ-SHOPPING-FULFILLMENT-0013",  # one matching typed destination entry
     "REQ-SHOPPING-FULFILLMENT-0015",  # no silent substitution of destination
   )
   def test_known_customer_multiple_addresses_selection(self) -> None:
@@ -473,16 +474,16 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
     )
     final_checkout = checkout.Checkout(**response_json)
 
-    # Verify selection in hierarchical model
-    self.assertEqual(
-      final_checkout.model_extra["fulfillment"]["methods"][0][
-        "selected_destination_id"
-      ],
-      target_id,
+    # Verify selection and self-describing destination in hierarchical model
+    method = final_checkout.model_extra["fulfillment"]["methods"][0]
+    self.assert_selected_destination(
+      method,
+      expected_id=target_id,
+      expected_type="shipping_address",
+      where="fulfillment.methods[0]",
     )
 
     # Verify the selected destination carries the expected address content
-    method = final_checkout.model_extra["fulfillment"]["methods"][0]
     selected_dest = next(
       d for d in method["destinations"] if d["id"] == target_id
     )

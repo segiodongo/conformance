@@ -95,6 +95,13 @@ class TriggerTest(unittest.TestCase):
         "accepted_eligibility_claim": "com.example.student",
         "pricing_eligibility_claim": "com.example.loyalty_gold",
         "unverifiable_eligibility_claim": "com.example.unverified_employee",
+        "unserviceable_destination_id": "dest_unserviceable_ak",
+        "pickup_location_id": "store_downtown_01",
+        "catalog_fulfills_to": {
+          "item_id": "bouquet_roses",
+          "fulfills_to": {"location": "store_downtown_01"},
+          "conflicting_location": "store_airport_99",
+        },
       }
     )
     context = DynamicFixtureContext(merged)
@@ -130,6 +137,9 @@ class TriggerTest(unittest.TestCase):
           "accepted_eligibility_claim": "not_reverse_domain",
           "pricing_eligibility_claim": "com..empty_segment",
           "unverifiable_eligibility_claim": 123,
+          "unserviceable_destination_id": "   ",
+          "pickup_location_id": 42,
+          "catalog_fulfills_to": {"item_id": "roses", "fulfills_to": {}},
         }
       }
     )
@@ -144,6 +154,9 @@ class TriggerTest(unittest.TestCase):
       "accepted_eligibility_claim",
       "pricing_eligibility_claim",
       "unverifiable_eligibility_claim",
+      "unserviceable_destination_id",
+      "pickup_location_id",
+      "catalog_fulfills_to",
     ):
       with self.subTest(key=key):
         self.assertIsNone(context.trigger(key))

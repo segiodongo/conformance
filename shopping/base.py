@@ -389,6 +389,278 @@ def eligibility_invalid_error_problems(
   return problems
 
 
+def _extract_fulfillment_methods(checkout_data: Any) -> list[dict[str, Any]]:
+  """Return `fulfillment.methods[]` from a raw checkout dict."""
+  if not isinstance(checkout_data, dict):
+    return []
+  fulfillment = checkout_data.get("fulfillment") or {}
+  if not isinstance(fulfillment, dict):
+    return []
+  if "methods" not in fulfillment and isinstance(fulfillment.get("root"), dict):
+    fulfillment = fulfillment["root"]
+  methods = fulfillment.get("methods")
+  return methods if isinstance(methods, list) else []
+
+
+def selected_destination_problems(
+  method: Any,
+  expected_id: str | None = None,
+  expected_type: str | None = None,
+  where: str = "fulfillment.methods[0]",
+) -> list[str]:
+  """Return every violation of accepted `selected_destination_id` rules.
+
+  Checks the rules of extensions/fulfillment.md (Destination Selection and
+  Business Location Destination):
+    - FULFILLMENT-0012: when the Business accepts a non-null
+      `selected_destination_id`, its response MUST carry that same
+      `selected_destination_id` value on the method.
+    - FULFILLMENT-0013: its response MUST include exactly one destination in
+      that same method's `destinations[]` whose `id` equals it, typed as
+      specified in Destinations.
+    - FULFILLMENT-0009: when a Business Location Destination is returned on a
+      `pickup` method (`type: "business_location"`), the Business MUST return
+      `type: "business_location"`, `id`, and its Buyer-facing `name`.
+  """
+  if not isinstance(method, dict):
+    return [f"{where}: method is not a JSON object ({method!r})"]
+
+  problems: list[str] = []
+  selected_id = method.get("selected_destination_id")
+  if not isinstance(selected_id, str) or not selected_id.strip():
+    problems.append(
+      f"{where}.selected_destination_id: must be a non-empty string, got "
+      f"{selected_id!r} (FULFILLMENT-0012)"
+    )
+    return problems
+
+  if expected_id is not None and selected_id != expected_id:
+    problems.append(
+      f"{where}.selected_destination_id: expected {expected_id!r}, got "
+      f"{selected_id!r} (FULFILLMENT-0012)"
+    )
+
+  destinations = method.get("destinations")
+  if not isinstance(destinations, list) or not destinations:
+    problems.append(
+      f"{where}.destinations: must contain the selected destination "
+      f"{selected_id!r}, got {destinations!r} (FULFILLMENT-0013)"
+    )
+    return problems
+
+  matching = [
+    d
+    for d in destinations
+    if isinstance(d, dict) and d.get("id") == selected_id
+  ]
+  if len(matching) != 1:
+    problems.append(
+      f"{where}.destinations: must include exactly one destination with "
+      f"id={selected_id!r}, found {len(matching)} in {destinations} "
+      "(FULFILLMENT-0013)"
+    )
+    return problems
+
+  dest = matching[0]
+  dest_type = dest.get("type")
+  if not isinstance(dest_type, str) or not dest_type.strip():
+    problems.append(
+      f"{where}.destinations[id={selected_id!r}].type: destination in "
+      f"response must carry a non-empty 'type' discriminator, got "
+      f"{dest_type!r} (FULFILLMENT-0013)"
+    )
+  elif expected_type is not None and dest_type != expected_type:
+    problems.append(
+      f"{where}.destinations[id={selected_id!r}].type: expected "
+      f"{expected_type!r}, got {dest_type!r} "
+      "(FULFILLMENT-0009, FULFILLMENT-0013)"
+    )
+
+  if expected_type == "business_location" or dest_type == "business_location":
+    name = dest.get("name")
+    if not isinstance(name, str) or not name.strip():
+      problems.append(
+        f"{where}.destinations[id={selected_id!r}].name: business_location "
+        f"destination must carry a non-empty buyer-facing 'name', got "
+        f"{name!r} (FULFILLMENT-0009)"
+      )
+
+  return problems
+
+
+def _selects_method_destination_path(path: Any, method_index: int = 0) -> bool:
+  """Return whether `path` selects `methods[i].selected_destination_id`."""
+  if not isinstance(path, str) or not path.strip():
+    return False
+  normalized = path.strip()
+  expected_jsonpath = (
+    f"$.fulfillment.methods[{method_index}].selected_destination_id"
+  )
+  expected_pointer = (
+    f"/fulfillment/methods/{method_index}/selected_destination_id"
+  )
+  return normalized in (
+    expected_jsonpath,
+    expected_jsonpath.lstrip("$."),
+    expected_pointer,
+  )
+
+
+def rejected_destination_update_problems(
+  before_checkout: Any,
+  after_checkout: Any,
+  method_index: int = 0,
+  where: str = "update response",
+) -> list[str]:
+  """Return every violation of rejected `selected_destination_id` update rules.
+
+  Checks the rules of extensions/fulfillment.md (Destination Selection):
+    - FULFILLMENT-0016: when the Business cannot accept a
+      `selected_destination_id` submitted on Update Checkout (not recognized
+      for that method, or revalidation fails), it MUST leave the current
+      Checkout unchanged.
+    - FULFILLMENT-0017: it MUST return that Checkout with an error Message
+      with `severity: "recoverable"` whose `path` selects the attempted
+      method's `selected_destination_id` (for example
+      `$.fulfillment.methods[0].selected_destination_id`).
+  """
+  if not isinstance(before_checkout, dict):
+    return [f"{where}: before_checkout is not a dict ({before_checkout!r})"]
+  if not isinstance(after_checkout, dict):
+    return [f"{where}: after_checkout is not a dict ({after_checkout!r})"]
+
+  problems: list[str] = []
+  before_methods = _extract_fulfillment_methods(before_checkout)
+  after_methods = _extract_fulfillment_methods(after_checkout)
+  if len(before_methods) <= method_index or len(after_methods) <= method_index:
+    problems.append(
+      f"{where}: missing fulfillment.methods[{method_index}] in before or "
+      f"after checkout (before={len(before_methods)}, "
+      f"after={len(after_methods)}) (FULFILLMENT-0016)"
+    )
+  else:
+    before_method = before_methods[method_index]
+    after_method = after_methods[method_index]
+    if after_method.get("selected_destination_id") != before_method.get(
+      "selected_destination_id"
+    ):
+      problems.append(
+        f"{where}.fulfillment.methods[{method_index}].selected_destination_id: "
+        f"changed from {before_method.get('selected_destination_id')!r} to "
+        f"{after_method.get('selected_destination_id')!r} on a rejected update "
+        "(FULFILLMENT-0016)"
+      )
+    if _without_empties(after_method.get("destinations")) != _without_empties(
+      before_method.get("destinations")
+    ):
+      problems.append(
+        f"{where}.fulfillment.methods[{method_index}].destinations: modified "
+        "on a rejected selected_destination_id update (FULFILLMENT-0016)"
+      )
+
+  if _without_empties(after_checkout.get("totals")) != _without_empties(
+    before_checkout.get("totals")
+  ):
+    problems.append(
+      f"{where}.totals: changed from {before_checkout.get('totals')} to "
+      f"{after_checkout.get('totals')} on a rejected update (FULFILLMENT-0016)"
+    )
+
+  messages = after_checkout.get("messages")
+  if not isinstance(messages, list) or not messages:
+    problems.append(
+      f"{where}.messages: missing recoverable error message for rejected "
+      f"selected_destination_id (FULFILLMENT-0017)"
+    )
+    return problems
+
+  matching_msgs = [
+    m
+    for m in messages
+    if isinstance(m, dict)
+    and m.get("type") == "error"
+    and m.get("severity") == "recoverable"
+    and _selects_method_destination_path(m.get("path"), method_index)
+  ]
+  if not matching_msgs:
+    problems.append(
+      f"{where}.messages: no message with type='error', "
+      "severity='recoverable', and path="
+      f"'$.fulfillment.methods[{method_index}].selected_destination_id'; "
+      f"got {messages} (FULFILLMENT-0017)"
+    )
+
+  return problems
+
+
+def option_description_problems(
+  option: Any, where: str = "option"
+) -> list[str]:
+  """Return every violation of `FULFILLMENT-0021` on an option's description.
+
+  extensions/fulfillment.md (Rendering / Business Responsibilities):
+    - FULFILLMENT-0021: For `options[].description`: MUST NOT repeat `title`
+      or `total` — provides supplementary context only.
+  """
+  if not isinstance(option, dict):
+    return [f"{where}: option is not a dict ({option!r})"]
+
+  raw_desc = option.get("description")
+  if raw_desc is None:
+    return []
+
+  desc_texts: list[str] = []
+  if isinstance(raw_desc, str):
+    if raw_desc.strip():
+      desc_texts.append(raw_desc)
+  elif isinstance(raw_desc, dict):
+    for key in ("plain", "markdown"):
+      val = raw_desc.get(key)
+      if isinstance(val, str) and val.strip():
+        desc_texts.append(val)
+
+  if not desc_texts:
+    return []
+
+  problems: list[str] = []
+  title = option.get("title")
+  norm_title = (
+    " ".join(title.casefold().split())
+    if isinstance(title, str) and title.strip()
+    else ""
+  )
+
+  total_amount: int | None = None
+  for entry in option.get("totals") or []:
+    if (
+      isinstance(entry, dict)
+      and entry.get("type") == "total"
+      and _is_int(entry.get("amount"))
+    ):
+      total_amount = entry["amount"]
+      break
+
+  for desc in desc_texts:
+    norm_desc = " ".join(desc.casefold().split())
+    if norm_title and norm_title in norm_desc:
+      problems.append(
+        f"{where}.description: repeats option title {title!r} in {desc!r} "
+        "(FULFILLMENT-0021)"
+      )
+    if total_amount is not None:
+      major_str = f"{total_amount / 100:.2f}"
+      dollar_str = f"${major_str}"
+      if dollar_str in norm_desc or (
+        total_amount >= 100 and major_str in norm_desc
+      ):
+        problems.append(
+          f"{where}.description: repeats option total ({dollar_str}) in "
+          f"{desc!r} (FULFILLMENT-0021)"
+        )
+
+  return problems
+
+
 def _without_empties(value: Any) -> Any:
   """Return a JSON value with its null and empty members left out.
 
@@ -640,6 +912,14 @@ class CatalogVariantFixture(TypedDict):
   variant_id: str
 
 
+class CatalogFulfillsToFixture(TypedDict):
+  """A catalog item, `fulfills_to` filter, and conflicting `location`."""
+
+  item_id: str
+  fulfills_to: dict[str, Any]
+  conflicting_location: str
+
+
 class DynamicFixtureContext:
   """Context for loading dynamic test fixtures from configuration.
 
@@ -668,6 +948,9 @@ class DynamicFixtureContext:
     "accepted_eligibility_claim": "get_accepted_eligibility_claim",
     "pricing_eligibility_claim": "get_pricing_eligibility_claim",
     "unverifiable_eligibility_claim": "get_unverifiable_eligibility_claim",
+    "unserviceable_destination_id": "get_unserviceable_destination_id",
+    "pickup_location_id": "get_pickup_location_id",
+    "catalog_fulfills_to": "get_catalog_fulfills_to",
   }
 
   def __init__(
@@ -1025,6 +1308,40 @@ class DynamicFixtureContext:
     """Get an accepted `context.eligibility` claim that fails verification."""
     val = self._get_test_fixture("unverifiable_eligibility_claim")
     return val if _is_reverse_domain_claim(val) else None
+
+  def get_unserviceable_destination_id(self) -> str | None:
+    """Get a recognized destination ID that fails revalidation in Checkout."""
+    val = self._get_test_fixture("unserviceable_destination_id")
+    if isinstance(val, str) and val.strip():
+      return val
+    return None
+
+  def get_pickup_location_id(self) -> str | None:
+    """Get a Business Location ID advertised for `pickup`."""
+    val = self._get_test_fixture("pickup_location_id")
+    if isinstance(val, str) and val.strip():
+      return val
+    return None
+
+  def get_catalog_fulfills_to(self) -> CatalogFulfillsToFixture | None:
+    """Get a catalog item, `fulfills_to` filter, and conflicting location."""
+    val = self._get_test_fixture("catalog_fulfills_to")
+    if not isinstance(val, dict):
+      return None
+    item_id = val.get("item_id")
+    fulfills_to = val.get("fulfills_to")
+    conflicting = val.get("conflicting_location")
+    if not isinstance(item_id, str) or not item_id.strip():
+      return None
+    if not isinstance(fulfills_to, dict) or not fulfills_to:
+      return None
+    if not isinstance(conflicting, str) or not conflicting.strip():
+      return None
+    return CatalogFulfillsToFixture(
+      item_id=item_id,
+      fulfills_to=fulfills_to,
+      conflicting_location=conflicting,
+    )
 
   def get_non_existent_id(self) -> str:
     """Get an identifier the server under test does not sell."""
@@ -1800,6 +2117,57 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     self.assertFalse(
       problems,
       f"{where} violates unverified eligibility completion rules:\n  "
+      + "\n  ".join(problems),
+    )
+
+  def assert_selected_destination(
+    self,
+    method: Any,
+    expected_id: str | None = None,
+    expected_type: str | None = None,
+    where: str = "fulfillment.methods[0]",
+  ) -> None:
+    """Assert `method` satisfies accepted `selected_destination_id` rules."""
+    problems = selected_destination_problems(
+      method,
+      expected_id=expected_id,
+      expected_type=expected_type,
+      where=where,
+    )
+    self.assertFalse(
+      problems,
+      f"{where} violates selected_destination_id rules:\n  "
+      + "\n  ".join(problems),
+    )
+
+  def assert_rejected_destination_update(
+    self,
+    before_checkout: Any,
+    after_checkout: Any,
+    method_index: int = 0,
+    where: str = "update response",
+  ) -> None:
+    """Assert a rejected destination update leaves checkout state intact."""
+    problems = rejected_destination_update_problems(
+      before_checkout,
+      after_checkout,
+      method_index=method_index,
+      where=where,
+    )
+    self.assertFalse(
+      problems,
+      f"{where} violates rejected selected_destination_id update rules:\n  "
+      + "\n  ".join(problems),
+    )
+
+  def assert_option_description(
+    self, option: Any, where: str = "option"
+  ) -> None:
+    """Assert `option.description` does not repeat `title` or `total`."""
+    problems = option_description_problems(option, where=where)
+    self.assertFalse(
+      problems,
+      f"{where} violates fulfillment option description rules:\n  "
       + "\n  ".join(problems),
     )
 

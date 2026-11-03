@@ -687,5 +687,183 @@ class EligibilityAndProvisionalDiscountHelpersTest(unittest.TestCase):
     self.assertTrue(any("CHECKOUT-0053" in p for p in problems))
 
 
+class FulfillmentSelectionAndDescriptionHelpersTest(unittest.TestCase):
+  """W8 helpers: selected_destination, rejected update, option description."""
+
+  def test_selected_destination_shipping_and_business_location(self) -> None:
+    """Valid shipping and business_location selections pass."""
+    shipping_method = {
+      "id": "method_1",
+      "type": "shipping",
+      "selected_destination_id": "dest_1",
+      "destinations": [
+        {"id": "dest_1", "type": "shipping_address", "postal_code": "94105"},
+        {"id": "dest_2", "type": "shipping_address", "postal_code": "10001"},
+      ],
+    }
+    self.assertEqual(
+      base.selected_destination_problems(
+        shipping_method,
+        expected_id="dest_1",
+        expected_type="shipping_address",
+      ),
+      [],
+    )
+
+    pickup_method = {
+      "id": "method_pickup_1",
+      "type": "pickup",
+      "selected_destination_id": "store_sf_01",
+      "destinations": [
+        {
+          "id": "store_sf_01",
+          "type": "business_location",
+          "name": "Market Street Flagship",
+        }
+      ],
+    }
+    self.assertEqual(
+      base.selected_destination_problems(
+        pickup_method,
+        expected_id="store_sf_01",
+        expected_type="business_location",
+      ),
+      [],
+    )
+
+  def test_selected_destination_detects_duplicates_or_missing_type_or_name(
+    self,
+  ) -> None:
+    """Duplicate matching IDs, missing type, or missing pickup name fail."""
+    dup_dests = {
+      "selected_destination_id": "dest_1",
+      "destinations": [
+        {"id": "dest_1", "type": "shipping_address"},
+        {"id": "dest_1", "type": "shipping_address"},
+      ],
+    }
+    problems = base.selected_destination_problems(dup_dests)
+    self.assertTrue(any("FULFILLMENT-0013" in p for p in problems))
+
+    untyped_dest = {
+      "selected_destination_id": "dest_1",
+      "destinations": [{"id": "dest_1"}],
+    }
+    problems = base.selected_destination_problems(untyped_dest)
+    self.assertTrue(any("FULFILLMENT-0013" in p for p in problems))
+
+    nameless_pickup = {
+      "selected_destination_id": "store_sf_01",
+      "destinations": [{"id": "store_sf_01", "type": "business_location"}],
+    }
+    problems = base.selected_destination_problems(
+      nameless_pickup, expected_type="business_location"
+    )
+    self.assertTrue(any("FULFILLMENT-0009" in p for p in problems))
+
+  def test_rejected_destination_update_passes_when_unchanged_with_error(
+    self,
+  ) -> None:
+    """Unchanged state + recoverable error on selected_destination_id passes."""
+    before = {
+      "fulfillment": {
+        "methods": [
+          {
+            "id": "method_1",
+            "selected_destination_id": "dest_1",
+            "destinations": [{"id": "dest_1", "type": "shipping_address"}],
+          }
+        ]
+      },
+      "totals": [{"type": "total", "amount": 4000}],
+    }
+    after = {
+      "fulfillment": {
+        "methods": [
+          {
+            "id": "method_1",
+            "selected_destination_id": "dest_1",
+            "destinations": [{"id": "dest_1", "type": "shipping_address"}],
+          }
+        ]
+      },
+      "totals": [{"type": "total", "amount": 4000}],
+      "messages": [
+        {
+          "type": "error",
+          "code": "destination_invalid",
+          "severity": "recoverable",
+          "path": "$.fulfillment.methods[0].selected_destination_id",
+          "content": "Destination not recognized.",
+        }
+      ],
+    }
+    self.assertEqual(
+      base.rejected_destination_update_problems(before, after, method_index=0),
+      [],
+    )
+
+  def test_rejected_destination_update_detects_state_mutation_or_missing_msg(
+    self,
+  ) -> None:
+    """Mutated selected_destination_id or missing recoverable error fails."""
+    before = {
+      "fulfillment": {
+        "methods": [
+          {
+            "id": "method_1",
+            "selected_destination_id": "dest_1",
+            "destinations": [{"id": "dest_1", "type": "shipping_address"}],
+          }
+        ]
+      },
+      "totals": [{"type": "total", "amount": 4000}],
+    }
+    mutated = {
+      "fulfillment": {
+        "methods": [
+          {
+            "id": "method_1",
+            "selected_destination_id": "bad_dest",
+            "destinations": [{"id": "dest_1", "type": "shipping_address"}],
+          }
+        ]
+      },
+      "totals": [{"type": "total", "amount": 3500}],
+      "messages": [],
+    }
+    problems = base.rejected_destination_update_problems(before, mutated)
+    self.assertTrue(any("FULFILLMENT-0016" in p for p in problems))
+    self.assertTrue(any("FULFILLMENT-0017" in p for p in problems))
+
+  def test_option_description_problems_checks_title_and_total(self) -> None:
+    """Supplementary description passes; repeating title or total fails."""
+    good_option = {
+      "id": "std-ship",
+      "title": "Standard Shipping",
+      "description": {"plain": "Arrives in 3-5 business days via USPS"},
+      "totals": [{"type": "total", "amount": 599}],
+    }
+    self.assertEqual(base.option_description_problems(good_option), [])
+
+    repeats_title = {
+      "id": "std-ship",
+      "title": "Standard Shipping",
+      "description": "Standard shipping in 3-5 business days",
+      "totals": [{"type": "total", "amount": 599}],
+    }
+    problems = base.option_description_problems(repeats_title)
+    self.assertTrue(any("FULFILLMENT-0021" in p for p in problems))
+
+    repeats_total = {
+      "id": "std-ship",
+      "title": "Standard Shipping",
+      "description": {"plain": "Arrives in 3-5 days for $5.99"},
+      "totals": [{"type": "total", "amount": 599}],
+    }
+    problems = base.option_description_problems(repeats_total)
+    self.assertTrue(any("FULFILLMENT-0021" in p for p in problems))
+
+
 if __name__ == "__main__":
   unittest.main()
