@@ -1,28 +1,29 @@
 # Findings from linking the tests to the catalog (demo)
 
-> **Demo only, not for merge.** These findings come from giving each of the 85
+> **Demo only, not for merge.** These findings come from giving each of the 86
 > shopping tests a marker against the catalog at `f2626c28` (see
 > [Linking tests to rules](README.md#linking-tests-to-rules)). Rule IDs are the
 > demo's stable IDs without the `REQ-SHOPPING-` prefix. They aren't official.
 
 ## Summary
 
-- **Markers:** 36 tests cite rules, 24 are `no_rule`, 16 are `scenario`, 6
-  are `outside_catalog` and 3 are `older_version`.
-- **Rules cited:** 34, all testable: 29 MUST, 2 MUST NOT and 3 SHOULD.
-- **Coverage:** the tests cite 31 of the 104 testable MUST and MUST NOT rules
-  (30%): order 11 of 17, fulfillment 4 of 16, checkout 9 of 37, cart 6 of 8
+- **Markers:** 38 tests cite rules, 24 are `no_rule`, 16 are `scenario`, 6
+  are `outside_catalog` and 2 are `older_version`.
+- **Rules cited:** 37, all testable: 32 MUST, 2 MUST NOT and 3 SHOULD.
+- **Coverage:** the tests cite 34 of the 104 testable MUST and MUST NOT rules
+  (33%): order 14 of 17, fulfillment 4 of 16, checkout 9 of 37, cart 6 of 8
   and discount 1 of 4. Catalog and buyer consent have none.
-- **Depth:** of those 31, 30 are checked in full and 1, ORDER-0022, in part
-  (see [Claims reviewed](#claims-reviewed)): the signature's envelope and
-  shape are checked, its value isn't verified. The marker cites it with
-  `partly`, so the coverage report counts 30 of the 104 (29%) as fully
-  checked and 1 as checked in part.
+- **Depth:** all 34 are checked in full (see
+  [Claims reviewed](#claims-reviewed)). ORDER-0022 is cited in part by the
+  envelope test and in full by the test that verifies the signature value,
+  so the coverage report counts 34 of the 104 (33%) as fully checked and
+  none only in part.
 - **Sample server:** against `samples` at `360adbc`, with the marker check
-  on, 80 of the 85 tests pass, 2 don't apply (the server implements
-  2026-04-08, which doesn't state the rules they cite) and the 3 TLS tests
-  skip: the sample is reached over `http://` on localhost, so there is no
-  TLS to check.
+  on, 80 of the 86 tests pass, 1 fails (Get Order answers an
+  unauthenticated request; see [Sample server findings](#sample-server-findings)),
+  2 don't apply (the server implements 2026-04-08, which doesn't state the
+  rules they cite) and the 3 TLS tests skip: the sample is reached over
+  `http://` on localhost, so there is no TLS to check.
 
 ## Claims reviewed
 
@@ -63,9 +64,12 @@ rule in part. CHECKOUT-0142 stays fully checked through `TotalsTest`.
 | FULFILLMENT-0018 | MUST     | `FulfillmentStructureTest.test_option_titles_distinguish_siblings`                                                                                                                                 | Full    | Non-empty titles that stay distinct after case folding and whitespace collapsing; the reading of "distinguish" a machine can check.                                                                                                                                                                                                        |
 | FULFILLMENT-0048 | MUST     | `FulfillmentStructureTest.test_default_config_single_group_per_method`                                                                                                                             | Full    |                                                                                                                                                                                                                                                                                                                                            |
 | ORDER-0008       | MUST     | `OrderTest.test_order_retrieval`, and both `WebhookStructureTest` full-entity tests                                                                                                                | Full    | Get Order validates against the order schema and carries the placed checkout (ID, currency, lines, total); each delivery is compared with Get Order member for member. The completion response's `order` is an order confirmation, so it isn't compared.                                                                                   |
+| ORDER-0009       | MUST     | `OrderTest.test_order_read_requires_authentication`                                                                                                                                                | Full    | Get Order with the transport headers but no credential (no signature, no `--auth_header`) must answer 4xx without the order's data; the same request signed with the platform key, which the agent profile publishes, must get the order.                                                                                                  |
+| ORDER-0015       | MUST     | `OrderTest.test_order_read_requires_authentication`                                                                                                                                                | Full    | The same rule as ORDER-0009; see [A rule stated twice](#a-rule-stated-twice).                                                                                                                                                                                                                                                              |
+| ORDER-0016       | MUST     | `WebhookStructureTest.test_delivery_signature_verifies_against_business_keys`                                                                                                                      | Full    | The delivery's signature is verified per signatures.md `verify_rest_request`: the key named by `keyid` from the profile's `keys[]` (`signing_keys[]` through 2026-08-25), the components the server's version must cover, the digest, and the value (ES256 as `r                                                                           |     | s`, ES384, Ed25519). The platform's half, "verified by the platform", is what the suite does. |
 | ORDER-0018       | MUST     | `WebhookStructureTest.test_transient_failure_retries_preserve_event_identity`                                                                                                                      | Full    |                                                                                                                                                                                                                                                                                                                                            |
 | ORDER-0021       | MUST     | `WebhookStructureTest.test_signed_delivery_carries_required_headers_and_digest`                                                                                                                    | Full    |                                                                                                                                                                                                                                                                                                                                            |
-| ORDER-0022       | MUST     | `WebhookStructureTest.test_signed_delivery_carries_required_headers_and_digest`                                                                                                                    | Partial | Checks the RFC 9421 headers, their dictionary shape (matching labels, quoted components, a `keyid`, a base64 signature) and the `Content-Digest`; the signature value isn't verified against the business's keys. Unsigned deliveries fail.                                                                                                |
+| ORDER-0022       | MUST     | `WebhookStructureTest.test_signed_delivery_carries_required_headers_and_digest`, `WebhookStructureTest.test_delivery_signature_verifies_against_business_keys`                                     | Full    | The envelope test is cited in part (headers, shape, digest); the verification test checks the signature per signatures.md in full. Unsigned deliveries fail both.                                                                                                                                                                          |
 | ORDER-0023       | MUST     | `WebhookStructureTest.test_order_created_event_is_full_order_entity`                                                                                                                               | Full    | The delivery validates against the order schema and matches Get Order member for member.                                                                                                                                                                                                                                                   |
 | ORDER-0024       | MUST     | `WebhookStructureTest.test_update_event_is_full_order_entity`                                                                                                                                      | Full    | The same comparison on the latest delivery after the order ships. The update comes from a `/testing/simulate-shipping` hook, so elsewhere the test skips, naming the trigger.                                                                                                                                                              |
 | ORDER-0025       | MUST     | `WebhookStructureTest.test_transient_failure_retries_preserve_event_identity`                                                                                                                      | Full    |                                                                                                                                                                                                                                                                                                                                            |
@@ -118,7 +122,9 @@ Guidelines) both require retries to keep the original `Webhook-Id` and
 `Webhook-Timestamp`. The retry test cites both, so neither shows as uncovered.
 Likewise ORDER-0035 (REST binding, Transport Security) and ORDER-0039 (REST
 binding, Conformance) both require HTTPS with TLS 1.3 as the minimum; the
-order TLS test cites both.
+order TLS test cites both. And ORDER-0009 (Get Order, Authorization) and
+ORDER-0015 (Operations, Guidelines) both require authenticating requests to
+order data; the authentication test cites both.
 
 ### Rule scope
 
@@ -134,13 +140,12 @@ limited stock. Saying so explicitly would remove the doubt.
 ### Changes since 2026-04-08
 
 The tests target the 2026-04-08 release; the catalog is the later draft.
-Three tests check behaviour the draft has changed (`older_version`):
+Two tests check behaviour the draft has changed (`older_version`):
 
-| Test                                                   | What changed                                                                                                                                                                                                                              |
-| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `BusinessLogicTest.test_buyer_consent`                 | Consent purposes are keyed by reverse-DNS ID, and businesses MUST ignore unadvertised ones (BUYER-CONSENT-0010). The test sends boolean flags.                                                                                            |
-| `FulfillmentTest.test_known_customer_new_address`      | The new Selection and Location Identity contract (FULFILLMENT-0012 to 0017) forbids returning a different `selected_destination_id` (FULFILLMENT-0015). The test accepts one.                                                             |
-| `WebhookStructureTest.test_signature_covers_ucp_agent` | ucp#659 adds `webhook-id` and `webhook-timestamp` to the components a webhook signature must cover, and fixes the order page's example. The test checks the 2026-04-08 set and skips when `ucp-agent` isn't covered, waiting on that fix. |
+| Test                                              | What changed                                                                                                                                                                  |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `BusinessLogicTest.test_buyer_consent`            | Consent purposes are keyed by reverse-DNS ID, and businesses MUST ignore unadvertised ones (BUYER-CONSENT-0010). The test sends boolean flags.                                |
+| `FulfillmentTest.test_known_customer_new_address` | The new Selection and Location Identity contract (FULFILLMENT-0012 to 0017) forbids returning a different `selected_destination_id` (FULFILLMENT-0015). The test accepts one. |
 
 ### Rules on pages the catalog doesn't cover
 
@@ -149,6 +154,12 @@ on `overview/index.md`: service advertisement, and the `version_unsupported`
 error for an unsupported version. Two check rules in `signatures.md`: the
 components a signature covers, and that a business's profile URL points to
 `/.well-known/ucp`.
+
+The components a webhook signature must cover changed with ucp#659 (merged
+2026-10-16, after the 2026-08-25 release): `webhook-id` and
+`webhook-timestamp` joined the list. The verifier holds a server to the list
+its advertised version states, so a 2026-04-08 server isn't failed for
+leaving them out, and a draft server is.
 
 ### Rules rendered by a macro
 
@@ -197,15 +208,20 @@ add them, and change the counts above.
   exactly the price plus the shipping option.
 - **Duplicate:** `test_structured_error_messages` sends the same request and
   makes the same assertions as `test_out_of_stock`.
+- **Signatures, both ways:** the suite now signs every request it sends
+  (RFC 9421, ES256 by default) and publishes the key in the agent profile,
+  so a business that verifies platform signatures can authenticate it; and
+  it verifies the business's webhook signatures against the keys the
+  business profile publishes. The old `test_signature_covers_ucp_agent`,
+  which read the component list and skipped on a missing `ucp-agent`, is
+  replaced by that verification. `ucp-agent` coverage follows the normative
+  table, which required it at 2026-04-08 already; the order page's example
+  that omitted it was fixed by ucp#659.
 - **Names that don't match:** `test_complete_is_idempotent` checks that a
-  second completion is refused. In `test_signature_covers_ucp_agent`, only a
-  missing `ucp-agent` skips; a missing `@method`, `@authority`, `@path`,
-  `content-digest` or `content-type` fails.
+  second completion is refused.
 - **Skips that could hide a failure:** the signature tests used to skip when
-  deliveries carried no signature headers at all. Now the envelope test
-  fails on an unsigned delivery (order.md: payloads MUST be signed), and
-  only the two checks that read a signature's parts skip, as not exercised,
-  naming that failure.
+  deliveries carried no signature headers at all. Now both fail on an
+  unsigned delivery (order.md: payloads MUST be signed).
 - **Needs fixtures:** these skip without the matching `conformance_input.json`
   entries: known customers with and without saved addresses, a
   free-shipping threshold and item, dynamic fulfillment destinations, and a
@@ -222,8 +238,8 @@ add them, and change the counts above.
 
 ## Sample server findings
 
-`Universal-Commerce-Protocol/samples` at `360adbc`, which passes the 72 tests
-that apply to its version:
+`Universal-Commerce-Protocol/samples` at `360adbc`, which passes all but one
+of the tests that apply to its version:
 
 - It adds `PUT /orders/{id}` and `POST /testing/simulate-shipping/{id}`,
   which the specification doesn't define.
@@ -232,11 +248,16 @@ that apply to its version:
   describes HTTP 200 with `messages`. It rejects rather than revises a
   quantity, so `test_quantity_revision_is_explained` would skip on it even
   if its version stated CHECKOUT-0010 and 0011.
-- It signs webhook deliveries and covers `ucp-agent`, so the signature tests
-  run instead of skipping.
+- It signs webhook deliveries with ES256 and covers `ucp-agent`,
+  `idempotency-key`, `webhook-id` and `webhook-timestamp`; the signature
+  verifies against the key in its `signing_keys[]`.
+- It returns order data to a request with no credential at all, which fails
+  ORDER-0009 and ORDER-0015 (Get Order MUST authenticate before answering).
+  It does require the `Idempotency-Key` and `Request-Id` headers on Get
+  Order, which the binding doesn't ask of a GET.
 
 ## Coverage gaps
 
-73 testable MUST and MUST NOT rules have no test: checkout 28, catalog 18
-(16 for lookup and 11 for search, 9 of them shared), fulfillment 12, order 6,
+70 testable MUST and MUST NOT rules have no test: checkout 28, catalog 18
+(16 for lookup and 11 for search, 9 of them shared), fulfillment 12, order 3,
 cart 2, discount 3 and buyer consent 4. Each is a candidate for a new test.

@@ -175,11 +175,13 @@ _TEST_OPTIONS = (
   "test_data_dir",
   "discovery_url",
   "webhook_base_url",
+  "platform_key_file",
+  "auth_header",
 )
 
 # Options that name a file, and one that names a folder. The tests use
 # their defaults for a path that does not exist, so the runner checks them.
-_FILE_OPTIONS = ("conformance_input", "fixture_config")
+_FILE_OPTIONS = ("conformance_input", "fixture_config", "platform_key_file")
 _DIR_OPTIONS = ("test_data_dir",)
 
 
@@ -250,9 +252,16 @@ TARGET_KEYS = (
   "test_data_dir",
   "agent_profile_url",
   "webhook_base_url",
+  "platform_key_file",
+  "auth_header",
 )
 # The options that are paths, resolved against the target folder.
-_TARGET_PATH_KEYS = ("conformance_input", "fixture_config", "test_data_dir")
+_TARGET_PATH_KEYS = (
+  "conformance_input",
+  "fixture_config",
+  "test_data_dir",
+  "platform_key_file",
+)
 DEFAULT_SERVER_URL = "http://localhost:8182"
 
 
@@ -395,6 +404,20 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     help="Public URL that reaches the mock webhook port, such as a tunnel, "
     "for a server that cannot reach this machine's localhost. Without it, "
     "webhook tests skip when the server is not on this machine.",
+  )
+  parser.add_argument(
+    "--platform_key_file",
+    default=None,
+    help="Private key the suite signs its requests with (RFC 9421): a PEM "
+    "file holding an EC P-256, P-384 or Ed25519 key, or a private JWK. "
+    "Default: a fresh ES256 key for the run, published in the agent profile.",
+  )
+  parser.add_argument(
+    "--auth_header",
+    default=None,
+    help="A credential header to send on every request, as 'Name: value', "
+    "for a server that authenticates platforms by API key ('X-API-Key: ...') "
+    "or OAuth ('Authorization: Bearer ...').",
   )
   parser.add_argument(
     "-k",

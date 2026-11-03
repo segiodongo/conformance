@@ -231,12 +231,14 @@ what would execute without contacting the server.
 
 A few more options help when the server is not on your machine.
 
-| Option                                                       | Use it when                                                                                                                                                                                                            |
-| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--discovery_url`                                            | The profile under test is not at `/.well-known/ucp`, for example because that path serves an older release. Give a full URL or a path on `--server_url`. The core tests still check `/.well-known/ucp`.                |
-| `--conformance_input`, `--fixture_config`, `--test_data_dir` | The server has its own test data (see steps 1–3). `--test_data_dir` holds `payment_instruments.csv` and `addresses.csv`.                                                                                               |
-| `--agent_profile_url`                                        | The server fetches the agent profile named in the `UCP-Agent` header. The suite serves it on `--mock_agent_port` (default 8285) at `/profiles/agent.json`; give a public URL that reaches it.                          |
-| `--webhook_base_url`                                         | The server sends order webhooks. The suite receives them on `--mock_webhook_port` (default 8284); give a public URL that reaches that port. Without it, the webhook tests skip when the server is not on your machine. |
+| Option                                                       | Use it when                                                                                                                                                                                                                                              |
+| ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--discovery_url`                                            | The profile under test is not at `/.well-known/ucp`, for example because that path serves an older release. Give a full URL or a path on `--server_url`. The core tests still check `/.well-known/ucp`.                                                  |
+| `--conformance_input`, `--fixture_config`, `--test_data_dir` | The server has its own test data (see steps 1–3). `--test_data_dir` holds `payment_instruments.csv` and `addresses.csv`.                                                                                                                                 |
+| `--agent_profile_url`                                        | The server fetches the agent profile named in the `UCP-Agent` header. The suite serves it on `--mock_agent_port` (default 8285) at `/profiles/agent.json`; give a public URL that reaches it.                                                            |
+| `--webhook_base_url`                                         | The server sends order webhooks. The suite receives them on `--mock_webhook_port` (default 8284); give a public URL that reaches that port. Without it, the webhook tests skip when the server is not on your machine.                                   |
+| `--platform_key_file`                                        | The server verifies request signatures against a key it already knows. Give that private key (PEM: EC P-256, P-384 or Ed25519; or a private JWK). By default the suite generates an ES256 key per run and publishes its public JWK in the agent profile. |
+| `--auth_header`                                              | The server authenticates platforms by API key or OAuth rather than by signature. Give the header as `'Name: value'`, such as `'X-API-Key: ...'` or `'Authorization: Bearer ...'`; it is sent on every request.                                           |
 
 A tunnel to each local port is one way to get the two public URLs. The
 runner notes, before the run, any of the two that a server elsewhere lacks.
@@ -253,7 +255,9 @@ folder, other keys are ignored, and options on the command line win:
   "fixture_config": "test_fixtures.json",
   "test_data_dir": ".",
   "agent_profile_url": "https://your-agent-tunnel.example/profiles/agent.json",
-  "webhook_base_url": "https://your-webhook-tunnel.example"
+  "webhook_base_url": "https://your-webhook-tunnel.example",
+  "platform_key_file": "platform-key.pem",
+  "auth_header": "X-API-Key: your-api-key"
 }
 ```
 
@@ -264,8 +268,11 @@ uv run ucp-conformance \
   --suite=shopping
 ```
 
-Request signing is not covered: the tests send a placeholder
-`request-signature` header.
+Every request the suite sends is signed per RFC 9421 (signatures.md, REST
+Request Signing) with the platform key, whose public JWK the agent profile
+publishes as `keys[]` and `signing_keys[]`; a server that verifies platform
+signatures can therefore authenticate the suite. The order tests also verify
+the server's webhook signatures against the keys its own profile publishes.
 
 ---
 

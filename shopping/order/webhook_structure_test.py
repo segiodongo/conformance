@@ -26,21 +26,18 @@ webhooks beyond "an event arrives" (which webhook_test.py already covers):
     incremental delta — order.md "Events" and its Business guidelines. Each
     delivery is therefore compared, member for member, with Get Order fetched
     right after it, and validated against the order schema.
-  * Deliveries MUST be signed. What is checked here is the signing ENVELOPE
-    (headers, digest, signed components, the RFC 9421 shape of
-    ``Signature-Input`` and ``Signature``), not cryptographic verification of
-    the signature value against the business's published keys: ``UCP-Agent``
-    (business profile URL), ``Signature``, ``Signature-Input`` and
-    ``Content-Digest`` headers, with
-    the SHA-256 ``Content-Digest`` matching the raw body — order.md "Webhook
-    Signature Verification". Because the ``UCP-Agent`` header is required on
-    webhook deliveries, ``ucp-agent`` is a required signed component
-    (signatures.md, REST Request Signing component table, footnote **).
+  * Deliveries MUST be signed. One test checks the signing ENVELOPE —
+    ``UCP-Agent`` (business profile URL), ``Signature``, ``Signature-Input``
+    and ``Content-Digest`` headers, the SHA-256 ``Content-Digest`` of the raw
+    body, the RFC 9421 shape of the two signature headers — and another
+    VERIFIES the signature the way signatures.md's ``verify_rest_request``
+    does: the key named by ``keyid`` from the business profile, the
+    components the server's version must cover, the digest, and the value
+    over the rebuilt signature base (``framework.signatures``).
 
-A server that sends unsigned deliveries fails the envelope test (order.md:
-payloads MUST be signed); the checks that read a signature's parts then skip
-as not exercised. The update-event test skips, naming the trigger, when the
-server exposes no /testing/simulate-shipping path.
+A server that sends unsigned deliveries fails both signature tests
+(order.md: payloads MUST be signed). The update-event test skips, naming the
+trigger, when the server exposes no /testing/simulate-shipping path.
 """
 
 import base64
@@ -52,9 +49,9 @@ from typing import Any
 
 from absl.testing import absltest
 from framework.base_test import FLAGS
+from framework import signatures
 from framework.decorators import (
   no_rule,
-  older_version,
   partly,
   requires_capability,
   spec_assert,
@@ -364,30 +361,13 @@ class WebhookStructureTest(ShoppingIntegrationTestBase):
     )
 
   # ── order.md "Webhook Signature Verification" ───────────────────────────
-  def _signed_event(self) -> dict[str, Any]:
-    """Place an order and return its delivery, skipping if unsigned.
-
-    For the checks that read a signature's parts. A delivery with NONE of
-    the signature headers means the server does not sign webhooks at all,
-    which `test_signed_delivery_carries_required_headers_and_digest` fails
-    (order.md: payloads MUST be signed); the checks that build on that skip
-    rather than fail again on the same root cause.
-    """
-    _, _, event = self._place_order()
-    if not any(event["headers"].get(h) for h in _SIGNATURE_HEADERS):
-      self.skip_not_exercised(
-        "the server sends unsigned webhook deliveries (no UCP-Agent, "
-        "Signature, Signature-Input or Content-Digest header), which "
-        "test_signed_delivery_carries_required_headers_and_digest fails"
-      )
-    return event
-
   @spec_assert(
     "REQ-SHOPPING-ORDER-0021",  # UCP-Agent header with the profile URL
     partly(
       "REQ-SHOPPING-ORDER-0022",  # sign payloads with RFC 9421 headers
-      "the RFC 9421 headers, their shape and the Content-Digest; the "
-      "signature value itself isn't verified against the business's keys",
+      "the RFC 9421 headers, their shape and the Content-Digest; "
+      "test_delivery_signature_verifies_against_business_keys verifies the "
+      "value",
     ),
   )
   def test_signed_delivery_carries_required_headers_and_digest(self) -> None:
@@ -398,7 +378,8 @@ class WebhookStructureTest(ShoppingIntegrationTestBase):
     ``Signature-Input`` / ``Signature`` are RFC 9421 dictionaries sharing a
     label, with a non-empty list of quoted component names, a ``keyid``
     (order.md verification step 1 reads it to pick the key) and a base64
-    byte-sequence signature. Not checked: that the signature verifies.
+    byte-sequence signature. The value itself is verified by
+    ``test_delivery_signature_verifies_against_business_keys``.
     """
     _, _, event = self._place_order()
     headers = event["headers"]
@@ -491,52 +472,54 @@ class WebhookStructureTest(ShoppingIntegrationTestBase):
         f"RFC 8941 §3.3.5): {signature!r}",
       )
 
-  @older_version(
-    "2026-04-08",
-    "ucp#659 made webhook signatures also cover webhook-id and "
-    "webhook-timestamp, and fixed the order example that the ucp-agent skip "
-    "waits on; the rule is in signatures.md, outside the catalog",
+  @spec_assert(
+    "REQ-SHOPPING-ORDER-0016",  # payloads MUST be signed by the business
+    "REQ-SHOPPING-ORDER-0022",  # signed per signatures.md with RFC 9421
   )
-  def test_signature_covers_ucp_agent(self) -> None:
-    """The signed components include ucp-agent (binds signer identity).
+  def test_delivery_signature_verifies_against_business_keys(self) -> None:
+    """The delivery's signature verifies with a key the business publishes.
 
-    signatures.md's REST signing component table requires ``ucp-agent``
-    whenever the UCP-Agent header is present, and order.md requires that
-    header on every webhook delivery — so a conformant webhook signature
-    always covers it (along with the always-required derived components and
-    the body components).
+    The verifier follows signatures.md's ``verify_rest_request``: the
+    ``keyid`` names a signature-capable key in the business profile
+    (``keys[]``, or ``signing_keys[]`` on releases through 2026-08-25); the
+    signature covers every component the version the server implements
+    requires (``@method``, ``@authority``, ``@path``, the body's digest and
+    type, ``ucp-agent`` and ``idempotency-key`` when sent, and from
+    ucp#659 on ``webhook-id`` and ``webhook-timestamp``); ``Content-Digest``
+    is the SHA-256 of the raw body; and the value verifies over the
+    rebuilt signature base with the key's algorithm (ES256 as r||s, ES384,
+    or Ed25519). An unsigned delivery fails: order.md has every webhook
+    payload signed.
     """
-    event = self._signed_event()
-    signature_input = event["headers"].get("signature-input", "")
-    match = re.search(r"\(([^)]*)\)", signature_input)
-    self.assertIsNotNone(
-      match,
-      f"Signature-Input has no component list: {signature_input!r}",
+    _, _, event = self._place_order()
+    headers = event["headers"]
+    keys = signatures.profile_keys(self.server_profile.raw)
+    self.assertTrue(
+      keys,
+      "the business profile publishes no signing keys (keys[], or "
+      "signing_keys[] before 2026-10), so no webhook signature can be "
+      "verified (signatures.md: a signer publishes its JWK public keys in "
+      "its profile)",
     )
-    components = re.findall(r'"([^"]+)"', match.group(1))
-    for required in (
-      "@method",
-      "@authority",
-      "@path",
-      "content-digest",
-      "content-type",
-    ):
-      self.assertIn(
-        required,
-        components,
-        f"webhook signature does not cover {required!r} "
-        f"(signatures.md signed-component table): {signature_input!r}",
-      )
-    # signatures.md's component table requires ucp-agent whenever the header
-    # is present, but order.md's own example webhook signature omits it; that
-    # inconsistency has a fix in flight (ucp#659). Until it lands, a merchant
-    # following the example verbatim must not be failed here.
-    if "ucp-agent" not in components:
-      self.skipTest(
-        "webhook signature does not cover ucp-agent; normative text requires "
-        "it but the spec example omits it (fix pending in ucp#659) - not "
-        "graded until the spec is self-consistent"
-      )
+    advertised = self.server_profile.capabilities.get(_ORDER_CAPABILITY)
+    outcome = signatures.verify_request(
+      method=event["method"],
+      authority=headers.get("host", ""),
+      path=event["url_path"],
+      query=event["query"],
+      headers=headers,
+      body=event["raw_body"],
+      keys=keys,
+      version=advertised.version if advertised else None,
+    )
+    self.assertTrue(
+      outcome.ok,
+      "the webhook delivery's signature does not verify against the "
+      f"business's published keys: {outcome.reason} (keyid "
+      f"{outcome.keyid!r}, covered {list(outcome.covered)}; order.md: "
+      "webhook payloads MUST be signed by the business and verified by the "
+      "platform; signatures.md verify_rest_request)",
+    )
 
 
 if __name__ == "__main__":

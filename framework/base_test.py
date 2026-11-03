@@ -26,7 +26,7 @@ from urllib.parse import urlsplit
 import uuid
 from absl import flags
 from absl.testing import absltest
-from framework import transport
+from framework import signatures, transport
 from framework.agent_profile_server import AgentProfileServer
 from framework.constants import DEFAULT_UCP_VERSION
 from framework.decorators import spec_marker
@@ -163,6 +163,53 @@ _define_flag(
   "that cannot reach this machine's localhost. The agent profile gives "
   "it as the webhook address.",
 )
+# The platform's credentials. Every request the suite sends is signed per
+# RFC 9421 with the platform key, whose public JWK the agent profile
+# publishes; a server that authenticates platforms by API key or OAuth
+# instead takes the header given here as well.
+_define_flag(
+  flags.DEFINE_string,
+  "platform_key_file",
+  None,
+  "Private key the suite signs its requests with: a PEM file (EC P-256, "
+  "P-384 or Ed25519) or a private JWK. Default: a fresh ES256 key for the "
+  "run, published in the agent profile.",
+)
+_define_flag(
+  flags.DEFINE_string,
+  "auth_header",
+  None,
+  "A credential header to send on every request, as 'Name: value', for a "
+  "server that authenticates platforms by API key ('X-API-Key: ...') or "
+  "OAuth ('Authorization: Bearer ...').",
+)
+
+
+@functools.cache
+def platform_key() -> signatures.SigningKey:
+  """Return the key the suite signs with: loaded from the flag, else fresh.
+
+  One key per process, so the agent profile every test serves names the key
+  every request is signed with.
+  """
+  path = flag_value("platform_key_file")
+  if path:
+    return signatures.load_signing_key(path)
+  return signatures.generate_signing_key()
+
+
+def auth_header() -> tuple[str, str] | None:
+  """Return the configured credential header as (name, value), if any."""
+  value = flag_value("auth_header")
+  if not value:
+    return None
+  name, separator, content = value.partition(":")
+  if not separator or not name.strip() or not content.strip():
+    raise ValueError(
+      f"--auth_header must look like 'Name: value', got {value!r}"
+    )
+  return name.strip(), content.strip()
+
 
 _LOCAL_HOSTS = frozenset({"localhost", "127.0.0.1", "::1", "0.0.0.0"})
 
@@ -248,7 +295,13 @@ class BaseIntegrationTest(absltest.TestCase):
     # must be stated by the version the server implements.
     self._verify_rules_apply()
 
-    self.client = httpx.Client(base_url=self.base_url, timeout=15.0)
+    # Every request is signed with the platform key (signatures.md, REST
+    # Request Signing); a request sent with auth=None goes unsigned.
+    self.client = httpx.Client(
+      base_url=self.base_url,
+      timeout=15.0,
+      auth=signatures.RequestSigner(platform_key()),
+    )
     self.addCleanup(self.client.close)
 
     self._start_agent_server()
@@ -317,6 +370,7 @@ class BaseIntegrationTest(absltest.TestCase):
       webhook_port=webhook_port,
       ucp_version=self.ucp_version,
       webhook_base_url=flag_value("webhook_base_url"),
+      keys=[platform_key().jwk],
     )
     self.agent_server.start()
     self.addCleanup(self.agent_server.stop)
@@ -377,14 +431,39 @@ class BaseIntegrationTest(absltest.TestCase):
     request_id: str | None = None,
     custom_profile_url: str | None = None,
   ) -> dict[str, str]:
-    """Generate standard UCP transport headers."""
+    """Generate standard UCP transport headers.
+
+    The RFC 9421 signature headers are added by the client when it sends
+    the request. The configured --auth_header, if any, rides along here.
+    """
     profile_url = custom_profile_url or agent_profile_url()
-    return {
+    headers = {
       "UCP-Agent": f'profile="{profile_url}"',
       "request-signature": "test",
       "idempotency-key": idempotency_key or str(uuid.uuid4()),
       "request-id": request_id or str(uuid.uuid4()),
       "Content-Type": "application/json",
+    }
+    credential = auth_header()
+    if credential:
+      headers[credential[0]] = credential[1]
+    return headers
+
+  def credential_free_headers(self) -> dict[str, str]:
+    """Return the transport headers with every credential left out.
+
+    What remains names the platform (UCP-Agent) and the request
+    (Idempotency-Key, Request-Id, Content-Type); nothing authenticates it.
+    Send the request with ``auth=None`` so the client adds no signature.
+    """
+    credential = auth_header()
+    dropped = {"request-signature", "authorization", "x-api-key"}
+    if credential:
+      dropped.add(credential[0].lower())
+    return {
+      name: value
+      for name, value in self.get_headers().items()
+      if name.lower() not in dropped
     }
 
   def assert_response_status(

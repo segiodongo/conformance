@@ -96,6 +96,58 @@ class OrderTest(ShoppingIntegrationTestBase):
     self.assert_order_carries_checkout(order_json, complete_data)
 
   # ── order/rest.md, Protocol Fundamentals and Conformance ────────────────
+  # ── order.md, Get Order: Authorization ───────────────────────────────────
+  @spec_assert(
+    "REQ-SHOPPING-ORDER-0009",  # MUST authenticate requests to order data
+    "REQ-SHOPPING-ORDER-0015",  # the same rule, in the Guidelines
+  )
+  def test_order_read_requires_authentication(self) -> None:
+    """Order data is returned only to an authenticated caller.
+
+    order.md: the business MUST authenticate requests to order data before
+    returning a response, by any supported mechanism (API key, OAuth 2.0,
+    mutual TLS or HTTP Message Signatures), and MAY allow platform
+    credentials to read the orders the platform originated.
+
+    Given an order the suite placed,
+    When Get Order is sent with the transport headers but no credential at
+    all: no RFC 9421 signature, no --auth_header, nothing but UCP-Agent
+    naming the platform,
+    Then the response is a 4xx that carries no order data; and when the
+    same request is sent as the suite normally sends it, signed with the
+    platform key the agent profile publishes (plus --auth_header when
+    given), the order comes back, so the refusal was authentication and
+    not a broken endpoint.
+    """
+    order_id = self.create_completed_order()
+    url = self.get_order_url(order_id)
+
+    anonymous = self.client.get(
+      url, headers=self.credential_free_headers(), auth=None
+    )
+    self.assertTrue(
+      400 <= anonymous.status_code < 500,
+      "Get Order answered an unauthenticated request with "
+      f"{anonymous.status_code}; order.md: the business MUST authenticate "
+      "requests to order data before returning a response (a 401 or 403, "
+      "or a 404 that reveals nothing, is expected)",
+    )
+    self.assertNotIn(
+      order_id,
+      anonymous.text,
+      "Get Order returned the order's data to an unauthenticated request "
+      f"(HTTP {anonymous.status_code}); order.md: authenticate before "
+      "returning a response",
+    )
+
+    authenticated = self.client.get(url, headers=self.get_headers())
+    self.assert_response_status(authenticated, 200)
+    self.assertEqual(
+      authenticated.json().get("id"),
+      order_id,
+      "the platform's own signed request did not get its order back",
+    )
+
   @spec_assert(
     "REQ-SHOPPING-ORDER-0034",  # all response bodies MUST be valid JSON
   )

@@ -80,6 +80,11 @@ class MockWebhookServer:
           "headers": headers,
           "raw_body": raw_body,
           "response_status": response_status,
+          # The request target as sent, for rebuilding a signature base:
+          # RFC 9421's @method, @path (with its leading slash) and @query.
+          "method": request.method,
+          "url_path": request.url.path,
+          "query": request.url.query or None,
         }
       )
       if response_status == 500:

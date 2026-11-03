@@ -48,6 +48,7 @@ class AgentProfileServer:
     profile_template_path: str | None = None,
     profile_dict: dict[str, Any] | None = None,
     webhook_base_url: str | None = None,
+    keys: list[dict[str, Any]] | None = None,
   ):
     """Initialize AgentProfileServer with port and profile configuration.
 
@@ -63,12 +64,17 @@ class AgentProfileServer:
         server, such as a tunnel, for a server under test that cannot reach
         this machine's localhost. It replaces
         http://localhost:{webhook_port} in the profile.
+      keys: The platform's public signing keys (JWKs) to publish, so the
+        business under test can verify the suite's request signatures. They
+        are served as `keys[]`, the canonical profile field, and as
+        `signing_keys[]`, its name through the 2026-08-25 release.
 
     """
     self.port = port
     self.webhook_port = webhook_port
     self.ucp_version = ucp_version
     self.webhook_base_url = webhook_base_url
+    self.keys = list(keys or [])
     self.app = FastAPI()
 
     if profile_dict is not None:
@@ -96,7 +102,11 @@ class AgentProfileServer:
       )
     content = content.replace("{webhook_port}", str(self.webhook_port))
     content = content.replace("{ucp_version}", self.ucp_version)
-    return json.loads(content)
+    profile = json.loads(content)
+    if self.keys:
+      profile["keys"] = self.keys
+      profile["signing_keys"] = self.keys
+    return profile
 
   def _setup_routes(self) -> None:
     async def _respond_profile() -> JSONResponse:
