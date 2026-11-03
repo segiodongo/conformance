@@ -19,10 +19,20 @@ The vertical-agnostic half of protocol conformance lives in
 to a server advertising the shopping vertical.
 """
 
+import uuid
+
 from absl.testing import absltest
 from framework.base_test import DEFAULT_UCP_VERSION
-from framework.decorators import outside_catalog, requires_capability
-from shopping.base import ShoppingIntegrationTestBase, rest_entry
+from framework.decorators import (
+  outside_catalog,
+  requires_capability,
+  spec_assert,
+)
+from shopping.base import (
+  ShoppingIntegrationTestBase,
+  get_valid_payment_payload,
+  rest_entry,
+)
 from ucp_sdk.models.schemas.shopping import checkout as checkout
 
 try:
@@ -175,6 +185,96 @@ class ShoppingProtocolTest(ShoppingIntegrationTestBase):
       headers=headers,
     )
     self.assert_response_status(response, 422)
+
+  # ── checkout/rest.md, Protocol Fundamentals ─────────────────────────────
+  @spec_assert(
+    "REQ-SHOPPING-CHECKOUT-0241",  # request and response bodies: valid JSON
+  )
+  def test_response_bodies_are_strict_json(self) -> None:
+    """Every checkout response body is valid RFC 8259 JSON served as JSON.
+
+    Create, Get, Update, Complete and Cancel Checkout, the error for an
+    unknown session, and the error for a request whose body is not JSON:
+    each body must be UTF-8 without a byte order mark, parse under the
+    RFC 8259 grammar (no NaN or Infinity, no trailing commas) and come as
+    application/json. The request half of the rule binds the platform; the
+    malformed request shows the business does not take a body that is not
+    JSON for one, and answers in JSON itself.
+    """
+    sessions = self.get_shopping_url("/checkout-sessions")
+    create_payload = self.create_checkout_payload().model_dump(
+      mode="json", by_alias=True, exclude_none=True
+    )
+    create = self.client.post(
+      sessions, json=create_payload, headers=self.get_headers()
+    )
+    self.assert_response_status(create, [200, 201])
+    self.assert_strict_json(create, f"Create Checkout ({create.status_code})")
+    checkout_id = create.json()["id"]
+
+    read = self.client.get(
+      f"{sessions}/{checkout_id}", headers=self.get_headers()
+    )
+    self.assert_response_status(read, 200)
+    self.assert_strict_json(read, "Get Checkout (200)")
+
+    checkout_obj = checkout.Checkout(**read.json())
+    update = self.client.put(
+      f"{sessions}/{checkout_id}",
+      json=self.checkout_update_payload(checkout_obj),
+      headers=self.get_headers(),
+    )
+    self.assert_response_status(update, 200)
+    self.assert_strict_json(update, "Update Checkout (200)")
+
+    cancel = self.client.post(
+      f"{sessions}/{checkout_id}/cancel", headers=self.get_headers()
+    )
+    self.assert_strict_json(cancel, f"Cancel Checkout ({cancel.status_code})")
+
+    # A completion, on a second session: the response with the order in it.
+    completed_id = self.create_checkout_session()["id"]
+    complete = self.client.post(
+      f"{sessions}/{completed_id}/complete",
+      json=get_valid_payment_payload(),
+      headers=self.get_headers(),
+    )
+    self.assert_response_status(complete, 200)
+    self.assert_strict_json(complete, "Complete Checkout (200)")
+
+    unknown = self.client.get(
+      f"{sessions}/does-not-exist-{uuid.uuid4()}", headers=self.get_headers()
+    )
+    self.assert_strict_json(
+      unknown, f"Get Checkout for an unknown session ({unknown.status_code})"
+    )
+
+    malformed = self.client.post(
+      sessions, content=b'{"line_items": [', headers=self.get_headers()
+    )
+    self.assertTrue(
+      400 <= malformed.status_code < 500,
+      "a request whose body is not valid JSON must be rejected with a 4xx "
+      f"(Content Types: request bodies MUST be valid JSON), got "
+      f"{malformed.status_code}",
+    )
+    self.assert_strict_json(
+      malformed, f"the error for a malformed body ({malformed.status_code})"
+    )
+
+  @spec_assert(
+    "REQ-SHOPPING-CHECKOUT-0242",  # HTTPS with minimum TLS version 1.3
+  )
+  def test_endpoints_are_served_over_tls_1_3(self) -> None:
+    """The profile and the checkout endpoint speak TLS 1.3 and nothing older.
+
+    A TLS 1.3 handshake must complete and a handshake capped at TLS 1.2
+    must be refused. A plaintext endpoint on a local address skips as an
+    environment limit; anywhere else it fails.
+    """
+    self.assert_tls_minimum_1_3(
+      [self.discovery_url, self.get_shopping_url("/checkout-sessions")]
+    )
 
 
 if __name__ == "__main__":

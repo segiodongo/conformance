@@ -95,6 +95,48 @@ class OrderTest(ShoppingIntegrationTestBase):
     self.assertTrue(order_data.line_items, "Get Order returned no line items")
     self.assert_order_carries_checkout(order_json, complete_data)
 
+  # ── order/rest.md, Protocol Fundamentals and Conformance ────────────────
+  @spec_assert(
+    "REQ-SHOPPING-ORDER-0034",  # all response bodies MUST be valid JSON
+  )
+  def test_response_bodies_are_strict_json(self) -> None:
+    """Every order response body is valid RFC 8259 JSON served as JSON.
+
+    Get Order for a placed order, and the error for an unknown order: each
+    body must be UTF-8 without a byte order mark, parse under the RFC 8259
+    grammar (no NaN or Infinity, no trailing commas) and come as
+    application/json.
+    """
+    order_id = self.create_completed_order()
+    read = self.client.get(
+      self.get_order_url(order_id), headers=self.get_headers()
+    )
+    self.assert_response_status(read, 200)
+    self.assert_strict_json(read, "Get Order (200)")
+
+    unknown = self.client.get(
+      self.get_order_url(f"does-not-exist-{uuid.uuid4()}"),
+      headers=self.get_headers(),
+    )
+    self.assert_strict_json(
+      unknown, f"Get Order for an unknown order ({unknown.status_code})"
+    )
+
+  @spec_assert(
+    "REQ-SHOPPING-ORDER-0035",  # HTTPS with minimum TLS version 1.3
+    "REQ-SHOPPING-ORDER-0039",  # the same rule, in the Conformance section
+  )
+  def test_endpoints_are_served_over_tls_1_3(self) -> None:
+    """The profile and the order endpoint speak TLS 1.3 and nothing older.
+
+    A TLS 1.3 handshake must complete and a handshake capped at TLS 1.2
+    must be refused. A plaintext endpoint on a local address skips as an
+    environment limit; anywhere else it fails.
+    """
+    self.assert_tls_minimum_1_3(
+      [self.discovery_url, self.get_shopping_url("/orders")]
+    )
+
   @scenario(
     "the order's first expectation reuses the selected option's title as "
     "its description, a sample server choice that no rule requires"

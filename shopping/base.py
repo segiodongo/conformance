@@ -1237,7 +1237,7 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     complete_data = self.complete_checkout_session(checkout_id)
     return complete_data["order"]["id"]
 
-  def update_checkout_session(
+  def checkout_update_payload(
     self,
     checkout_obj: Any,
     currency: str | None = None,
@@ -1247,9 +1247,8 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     fulfillment: Any | None = None,
     discounts: Any | None = None,
     platform: Any | None = None,
-    headers: dict[str, str] | None = None,
-  ) -> Any:
-    """Update a checkout session.
+  ) -> dict[str, Any]:
+    """Build the body of an Update Checkout request, as JSON.
 
     PUT replaces the whole checkout, so every optional field that is not
     passed explicitly is carried over from `checkout_obj`; otherwise a partial
@@ -1313,15 +1312,42 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
       discounts=discounts,
       platform=platform,
     )
+    return update_payload.model_dump(
+      mode="json", by_alias=True, exclude_none=True
+    )
 
+  def update_checkout_session(
+    self,
+    checkout_obj: Any,
+    currency: str | None = None,
+    line_items: list[Any] | None = None,
+    payment: Any | None = None,
+    buyer: Any | None = None,
+    fulfillment: Any | None = None,
+    discounts: Any | None = None,
+    platform: Any | None = None,
+    headers: dict[str, str] | None = None,
+  ) -> Any:
+    """Update a checkout session; return the response JSON.
+
+    The body comes from `checkout_update_payload`, which carries over every
+    field not passed explicitly, since PUT replaces the whole checkout.
+    """
     request_headers = self.get_headers()
     if headers:
       request_headers.update(headers)
 
     response = self.client.put(
       self.get_shopping_url(f"/checkout-sessions/{checkout_obj.id}"),
-      json=update_payload.model_dump(
-        mode="json", by_alias=True, exclude_none=True
+      json=self.checkout_update_payload(
+        checkout_obj,
+        currency=currency,
+        line_items=line_items,
+        payment=payment,
+        buyer=buyer,
+        fulfillment=fulfillment,
+        discounts=discounts,
+        platform=platform,
       ),
       headers=request_headers,
     )

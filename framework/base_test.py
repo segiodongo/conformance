@@ -19,12 +19,14 @@ import functools
 import json
 import logging
 import os
+from collections.abc import Iterable
 from pathlib import Path
 from typing import NoReturn
 from urllib.parse import urlsplit
 import uuid
 from absl import flags
 from absl.testing import absltest
+from framework import transport
 from framework.agent_profile_server import AgentProfileServer
 from framework.constants import DEFAULT_UCP_VERSION
 from framework.decorators import spec_marker
@@ -401,3 +403,71 @@ class BaseIntegrationTest(absltest.TestCase):
         f" {response.text}"
       ),
     )
+
+  # Protocol Fundamentals every REST binding page states: bodies are valid
+  # JSON served as application/json, and endpoints are served over HTTPS
+  # with TLS 1.3 as the minimum (see framework.transport).
+
+  def assert_strict_json(self, response: httpx.Response, what: str) -> None:
+    """Assert a response body is valid RFC 8259 JSON served as JSON.
+
+    Args:
+      response: The response to check.
+      what: Which response, for the message, such as "Create Cart (201)".
+
+    """
+    problems = transport.json_body_problems(
+      response.status_code,
+      response.headers.get("content-type"),
+      response.content,
+    )
+    self.assertFalse(
+      problems,
+      f"{what}: the response body is not valid JSON as RFC 8259 specifies "
+      "it (REST binding, Content Types):\n  " + "\n  ".join(problems),
+    )
+
+  def assert_tls_minimum_1_3(self, urls: Iterable[str]) -> None:
+    """Assert the hosts behind the URLs serve TLS 1.3 and nothing older.
+
+    Each distinct https host is probed twice: a TLS 1.3 handshake must
+    complete, and a handshake capped at TLS 1.2 must be refused. A URL that
+    is not https fails the rule, except on a local address: a server under
+    test on this machine is reached over plaintext by arrangement, which is
+    an environment limit, so the test skips and says how to lift it.
+
+    Args:
+      urls: The endpoints the rule covers, such as the discovery profile and
+        the capability's REST endpoint.
+
+    """
+    hosts: dict[tuple[str, int], str] = {}
+    for url in urls:
+      parts = urlsplit(url)
+      if parts.scheme != "https":
+        if is_local_url(url):
+          self.skip_environment(
+            f"{url} is reached over {parts.scheme or 'no scheme'} on a local "
+            "address, so TLS can't be checked; serve the server over HTTPS "
+            "(or test a deployed instance) to check it"
+          )
+        self.fail(
+          f"{url} is not served over HTTPS (REST binding, Transport "
+          "Security: all REST endpoints MUST be served over HTTPS with "
+          "minimum TLS version 1.3)"
+        )
+      host = parts.hostname or ""
+      hosts.setdefault((host, parts.port or 443), url)
+    for (host, port), url in hosts.items():
+      probe = transport.probe_tls(host, port)
+      self.assertTrue(
+        probe.tls13,
+        f"{host}:{port} ({url}) does not complete a TLS 1.3 handshake "
+        f"({probe.tls13_detail}); all REST endpoints MUST be served over "
+        "HTTPS with minimum TLS version 1.3",
+      )
+      self.assertTrue(
+        probe.tls12_refused,
+        f"{host}:{port} ({url}) still accepts TLS 1.2 ({probe.tls12_detail}); "
+        "the minimum TLS version MUST be 1.3",
+      )

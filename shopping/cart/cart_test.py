@@ -281,6 +281,85 @@ class CartTest(ShoppingIntegrationTestBase):
       f"{checkout.get('discounts')!r}, messages: {checkout.get('messages')!r}",
     )
 
+  # ── cart/rest.md, Protocol Fundamentals ──────────────────────────────────
+  @spec_assert(
+    "REQ-SHOPPING-CART-0062",  # request and response bodies MUST be valid JSON
+  )
+  def test_response_bodies_are_strict_json(self) -> None:
+    """Every cart response body is valid RFC 8259 JSON served as JSON.
+
+    Create, Get, Update and Cancel Cart, the answer for the cart once
+    canceled, and the error answer to a request whose body is not JSON:
+    each body must be UTF-8 without a byte order mark, parse under the
+    RFC 8259 grammar (no NaN or Infinity, no trailing commas) and come as
+    application/json. The request half of the rule binds the platform; the
+    malformed request shows the business does not take a body that is not
+    JSON for one, and answers in JSON itself.
+    """
+    sku = self.fixture_ctx.get_test_sku()
+    carts = self.get_shopping_url("/carts")
+    create = self.client.post(
+      carts,
+      json={"line_items": [{"item": {"id": sku}, "quantity": 1}]},
+      headers=self.get_headers(),
+    )
+    self.assert_response_status(create, [200, 201])
+    self.assert_strict_json(create, f"Create Cart ({create.status_code})")
+    cart_id = create.json()["id"]
+
+    read = self.get_cart(cart_id)
+    self.assert_response_status(read, 200)
+    self.assert_strict_json(read, "Get Cart (200)")
+
+    update = self.client.put(
+      f"{carts}/{cart_id}",
+      json={
+        "id": cart_id,
+        "line_items": [{"item": {"id": sku}, "quantity": 2}],
+      },
+      headers=self.get_headers(),
+    )
+    self.assert_response_status(update, 200)
+    self.assert_strict_json(update, "Update Cart (200)")
+
+    cancel = self.cancel_cart(cart_id)
+    self.assert_response_status(cancel, [200, 201])
+    self.assert_strict_json(cancel, f"Cancel Cart ({cancel.status_code})")
+
+    # Whatever the server answers for a canceled cart (not_found is a
+    # SHOULD), the body is JSON.
+    after = self.get_cart(cart_id)
+    self.assert_strict_json(
+      after, f"Get Cart after cancel ({after.status_code})"
+    )
+
+    malformed = self.client.post(
+      carts, content=b'{"line_items": [', headers=self.get_headers()
+    )
+    self.assertTrue(
+      400 <= malformed.status_code < 500,
+      "a request whose body is not valid JSON must be rejected with a 4xx "
+      f"(Content Types: request bodies MUST be valid JSON), got "
+      f"{malformed.status_code}",
+    )
+    self.assert_strict_json(
+      malformed, f"the error for a malformed body ({malformed.status_code})"
+    )
+
+  @spec_assert(
+    "REQ-SHOPPING-CART-0063",  # HTTPS with minimum TLS version 1.3
+  )
+  def test_endpoints_are_served_over_tls_1_3(self) -> None:
+    """The profile and the cart endpoint speak TLS 1.3 and nothing older.
+
+    A TLS 1.3 handshake must complete and a handshake capped at TLS 1.2
+    must be refused. A plaintext endpoint on a local address skips as an
+    environment limit; anywhere else it fails.
+    """
+    self.assert_tls_minimum_1_3(
+      [self.discovery_url, self.get_shopping_url("/carts")]
+    )
+
 
 if __name__ == "__main__":
   absltest.main()
