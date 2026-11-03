@@ -25,6 +25,7 @@ import unittest
 
 from shopping import base
 from shopping.cart import cart_test
+from shopping.catalog import lookup_test, search_test
 from shopping.order import webhook_structure_test as webhook
 from shopping.validation import validation_test
 
@@ -421,6 +422,161 @@ class CartHelpersTest(unittest.TestCase):
     self.assertFalse(
       cart_test._message_names_code(
         {"messages": [{"type": "info", "content": "Free shipping"}]}, "SAVE10"
+      )
+    )
+
+
+class UnitPriceProblemsTest(unittest.TestCase):
+  """unit_price_problems and assert_unit_price: CATALOG-0003..0009."""
+
+  def check(self, unit_price: dict, price: dict) -> None:
+    """Run assert_unit_price unbound with this TestCase as self."""
+    base.ShoppingIntegrationTestBase.assert_unit_price(self, unit_price, price)
+
+  def test_spec_cable_spool_example_passes(self) -> None:
+    """A 50 m cable spool at $25.00 with a $0.50/m comparator passes."""
+    self.check(
+      {
+        "amount": 50,
+        "currency": "USD",
+        "measure": {
+          "value": 5000,
+          "unit": "MTR",
+          "scale": 2,
+          "display_text": "m",
+        },
+        "reference": {"value": 1, "unit": "MTR", "display_text": "m"},
+      },
+      {"amount": 2500, "currency": "USD"},
+    )
+
+  def test_accepts_one_rounding_when_comparator_is_fractional(self) -> None:
+    """750 mL at $10.00 -> per 100 mL is 133.333... minor units (133 or 134)."""
+    for rounded in (133, 134):
+      self.check(
+        {
+          "amount": rounded,
+          "currency": "USD",
+          "measure": {"value": 750, "unit": "MLT", "display_text": "mL"},
+          "reference": {"value": 100, "unit": "MLT", "display_text": "mL"},
+        },
+        {"amount": 1000, "currency": "USD"},
+      )
+
+  def test_rejects_non_positive_or_non_integer_measure_values(self) -> None:
+    """CATALOG-0003: measure.value and reference.value must be positive ints."""
+    for bad_m, bad_r in ((0, 1), (1, -1), (True, 1), (1.5, 1)):
+      problems = base.unit_price_problems(
+        {
+          "amount": 100,
+          "currency": "USD",
+          "measure": {"value": bad_m, "unit": "MTR"},
+          "reference": {"value": bad_r, "unit": "MTR"},
+        },
+        {"amount": 100, "currency": "USD"},
+      )
+      self.assertTrue(
+        any("CATALOG-0003" in p for p in problems),
+        f"expected CATALOG-0003 violation for ({bad_m!r}, {bad_r!r}): "
+        f"{problems}",
+      )
+
+  def test_rejects_currency_mismatch(self) -> None:
+    """CATALOG-0004 & -0007: unit_price.currency must equal price.currency."""
+    problems = base.unit_price_problems(
+      {
+        "amount": 100,
+        "currency": "EUR",
+        "measure": {"value": 1, "unit": "MTR"},
+        "reference": {"value": 1, "unit": "MTR"},
+      },
+      {"amount": 100, "currency": "USD"},
+    )
+    self.assertTrue(any("CATALOG-0004" in p for p in problems))
+
+  def test_rejects_cross_unit_comparison(self) -> None:
+    """CATALOG-0005 & -0007: measure.unit must equal reference.unit."""
+    problems = base.unit_price_problems(
+      {
+        "amount": 100,
+        "currency": "USD",
+        "measure": {"value": 1000, "unit": "GRM"},
+        "reference": {"value": 1, "unit": "KGM"},
+      },
+      {"amount": 100, "currency": "USD"},
+    )
+    self.assertTrue(any("CATALOG-0005" in p for p in problems))
+
+  def test_rejects_wrong_comparator_amount(self) -> None:
+    """CATALOG-0008 & -0009: amount outside floor/ceil of formula fails."""
+    with self.assertRaises(AssertionError) as caught:
+      self.check(
+        {
+          "amount": 135,
+          "currency": "USD",
+          "measure": {"value": 750, "unit": "MLT"},
+          "reference": {"value": 100, "unit": "MLT"},
+        },
+        {"amount": 1000, "currency": "USD"},
+      )
+    self.assertIn("CATALOG-0008", str(caught.exception))
+
+
+class CatalogHelpersTest(unittest.TestCase):
+  """Helpers used by lookup_test and search_test."""
+
+  def test_find_variant_matches_variant_id_then_product_id(self) -> None:
+    """_find_variant finds an exact variant ID or falls back to product ID."""
+    products = [
+      {
+        "id": "prod_1",
+        "variants": [{"id": "var_1a"}, {"id": "var_1b"}],
+      }
+    ]
+    self.assertEqual(
+      lookup_test._find_variant(products, "var_1b"), {"id": "var_1b"}
+    )
+    self.assertEqual(
+      lookup_test._find_variant(products, "prod_1"), {"id": "var_1a"}
+    )
+    self.assertIsNone(lookup_test._find_variant(products, "missing"))
+
+  def test_has_error_code_checks_messages_and_top_level(self) -> None:
+    """_has_error_code matches messages[].code or top-level code/error."""
+    self.assertTrue(
+      lookup_test._has_error_code(
+        {"messages": [{"type": "error", "code": "request_too_large"}]},
+        "request_too_large",
+      )
+    )
+    self.assertTrue(
+      lookup_test._has_error_code(
+        {"code": "request_too_large"}, "request_too_large"
+      )
+    )
+    self.assertFalse(
+      lookup_test._has_error_code(
+        {"messages": [{"type": "error", "code": "other"}]},
+        "request_too_large",
+      )
+    )
+
+  def test_is_rejected_search_accepts_400_or_ucp_error_envelope(self) -> None:
+    """_is_rejected_search recognizes HTTP 400 and UCP error envelopes."""
+    self.assertTrue(search_test._is_rejected_search(400, {}))
+    self.assertTrue(
+      search_test._is_rejected_search(
+        200,
+        {
+          "ucp": {"status": "error"},
+          "messages": [{"type": "error", "code": "invalid_input"}],
+        },
+      )
+    )
+    self.assertFalse(
+      search_test._is_rejected_search(
+        200,
+        {"ucp": {"status": "success"}, "products": []},
       )
     )
 

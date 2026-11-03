@@ -58,17 +58,46 @@ class TriggerTest(unittest.TestCase):
       with self.subTest(key=key):
         self.assertTrue(callable(getattr(DynamicFixtureContext, getter)))
 
-  def test_flower_shop_declares_every_trigger(self):
-    """Test that the sample's fixtures give every trigger a value."""
+  def test_flower_shop_declares_its_triggers(self):
+    """Test that the sample's fixtures give its declared triggers a value."""
     context = DynamicFixtureContext(FLOWER_SHOP)
+    declared = set(FLOWER_SHOP.get("test_fixtures", {})) & set(
+      DynamicFixtureContext.TRIGGERS
+    )
+    self.assertTrue(declared)
     for key in DynamicFixtureContext.TRIGGERS:
       with self.subTest(key=key):
-        self.assertIsNotNone(context.trigger(key))
+        if key in declared:
+          self.assertIsNotNone(context.trigger(key))
+        else:
+          self.assertIsNone(context.trigger(key))
     self.assertEqual(context.trigger("valid_discount_code_2"), "WELCOME20")
     self.assertEqual(
       context.trigger("known_customer")["email"], "john.doe@example.com"
     )
     self.assertEqual(context.trigger("free_shipping_min_subtotal"), 10000)
+
+  def test_all_registered_triggers_parse_valid_shapes(self):
+    """Test that every registered trigger returns a value when well-formed."""
+    merged = json.loads(json.dumps(FLOWER_SHOP))
+    merged["test_fixtures"].update(
+      {
+        "catalog_product_with_options": {
+          "id": "prod_abc123",
+          "selected": [{"name": "Color", "label": "Blue"}],
+        },
+        "catalog_variant": {
+          "product_id": "prod_abc123",
+          "variant_id": "prod_abc123_size10",
+        },
+        "unit_price_item_sku": "cable_50m",
+        "catalog_search_default_page_size": 10,
+      }
+    )
+    context = DynamicFixtureContext(merged)
+    for key in DynamicFixtureContext.TRIGGERS:
+      with self.subTest(key=key):
+        self.assertIsNotNone(context.trigger(key))
 
   def test_undeclared_triggers_are_none(self):
     """Test that a server that declares nothing gets None for each."""
@@ -91,6 +120,10 @@ class TriggerTest(unittest.TestCase):
               "expected_option_id": "exp-ship-us",
             }
           },
+          "catalog_product_with_options": {"id": "prod_only"},
+          "catalog_variant": {"product_id": "prod_only"},
+          "unit_price_item_sku": "   ",
+          "catalog_search_default_page_size": True,
         }
       }
     )
@@ -98,6 +131,10 @@ class TriggerTest(unittest.TestCase):
       "known_customer",
       "known_customer_without_address",
       "dynamic_fulfillment",
+      "catalog_product_with_options",
+      "catalog_variant",
+      "unit_price_item_sku",
+      "catalog_search_default_page_size",
     ):
       with self.subTest(key=key):
         self.assertIsNone(context.trigger(key))

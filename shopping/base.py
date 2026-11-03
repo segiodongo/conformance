@@ -21,8 +21,10 @@ checkout payload builders and the checkout/order helpers the tests call.
 """
 
 import csv
+from fractions import Fraction
 import json
 import logging
+import math
 from pathlib import Path
 from typing import Any, TypedDict
 import uuid
@@ -109,6 +111,123 @@ def line_total_entry(line: dict[str, Any]) -> int | None:
   if "subtotal" in entries:
     return entries["subtotal"]
   return entries.get("total") if len(entries) == 1 else None
+
+
+def _is_int(value: Any) -> bool:
+  """Return whether value is an int and not a bool."""
+  return isinstance(value, int) and not isinstance(value, bool)
+
+
+def unit_price_problems(
+  unit_price: Any, price: Any, where: str = "unit_price"
+) -> list[str]:
+  """Return every violation of the catalog unit_price invariants, or none.
+
+  Checks the rules of catalog/index.md (Distinction from unit price):
+    - CATALOG-0003: positive integer for `measure.value` and `reference.value`.
+    - CATALOG-0004: `unit_price.currency` equals `price.currency`.
+    - CATALOG-0005: `measure.unit` equals `reference.unit`.
+    - CATALOG-0007: no cross-unit or currency conversion.
+    - CATALOG-0008: comparator is `(price.amount / (measure.value ×
+      10^-measure.scale)) × (reference.value × 10^-reference.scale)`.
+    - CATALOG-0009: rounded once to the currency's minor units as
+      `unit_price.amount`.
+
+  Args:
+    unit_price: The `unit_price` object from a variant or transaction item.
+    price: The `price` object (`{"amount", "currency"}`) it is derived from.
+    where: Label for error messages.
+
+  Returns:
+    Human-readable problem descriptions; empty when all invariants hold.
+
+  """
+  if not isinstance(unit_price, dict):
+    return [f"{where}: expected a dict, got {unit_price!r}"]
+  if not isinstance(price, dict):
+    return [f"{where}: price must be a dict, got {price!r}"]
+
+  problems: list[str] = []
+  measure = unit_price.get("measure")
+  reference = unit_price.get("reference")
+  if not isinstance(measure, dict):
+    problems.append(f"{where}.measure: missing or not a dict ({measure!r})")
+    measure = {}
+  if not isinstance(reference, dict):
+    problems.append(f"{where}.reference: missing or not a dict ({reference!r})")
+    reference = {}
+
+  # CATALOG-0003: positive integer for measure.value and reference.value.
+  m_val = measure.get("value")
+  r_val = reference.get("value")
+  if not _is_int(m_val) or m_val < 1:
+    problems.append(
+      f"{where}.measure.value: must be a positive integer, got {m_val!r} "
+      "(CATALOG-0003)"
+    )
+  if not _is_int(r_val) or r_val < 1:
+    problems.append(
+      f"{where}.reference.value: must be a positive integer, got {r_val!r} "
+      "(CATALOG-0003)"
+    )
+
+  # CATALOG-0004 & CATALOG-0007: unit_price.currency == price.currency.
+  up_currency = unit_price.get("currency")
+  p_currency = price.get("currency")
+  if (
+    not isinstance(up_currency, str)
+    or not up_currency
+    or up_currency != p_currency
+  ):
+    problems.append(
+      f"{where}.currency: {up_currency!r} does not equal price.currency "
+      f"{p_currency!r} (CATALOG-0004, CATALOG-0007)"
+    )
+
+  # CATALOG-0005 & CATALOG-0007: measure.unit == reference.unit.
+  m_unit = measure.get("unit")
+  r_unit = reference.get("unit")
+  if not isinstance(m_unit, str) or not m_unit or m_unit != r_unit:
+    problems.append(
+      f"{where}: measure.unit {m_unit!r} does not equal reference.unit "
+      f"{r_unit!r} (CATALOG-0005, CATALOG-0007)"
+    )
+
+  # CATALOG-0008 & CATALOG-0009: comparator formula rounded once to minor units.
+  up_amount = unit_price.get("amount")
+  p_amount = price.get("amount")
+  m_scale = measure.get("scale", 0)
+  r_scale = reference.get("scale", 0)
+  if m_scale is None:
+    m_scale = 0
+  if r_scale is None:
+    r_scale = 0
+  if not _is_int(up_amount):
+    problems.append(
+      f"{where}.amount: must be an integer, got {up_amount!r} (CATALOG-0009)"
+    )
+  elif not _is_int(p_amount):
+    problems.append(f"{where}: price.amount is not an integer ({p_amount!r})")
+  elif not _is_int(m_scale) or m_scale < 0:
+    problems.append(f"{where}.measure.scale: invalid scale {m_scale!r}")
+  elif not _is_int(r_scale) or r_scale < 0:
+    problems.append(f"{where}.reference.scale: invalid scale {r_scale!r}")
+  elif _is_int(m_val) and m_val >= 1 and _is_int(r_val) and r_val >= 1:
+    exact = (
+      Fraction(p_amount, 1)
+      * Fraction(r_val, 10**r_scale)
+      / Fraction(m_val, 10**m_scale)
+    )
+    allowed = {math.floor(exact), math.ceil(exact)}
+    if up_amount not in allowed:
+      problems.append(
+        f"{where}.amount: got {up_amount}, expected {float(exact):.4f} "
+        f"rounded once to minor units ({sorted(allowed)}) from "
+        f"price.amount={p_amount}, measure={measure}, reference={reference} "
+        "(CATALOG-0007, CATALOG-0008, CATALOG-0009)"
+      )
+
+  return problems
 
 
 def _without_empties(value: Any) -> Any:
@@ -341,6 +460,27 @@ class DynamicFulfillmentFixture(TypedDict):
   international: DynamicFulfillmentCaseFixture
 
 
+class CatalogOptionSelectionFixture(TypedDict):
+  """A single option selection (`name`, `label`) for a catalog product."""
+
+  name: str
+  label: str
+
+
+class CatalogProductWithOptionsFixture(TypedDict):
+  """A catalog product with configurable options and a sample selection."""
+
+  id: str
+  selected: list[CatalogOptionSelectionFixture]
+
+
+class CatalogVariantFixture(TypedDict):
+  """A catalog product ID and one of its variant IDs."""
+
+  product_id: str
+  variant_id: str
+
+
 class DynamicFixtureContext:
   """Context for loading dynamic test fixtures from configuration.
 
@@ -362,6 +502,10 @@ class DynamicFixtureContext:
     "free_shipping_min_subtotal": "get_free_shipping_min_subtotal",
     "free_shipping_item_sku": "get_free_shipping_item_sku",
     "dynamic_fulfillment": "get_dynamic_fulfillment",
+    "catalog_product_with_options": "get_catalog_product_with_options",
+    "catalog_variant": "get_catalog_variant",
+    "unit_price_item_sku": "get_unit_price_item_sku",
+    "catalog_search_default_page_size": "get_catalog_search_default_page_size",
   }
 
   def __init__(
@@ -655,6 +799,77 @@ class DynamicFixtureContext:
     return DynamicFulfillmentFixture(
       domestic=domestic, international=international
     )
+
+  def get_catalog_product_with_options(
+    self,
+  ) -> CatalogProductWithOptionsFixture | None:
+    """Get a catalog product with options and a sample selection."""
+    val = self._get_test_fixture("catalog_product_with_options")
+    if not isinstance(val, dict):
+      return None
+    product_id = val.get("id")
+    selected = val.get("selected")
+    if not isinstance(product_id, str) or not product_id.strip():
+      return None
+    if not isinstance(selected, list) or not selected:
+      return None
+    for entry in selected:
+      if not isinstance(entry, dict):
+        return None
+      if not isinstance(entry.get("name"), str) or not entry["name"].strip():
+        return None
+      if not isinstance(entry.get("label"), str) or not entry["label"].strip():
+        return None
+    return CatalogProductWithOptionsFixture(id=product_id, selected=selected)
+
+  def get_catalog_variant(self) -> CatalogVariantFixture | None:
+    """Get a product ID and one of its variant IDs."""
+    val = self._get_test_fixture("catalog_variant")
+    if not isinstance(val, dict):
+      return None
+    product_id = val.get("product_id")
+    variant_id = val.get("variant_id")
+    if not isinstance(product_id, str) or not product_id.strip():
+      return None
+    if not isinstance(variant_id, str) or not variant_id.strip():
+      return None
+    return CatalogVariantFixture(product_id=product_id, variant_id=variant_id)
+
+  def get_unit_price_item_sku(self) -> str | None:
+    """Get the SKU or variant ID of an item with `unit_price`."""
+    val = self._get_test_fixture("unit_price_item_sku")
+    if not isinstance(val, str) or not val.strip():
+      return None
+    return val
+
+  def get_catalog_search_default_page_size(self) -> int | None:
+    """Get the default page size for `/catalog/search` when omitting `limit`."""
+    val = self._get_test_fixture("catalog_search_default_page_size")
+    if not _is_int(val) or val < 1:
+      return None
+    return val
+
+  def get_non_existent_id(self) -> str:
+    """Get an identifier the server under test does not sell."""
+    for source in (self._config, self._fallback_config):
+      entry = source.get("non_existent_item")
+      if isinstance(entry, dict) and entry.get("id"):
+        return str(entry["id"])
+    return "non_existent_id_99999"
+
+  def get_catalog_max_batch_size(self, default: int = 1000) -> int:
+    """Get the maximum batch size for `/catalog/lookup`, defaulting to 1000."""
+    val = self._get_test_fixture("catalog_max_batch_size")
+    if _is_int(val) and val >= 1:
+      return val
+    return default
+
+  def get_catalog_search_query(self) -> str:
+    """Get a search query string that matches items in the server's catalog."""
+    val = self._get_test_fixture("catalog_search_query")
+    if isinstance(val, str) and val.strip():
+      return val
+    return self.get_test_sku()
 
 
 ConfiguredFixtureContext = DynamicFixtureContext
@@ -1454,4 +1669,49 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     return sorted(
       ((line.get("item") or {}).get("id"), line.get("quantity"))
       for line in entity.get("line_items") or []
+    )
+
+  # ── catalog capabilities (catalog/lookup.md, catalog/search.md) ──────────
+
+  def catalog_lookup(self, ids: list[str], **extra: Any) -> httpx.Response:
+    """POST /catalog/lookup with `ids`; return the raw response."""
+    payload: dict[str, Any] = {"ids": ids}
+    payload.update(extra)
+    return self.client.post(
+      self.get_shopping_url("/catalog/lookup"),
+      json=payload,
+      headers=self.get_headers(),
+    )
+
+  def catalog_product(self, item_id: str, **extra: Any) -> httpx.Response:
+    """POST /catalog/product with `id`; return the raw response."""
+    payload: dict[str, Any] = {"id": item_id}
+    payload.update(extra)
+    return self.client.post(
+      self.get_shopping_url("/catalog/product"),
+      json=payload,
+      headers=self.get_headers(),
+    )
+
+  def catalog_search(
+    self, payload: dict[str, Any] | None = None, **extra: Any
+  ) -> httpx.Response:
+    """POST /catalog/search with `payload`; return the raw response."""
+    body: dict[str, Any] = dict(payload or {})
+    body.update(extra)
+    return self.client.post(
+      self.get_shopping_url("/catalog/search"),
+      json=body,
+      headers=self.get_headers(),
+    )
+
+  def assert_unit_price(
+    self, unit_price: Any, price: Any, where: str = "unit_price"
+  ) -> None:
+    """Assert that a `unit_price` object satisfies CATALOG-0003..0009."""
+    problems = unit_price_problems(unit_price, price, where=where)
+    self.assertFalse(
+      problems,
+      f"{where} violates catalog unit_price invariants:\n  "
+      + "\n  ".join(problems),
     )
