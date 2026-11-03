@@ -19,12 +19,11 @@ import uuid
 from absl import flags
 from absl.testing import absltest
 from framework.decorators import (
-  partly,
   requires_capability,
   scenario,
   spec_assert,
 )
-from pydantic import AnyUrl
+from pydantic import AnyUrl, ValidationError
 from shopping.base import get_valid_payment_payload
 from shopping.base import shopping_test_data
 from shopping.base import ShoppingIntegrationTestBase
@@ -63,36 +62,38 @@ class OrderTest(ShoppingIntegrationTestBase):
   """
 
   @spec_assert(
-    partly(
-      "REQ-SHOPPING-ORDER-0008",  # full order entity on every response
-      "Get Order only, with the schema's required fields taken as the full "
-      "entity",
-    ),
+    "REQ-SHOPPING-ORDER-0008",  # full order entity on every response
   )
   def test_order_retrieval(self) -> None:
-    """Test successful order retrieval.
+    """Get Order returns the full order entity for the placed checkout.
 
-    Given a completed checkout/order,
+    Given a completed checkout,
     When a GET request is sent to /orders/{id},
-    Then the response should be 200 OK and return the correct order data with
-    matching IDs.
+    Then the response is 200 OK with an order that validates against the
+    order schema and carries the checkout it was placed from: its ID, its
+    currency, each of its lines and its total (order.md Operations: the
+    full order entity on every response). The completion response's
+    ``order`` is an order confirmation, identifiers only, so it is not
+    compared; the rule's other response, event delivery, is compared with
+    Get Order by the webhook structure tests.
     """
     checkout_data = self.create_checkout_session()
     checkout_id = checkout_data["id"]
     complete_data = self.complete_checkout_session(checkout_id)
     order_id = complete_data["order"]["id"]
 
-    # Get Order
     response = self.client.get(
       self.get_order_url(order_id), headers=self.get_headers()
     )
     self.assert_response_status(response, 200)
-
-    order_data = order.Order(**response.json())
+    order_json = response.json()
+    try:
+      order_data = order.Order(**order_json)
+    except ValidationError as error:
+      self.fail(f"Get Order is not a valid order entity: {error}")
     self.assertEqual(order_data.id, order_id, "Order ID mismatch")
-    self.assertEqual(
-      order_data.checkout_id, checkout_id, "Checkout ID mismatch"
-    )
+    self.assertTrue(order_data.line_items, "Get Order returned no line items")
+    self.assert_order_carries_checkout(order_json, complete_data)
 
   @scenario(
     "the order's first expectation reuses the selected option's title as "

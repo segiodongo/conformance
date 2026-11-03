@@ -23,11 +23,12 @@ webhooks beyond "an event arrives" (which webhook_test.py already covers):
   * The body is the FULL order entity: the same current-state snapshot as Get
     Order. Businesses MUST send the "Order created" event with a fully
     populated order entity and MUST send the full entity on updates, never an
-    incremental delta — order.md "Events" and its Business guidelines. The
-    schema's required properties (order.json) are the floor for "fully
-    populated".
+    incremental delta — order.md "Events" and its Business guidelines. Each
+    delivery is therefore compared, member for member, with Get Order fetched
+    right after it, and validated against the order schema.
   * Deliveries MUST be signed. What is checked here is the signing ENVELOPE
-    (headers, digest, signed components), not cryptographic verification of
+    (headers, digest, signed components, the RFC 9421 shape of
+    ``Signature-Input`` and ``Signature``), not cryptographic verification of
     the signature value against the business's published keys: ``UCP-Agent``
     (business profile URL), ``Signature``, ``Signature-Input`` and
     ``Content-Digest`` headers, with
@@ -36,13 +37,14 @@ webhooks beyond "an event arrives" (which webhook_test.py already covers):
     webhook deliveries, ``ucp-agent`` is a required signed component
     (signatures.md, REST Request Signing component table, footnote **).
 
-The signature tests skip loudly when the server sends completely unsigned
-deliveries (the current reference-server behavior), mirroring how other
-structural tests skip on shapes the server does not emit; the update-event
-test skips when the server exposes no /testing/simulate-shipping path.
+A server that sends unsigned deliveries fails the envelope test (order.md:
+payloads MUST be signed); the checks that read a signature's parts then skip
+as not exercised. The update-event test skips, naming the trigger, when the
+server exposes no /testing/simulate-shipping path.
 """
 
 import base64
+import binascii
 import hashlib
 import re
 import time
@@ -58,7 +60,9 @@ from framework.decorators import (
   spec_assert,
 )
 from framework.mock_webhook_server import MockWebhookServer
+from pydantic import ValidationError
 from shopping.base import ShoppingIntegrationTestBase
+from ucp_sdk.models.schemas.shopping import order
 
 _ORDER_CAPABILITY = "dev.ucp.shopping.order"
 
@@ -81,6 +85,22 @@ _SIGNATURE_HEADERS = (
   "signature-input",
   "content-digest",
 )
+
+# RFC 9421 §4.1-4.2, on RFC 8941 structured fields: Signature-Input and
+# Signature are Dictionaries sharing their labels. A Signature-Input member
+# is an Inner List of quoted component names followed by parameters
+# (``sig1=("@method" "content-digest");keyid="merchant-2026"``); the
+# Signature member with the same label is a Byte Sequence (``sig1=:base64:``).
+_SF_KEY = r"[a-z*][a-z0-9_.*-]*"
+_SF_PARAMS = rf'(?:;{_SF_KEY}(?:=(?:"[^"]*"|[^;,\s]+))?)*'
+_SIGNATURE_INPUT_MEMBER = re.compile(
+  rf"(?P<label>{_SF_KEY})=\((?P<components>[^)]*)\)(?P<params>{_SF_PARAMS})"
+)
+_SIGNATURE_MEMBER = re.compile(
+  rf"(?P<label>{_SF_KEY})=:(?P<value>[A-Za-z0-9+/=]*):"
+)
+_COMPONENT_ITEM = rf'"[^"]+"{_SF_PARAMS}'
+_COMPONENT_LIST = re.compile(rf"{_COMPONENT_ITEM}(?:\s+{_COMPONENT_ITEM})*")
 
 
 @requires_capability(_ORDER_CAPABILITY)
@@ -158,26 +178,41 @@ class WebhookStructureTest(ShoppingIntegrationTestBase):
     return checkout_id, order_id, events[0]
 
   def _assert_full_order_entity(
-    self, payload: dict[str, Any], checkout_id: str, order_id: str
+    self, payload: dict[str, Any], checkout_id: str, order_id: str, what: str
   ) -> None:
-    """Assert the payload is the fully populated order entity for our order."""
+    """Assert a delivery's body is the fully populated order entity.
+
+    Three checks: the body validates against the order schema; it names our
+    order and the checkout it came from; and it is the same current-state
+    snapshot Get Order returns, member for member (order.md: the same
+    schema for retrieval and delivery, the full entity on every response).
+
+    Args:
+      payload: The delivery's body.
+      checkout_id: The checkout the order came from.
+      order_id: The order's ID.
+      what: Which delivery, for the messages.
+
+    """
     missing = [k for k in _ORDER_REQUIRED if payload.get(k) is None]
     self.assertFalse(
       missing,
-      "webhook body is not a fully populated order entity; missing "
-      f"required order properties {missing} (order.md: the payload is the "
-      "same current-state snapshot as Get Order)",
+      f"{what} is not a fully populated order entity; missing required "
+      f"order properties {missing} (order.md: the payload is the same "
+      "current-state snapshot as Get Order)",
     )
-    self.assertTrue(
-      payload["line_items"],
-      "webhook order entity carries no line_items",
-    )
+    try:
+      order.Order(**payload)
+    except ValidationError as error:
+      self.fail(f"{what} is not a valid order entity: {error}")
+    self.assertTrue(payload["line_items"], f"{what} carries no line_items")
     self.assertEqual(payload["id"], order_id)
     self.assertEqual(
       payload["checkout_id"],
       checkout_id,
-      "webhook order entity does not reference the originating checkout",
+      f"{what} does not reference the originating checkout",
     )
+    self.assert_same_order_snapshot(order_id, payload, what)
 
   # ── order.md "Order Event Webhook": Standard Webhooks headers ───────────
   @no_rule(
@@ -263,24 +298,33 @@ class WebhookStructureTest(ShoppingIntegrationTestBase):
 
   # ── order.md "Events": fully populated order entity ─────────────────────
   @spec_assert(
-    partly(
-      "REQ-SHOPPING-ORDER-0023",  # MUST send "Order created" with full entity
-      "the schema's required fields taken as a fully populated entity",
-    ),
+    "REQ-SHOPPING-ORDER-0008",  # full entity on every response, delivery too
+    "REQ-SHOPPING-ORDER-0023",  # MUST send "Order created" with full entity
   )
   def test_order_created_event_is_full_order_entity(self) -> None:
-    """The 'Order created' delivery body is the full order entity."""
+    """The 'Order created' delivery body is the full order entity.
+
+    The body validates against the order schema and is, member for member,
+    the snapshot Get Order returns for the order: the same full entity on
+    the asynchronous response as on the synchronous one (order.md
+    Operations).
+    """
     checkout_id, order_id, event = self._place_order()
-    self._assert_full_order_entity(event["payload"], checkout_id, order_id)
+    self._assert_full_order_entity(
+      event["payload"], checkout_id, order_id, "the Order created delivery"
+    )
 
   @spec_assert(
-    partly(
-      "REQ-SHOPPING-ORDER-0024",  # full order entity on updates, not deltas
-      "the schema's required fields taken as the full entity",
-    ),
+    "REQ-SHOPPING-ORDER-0008",  # full entity on every response, delivery too
+    "REQ-SHOPPING-ORDER-0024",  # full order entity on updates, not deltas
   )
   def test_update_event_is_full_order_entity(self) -> None:
-    """An update delivery is the full current-state snapshot, not a delta."""
+    """An update delivery is the full current-state snapshot, not a delta.
+
+    After the order ships, the latest delivery reflects the shipment and is,
+    member for member, the snapshot Get Order returns. (The first delivery
+    predates the shipment, so it is the "Order created" test's to compare.)
+    """
     checkout_id, order_id, _ = self._place_order()
     headers = self.get_headers()
     headers["Simulation-Secret"] = FLAGS.simulation_secret
@@ -294,10 +338,9 @@ class WebhookStructureTest(ShoppingIntegrationTestBase):
         "403); pass --simulation_secret matching the server under test"
       )
     if ship_response.status_code in (404, 405):
-      self.skipTest(
-        "server exposes no webhook simulation path "
-        f"(/testing/simulate-shipping -> {ship_response.status_code}); "
-        "cannot trigger an order update"
+      self.skip_no_trigger(
+        "a /testing/simulate-shipping/{order_id} hook that advances the "
+        f"order (the server answered {ship_response.status_code})"
       )
     self.assert_response_status(ship_response, 200)
     events = self._wait_for_events(order_id, 2)
@@ -307,16 +350,17 @@ class WebhookStructureTest(ShoppingIntegrationTestBase):
       "no update webhook delivered after the order shipped "
       "(order.md: MUST send full order entity on updates)",
     )
-    for event in events:
-      self._assert_full_order_entity(event["payload"], checkout_id, order_id)
-    fulfillment_events = [
-      fe
-      for event in events
-      for fe in (event["payload"]["fulfillment"].get("events") or [])
-    ]
+    update = events[-1]["payload"]
     self.assertTrue(
-      any(fe.get("type") == "shipped" for fe in fulfillment_events),
-      "no update delivery reflected the shipped state in the snapshot",
+      any(
+        fe.get("type") == "shipped"
+        for fe in (update.get("fulfillment") or {}).get("events") or []
+      ),
+      "the latest delivery does not reflect the shipped state in its "
+      "snapshot (order.md: updates carry the full current-state entity)",
+    )
+    self._assert_full_order_entity(
+      update, checkout_id, order_id, "the update delivery"
     )
 
   # ── order.md "Webhook Signature Verification" ───────────────────────────
@@ -342,12 +386,20 @@ class WebhookStructureTest(ShoppingIntegrationTestBase):
     "REQ-SHOPPING-ORDER-0021",  # UCP-Agent header with the profile URL
     partly(
       "REQ-SHOPPING-ORDER-0022",  # sign payloads with RFC 9421 headers
-      "the RFC 9421 headers and Content-Digest only; the signature itself "
-      "isn't verified",
+      "the RFC 9421 headers, their shape and the Content-Digest; the "
+      "signature value itself isn't verified against the business's keys",
     ),
   )
   def test_signed_delivery_carries_required_headers_and_digest(self) -> None:
-    """A signed delivery carries all four headers; the digest matches."""
+    """A signed delivery carries the four headers in RFC 9421 shape.
+
+    Checked: all four headers are present; ``UCP-Agent`` names the business
+    profile; ``Content-Digest`` is the SHA-256 of the raw body; and
+    ``Signature-Input`` / ``Signature`` are RFC 9421 dictionaries sharing a
+    label, with a non-empty list of quoted component names, a ``keyid``
+    (order.md verification step 1 reads it to pick the key) and a base64
+    byte-sequence signature. Not checked: that the signature verifies.
+    """
     _, _, event = self._place_order()
     headers = event["headers"]
     missing = [h for h in _SIGNATURE_HEADERS if not headers.get(h)]
@@ -382,6 +434,62 @@ class WebhookStructureTest(ShoppingIntegrationTestBase):
       expected,
       "Content-Digest does not match the SHA-256 of the raw delivery body",
     )
+    self._assert_signature_shape(
+      headers["signature-input"], headers["signature"]
+    )
+
+  def _assert_signature_shape(
+    self, signature_input: str, signature: str
+  ) -> None:
+    """Assert the two signature headers have the RFC 9421 dictionary shape.
+
+    Args:
+      signature_input: The ``Signature-Input`` header value.
+      signature: The ``Signature`` header value.
+
+    """
+    inputs = {
+      m.group("label"): m
+      for m in _SIGNATURE_INPUT_MEMBER.finditer(signature_input)
+    }
+    self.assertTrue(
+      inputs,
+      "Signature-Input is not an RFC 9421 dictionary of "
+      f'label=("component" ...);params members: {signature_input!r}',
+    )
+    values = {
+      m.group("label"): m.group("value")
+      for m in _SIGNATURE_MEMBER.finditer(signature)
+    }
+    for label, member in inputs.items():
+      components = member.group("components").strip()
+      self.assertTrue(
+        components and _COMPONENT_LIST.fullmatch(components),
+        f"Signature-Input {label} must list quoted component names "
+        f"(RFC 9421 §4.1): {signature_input!r}",
+      )
+      self.assertRegex(
+        member.group("params"),
+        r';keyid="[^"]+"',
+        f"Signature-Input {label} carries no keyid, so a verifier cannot "
+        "pick the key from the business profile's keys (order.md Webhook "
+        f"Signature Verification step 1): {signature_input!r}",
+      )
+      self.assertIn(
+        label,
+        values,
+        f"Signature has no member labelled {label} to match Signature-Input "
+        f"(RFC 9421 §4.2): {signature!r}",
+      )
+      try:
+        raw = base64.b64decode(values[label], validate=True)
+      except (ValueError, binascii.Error):
+        raw = b""
+      self.assertTrue(
+        raw,
+        f"Signature {label} is not a base64 byte sequence (RFC 9421 §4.2 / "
+        f"RFC 8941 §3.3.5): {signature!r}",
+      )
 
   @older_version(
     "2026-04-08",

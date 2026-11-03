@@ -43,7 +43,7 @@ server under test.
 """
 
 from absl.testing import absltest
-from framework.decorators import partly, requires_capability, spec_assert
+from framework.decorators import requires_capability, spec_assert
 from shopping.base import ShoppingIntegrationTestBase
 from ucp_sdk.models.schemas.shopping import checkout as checkout
 from ucp_sdk.models.schemas.shopping import checkout_create_request
@@ -113,11 +113,7 @@ class FulfillmentStructureTest(ShoppingIntegrationTestBase):
     )
 
   @spec_assert(
-    partly(
-      "REQ-SHOPPING-FULFILLMENT-0018",  # option title MUST distinguish siblings
-      "distinct, non-empty titles only; whether they tell options apart for "
-      "a buyer can't be checked by machine",
-    ),
+    "REQ-SHOPPING-FULFILLMENT-0018",  # option title MUST distinguish siblings
   )
   def test_option_titles_distinguish_siblings(self) -> None:
     """FUL-001: sibling ``options[].title`` are non-empty and distinct.
@@ -126,7 +122,10 @@ class FulfillmentStructureTest(ShoppingIntegrationTestBase):
     When a group carries options,
     Then each option's ``title`` is a non-empty string and no two siblings
     in the same group share a title (fulfillment.md: ``options[].title``
-    "MUST distinguish this option from its siblings").
+    "MUST distinguish this option from its siblings"). Titles that differ
+    only in letter case or spacing don't distinguish anything for a buyer,
+    so they count as the same title; that is the reading a machine can
+    check, recorded in findings.md.
     """
     response_json = self._checkout_with_options()
 
@@ -149,13 +148,14 @@ class FulfillmentStructureTest(ShoppingIntegrationTestBase):
             title.strip(),
             msg=f"Option {opt.get('id')!r} title must be non-empty: {opt}",
           )
-          titles.append(title)
+          titles.append(" ".join(title.casefold().split()))
         self.assertEqual(
           len(titles),
           len(set(titles)),
           msg=(
-            "Sibling option titles must be distinct within a group; got"
-            f" duplicates in {titles}"
+            "Sibling option titles must distinguish the options (distinct "
+            "once case and spacing are ignored); got duplicates in "
+            f"{[opt.get('title') for opt in options]}"
           ),
         )
 

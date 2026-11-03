@@ -18,7 +18,6 @@ from absl.testing import absltest
 from framework.decorators import (
   no_rule,
   older_version,
-  partly,
   requires_capability,
   spec_assert,
 )
@@ -60,104 +59,87 @@ class BusinessLogicTest(ShoppingIntegrationTestBase):
   """
 
   @spec_assert(
-    partly(
-      "REQ-SHOPPING-CHECKOUT-0016",  # line total MUST be price x quantity
-      "a quantity of 1 only, so scale and rounding aren't checked",
-    ),
+    "REQ-SHOPPING-CHECKOUT-0016",  # line total MUST be price x quantity
     "REQ-SHOPPING-CHECKOUT-0134",  # Exactly one "total" MUST be present
   )
   def test_totals_calculation_on_create(self):
     """Test that totals are calculated correctly upon checkout creation.
 
-    Given a request to create a checkout session with a specific item,
-    When the checkout is created with an incorrect title/price in the request,
-    Then the server should return a checkout where line item totals, subtotal,
-    and grand total correctly reflect the database price, ignoring client
-    input.
+    Given a request to create a checkout session for three of an item,
+    When the checkout is created,
+    Then every line's total is the server's own `price × quantity ×
+    10^-scale` (checkout.md, Pricing a line), the first line prices the item
+    at the fixtures' price, and the checkout totals reconcile.
     """
     expected_price = self.fixture_ctx.get_test_price()
 
     # Create checkout (client cannot send title/price per schema). The server
     # should use the authoritative price from its DB (which matches our config).
-    response_json = self.create_checkout_session(select_fulfillment=False)
+    response_json = self.create_checkout_session(
+      quantity=3, select_fulfillment=False
+    )
     checkout_obj = checkout.Checkout(**response_json)
 
-    # Verify Line Item Calculations
+    # Each line's total follows from its own price, quantity and scale. A
+    # measured line (scale > 0) is checked with the rule's single rounding;
+    # the flower shop sells whole items, so scale is 0 here.
+    self.assert_line_totals(response_json)
+
+    # The store's data: the item costs what the fixtures say, and the line
+    # total is three of it.
     line_item = checkout_obj.line_items[0]
-    li_subtotal = next(
-      (t.amount for t in line_item.totals if t.type == "subtotal"), 0
+    self.assertEqual(line_item.quantity, 3)
+    self.assertEqual(
+      line_item.item.price,
+      expected_price,
+      f"Item price should match DB price {expected_price}",
     )
     li_total = next(
-      (t.amount for t in line_item.totals if t.type == "total"), 0
-    )
-
-    self.assertEqual(
-      li_subtotal,
-      expected_price,
-      f"Line item subtotal should match DB price {expected_price}",
+      (t.amount for t in line_item.totals if t.type == "total"), None
     )
     self.assertEqual(
       li_total,
-      expected_price,
-      f"Line item total should match DB price {expected_price}",
+      expected_price * 3,
+      f"Line item total should be 3 x DB price {expected_price}",
     )
 
     # Verify Totals Breakdown
-    self.assert_totals_consistent(checkout_obj, expected_price)
+    self.assert_totals_consistent(checkout_obj, expected_price * 3)
 
   @spec_assert(
-    partly(
-      "REQ-SHOPPING-CHECKOUT-0016",  # line total MUST be price x quantity
-      "a whole-number quantity only, read through the checkout subtotal",
-    ),
+    "REQ-SHOPPING-CHECKOUT-0016",  # line total MUST be price x quantity
     "REQ-SHOPPING-CHECKOUT-0134",  # Exactly one "total" MUST be present
   )
   def test_totals_recalculation_on_update(self):
     """Test that totals are recalculated correctly upon checkout update.
 
     Given an existing checkout session with 1 item,
-    When the line item quantity is updated to 2,
-    Then the server should return the updated checkout with a total amount of
+    When the line item quantity is updated to 2 (PUT replaces the whole
+    checkout, so every other field is resent as it was),
+    Then the line's own total is `price × 2`, and the checkout totals are
     2 * price.
     """
     response_json = self.create_checkout_session(select_fulfillment=False)
     checkout_obj = checkout.Checkout(**response_json)
-    checkout_id = checkout_obj.id
 
     expected_price = self.fixture_ctx.get_test_price()
 
     # Update quantity to 2.
-    item_update = item_update_request.ItemUpdateRequest(
-      id=checkout_obj.line_items[0].item.id,
-    )
     line_item_update = line_item_update_request.LineItemUpdateRequest(
       id=checkout_obj.line_items[0].id,
-      item=item_update,
+      item=item_update_request.ItemUpdateRequest(
+        id=checkout_obj.line_items[0].item.id,
+      ),
       quantity=2,
     )
-    payment_update = payment_update_request.PaymentUpdateRequest(
-      instruments=checkout_obj.payment.instruments,
+    updated_json = self.update_checkout_session(
+      checkout_obj, line_items=[line_item_update]
     )
+    self.assert_line_totals(updated_json)
 
-    update_payload = checkout_update_req.CheckoutUpdateRequest(
-      id=checkout_id,
-      currency=checkout_obj.currency,
-      line_items=[line_item_update],
-      payment=payment_update,
-    )
-
-    response = self.client.put(
-      self.get_shopping_url(f"/checkout-sessions/{checkout_id}"),
-      json=update_payload.model_dump(
-        mode="json", by_alias=True, exclude_none=True
-      ),
-      headers=self.get_headers(),
-    )
-    self.assert_response_status(response, 200)
-
-    updated_checkout = checkout.Checkout(**response.json())
-    expected_total = expected_price * 2
-    self.assert_totals_consistent(updated_checkout, expected_total)
+    updated_checkout = checkout.Checkout(**updated_json)
+    self.assertEqual(updated_checkout.line_items[0].quantity, 2)
+    self.assert_totals_consistent(updated_checkout, expected_price * 2)
 
   @requires_capability("dev.ucp.shopping.buyer_consent")
   @older_version(

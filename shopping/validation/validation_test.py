@@ -15,7 +15,7 @@
 """Validation tests for the UCP SDK Server."""
 
 from absl.testing import absltest
-from framework.decorators import partly, requires_capability, spec_assert
+from framework.decorators import requires_capability, spec_assert
 from shopping.base import get_valid_payment_payload
 from shopping.base import ShoppingIntegrationTestBase
 from ucp_sdk.models.schemas.shopping import (
@@ -47,6 +47,27 @@ from pydantic import ValidationError
 
 # Rebuild models to resolve forward references
 checkout.Checkout.model_rebuild(_types_namespace={"Payment": Payment})
+
+
+def _explains_line(message: dict) -> bool:
+  """Whether a messages[] entry speaks to a line item or its quantity.
+
+  checkout.md asks for "an explanatory messages[] entry" without fixing its
+  type, code or path, so any entry that points into ``line_items`` or whose
+  code or content mentions quantity or stock is taken as the explanation.
+
+  Args:
+    message: One ``messages[]`` entry as returned by the server.
+
+  Returns:
+    True when the entry can be read as explaining a quantity revision.
+
+  """
+  path = str(message.get("path") or "")
+  if "line_items" in path:
+    return True
+  words = f"{message.get('code') or ''} {message.get('content') or ''}"
+  return any(word in words.casefold() for word in ("quantity", "stock"))
 
 
 @requires_capability("dev.ucp.shopping.checkout")
@@ -245,16 +266,51 @@ class ValidationTest(ShoppingIntegrationTestBase):
       error_4xx_substring="stock",
     )
 
+  _EXCESSIVE_QUANTITY = 10001
+
+  def _request_line_quantity(
+    self, checkout_obj: checkout.Checkout, quantity: int
+  ):
+    """PUT the checkout with its first line's quantity set to `quantity`.
+
+    Args:
+      checkout_obj: The checkout as created.
+      quantity: The quantity to request for the first line item.
+
+    Returns:
+      The raw response, whichever posture the server takes.
+
+    """
+    item_update = item_update_request.ItemUpdateRequest(
+      id=checkout_obj.line_items[0].item.id,
+    )
+    line_item_update = line_item_update_request.LineItemUpdateRequest(
+      id=checkout_obj.line_items[0].id,
+      item=item_update,
+      quantity=quantity,
+    )
+    payment_update = payment_update_request.PaymentUpdateRequest(
+      instruments=checkout_obj.payment.instruments,
+      handlers=[
+        h.model_dump(mode="json", exclude_none=True)
+        for h in checkout_obj.payment.instruments
+      ],
+    )
+    update_payload = checkout_update_req.CheckoutUpdateRequest(
+      id=checkout_obj.id,
+      currency=checkout_obj.currency,
+      line_items=[line_item_update],
+      payment=payment_update,
+    )
+    return self.client.put(
+      self.get_shopping_url(f"/checkout-sessions/{checkout_obj.id}"),
+      json=update_payload.model_dump(
+        mode="json", by_alias=True, exclude_none=True
+      ),
+      headers=self.get_headers(),
+    )
+
   @spec_assert(
-    partly(
-      "REQ-SHOPPING-CHECKOUT-0010",  # a revision comes with a messages[] entry
-      "exercised with limited stock, not an off-increment quantity, and "
-      "only a quantity_adjusted warning counts as the message",
-    ),
-    partly(
-      "REQ-SHOPPING-CHECKOUT-0011",  # MUST NOT silently reinterpret quantity
-      "exercised with limited stock, not an off-increment quantity",
-    ),
     "REQ-SHOPPING-CHECKOUT-0105",  # SHOULD provide accurate error messages
   )
   def test_update_inventory_validation(self) -> None:
@@ -271,38 +327,8 @@ class ValidationTest(ShoppingIntegrationTestBase):
     """
     response_json = self.create_checkout_session()
     checkout_obj = checkout.Checkout(**response_json)
-    checkout_id = checkout_obj.id
-
-    # Update to excessive quantity (e.g. 10000)
-    item_update = item_update_request.ItemUpdateRequest(
-      id=checkout_obj.line_items[0].item.id,
-    )
-    line_item_update = line_item_update_request.LineItemUpdateRequest(
-      id=checkout_obj.line_items[0].id,
-      item=item_update,
-      quantity=10001,
-    )
-    payment_update = payment_update_request.PaymentUpdateRequest(
-      instruments=checkout_obj.payment.instruments,
-      handlers=[
-        h.model_dump(mode="json", exclude_none=True)
-        for h in checkout_obj.payment.instruments
-      ],
-    )
-
-    update_payload = checkout_update_req.CheckoutUpdateRequest(
-      id=checkout_id,
-      currency=checkout_obj.currency,
-      line_items=[line_item_update],
-      payment=payment_update,
-    )
-
-    response = self.client.put(
-      self.get_shopping_url(f"/checkout-sessions/{checkout_id}"),
-      json=update_payload.model_dump(
-        mode="json", by_alias=True, exclude_none=True
-      ),
-      headers=self.get_headers(),
+    response = self._request_line_quantity(
+      checkout_obj, self._EXCESSIVE_QUANTITY
     )
 
     if response.status_code in (200, 201):
@@ -321,7 +347,10 @@ class ValidationTest(ShoppingIntegrationTestBase):
         quantities = [li.get("quantity") for li in data.get("line_items", [])]
         self.assertTrue(
           quantities
-          and all(isinstance(q, int) and q < 10001 for q in quantities),
+          and all(
+            isinstance(q, int) and q < self._EXCESSIVE_QUANTITY
+            for q in quantities
+          ),
           "A quantity_adjusted warning must come with the line-item "
           "quantity actually clamped below the requested amount, got "
           f"{quantities}",
@@ -332,6 +361,72 @@ class ValidationTest(ShoppingIntegrationTestBase):
       response,
       accepted_codes={"out_of_stock", "item_unavailable"},
       error_4xx_substring="stock",
+    )
+
+  @spec_assert(
+    "REQ-SHOPPING-CHECKOUT-0010",  # a revision comes with a messages[] entry
+    "REQ-SHOPPING-CHECKOUT-0011",  # MUST NOT silently reinterpret quantity
+  )
+  def test_quantity_revision_is_explained(self) -> None:
+    """A revised line quantity comes with a messages[] entry explaining it.
+
+    checkout.md "Quantity and sale basis": a revision MUST be returned as a
+    revised line ``quantity`` with an explanatory ``messages[]`` entry, and
+    the business MUST NOT silently reinterpret the requested quantity. The
+    same paragraph lets the business revise a quantity for its own reasons
+    such as limited stock, so this test provokes a revision by requesting
+    more units than any store stocks (see findings.md, "Rule scope").
+
+    A server that rejects the request instead (4xx, or 2xx with an in-band
+    error and the quantity left as requested) or that accepts it as
+    requested made no revision; both leave the rules unexercised and skip.
+    When the quantity does come back lowered, some message must speak to
+    that line or its quantity: a ``path`` into ``line_items``, or a code or
+    content mentioning quantity or stock. Any ``type`` counts; checkout.md
+    does not prescribe one.
+    """
+    response_json = self.create_checkout_session()
+    checkout_obj = checkout.Checkout(**response_json)
+    line_id = checkout_obj.line_items[0].id
+    response = self._request_line_quantity(
+      checkout_obj, self._EXCESSIVE_QUANTITY
+    )
+    if response.status_code not in (200, 201):
+      self.skip_not_exercised(
+        f"the server rejects a quantity of {self._EXCESSIVE_QUANTITY} with "
+        f"HTTP {response.status_code} rather than revising it, so no "
+        "revision was made to explain"
+      )
+    data = response.json()
+    line = next(
+      (li for li in data.get("line_items", []) if li.get("id") == line_id),
+      None,
+    )
+    if line is None:
+      self.skip_not_exercised(
+        "the server dropped the line rather than revising its quantity"
+      )
+    quantity = line.get("quantity")
+    if quantity == self._EXCESSIVE_QUANTITY:
+      self.skip_not_exercised(
+        f"the server kept the requested quantity {quantity}, so no revision "
+        "was made to explain"
+      )
+    self.assertIsInstance(quantity, int)
+    self.assertLess(
+      quantity,
+      self._EXCESSIVE_QUANTITY,
+      "a line quantity returned higher than requested is not a revision the "
+      "spec describes",
+    )
+    messages = data.get("messages") or []
+    explanatory = [m for m in messages if _explains_line(m)]
+    self.assertTrue(
+      explanatory,
+      f"the line quantity was revised from {self._EXCESSIVE_QUANTITY} to "
+      f"{quantity} without an explanatory messages[] entry about the line "
+      f"(checkout.md: a revision MUST come with an explanatory message and "
+      f"MUST NOT silently reinterpret the quantity); messages: {messages}",
     )
 
   @spec_assert(

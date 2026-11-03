@@ -71,6 +71,105 @@ except ImportError:
 f_models.Checkout.model_rebuild(_types_namespace={"Payment": Payment})
 
 
+def expected_line_total(line: dict[str, Any]) -> tuple[float, int]:
+  """Return what checkout.md says a response line's total is, and its scale.
+
+  "The Business MUST compute the line total as `price × quantity × 10^-scale`
+  and round once at the line" (checkout.md, Pricing a line). `scale` is the
+  line's effective sale basis, `item.quantity_unit.scale`, or 0 when the
+  descriptor is absent (the default identity: whole items).
+
+  Args:
+    line: A checkout, cart or order line as the server returned it.
+
+  Returns:
+    The exact product, before the one rounding the rule allows, and the
+    scale it was computed with.
+
+  """
+  item = line.get("item") or {}
+  unit = item.get("quantity_unit") or {}
+  scale = int(unit.get("scale") or 0)
+  price = int(item["price"])
+  quantity = int(line["quantity"])
+  return price * quantity / 10**scale, scale
+
+
+def line_total_entry(line: dict[str, Any]) -> int | None:
+  """Return the amount of a response line's own total.
+
+  The line's `totals[]` carries the product the rule speaks of as its
+  `subtotal` entry; a line with no such entry but a lone `total` entry is read
+  as that total.
+  """
+  entries = {
+    entry.get("type"): entry.get("amount") for entry in line.get("totals") or []
+  }
+  if "subtotal" in entries:
+    return entries["subtotal"]
+  return entries.get("total") if len(entries) == 1 else None
+
+
+def _without_empties(value: Any) -> Any:
+  """Return a JSON value with its null and empty members left out.
+
+  An omitted `messages` and `"messages": []` say the same thing; comparing
+  snapshots shouldn't tell them apart. A member that is empty once its own
+  empties are left out (`{"events": []}`) goes the same way.
+  """
+  if isinstance(value, dict):
+    kept = {}
+    for key, member in value.items():
+      cleaned = _without_empties(member)
+      if cleaned is None or cleaned == [] or cleaned == {}:
+        continue
+      kept[key] = cleaned
+    return kept
+  if isinstance(value, list):
+    return [_without_empties(member) for member in value]
+  return value
+
+
+def snapshot_differences(
+  expected: Any, actual: Any, path: str = "$"
+) -> list[str]:
+  """Return where two order snapshots differ, as JSON paths with the values.
+
+  Args:
+    expected: The authoritative entity, as Get Order returns it.
+    actual: The entity another response or delivery carried.
+    path: The JSON path of the values compared, for the messages.
+
+  Returns:
+    One line per difference; none when the snapshots are the same once
+    null and empty members are left out of both.
+
+  """
+  expected, actual = _without_empties(expected), _without_empties(actual)
+  if isinstance(expected, dict) and isinstance(actual, dict):
+    found = []
+    for key in sorted(set(expected) | set(actual)):
+      member = f"{path}.{key}"
+      if key not in actual:
+        found.append(f"{member}: missing (Get Order has {expected[key]!r})")
+      elif key not in expected:
+        found.append(f"{member}: extra ({actual[key]!r}; Get Order has none)")
+      else:
+        found += snapshot_differences(expected[key], actual[key], member)
+    return found
+  if isinstance(expected, list) and isinstance(actual, list):
+    if len(expected) != len(actual):
+      return [f"{path}: {len(actual)} entries, Get Order has {len(expected)}"]
+    return [
+      line
+      for index, (want, got) in enumerate(zip(expected, actual, strict=True))
+      for line in snapshot_differences(want, got, f"{path}[{index}]")
+    ]
+  if expected != actual:
+    return [f"{path}: {actual!r}, Get Order has {expected!r}"]
+  return []
+
+
 class UnifiedUpdate(CheckoutUpdateRequest):
   """Client-side unified update model to support extensions."""
 
@@ -673,6 +772,143 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     if value is None:
       self.skip_no_trigger(name)
     return value
+
+  def assert_line_totals(self, checkout_data: dict[str, Any]) -> None:
+    """Assert every line's total is `price × quantity × 10^-scale`.
+
+    checkout.md (Pricing a line) has the Business compute the line total so
+    and round once at the line. Each line is checked against its own
+    response values: the item's price, the quantity, and the scale of the
+    `quantity_unit` it echoes (0 when absent). With scale 0 the product is
+    exact; with a measured line, a single rounding leaves the total within
+    one minor unit of the product, which is what is asserted.
+
+    Args:
+      checkout_data: A checkout as the server returned it.
+
+    """
+    lines = checkout_data.get("line_items") or []
+    self.assertTrue(lines, "the checkout has no line items to check")
+    for index, line in enumerate(lines):
+      exact, scale = expected_line_total(line)
+      actual = line_total_entry(line)
+      where = f"line_items[{index}] ({line.get('item', {}).get('id')!r})"
+      self.assertIsNotNone(
+        actual,
+        f"{where} carries no subtotal entry in totals[]: {line.get('totals')}",
+      )
+      if scale == 0:
+        self.assertEqual(
+          actual,
+          int(exact),
+          f"{where}: total {actual} is not price × quantity "
+          f"({line['item']['price']} × {line['quantity']} = {int(exact)}) "
+          "(checkout.md: the line total is price × quantity × 10^-scale)",
+        )
+      else:
+        self.assertLess(
+          abs(actual - exact),
+          1,
+          f"{where}: total {actual} is not price × quantity × 10^-{scale} "
+          f"({line['item']['price']} × {line['quantity']} × 10^-{scale} = "
+          f"{exact}) rounded once at the line",
+        )
+
+  def assert_same_order_snapshot(
+    self, order_id: str, actual: dict[str, Any], what: str
+  ) -> dict[str, Any]:
+    """Assert an order entity is the snapshot Get Order returns right now.
+
+    order.md (Operations): the order entity is a current-state snapshot, the
+    same for synchronous retrieval and event delivery, and the Business MUST
+    return the full entity on every response. So a delivery, or the order a
+    completion response carries, must match Get Order member for member.
+
+    Args:
+      order_id: The order's ID.
+      actual: The order entity to check.
+      what: What carried it, for the message, such as "the Order created
+        delivery".
+
+    Returns:
+      The order as Get Order returned it.
+
+    """
+    response = self.client.get(
+      self.get_order_url(order_id), headers=self.get_headers()
+    )
+    self.assert_response_status(response, 200)
+    authoritative = response.json()
+    differences = snapshot_differences(authoritative, actual)
+    self.assertFalse(
+      differences,
+      f"{what} is not the full order entity Get Order returns "
+      "(order.md: the full entity on every response, the same current-state "
+      "snapshot for retrieval and delivery); differences:\n  "
+      + "\n  ".join(differences),
+    )
+    return authoritative
+
+  def assert_order_carries_checkout(
+    self, order_data: dict[str, Any], checkout_data: dict[str, Any]
+  ) -> None:
+    """Assert an order entity carries the checkout it was placed from.
+
+    order.md (Operations): the order is the current-state snapshot of the
+    placed order, and the Business MUST return the full entity on every
+    response. Right after placement that state is the completed checkout's,
+    so the order must name it and carry its currency, each of its lines
+    (the item and the quantity ordered) and its total; a reference, a delta
+    or a trimmed snapshot does not.
+
+    Args:
+      order_data: The order as the server returned it.
+      checkout_data: The completed checkout it was placed from.
+
+    """
+    self.assertEqual(
+      order_data.get("checkout_id"),
+      checkout_data["id"],
+      "the order does not name the checkout it was placed from",
+    )
+    self.assertEqual(
+      order_data.get("currency"),
+      checkout_data["currency"],
+      "the order's currency is not the checkout's",
+    )
+    ordered = {
+      line["item"]["id"]: line for line in order_data.get("line_items") or []
+    }
+    for line in checkout_data["line_items"]:
+      item_id = line["item"]["id"]
+      self.assertIn(
+        item_id,
+        ordered,
+        f"the order carries no line for the checkout's item {item_id!r}; "
+        f"order lines: {sorted(ordered)}",
+      )
+      quantity = ordered[item_id].get("quantity")
+      ordered_total = (
+        quantity.get("total") if isinstance(quantity, dict) else quantity
+      )
+      self.assertEqual(
+        ordered_total,
+        line["quantity"],
+        f"the order's quantity for {item_id!r} is not the checkout's",
+      )
+    totals = {
+      entry.get("type"): entry.get("amount")
+      for entry in order_data.get("totals") or []
+    }
+    expected = {
+      entry.get("type"): entry.get("amount")
+      for entry in checkout_data.get("totals") or []
+    }
+    self.assertEqual(
+      totals.get("total"),
+      expected.get("total"),
+      "the order's total is not the completed checkout's",
+    )
 
   def assert_totals_consistent(
     self, checkout_obj, expected_subtotal, expected_discount=0

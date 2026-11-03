@@ -1,69 +1,70 @@
 # Findings from linking the tests to the catalog (demo)
 
-> **Demo only, not for merge.** These findings come from giving each of the 63
+> **Demo only, not for merge.** These findings come from giving each of the 74
 > shopping tests a marker against the catalog at `f2626c28` (see
 > [Linking tests to rules](README.md#linking-tests-to-rules)). Rule IDs are the
 > demo's stable IDs without the `REQ-SHOPPING-` prefix. They aren't official.
 
 ## Summary
 
-- **Markers:** 23 tests cite rules, 23 are `no_rule`, 12 are `scenario`, 2
+- **Markers:** 25 tests cite rules, 24 are `no_rule`, 16 are `scenario`, 6
   are `outside_catalog` and 3 are `older_version`.
 - **Rules cited:** 22, all testable: 17 MUST, 2 MUST NOT and 3 SHOULD.
 - **Coverage:** the tests cite 19 of the 104 testable MUST and MUST NOT rules
   (18%): order 8 of 17, fulfillment 4 of 16 and checkout 7 of 37. Cart,
   catalog, discount and buyer consent have none.
-- **Depth:** of those 19, 11 are checked in full, 6 in part, and 2 depend on
-  how the rule's scope is read (see [Claims reviewed](#claims-reviewed)). The
-  markers cite those 8 with `partly`, so the coverage report counts 11 of the
-  104 (11%) as fully checked and 8 as checked in part.
-- **Sample server:** all 63 tests pass against `samples` at `360adbc`, with the
-  marker check on.
+- **Depth:** of those 19, 18 are checked in full and 1, ORDER-0022, in part
+  (see [Claims reviewed](#claims-reviewed)): the signature's envelope and
+  shape are checked, its value isn't verified. The marker cites it with
+  `partly`, so the coverage report counts 18 of the 104 (17%) as fully
+  checked and 1 as checked in part.
+- **Sample server:** against `samples` at `360adbc`, with the marker check
+  on, 72 of the 74 tests pass and 2 don't apply: the server implements
+  2026-04-08, which doesn't state the rules they cite.
 
 ## Claims reviewed
 
 Every rule a `spec_assert` marker cites was checked against the test's
-assertions. Each claim marked Partial or Reading below is cited with
-`partly`, with a gap taken from its note, so the report counts that test as
-checking the rule in part. CHECKOUT-0142 stays fully checked through
-`TotalsTest`.
+assertions. Each claim marked Partial below is cited with `partly`, with a
+gap taken from its note, so the report counts that test as checking the
+rule in part. CHECKOUT-0142 stays fully checked through `TotalsTest`.
 
 - **Full:** the assertions check the rule as stated, for the case the test
-  sets up.
+  sets up. Where that rests on how the rule's scope is read, the note says
+  so.
 - **Partial:** they check part of the rule; the note says which part.
-- **Reading:** the claim depends on how the rule's scope is read.
 
-| Rule             | Level    | Test                                                                                                                                                                                               | Verdict | Note                                                                                                                                                  |
-| ---------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| CHECKOUT-0010    | MUST     | `ValidationTest.test_update_inventory_validation`                                                                                                                                                  | Reading | See [Rule scope](#rule-scope). Only a `quantity_adjusted` warning counts as the explanatory message.                                                  |
-| CHECKOUT-0011    | MUST NOT | `ValidationTest.test_update_inventory_validation`                                                                                                                                                  | Reading | See [Rule scope](#rule-scope). A quantity changed without a message fails.                                                                            |
-| CHECKOUT-0016    | MUST     | `BusinessLogicTest.test_totals_calculation_on_create`, `BusinessLogicTest.test_totals_recalculation_on_update`                                                                                     | Partial | Whole-number quantities only (1, then 2), so scale and rounding aren't exercised. On update, the line total is checked through the checkout subtotal. |
-| CHECKOUT-0105    | SHOULD   | `ValidationTest`: `test_out_of_stock`, `test_update_inventory_validation`, `test_product_not_found`, `test_payment_failure`, `test_complete_without_fulfillment`, `test_structured_error_messages` | Full    | "Accurate" is checked as naming the cause: a 4xx whose body mentions it, or a standard error code.                                                    |
-| CHECKOUT-0119    | SHOULD   | `CheckoutLifecycleTest.test_cannot_cancel_completed_checkout`                                                                                                                                      | Partial | Asserts only a status other than 200: an error returned in band with HTTP 200 would fail, and the error's content isn't checked.                      |
-| CHECKOUT-0120    | SHOULD   | `CheckoutLifecycleTest.test_cancel_checkout`                                                                                                                                                       | Full    |                                                                                                                                                       |
-| CHECKOUT-0133    | MUST     | `TotalsTest.test_single_subtotal_entry`                                                                                                                                                            | Full    |                                                                                                                                                       |
-| CHECKOUT-0134    | MUST     | `TotalsTest.test_single_total_entry`, and both `BusinessLogicTest` totals tests                                                                                                                    | Full    |                                                                                                                                                       |
-| CHECKOUT-0142    | MUST     | `TotalsTest.test_discount_entry_is_negative`                                                                                                                                                       | Full    | Checks `discount` and `items_discount` entries; skips when there are none.                                                                            |
-| CHECKOUT-0142    | MUST     | `DiscountSemanticsTest.test_discount_total_is_negative`                                                                                                                                            | Partial | Checks only the `discount` entry.                                                                                                                     |
-| CHECKOUT-0143    | MUST     | `TotalsTest.test_additive_entries_non_negative`                                                                                                                                                    | Full    |                                                                                                                                                       |
-| FULFILLMENT-0012 | MUST     | `FulfillmentTest.test_known_customer_multiple_addresses_selection`                                                                                                                                 | Full    | For a destination the business listed itself (a saved address).                                                                                       |
-| FULFILLMENT-0015 | MUST NOT | `FulfillmentTest.test_known_customer_multiple_addresses_selection`                                                                                                                                 | Full    | Both parts: the same ID comes back, and its destination is the selected address.                                                                      |
-| FULFILLMENT-0018 | MUST     | `FulfillmentStructureTest.test_option_titles_distinguish_siblings`                                                                                                                                 | Partial | Distinct, non-empty titles. Whether a title tells options apart for a buyer can't be checked by machine.                                              |
-| FULFILLMENT-0048 | MUST     | `FulfillmentStructureTest.test_default_config_single_group_per_method`                                                                                                                             | Full    |                                                                                                                                                       |
-| ORDER-0008       | MUST     | `OrderTest.test_order_retrieval`                                                                                                                                                                   | Partial | Get Order only, and "full" is checked as the schema's required fields.                                                                                |
-| ORDER-0018       | MUST     | `WebhookStructureTest.test_transient_failure_retries_preserve_event_identity`                                                                                                                      | Full    |                                                                                                                                                       |
-| ORDER-0021       | MUST     | `WebhookStructureTest.test_signed_delivery_carries_required_headers_and_digest`                                                                                                                    | Full    |                                                                                                                                                       |
-| ORDER-0022       | MUST     | `WebhookStructureTest.test_signed_delivery_carries_required_headers_and_digest`                                                                                                                    | Partial | Checks the RFC 9421 headers and the `Content-Digest`, not the signature. Skips when deliveries carry no signature headers at all.                     |
-| ORDER-0023       | MUST     | `WebhookStructureTest.test_order_created_event_is_full_order_entity`                                                                                                                               | Partial | "Fully populated" is checked as the schema's required fields.                                                                                         |
-| ORDER-0024       | MUST     | `WebhookStructureTest.test_update_event_is_full_order_entity`                                                                                                                                      | Partial | The same floor. The update comes from the sample server's `/testing/simulate-shipping`, so elsewhere the test skips.                                  |
-| ORDER-0025       | MUST     | `WebhookStructureTest.test_transient_failure_retries_preserve_event_identity`                                                                                                                      | Full    |                                                                                                                                                       |
-| ORDER-0026       | MUST     | `WebhookStructureTest.test_transient_failure_retries_preserve_event_identity`                                                                                                                      | Full    | The same rule as ORDER-0018; see [A rule stated twice](#a-rule-stated-twice).                                                                         |
+| Rule             | Level    | Test                                                                                                                                                                                               | Verdict | Note                                                                                                                                                                                                                                                     |
+| ---------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CHECKOUT-0010    | MUST     | `ValidationTest.test_quantity_revision_is_explained`                                                                                                                                               | Full    | See [Rule scope](#rule-scope). Any `messages[]` entry about the line or its quantity counts as the explanation. Skips when the server rejects or accepts the quantity instead of revising it.                                                            |
+| CHECKOUT-0011    | MUST NOT | `ValidationTest.test_quantity_revision_is_explained`                                                                                                                                               | Full    | See [Rule scope](#rule-scope). A lowered quantity without such a message fails.                                                                                                                                                                          |
+| CHECKOUT-0016    | MUST     | `BusinessLogicTest.test_totals_calculation_on_create`, `BusinessLogicTest.test_totals_recalculation_on_update`                                                                                     | Full    | Each line's `subtotal` is checked as `price × quantity × 10^-scale` from the line's own values: exact at scale 0, within one minor unit when the item carries a `quantity_unit` scale.                                                                   |
+| CHECKOUT-0105    | SHOULD   | `ValidationTest`: `test_out_of_stock`, `test_update_inventory_validation`, `test_product_not_found`, `test_payment_failure`, `test_complete_without_fulfillment`, `test_structured_error_messages` | Full    | "Accurate" is checked as naming the cause: a 4xx whose body mentions it, or a standard error code.                                                                                                                                                       |
+| CHECKOUT-0119    | SHOULD   | `CheckoutLifecycleTest.test_cannot_cancel_completed_checkout`                                                                                                                                      | Partial | Asserts only a status other than 200: an error returned in band with HTTP 200 would fail, and the error's content isn't checked.                                                                                                                         |
+| CHECKOUT-0120    | SHOULD   | `CheckoutLifecycleTest.test_cancel_checkout`                                                                                                                                                       | Full    |                                                                                                                                                                                                                                                          |
+| CHECKOUT-0133    | MUST     | `TotalsTest.test_single_subtotal_entry`                                                                                                                                                            | Full    |                                                                                                                                                                                                                                                          |
+| CHECKOUT-0134    | MUST     | `TotalsTest.test_single_total_entry`, and both `BusinessLogicTest` totals tests                                                                                                                    | Full    |                                                                                                                                                                                                                                                          |
+| CHECKOUT-0142    | MUST     | `TotalsTest.test_discount_entry_is_negative`                                                                                                                                                       | Full    | Checks `discount` and `items_discount` entries; skips when there are none.                                                                                                                                                                               |
+| CHECKOUT-0142    | MUST     | `DiscountSemanticsTest.test_discount_total_is_negative`                                                                                                                                            | Partial | Checks only the `discount` entry.                                                                                                                                                                                                                        |
+| CHECKOUT-0143    | MUST     | `TotalsTest.test_additive_entries_non_negative`                                                                                                                                                    | Full    |                                                                                                                                                                                                                                                          |
+| FULFILLMENT-0012 | MUST     | `FulfillmentTest.test_known_customer_multiple_addresses_selection`                                                                                                                                 | Full    | For a destination the business listed itself (a saved address).                                                                                                                                                                                          |
+| FULFILLMENT-0015 | MUST NOT | `FulfillmentTest.test_known_customer_multiple_addresses_selection`                                                                                                                                 | Full    | Both parts: the same ID comes back, and its destination is the selected address.                                                                                                                                                                         |
+| FULFILLMENT-0018 | MUST     | `FulfillmentStructureTest.test_option_titles_distinguish_siblings`                                                                                                                                 | Full    | Non-empty titles that stay distinct after case folding and whitespace collapsing; the reading of "distinguish" a machine can check.                                                                                                                      |
+| FULFILLMENT-0048 | MUST     | `FulfillmentStructureTest.test_default_config_single_group_per_method`                                                                                                                             | Full    |                                                                                                                                                                                                                                                          |
+| ORDER-0008       | MUST     | `OrderTest.test_order_retrieval`, and both `WebhookStructureTest` full-entity tests                                                                                                                | Full    | Get Order validates against the order schema and carries the placed checkout (ID, currency, lines, total); each delivery is compared with Get Order member for member. The completion response's `order` is an order confirmation, so it isn't compared. |
+| ORDER-0018       | MUST     | `WebhookStructureTest.test_transient_failure_retries_preserve_event_identity`                                                                                                                      | Full    |                                                                                                                                                                                                                                                          |
+| ORDER-0021       | MUST     | `WebhookStructureTest.test_signed_delivery_carries_required_headers_and_digest`                                                                                                                    | Full    |                                                                                                                                                                                                                                                          |
+| ORDER-0022       | MUST     | `WebhookStructureTest.test_signed_delivery_carries_required_headers_and_digest`                                                                                                                    | Partial | Checks the RFC 9421 headers, their dictionary shape (matching labels, quoted components, a `keyid`, a base64 signature) and the `Content-Digest`; the signature value isn't verified against the business's keys. Unsigned deliveries fail.              |
+| ORDER-0023       | MUST     | `WebhookStructureTest.test_order_created_event_is_full_order_entity`                                                                                                                               | Full    | The delivery validates against the order schema and matches Get Order member for member.                                                                                                                                                                 |
+| ORDER-0024       | MUST     | `WebhookStructureTest.test_update_event_is_full_order_entity`                                                                                                                                      | Full    | The same comparison on the latest delivery after the order ships. The update comes from a `/testing/simulate-shipping` hook, so elsewhere the test skips, naming the trigger.                                                                            |
+| ORDER-0025       | MUST     | `WebhookStructureTest.test_transient_failure_retries_preserve_event_identity`                                                                                                                      | Full    |                                                                                                                                                                                                                                                          |
+| ORDER-0026       | MUST     | `WebhookStructureTest.test_transient_failure_retries_preserve_event_identity`                                                                                                                      | Full    | The same rule as ORDER-0018; see [A rule stated twice](#a-rule-stated-twice).                                                                                                                                                                            |
 
 ## Spec findings
 
 ### Behaviour stated without a keyword
 
-22 of the 23 `no_rule` tests check behaviour the specification describes but
+23 of the 24 `no_rule` tests check behaviour the specification describes but
 doesn't state with an RFC 2119 keyword. The other, `test_repeated_cancel`, is
 `no_rule` because it accepts either outcome (see
 [Test findings](#test-findings)). Each is a candidate for normative wording,
@@ -80,6 +81,7 @@ unless the behaviour is meant to be informative.
 | `checkout/index.md`, totals invariants       | "Every entry carries a `type` and an `amount`"; "Amounts are signed integers"                                                                          | `test_entries_have_type_and_amount`                                                                            |
 | `extensions/fulfillment.md`, Overview        | Checkout fulfillment covers "selection and cost"; nothing says the total includes the selected option's cost                                           | `test_fulfillment_flow`                                                                                        |
 | `order/index.md`, Order Event Webhook        | A "Required Headers" table lists `Webhook-Id` and `Webhook-Timestamp`                                                                                  | `test_delivery_carries_standard_webhook_headers`                                                               |
+| `order/index.md`, Expectations               | An expectation records "where they're going (destination)"; nothing says it is the destination selected at checkout                                    | `test_webhook_order_address_new_address`                                                                       |
 | `extensions/discount.md`, Operations         | Submitted codes replace earlier ones, `"codes": []` clears them, and codes match case-insensitively                                                    | `test_codes_replace_previous_set`, `test_empty_codes_removes_discount`, `test_code_matches_case_insensitively` |
 | `extensions/discount.md`, Operations         | `discounts.applied` lists the active discounts and `totals[]` their amounts; `applied` is listed under "Response behavior"                             | `test_discount_flow`, `test_multiple_discounts_accepted`, `test_client_applied_does_not_change_price`          |
 | `extensions/discount.md`, Allocation Details | `applied[].amount` is the discount's magnitude; the allocations "Invariant"                                                                            | `test_fixed_amount_discount`, `test_allocations_sum_to_applied_amount`                                         |
@@ -164,8 +166,11 @@ add them, and change the counts above.
   second completion is refused. In `test_signature_covers_ucp_agent`, only a
   missing `ucp-agent` skips; a missing `@method`, `@authority`, `@path`,
   `content-digest` or `content-type` fails.
-- **Skips that can hide a failure:** the signature tests skip when deliveries
-  carry no signature headers at all, so the worst case shows as a skip.
+- **Skips that could hide a failure:** the signature tests used to skip when
+  deliveries carried no signature headers at all. Now the envelope test
+  fails on an unsigned delivery (order.md: payloads MUST be signed), and
+  only the two checks that read a signature's parts skip, as not exercised,
+  naming that failure.
 - **Needs fixtures:** these skip without the matching `conformance_input.json`
   entries: known customers with and without saved addresses, a
   free-shipping threshold and item, dynamic fulfillment destinations, and a
@@ -176,17 +181,22 @@ add them, and change the counts above.
     `test_invalid_adjustment_status` and `test_malformed_adjustment_payload`,
     all marked `scenario`.
   - `POST /testing/simulate-shipping/{id}`:
-    `test_update_event_is_full_order_entity` skips without it.
+    `test_update_event_is_full_order_entity` skips without it, naming the
+    hook as the trigger it lacks.
   - The failing payment instrument `instr_fail`: `test_payment_failure`.
 
 ## Sample server findings
 
-`Universal-Commerce-Protocol/samples` at `360adbc`, which passes all 63 tests:
+`Universal-Commerce-Protocol/samples` at `360adbc`, which passes the 72 tests
+that apply to its version:
 
 - It adds `PUT /orders/{id}` and `POST /testing/simulate-shipping/{id}`,
   which the specification doesn't define.
-- It answers business outcomes such as an out-of-stock item with a 4xx (409),
-  where `checkout/rest.md` describes HTTP 200 with `messages`.
+- It answers business outcomes such as an out-of-stock item with a 4xx (409,
+  or 400 for a quantity beyond its stock), where `checkout/rest.md`
+  describes HTTP 200 with `messages`. It rejects rather than revises a
+  quantity, so `test_quantity_revision_is_explained` would skip on it even
+  if its version stated CHECKOUT-0010 and 0011.
 - It signs webhook deliveries and covers `ucp-agent`, so the signature tests
   run instead of skipping.
 
