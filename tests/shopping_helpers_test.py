@@ -581,5 +581,111 @@ class CatalogHelpersTest(unittest.TestCase):
     )
 
 
+class EligibilityAndProvisionalDiscountHelpersTest(unittest.TestCase):
+  """W7 helpers: provisional_discount_problems and eligibility_invalid_error."""
+
+  def test_valid_provisional_discount_passes(self) -> None:
+    """Provisional discount with eligibility, automatic, and negative total."""
+    checkout_data = {
+      "discounts": {
+        "applied": [
+          {
+            "title": "Gold Member 15% Off",
+            "amount": 1500,
+            "automatic": True,
+            "provisional": True,
+            "eligibility": "com.example.loyalty_gold",
+          }
+        ]
+      },
+      "totals": [
+        {"type": "subtotal", "amount": 10000},
+        {"type": "discount", "amount": -1500},
+        {"type": "total", "amount": 8500},
+      ],
+    }
+    self.assertEqual(
+      base.provisional_discount_problems(
+        checkout_data, "com.example.loyalty_gold"
+      ),
+      [],
+    )
+
+  def test_provisional_discount_detects_missing_or_invalid_fields(self) -> None:
+    """Missing provisional=True, automatic=True, or negative total fails."""
+    missing = {"discounts": {"applied": []}, "totals": []}
+    problems = base.provisional_discount_problems(
+      missing, "com.example.loyalty_gold"
+    )
+    self.assertTrue(any("DISCOUNT-0006" in p for p in problems))
+
+    bad_entry = {
+      "discounts": {
+        "applied": [
+          {
+            "title": "",
+            "amount": 0,
+            "code": "SHOULD_NOT_BE_SET",
+            "automatic": False,
+            "provisional": False,
+            "eligibility": "com.example.loyalty_gold",
+          }
+        ]
+      },
+      "totals": [{"type": "total", "amount": 10000}],
+    }
+    problems = base.provisional_discount_problems(
+      bad_entry, "com.example.loyalty_gold"
+    )
+    self.assertTrue(any(".provisional: must be True" in p for p in problems))
+    self.assertTrue(any(".automatic: must be True" in p for p in problems))
+    self.assertTrue(any(".code: must be omitted" in p for p in problems))
+    self.assertTrue(any("negative discount" in p for p in problems))
+
+  def test_valid_eligibility_invalid_error_passes(self) -> None:
+    """Unverified claim at completion returns recoverable error."""
+    body = {
+      "id": "chk_1",
+      "status": "requires_escalation",
+      "messages": [
+        {
+          "type": "error",
+          "code": "eligibility_invalid",
+          "severity": "recoverable",
+          "content": "Unable to verify student status.",
+        }
+      ],
+    }
+    self.assertEqual(base.eligibility_invalid_error_problems(body), [])
+
+  def test_eligibility_invalid_error_detects_completed_or_bad_severity(
+    self,
+  ) -> None:
+    """Completed status, order creation, or wrong severity is flagged."""
+    completed_body = {
+      "id": "chk_1",
+      "status": "completed",
+      "order": {"id": "ord_1"},
+      "messages": [],
+    }
+    problems = base.eligibility_invalid_error_problems(completed_body)
+    self.assertTrue(any("CHECKOUT-0052" in p for p in problems))
+    self.assertTrue(any("CHECKOUT-0051" in p for p in problems))
+
+    wrong_severity = {
+      "id": "chk_1",
+      "status": "incomplete",
+      "messages": [
+        {
+          "type": "error",
+          "code": "eligibility_invalid",
+          "severity": "unrecoverable",
+        }
+      ],
+    }
+    problems = base.eligibility_invalid_error_problems(wrong_severity)
+    self.assertTrue(any("CHECKOUT-0053" in p for p in problems))
+
+
 if __name__ == "__main__":
   unittest.main()

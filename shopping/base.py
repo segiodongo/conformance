@@ -230,6 +230,165 @@ def unit_price_problems(
   return problems
 
 
+def _is_reverse_domain_claim(value: Any) -> bool:
+  """Return whether `value` is a reverse-domain eligibility claim string."""
+  if not isinstance(value, str):
+    return False
+  stripped = value.strip()
+  if not stripped or stripped != value or " " in stripped:
+    return False
+  parts = stripped.split(".")
+  return len(parts) >= 2 and all(parts)
+
+
+def provisional_discount_problems(
+  checkout_data: Any, claim: str, where: str = "discounts.applied"
+) -> list[str]:
+  """Return every violation of provisional discount rules for `claim`.
+
+  Checks the rules of discount.md (Eligibility Claims & Discount Behavior):
+    - DISCOUNT-0006: when the discount extension is active, Businesses that
+      choose to accept eligibility claims MUST surface their effect on pricing
+      as provisional discounts in the `applied` array.
+    - DISCOUNT-0008: when a Business recognizes a claim and it affects pricing,
+      it MUST surface a corresponding provisional discount in
+      `discounts.applied` (`provisional: true`, `eligibility: claim`,
+      `automatic: true`, `code` omitted, positive `amount`, non-empty `title`).
+  """
+  if not isinstance(checkout_data, dict):
+    return [f"{where}: checkout response is not an object"]
+  discounts = checkout_data.get("discounts")
+  if not isinstance(discounts, dict):
+    return [
+      f"{where}: missing discounts object on checkout for claim {claim!r} "
+      "(DISCOUNT-0006, DISCOUNT-0008)"
+    ]
+  applied = discounts.get("applied")
+  if not isinstance(applied, list) or not applied:
+    return [
+      f"{where}: discounts.applied is empty or missing for claim {claim!r} "
+      "(DISCOUNT-0006, DISCOUNT-0008)"
+    ]
+
+  matching = [
+    entry
+    for entry in applied
+    if isinstance(entry, dict) and entry.get("eligibility") == claim
+  ]
+  if not matching:
+    return [
+      f"{where}: no entry in discounts.applied carries eligibility={claim!r}; "
+      f"got {applied} (DISCOUNT-0006, DISCOUNT-0008)"
+    ]
+
+  problems: list[str] = []
+  for idx, entry in enumerate(matching):
+    prefix = f"{where}[eligibility={claim!r}#{idx}]"
+    if entry.get("provisional") is not True:
+      problems.append(
+        f"{prefix}.provisional: must be True for an unverified eligibility "
+        f"claim, got {entry.get('provisional')!r} "
+        "(DISCOUNT-0006, DISCOUNT-0008)"
+      )
+    if entry.get("automatic") is not True:
+      problems.append(
+        f"{prefix}.automatic: must be True for an eligibility-triggered "
+        f"discount, got {entry.get('automatic')!r} (DISCOUNT-0008)"
+      )
+    if entry.get("code") is not None:
+      problems.append(
+        f"{prefix}.code: must be omitted for an eligibility-triggered "
+        f"discount, got {entry.get('code')!r} (DISCOUNT-0008)"
+      )
+    title = entry.get("title")
+    if not isinstance(title, str) or not title.strip():
+      problems.append(f"{prefix}.title: must be a non-empty string")
+    amount = entry.get("amount")
+    if not _is_int(amount) or amount <= 0:
+      problems.append(
+        f"{prefix}.amount: must be a positive integer in minor units, got "
+        f"{amount!r} (DISCOUNT-0006, DISCOUNT-0008)"
+      )
+
+  totals = checkout_data.get("totals") or []
+  discount_totals = [
+    t.get("amount")
+    for t in totals
+    if isinstance(t, dict)
+    and t.get("type") in ("discount", "items_discount")
+    and _is_int(t.get("amount"))
+  ]
+  if not discount_totals or sum(discount_totals) >= 0:
+    problems.append(
+      f"{where}: provisional discount for {claim!r} is not reflected as a "
+      f"negative discount/items_discount entry in totals[]: {totals} "
+      "(DISCOUNT-0006)"
+    )
+
+  return problems
+
+
+def eligibility_invalid_error_problems(
+  body: Any, where: str = "complete response"
+) -> list[str]:
+  """Return every violation of unverified-claim completion rules.
+
+  Checks the rules of checkout/index.md (Eligibility Verification at
+  Completion):
+    - CHECKOUT-0047 & CHECKOUT-0052: Businesses MUST NOT complete a transaction
+      with unresolved eligibility claims (`status != "completed"`, no `order`).
+    - CHECKOUT-0051: accepted claims that remain unverified at completion MUST
+      result in `type: "error"` with `code: "eligibility_invalid"`.
+    - CHECKOUT-0053: the Business MUST return an error in `messages` with
+      `code: "eligibility_invalid"` and `severity: "recoverable"`.
+  """
+  if not isinstance(body, dict):
+    return [f"{where}: response body is not a JSON object ({body!r})"]
+
+  problems: list[str] = []
+  if body.get("status") == "completed" or body.get("order") is not None:
+    problems.append(
+      f"{where}: completed transaction despite unresolved eligibility claim "
+      f"(status={body.get('status')!r}, order={body.get('order')!r}) "
+      "(CHECKOUT-0047, CHECKOUT-0052)"
+    )
+
+  messages = body.get("messages")
+  if not isinstance(messages, list) or not messages:
+    problems.append(
+      f"{where}: missing messages[] with eligibility_invalid error "
+      "(CHECKOUT-0051, CHECKOUT-0053)"
+    )
+    return problems
+
+  elig_msgs = [
+    m
+    for m in messages
+    if isinstance(m, dict) and m.get("code") == "eligibility_invalid"
+  ]
+  if not elig_msgs:
+    problems.append(
+      f"{where}: no message in messages[] has code='eligibility_invalid'; "
+      f"got {messages} (CHECKOUT-0051, CHECKOUT-0053)"
+    )
+    return problems
+
+  for idx, msg in enumerate(elig_msgs):
+    if msg.get("type") != "error":
+      problems.append(
+        f"{where}.messages[{idx}]: eligibility_invalid message must have "
+        f"type='error', got {msg.get('type')!r} (CHECKOUT-0051)"
+      )
+    if msg.get("severity") != "recoverable":
+      problems.append(
+        f"{where}.messages[{idx}]: eligibility_invalid message must have "
+        f"severity='recoverable', got {msg.get('severity')!r} "
+        "(CHECKOUT-0053)"
+      )
+
+  return problems
+
+
 def _without_empties(value: Any) -> Any:
   """Return a JSON value with its null and empty members left out.
 
@@ -506,6 +665,9 @@ class DynamicFixtureContext:
     "catalog_variant": "get_catalog_variant",
     "unit_price_item_sku": "get_unit_price_item_sku",
     "catalog_search_default_page_size": "get_catalog_search_default_page_size",
+    "accepted_eligibility_claim": "get_accepted_eligibility_claim",
+    "pricing_eligibility_claim": "get_pricing_eligibility_claim",
+    "unverifiable_eligibility_claim": "get_unverifiable_eligibility_claim",
   }
 
   def __init__(
@@ -849,6 +1011,21 @@ class DynamicFixtureContext:
       return None
     return val
 
+  def get_accepted_eligibility_claim(self) -> str | None:
+    """Get a reverse-domain `context.eligibility` claim the server accepts."""
+    val = self._get_test_fixture("accepted_eligibility_claim")
+    return val if _is_reverse_domain_claim(val) else None
+
+  def get_pricing_eligibility_claim(self) -> str | None:
+    """Get a reverse-domain claim that triggers a provisional discount."""
+    val = self._get_test_fixture("pricing_eligibility_claim")
+    return val if _is_reverse_domain_claim(val) else None
+
+  def get_unverifiable_eligibility_claim(self) -> str | None:
+    """Get an accepted `context.eligibility` claim that fails verification."""
+    val = self._get_test_fixture("unverifiable_eligibility_claim")
+    return val if _is_reverse_domain_claim(val) else None
+
   def get_non_existent_id(self) -> str:
     """Get an identifier the server under test does not sell."""
     for source in (self._config, self._fallback_config):
@@ -870,6 +1047,15 @@ class DynamicFixtureContext:
     if isinstance(val, str) and val.strip():
       return val
     return self.get_test_sku()
+
+  def get_unrecognized_eligibility_claim(
+    self, default: str = "org.ucp.conformance.unrecognized_claim"
+  ) -> str:
+    """Get a reverse-domain `context.eligibility` claim the server ignores."""
+    val = self._get_test_fixture("unrecognized_eligibility_claim")
+    if _is_reverse_domain_claim(val):
+      return val
+    return default
 
 
 ConfiguredFixtureContext = DynamicFixtureContext
@@ -1207,6 +1393,7 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     handlers=None,
     buyer: dict[str, Any] | None = None,
     include_fulfillment: bool = True,
+    context: dict[str, Any] | None = None,
   ) -> checkout_create_request.CheckoutCreateRequest:
     """Create a valid checkout creation payload."""
     ctx = getattr(self, "fixture_ctx", None) or DynamicFixtureContext(
@@ -1289,6 +1476,7 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
       payment=payment,
       buyer=buyer,
       fulfillment=fulfillment,
+      context=context,
     )
     checkout_req.status = "incomplete"
     checkout_req.ucp = {"version": self.ucp_version}
@@ -1306,6 +1494,7 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     buyer: dict[str, Any] | None = None,
     select_fulfillment: bool = True,
     headers: dict[str, str] | None = None,
+    context: dict[str, Any] | None = None,
   ) -> Any:
     """Create a checkout session and return the response JSON."""
     create_payload = self.create_checkout_payload(
@@ -1315,6 +1504,7 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
       handlers=handlers,
       buyer=buyer,
       include_fulfillment=select_fulfillment,
+      context=context,
     )
 
     request_headers = self.get_headers()
@@ -1332,11 +1522,15 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     checkout_data = response.json()
 
     if select_fulfillment:
-      checkout_data = self.ensure_fulfillment_ready(checkout_data["id"])
+      checkout_data = self.ensure_fulfillment_ready(
+        checkout_data["id"], context=context
+      )
 
     return checkout_data
 
-  def ensure_fulfillment_ready(self, checkout_id: str) -> Any:
+  def ensure_fulfillment_ready(
+    self, checkout_id: str, context: dict[str, Any] | None = None
+  ) -> Any:
     """Ensure a fulfillment option is selected for the checkout."""
     response = self.client.get(
       self.get_shopping_url(f"/checkout-sessions/{checkout_id}"),
@@ -1391,6 +1585,7 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
       checkout_data = self.update_checkout_session(
         checkout_obj,
         fulfillment={"methods": [method_payload]},
+        context=context,
       )
       checkout_obj = f_models.Checkout(**checkout_data)
 
@@ -1403,6 +1598,7 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
       checkout_data = self.update_checkout_session(
         checkout_obj,
         fulfillment={"methods": [method_payload]},
+        context=context,
       )
       checkout_obj = f_models.Checkout(**checkout_data)
 
@@ -1424,24 +1620,29 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
       checkout_data = self.update_checkout_session(
         checkout_obj,
         fulfillment={"methods": [method_payload]},
+        context=context,
       )
 
     return checkout_data
+
+  def attempt_complete_checkout(
+    self, checkout_id: str, payment_payload: dict[str, Any] | None = None
+  ) -> httpx.Response:
+    """POST /checkout-sessions/{id}/complete and return the raw response."""
+    if payment_payload is None:
+      payment_payload = get_valid_payment_payload()
+    return self.client.post(
+      self.get_shopping_url(f"/checkout-sessions/{checkout_id}/complete"),
+      json=payment_payload,
+      headers=self.get_headers(),
+    )
 
   def complete_checkout_session(
     self, checkout_id: str, payment_payload: dict[str, Any] | None = None
   ) -> Any:
     """Complete a checkout session."""
     self.ensure_fulfillment_ready(checkout_id)
-
-    if payment_payload is None:
-      payment_payload = get_valid_payment_payload()
-
-    response = self.client.post(
-      self.get_shopping_url(f"/checkout-sessions/{checkout_id}/complete"),
-      json=payment_payload,
-      headers=self.get_headers(),
-    )
+    response = self.attempt_complete_checkout(checkout_id, payment_payload)
     self.assert_response_status(response, 200)
     return response.json()
 
@@ -1462,6 +1663,7 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     fulfillment: Any | None = None,
     discounts: Any | None = None,
     platform: Any | None = None,
+    context: dict[str, Any] | None = None,
   ) -> dict[str, Any]:
     """Build the body of an Update Checkout request, as JSON.
 
@@ -1485,6 +1687,8 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
       discounts = to_json(getattr(checkout_obj, "discounts", None))
     if platform is None:
       platform = to_json(getattr(checkout_obj, "platform", None))
+    if context is None:
+      context = to_json(getattr(checkout_obj, "context", None))
 
     if line_items is None:
       line_items = []
@@ -1527,9 +1731,12 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
       discounts=discounts,
       platform=platform,
     )
-    return update_payload.model_dump(
+    dumped = update_payload.model_dump(
       mode="json", by_alias=True, exclude_none=True
     )
+    if context is not None:
+      dumped["context"] = context
+    return dumped
 
   def update_checkout_session(
     self,
@@ -1542,6 +1749,7 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     discounts: Any | None = None,
     platform: Any | None = None,
     headers: dict[str, str] | None = None,
+    context: dict[str, Any] | None = None,
   ) -> Any:
     """Update a checkout session; return the response JSON.
 
@@ -1563,11 +1771,37 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
         fulfillment=fulfillment,
         discounts=discounts,
         platform=platform,
+        context=context,
       ),
       headers=request_headers,
     )
     self.assert_response_status(response, 200)
     return response.json()
+
+  def assert_provisional_discount(
+    self,
+    checkout_data: Any,
+    claim: str,
+    where: str = "discounts.applied",
+  ) -> None:
+    """Assert `checkout_data` surfaces a provisional discount for `claim`."""
+    problems = provisional_discount_problems(checkout_data, claim, where=where)
+    self.assertFalse(
+      problems,
+      f"{where} violates provisional discount rules for {claim!r}:\n  "
+      + "\n  ".join(problems),
+    )
+
+  def assert_eligibility_invalid_error(
+    self, body: Any, where: str = "complete response"
+  ) -> None:
+    """Assert `body` rejects completion with `eligibility_invalid`."""
+    problems = eligibility_invalid_error_problems(body, where=where)
+    self.assertFalse(
+      problems,
+      f"{where} violates unverified eligibility completion rules:\n  "
+      + "\n  ".join(problems),
+    )
 
   # ── cart capability (cart.md, cart/rest.md) ──────────────────────────────
 

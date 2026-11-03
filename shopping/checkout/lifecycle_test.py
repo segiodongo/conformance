@@ -577,6 +577,207 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
       msg="Should not be able to cancel a completed checkout.",
     )
 
+  @spec_assert("REQ-SHOPPING-CHECKOUT-0048")
+  def test_unrecognized_eligibility_claim_does_not_block_checkout(self):
+    """Unrecognized eligibility claims must not block checkout progression."""
+    claim = self.fixture_ctx.get_unrecognized_eligibility_claim()
+    baseline_create = self.create_checkout_session(
+      buyer=self.DEFAULT_BUYER,
+      select_fulfillment=True,
+    )
+    baseline_update = self.update_checkout_session(
+      checkout.Checkout(**baseline_create),
+    )
+    created = self.create_checkout_session(
+      buyer=self.DEFAULT_BUYER,
+      select_fulfillment=True,
+      context={"eligibility": [claim]},
+    )
+    updated = self.update_checkout_session(
+      checkout.Checkout(**created),
+      context={"eligibility": [claim]},
+    )
+    for step_name, body, base_body in (
+      ("create", created, baseline_create),
+      ("update", updated, baseline_update),
+    ):
+      messages = body.get("messages") or []
+      base_error_codes = {
+        m.get("code")
+        for m in (base_body.get("messages") or [])
+        if isinstance(m, dict) and m.get("type") == "error"
+      }
+      new_error_msgs = [
+        m
+        for m in messages
+        if isinstance(m, dict)
+        and m.get("type") == "error"
+        and (
+          m.get("code") not in base_error_codes
+          or "eligibility" in str(m.get("code") or "").lower()
+          or "eligibility" in str(m.get("path") or "").lower()
+        )
+      ]
+      self.assertEmpty(
+        new_error_msgs,
+        msg=(
+          f"{step_name}: unrecognized eligibility claim {claim!r} must not "
+          f"produce error messages, got {new_error_msgs}"
+        ),
+      )
+      for msg in messages:
+        if (
+          isinstance(msg, dict)
+          and msg.get("code") == "eligibility_not_accepted"
+        ):
+          self.assertIn(
+            msg.get("type"),
+            ("info", "warning"),
+            msg=(
+              f"{step_name}: eligibility_not_accepted message must have "
+              f"type 'info' or 'warning', got {msg!r}"
+            ),
+          )
+      self.assertNotIn(
+        body.get("status"),
+        ("requires_escalation", "canceled"),
+        msg=(
+          f"{step_name}: unrecognized eligibility claim {claim!r} must not "
+          f"escalate or cancel the checkout, got status={body.get('status')!r}"
+        ),
+      )
+      self.assertEqual(
+        body.get("status"),
+        base_body.get("status"),
+        msg=(
+          f"{step_name}: unrecognized eligibility claim {claim!r} must not "
+          f"degrade checkout status compared to baseline "
+          f"{base_body.get('status')!r}, got {body.get('status')!r}"
+        ),
+      )
+    completed = self.complete_checkout_session(created["id"])
+    self.assertEqual(completed.get("status"), "completed")
+
+  @spec_assert("REQ-SHOPPING-CHECKOUT-0047")
+  def test_accepted_eligibility_claim_resolved_by_rescission_before_complete(
+    self,
+  ):
+    """Accepted eligibility claims must be resolved before completion."""
+    claim = self.require_trigger("accepted_eligibility_claim")
+    created = self.create_checkout_session(
+      buyer=self.DEFAULT_BUYER,
+      select_fulfillment=True,
+      context={"eligibility": [claim]},
+    )
+    messages = created.get("messages") or []
+    applied = (created.get("discounts") or {}).get("applied") or []
+    accepted_msg = any(
+      isinstance(m, dict) and m.get("code") == "eligibility_accepted"
+      for m in messages
+    )
+    provisional_for_claim = any(
+      isinstance(d, dict)
+      and d.get("eligibility") == claim
+      and d.get("provisional") is True
+      for d in applied
+    )
+    has_actions = bool(created.get("actions"))
+    self.assertTrue(
+      accepted_msg
+      or provisional_for_claim
+      or has_actions
+      or created.get("status") == "incomplete",
+      msg=(
+        f"Server did not surface acceptance of declared "
+        f"accepted_eligibility_claim {claim!r} via eligibility_accepted "
+        f"message, provisional discount, actions, or incomplete status"
+      ),
+    )
+    if (
+      provisional_for_claim
+      or has_actions
+      or created.get("status") != "ready_for_complete"
+    ):
+      early = self.attempt_complete_checkout(created["id"])
+      if early.status_code in (200, 201):
+        early_body = early.json()
+        self.assertNotEqual(
+          early_body.get("status"),
+          "completed",
+          msg="Unresolved accepted eligibility claim must not complete",
+        )
+        self.assertIsNone(
+          early_body.get("order"),
+          msg="Unresolved accepted eligibility claim must not create an order",
+        )
+    rescinded = self.update_checkout_session(
+      checkout.Checkout(**created),
+      context={"eligibility": []},
+    )
+    remaining_provisional = [
+      d
+      for d in ((rescinded.get("discounts") or {}).get("applied") or [])
+      if isinstance(d, dict)
+      and d.get("eligibility") == claim
+      and d.get("provisional") is True
+    ]
+    self.assertEmpty(
+      remaining_provisional,
+      msg=(
+        f"Rescinding context.eligibility=[] must remove provisional discount "
+        f"for {claim!r}, got {remaining_provisional}"
+      ),
+    )
+    self.assertEqual(
+      rescinded.get("status"),
+      "ready_for_complete",
+      msg="Checkout must be ready_for_complete once claim is rescinded",
+    )
+    completed = self.complete_checkout_session(created["id"])
+    self.assertEqual(completed.get("status"), "completed")
+
+  @spec_assert(
+    "REQ-SHOPPING-CHECKOUT-0047",
+    "REQ-SHOPPING-CHECKOUT-0051",
+    "REQ-SHOPPING-CHECKOUT-0052",
+    "REQ-SHOPPING-CHECKOUT-0053",
+  )
+  def test_unverified_eligibility_claim_rejected_at_completion(self):
+    """Unverified accepted claims fail completion with eligibility_invalid."""
+    claim = self.require_trigger("unverifiable_eligibility_claim")
+    created = self.create_checkout_session(
+      buyer=self.DEFAULT_BUYER,
+      select_fulfillment=True,
+      context={"eligibility": [claim]},
+    )
+    checkout_id = created["id"]
+    resp = self.attempt_complete_checkout(checkout_id)
+    try:
+      body = resp.json()
+    except ValueError:
+      self.fail(
+        f"complete response for unverified claim {claim!r} was not JSON "
+        f"(HTTP {resp.status_code})"
+      )
+    self.assert_eligibility_invalid_error(body, where="POST complete response")
+    get_resp = self.client.get(
+      self.get_shopping_url(f"/checkout-sessions/{checkout_id}"),
+      headers=self.get_headers(),
+    )
+    self.assertEqual(get_resp.status_code, 200)
+    persisted = get_resp.json()
+    self.assertNotEqual(
+      persisted.get("status"),
+      "completed",
+      msg=(
+        "Checkout with unverified eligibility claim must not persist completed"
+      ),
+    )
+    self.assertIsNone(
+      persisted.get("order"),
+      msg="Checkout with unverified eligibility claim must not persist order",
+    )
+
 
 if __name__ == "__main__":
   absltest.main()

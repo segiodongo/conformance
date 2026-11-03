@@ -1,30 +1,31 @@
 # Findings from linking the tests to the catalog (demo)
 
-> **Demo only, not for merge.** These findings come from giving each of the 99
+> **Demo only, not for merge.** These findings come from giving each of the 104
 > shopping tests a marker against the catalog at `f2626c28` (see
 > [Linking tests to rules](README.md#linking-tests-to-rules)). Rule IDs are the
 > demo's stable IDs without the `REQ-SHOPPING-` prefix. They aren't official.
 
 ## Summary
 
-- **Markers:** 51 tests cite rules, 24 are `no_rule`, 16 are `scenario`, 6
+- **Markers:** 56 tests cite rules, 24 are `no_rule`, 16 are `scenario`, 6
   are `outside_catalog` and 2 are `older_version`.
-- **Rules cited:** 55, all testable: 48 MUST, 4 MUST NOT and 3 SHOULD.
-- **Coverage:** the tests cite 52 of the 104 testable MUST and MUST NOT rules
-  (50%): catalog 18 of 18, order 14 of 17, fulfillment 4 of 16, checkout 9 of
-  37, cart 6 of 8 and discount 1 of 4. Buyer consent has none.
-- **Depth:** all 52 are checked in full (see
+- **Rules cited:** 63, all testable: 55 MUST, 5 MUST NOT and 3 SHOULD.
+- **Coverage:** the tests cite 60 of the 104 testable MUST and MUST NOT rules
+  (58%): catalog 18 of 18, discount 4 of 4, order 14 of 17, cart 6 of 8,
+  checkout 14 of 37 and fulfillment 4 of 16. Buyer consent has none.
+- **Depth:** all 60 are checked in full (see
   [Claims reviewed](#claims-reviewed)). ORDER-0022 is cited in part by the
   envelope test and in full by the test that verifies the signature value,
-  so the coverage report counts 52 of the 104 (50%) as fully checked and
+  so the coverage report counts 60 of the 104 (58%) as fully checked and
   none only in part.
 - **Sample server:** against `samples` at `360adbc`, with the marker check
-  on, 80 of the 99 shopping tests pass, 1 fails (Get Order answers an
+  on, 81 of the 104 shopping tests pass, 1 fails (Get Order answers an
   unauthenticated request; see [Sample server findings](#sample-server-findings)),
   2 don't apply (the server implements 2026-04-08, which doesn't state the
   rules they cite), 13 skip because the sample doesn't advertise the catalog
-  capabilities, and the 3 TLS tests skip: the sample is reached over `http://`
-  on localhost, so there is no TLS to check.
+  capabilities, 4 skip because no eligibility-claim trigger is declared, and
+  the 3 TLS tests skip: the sample is reached over `http://` on localhost, so
+  there is no TLS to check.
 
 ## Claims reviewed
 
@@ -67,6 +68,11 @@ rule in part. CHECKOUT-0142 stays fully checked through `TotalsTest`.
 | CHECKOUT-0010       | MUST     | `ValidationTest.test_quantity_revision_is_explained`                                                                                                                                               | Full    | See [Rule scope](#rule-scope). Any `messages[]` entry about the line or its quantity counts as the explanation. Skips when the server rejects or accepts the quantity instead of revising it.                                                                                                                                              |
 | CHECKOUT-0011       | MUST NOT | `ValidationTest.test_quantity_revision_is_explained`                                                                                                                                               | Full    | See [Rule scope](#rule-scope). A lowered quantity without such a message fails.                                                                                                                                                                                                                                                            |
 | CHECKOUT-0016       | MUST     | `BusinessLogicTest.test_totals_calculation_on_create`, `BusinessLogicTest.test_totals_recalculation_on_update`                                                                                     | Full    | Each line's `subtotal` is checked as `price × quantity × 10^-scale` from the line's own values: exact at scale 0, within one minor unit when the item carries a `quantity_unit` scale.                                                                                                                                                     |
+| CHECKOUT-0047       | MUST     | `CheckoutLifecycleTest.test_accepted_eligibility_claim_resolved_by_rescission_before_complete`, `CheckoutLifecycleTest.test_unverified_eligibility_claim_rejected_at_completion`                   | Full    | Covers both resolution paths before completion may succeed: rescinding `context.eligibility: []` removes the provisional discount and allows completion, and an accepted claim that remains unverified at completion fails to complete.                                                                                                    |
+| CHECKOUT-0048       | MUST NOT | `CheckoutLifecycleTest.test_unrecognized_eligibility_claim_does_not_block_checkout`                                                                                                                | Full    | Sending an unrecognized reverse-domain claim in `context.eligibility` on Create and Update adds no error message, keeps any `eligibility_not_accepted` message as `info` or `warning`, does not degrade checkout `status`, and completes the checkout.                                                                                     |
+| CHECKOUT-0051       | MUST     | `CheckoutLifecycleTest.test_unverified_eligibility_claim_rejected_at_completion`                                                                                                                   | Full    | Attempting `/complete` with `unverifiable_eligibility_claim` returns a `messages[]` entry with `type: "error"` and `code: "eligibility_invalid"`.                                                                                                                                                                                          |
+| CHECKOUT-0052       | MUST NOT | `CheckoutLifecycleTest.test_unverified_eligibility_claim_rejected_at_completion`                                                                                                                   | Full    | Neither the `/complete` response nor a subsequent Get Checkout reports `status: "completed"` or an `order` when an accepted claim is unresolved.                                                                                                                                                                                           |
+| CHECKOUT-0053       | MUST     | `CheckoutLifecycleTest.test_unverified_eligibility_claim_rejected_at_completion`                                                                                                                   | Full    | The `eligibility_invalid` error entry carries `severity: "recoverable"`.                                                                                                                                                                                                                                                                   |
 | CHECKOUT-0241       | MUST     | `ShoppingProtocolTest.test_response_bodies_are_strict_json`                                                                                                                                        | Full    | As CART-0062, over Create, Get, Update, Complete and Cancel Checkout, the error for an unknown session and the error for a malformed body.                                                                                                                                                                                                 |
 | CHECKOUT-0242       | MUST     | `ShoppingProtocolTest.test_endpoints_are_served_over_tls_1_3`                                                                                                                                      | Full    | As CART-0063.                                                                                                                                                                                                                                                                                                                              |
 | CHECKOUT-0105       | SHOULD   | `ValidationTest`: `test_out_of_stock`, `test_update_inventory_validation`, `test_product_not_found`, `test_payment_failure`, `test_complete_without_fulfillment`, `test_structured_error_messages` | Full    | "Accurate" is checked as naming the cause: a 4xx whose body mentions it, or a standard error code.                                                                                                                                                                                                                                         |
@@ -78,6 +84,9 @@ rule in part. CHECKOUT-0142 stays fully checked through `TotalsTest`.
 | CHECKOUT-0142       | MUST     | `DiscountSemanticsTest.test_discount_total_is_negative`                                                                                                                                            | Partial | Checks only the `discount` entry.                                                                                                                                                                                                                                                                                                          |
 | CHECKOUT-0143       | MUST     | `TotalsTest.test_additive_entries_non_negative`                                                                                                                                                    | Full    |                                                                                                                                                                                                                                                                                                                                            |
 | DISCOUNT-0003       | MUST     | `CartTest.test_cart_discount_codes_carry_forward_to_checkout`                                                                                                                                      | Full    | The checkout must name the code: in `discounts.codes`, as an applied discount, or in a `messages[]` rejection. Skips when the discount extension doesn't extend both cart and checkout, or when the code wasn't applied to the cart.                                                                                                       |
+| DISCOUNT-0006       | MUST     | `DiscountSemanticsTest.test_pricing_eligibility_claim_surfaces_provisional_discount`                                                                                                               | Full    | A checkout with `pricing_eligibility_claim` in `context.eligibility` surfaces a provisional discount in `discounts.applied`, a negative `discount`/`items_discount` entry in `totals[]`, and a lower checkout total than the baseline without the claim.                                                                                   |
+| DISCOUNT-0008       | MUST     | `DiscountSemanticsTest.test_pricing_eligibility_claim_surfaces_provisional_discount`                                                                                                               | Full    | The `discounts.applied` entry carries `eligibility` equal to the claim, `provisional: true`, `automatic: true`, `code` omitted, a non-empty `title`, and a positive integer `amount`.                                                                                                                                                      |
+| DISCOUNT-0009       | MUST     | `DiscountSemanticsTest.test_provisional_discount_claims_resolved_at_completion`                                                                                                                    | Full    | At `/complete`, the provisional claim either verifies (`provisional: true` no longer present on the completed checkout) or fails verification with `code: "eligibility_invalid"` and `severity: "recoverable"`; rescinding `context.eligibility: []` removes the provisional discount before completion.                                   |
 | FULFILLMENT-0012    | MUST     | `FulfillmentTest.test_known_customer_multiple_addresses_selection`                                                                                                                                 | Full    | For a destination the business listed itself (a saved address).                                                                                                                                                                                                                                                                            |
 | FULFILLMENT-0015    | MUST NOT | `FulfillmentTest.test_known_customer_multiple_addresses_selection`                                                                                                                                 | Full    | Both parts: the same ID comes back, and its destination is the selected address.                                                                                                                                                                                                                                                           |
 | FULFILLMENT-0018    | MUST     | `FulfillmentStructureTest.test_option_titles_distinguish_siblings`                                                                                                                                 | Full    | Non-empty titles that stay distinct after case folding and whitespace collapsing; the reading of "distinguish" a machine can check.                                                                                                                                                                                                        |
@@ -126,9 +135,10 @@ unless the behaviour is meant to be informative.
 
 Two related observations:
 
-- **Discount:** 10 of its 11 tests are `no_rule`. Its 9 rules cover
-  discovery, cart-to-checkout continuity, how rejections are reported and
-  eligibility claims, not the request and response behaviour above.
+- **Discount:** 10 of its 13 tests in `shopping/discount/` are `no_rule`. Its 9
+  rules cover discovery, cart-to-checkout continuity, how rejections are
+  reported and eligibility claims (all 4 testable MUSTs now covered), not the
+  code-submission request and response behaviour above.
 - **Errors:** `checkout/rest.md` (Error Responses) says business outcomes,
   such as unavailable merchandise, return HTTP 200 with `messages`, without a
   keyword. The message fields `type`, `code`, `content` and `severity` are
@@ -248,13 +258,22 @@ add them, and change the counts above.
   rules `CATALOG-0045, 0046`). `CATALOG-LOOKUP-0010` probes the batch limit by
   sending `catalog_max_batch_size + 1` identifiers (default 1000 per the
   specification) and checking for HTTP 400 `request_too_large`.
-- **Needs fixtures:** these skip without the matching `conformance_input.json`
+- **Eligibility and provisional discounts:** `CheckoutLifecycleTest` and
+  `DiscountSemanticsTest` cover the 8 testable MUST and MUST NOT rules for
+  `context.eligibility` and provisional discounts (`CHECKOUT-0047, -0048,
+-0051, -0052, -0053`; `DISCOUNT-0006, -0008, -0009`). Unrecognized claims
+  (`CHECKOUT-0048`) need no trigger and run against any server; accepted,
+  pricing, and unverifiable claims use fixture triggers because accepting
+  eligibility claims is optional for businesses (`CHECKOUT-0046`,
+  `DISCOUNT-0006`).
+- **Needs fixtures:** these skip without the matching `test_fixtures.json`
   entries: known customers with and without saved addresses, a
   free-shipping threshold and item, dynamic fulfillment destinations, a
-  second or fixed-amount discount code, and the catalog triggers (a
+  second or fixed-amount discount code, the catalog triggers (a
   multi-variant product, a product with selectable options, a `unit_price`
   item whose pricing basis differs from its sale basis, and the search
-  endpoint's default page size).
+  endpoint's default page size), and the eligibility triggers (an accepted
+  claim, a pricing claim, and an unverifiable claim).
 - **Needs the sample server:**
   - `PUT /orders/{id}`, which neither the draft nor any release defines:
     `test_order_update`, `test_order_adjustments`,
@@ -287,6 +306,6 @@ of the tests that apply to its version:
 
 ## Coverage gaps
 
-52 testable MUST and MUST NOT rules have no test: checkout 28, fulfillment 12,
-buyer consent 4, order 3, discount 3 and cart 2. Catalog has all 18 covered.
-Each remaining rule is a candidate for a new test.
+44 testable MUST and MUST NOT rules have no test: checkout 23, fulfillment 12,
+buyer consent 4, order 3 and cart 2. Catalog (18 of 18) and discount (4 of 4)
+have all of theirs covered. Each remaining rule is a candidate for a new test.

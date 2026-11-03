@@ -92,6 +92,9 @@ class TriggerTest(unittest.TestCase):
         },
         "unit_price_item_sku": "cable_50m",
         "catalog_search_default_page_size": 10,
+        "accepted_eligibility_claim": "com.example.student",
+        "pricing_eligibility_claim": "com.example.loyalty_gold",
+        "unverifiable_eligibility_claim": "com.example.unverified_employee",
       }
     )
     context = DynamicFixtureContext(merged)
@@ -124,6 +127,9 @@ class TriggerTest(unittest.TestCase):
           "catalog_variant": {"product_id": "prod_only"},
           "unit_price_item_sku": "   ",
           "catalog_search_default_page_size": True,
+          "accepted_eligibility_claim": "not_reverse_domain",
+          "pricing_eligibility_claim": "com..empty_segment",
+          "unverifiable_eligibility_claim": 123,
         }
       }
     )
@@ -135,6 +141,9 @@ class TriggerTest(unittest.TestCase):
       "catalog_variant",
       "unit_price_item_sku",
       "catalog_search_default_page_size",
+      "accepted_eligibility_claim",
+      "pricing_eligibility_claim",
+      "unverifiable_eligibility_claim",
     ):
       with self.subTest(key=key):
         self.assertIsNone(context.trigger(key))

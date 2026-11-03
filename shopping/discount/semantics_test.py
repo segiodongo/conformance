@@ -259,6 +259,107 @@ class DiscountSemanticsTest(ShoppingIntegrationTestBase):
       f"the first code must be replaced, not accumulated (got {applied})",
     )
 
+  # ── W7: provisional discounts from eligibility claims (discount.md) ─────
+  @spec_assert("REQ-SHOPPING-DISCOUNT-0006", "REQ-SHOPPING-DISCOUNT-0008")
+  def test_pricing_eligibility_claim_surfaces_provisional_discount(self):
+    """Accepted pricing eligibility claims surface provisional discounts."""
+    claim = self.require_trigger("pricing_eligibility_claim")
+    _, baseline_raw = self._new_checkout()
+    baseline_total = self._total_amount(baseline_raw)
+    self.assertIsNotNone(baseline_total, "baseline checkout must have a total")
+    claimed_raw = self.create_checkout_session(
+      select_fulfillment=False,
+      context={"eligibility": [claim]},
+    )
+    self.assert_provisional_discount(
+      claimed_raw, claim, where="discounts.applied"
+    )
+    claimed_total = self._total_amount(claimed_raw)
+    self.assertIsNotNone(claimed_total, "claimed checkout must have a total")
+    self.assertLess(
+      claimed_total,
+      baseline_total,
+      f"provisional discount for {claim!r} must reduce total below "
+      f"{baseline_total}, got {claimed_total}",
+    )
+
+  @spec_assert("REQ-SHOPPING-DISCOUNT-0009")
+  def test_provisional_discount_claims_resolved_at_completion(self):
+    """Provisional discount claims must be resolved at checkout completion."""
+    claim = self.require_trigger("pricing_eligibility_claim")
+    created = self.create_checkout_session(
+      buyer=self.DEFAULT_BUYER,
+      select_fulfillment=True,
+      context={"eligibility": [claim]},
+    )
+    self.assert_provisional_discount(
+      created, claim, where="created checkout discounts.applied"
+    )
+    resp = self.attempt_complete_checkout(created["id"])
+    try:
+      body = resp.json()
+    except ValueError:
+      self.fail(
+        f"complete response for provisional claim {claim!r} was not JSON "
+        f"(HTTP {resp.status_code})"
+      )
+    if resp.status_code in (200, 201) and body.get("status") == "completed":
+      applied = (body.get("discounts") or {}).get("applied") or []
+      still_provisional = [
+        d
+        for d in applied
+        if isinstance(d, dict) and d.get("provisional") is True
+      ]
+      self.assertEmpty(
+        still_provisional,
+        msg=(
+          f"completed checkout must have resolved all provisional discounts "
+          f"(provisional=false or removed), got {still_provisional}"
+        ),
+      )
+    else:
+      self.assert_eligibility_invalid_error(body, where="complete response")
+
+    rescind_checkout = self.create_checkout_session(
+      buyer=self.DEFAULT_BUYER,
+      select_fulfillment=True,
+      context={"eligibility": [claim]},
+    )
+    self.assert_provisional_discount(
+      rescind_checkout, claim, where="pre-rescission discounts.applied"
+    )
+    updated = self.update_checkout_session(
+      checkout.Checkout(**rescind_checkout),
+      context={"eligibility": []},
+    )
+    remaining = [
+      d
+      for d in ((updated.get("discounts") or {}).get("applied") or [])
+      if isinstance(d, dict)
+      and (d.get("provisional") is True or d.get("eligibility") == claim)
+    ]
+    self.assertEmpty(
+      remaining,
+      msg=(
+        f"rescinding context.eligibility=[] must remove provisional discount "
+        f"for {claim!r}, got {remaining}"
+      ),
+    )
+    completed = self.complete_checkout_session(rescind_checkout["id"])
+    self.assertEqual(completed.get("status"), "completed")
+    completed_provisional = [
+      d
+      for d in ((completed.get("discounts") or {}).get("applied") or [])
+      if isinstance(d, dict) and d.get("provisional") is True
+    ]
+    self.assertEmpty(
+      completed_provisional,
+      msg=(
+        f"completed checkout after rescission must have no provisional "
+        f"discounts, got {completed_provisional}"
+      ),
+    )
+
 
 if __name__ == "__main__":
   absltest.main()
