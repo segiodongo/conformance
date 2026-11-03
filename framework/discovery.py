@@ -25,12 +25,28 @@ DISCOVERY_PATH = "/.well-known/ucp"
 
 @dataclass(frozen=True)
 class Capability:
-  """Represents a discovered capability."""
+  """Represents a discovered capability.
+
+  `extends` lists the capabilities an extension applies to, as the profile
+  advertises them: the discount extension may extend cart, checkout or both
+  (discount.md, Discovery).
+  """
 
   name: str
   version: str
   spec: str | None = None
   schema_url: str | None = None
+  extends: tuple[str, ...] = ()
+
+
+def _extends(cap: dict[str, Any]) -> tuple[str, ...]:
+  """Return a capability entry's `extends` as a tuple of names."""
+  value = cap.get("extends")
+  if isinstance(value, str):
+    return (value,)
+  if isinstance(value, list):
+    return tuple(str(name) for name in value)
+  return ()
 
 
 # Capabilities the specification renamed, keyed by their current name. A
@@ -76,6 +92,7 @@ class UcpProfile:
               version=ver_str,
               spec=cap.get("spec"),
               schema_url=cap.get("schema"),
+              extends=_extends(cap),
             )
     elif isinstance(caps_data, dict):
       for name, cap_list in caps_data.items():
@@ -89,6 +106,7 @@ class UcpProfile:
               version=ver_str,
               spec=cap.get("spec"),
               schema_url=cap.get("schema"),
+              extends=_extends(cap),
             )
 
     # Extract payment handlers
@@ -143,6 +161,22 @@ class UcpProfile:
         continue
       return not (min_version and capability.version < min_version)
     return False
+
+  def extension_extends(self, extension: str, capability: str) -> bool:
+    """Whether the profile advertises `extension` as extending `capability`.
+
+    Args:
+      extension: The extension's name, such as "dev.ucp.shopping.discount".
+      capability: The capability it would extend, such as
+        "dev.ucp.shopping.cart".
+
+    Returns:
+      True when the extension is advertised with `capability` among its
+      `extends`; False when it isn't advertised or doesn't extend it.
+
+    """
+    entry = self.capabilities.get(extension)
+    return entry is not None and capability in entry.extends
 
   def supports_payment_handler(self, handler_id: str) -> bool:
     """Check if the server supports a payment handler by ID or name."""

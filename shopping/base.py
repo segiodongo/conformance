@@ -31,6 +31,7 @@ from framework.base_test import (
   flag_value,
 )
 from framework.decorators import requires_capability
+import httpx
 from ucp_sdk.models.schemas import payment_handler
 from ucp_sdk.models.schemas.shopping import checkout as f_models
 from ucp_sdk.models.schemas.shopping import checkout_create_request
@@ -131,14 +132,16 @@ def _without_empties(value: Any) -> Any:
 
 
 def snapshot_differences(
-  expected: Any, actual: Any, path: str = "$"
+  expected: Any, actual: Any, path: str = "$", reference: str = "Get Order"
 ) -> list[str]:
-  """Return where two order snapshots differ, as JSON paths with the values.
+  """Return where two entity snapshots differ, as JSON paths with the values.
 
   Args:
-    expected: The authoritative entity, as Get Order returns it.
+    expected: The authoritative entity, as the reference operation returns
+      it.
     actual: The entity another response or delivery carried.
     path: The JSON path of the values compared, for the messages.
+    reference: What returned `expected`, named in the messages.
 
   Returns:
     One line per difference; none when the snapshots are the same once
@@ -151,22 +154,24 @@ def snapshot_differences(
     for key in sorted(set(expected) | set(actual)):
       member = f"{path}.{key}"
       if key not in actual:
-        found.append(f"{member}: missing (Get Order has {expected[key]!r})")
+        found.append(f"{member}: missing ({reference} has {expected[key]!r})")
       elif key not in expected:
-        found.append(f"{member}: extra ({actual[key]!r}; Get Order has none)")
+        found.append(f"{member}: extra ({actual[key]!r}; {reference} has none)")
       else:
-        found += snapshot_differences(expected[key], actual[key], member)
+        found += snapshot_differences(
+          expected[key], actual[key], member, reference
+        )
     return found
   if isinstance(expected, list) and isinstance(actual, list):
     if len(expected) != len(actual):
-      return [f"{path}: {len(actual)} entries, Get Order has {len(expected)}"]
+      return [f"{path}: {len(actual)} entries, {reference} has {len(expected)}"]
     return [
       line
       for index, (want, got) in enumerate(zip(expected, actual, strict=True))
-      for line in snapshot_differences(want, got, f"{path}[{index}]")
+      for line in snapshot_differences(want, got, f"{path}[{index}]", reference)
     ]
   if expected != actual:
-    return [f"{path}: {actual!r}, Get Order has {expected!r}"]
+    return [f"{path}: {actual!r}, {reference} has {expected!r}"]
   return []
 
 
@@ -1322,3 +1327,105 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     )
     self.assert_response_status(response, 200)
     return response.json()
+
+  # ── cart capability (cart.md, cart/rest.md) ──────────────────────────────
+
+  def create_cart(
+    self,
+    quantity: int = 1,
+    item_id: str | None = None,
+    buyer: dict[str, Any] | None = None,
+    discounts: dict[str, Any] | None = None,
+    **extra: Any,
+  ) -> dict[str, Any]:
+    """POST /carts with the fixtures' item; return the cart as created.
+
+    Args:
+      quantity: The quantity of the line.
+      item_id: The item to put in the cart; the fixtures' SKU by default.
+      buyer: An optional buyer object (cart.json: optional on create).
+      discounts: An optional discounts object, for a cart extended with
+        the discount extension.
+      **extra: Further top-level request members.
+
+    Returns:
+      The cart entity, as the server returned it.
+
+    """
+    payload: dict[str, Any] = {
+      "line_items": [
+        {
+          "item": {"id": item_id or self.fixture_ctx.get_test_sku()},
+          "quantity": quantity,
+        }
+      ]
+    }
+    if buyer is not None:
+      payload["buyer"] = buyer
+    if discounts is not None:
+      payload["discounts"] = discounts
+    payload.update(extra)
+    response = self.client.post(
+      self.get_shopping_url("/carts"), json=payload, headers=self.get_headers()
+    )
+    self.assert_response_status(response, [200, 201])
+    cart = response.json()
+    self.assertTrue(cart.get("id"), f"the created cart has no id: {cart}")
+    return cart
+
+  def get_cart(self, cart_id: str) -> httpx.Response:
+    """GET /carts/{id}; return the raw response."""
+    return self.client.get(
+      self.get_shopping_url(f"/carts/{cart_id}"), headers=self.get_headers()
+    )
+
+  def cancel_cart(self, cart_id: str) -> httpx.Response:
+    """POST /carts/{id}/cancel; return the raw response."""
+    return self.client.post(
+      self.get_shopping_url(f"/carts/{cart_id}/cancel"),
+      headers=self.get_headers(),
+    )
+
+  def convert_cart(self, cart_id: str, **payload: Any) -> dict[str, Any]:
+    """Create a checkout from a cart; return the checkout.
+
+    cart.md (Cart-to-Checkout Conversion): the platform passes `cart_id` in
+    the Create Checkout request, MUST include `line_items` and SHOULD set it
+    to an empty array. Each call sends a fresh Idempotency-Key, so a second
+    conversion is a new request, not a replay.
+
+    Args:
+      cart_id: The cart to convert.
+      **payload: Further request members, such as the overlapping fields a
+        test wants the business to ignore.
+
+    Returns:
+      The checkout entity, as the server returned it.
+
+    """
+    body: dict[str, Any] = {"cart_id": cart_id, "line_items": []}
+    body.update(payload)
+    response = self.client.post(
+      self.get_shopping_url("/checkout-sessions"),
+      json=body,
+      headers=self.get_headers(),
+    )
+    self.assert_response_status(response, [200, 201])
+    checkout_data = response.json()
+    self.assertTrue(
+      checkout_data.get("id"),
+      f"the checkout created from cart {cart_id} has no id: {checkout_data}",
+    )
+    return checkout_data
+
+  @staticmethod
+  def line_item_bag(entity: dict[str, Any]) -> list[tuple[Any, Any]]:
+    """Return an entity's line items as a sorted bag of (item id, quantity).
+
+    Carts and checkouts assign their own line IDs, so contents are compared
+    by what was ordered, not by those IDs.
+    """
+    return sorted(
+      ((line.get("item") or {}).get("id"), line.get("quantity"))
+      for line in entity.get("line_items") or []
+    )

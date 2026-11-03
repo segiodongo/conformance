@@ -1,25 +1,25 @@
 # Findings from linking the tests to the catalog (demo)
 
-> **Demo only, not for merge.** These findings come from giving each of the 74
+> **Demo only, not for merge.** These findings come from giving each of the 79
 > shopping tests a marker against the catalog at `f2626c28` (see
 > [Linking tests to rules](README.md#linking-tests-to-rules)). Rule IDs are the
 > demo's stable IDs without the `REQ-SHOPPING-` prefix. They aren't official.
 
 ## Summary
 
-- **Markers:** 25 tests cite rules, 24 are `no_rule`, 16 are `scenario`, 6
+- **Markers:** 30 tests cite rules, 24 are `no_rule`, 16 are `scenario`, 6
   are `outside_catalog` and 3 are `older_version`.
-- **Rules cited:** 22, all testable: 17 MUST, 2 MUST NOT and 3 SHOULD.
-- **Coverage:** the tests cite 19 of the 104 testable MUST and MUST NOT rules
-  (18%): order 8 of 17, fulfillment 4 of 16 and checkout 7 of 37. Cart,
-  catalog, discount and buyer consent have none.
-- **Depth:** of those 19, 18 are checked in full and 1, ORDER-0022, in part
+- **Rules cited:** 27, all testable: 22 MUST, 2 MUST NOT and 3 SHOULD.
+- **Coverage:** the tests cite 24 of the 104 testable MUST and MUST NOT rules
+  (23%): order 8 of 17, fulfillment 4 of 16, checkout 7 of 37, cart 4 of 8
+  and discount 1 of 4. Catalog and buyer consent have none.
+- **Depth:** of those 24, 23 are checked in full and 1, ORDER-0022, in part
   (see [Claims reviewed](#claims-reviewed)): the signature's envelope and
   shape are checked, its value isn't verified. The marker cites it with
-  `partly`, so the coverage report counts 18 of the 104 (17%) as fully
+  `partly`, so the coverage report counts 23 of the 104 (22%) as fully
   checked and 1 as checked in part.
 - **Sample server:** against `samples` at `360adbc`, with the marker check
-  on, 72 of the 74 tests pass and 2 don't apply: the server implements
+  on, 77 of the 79 tests pass and 2 don't apply: the server implements
   2026-04-08, which doesn't state the rules they cite.
 
 ## Claims reviewed
@@ -36,6 +36,10 @@ rule in part. CHECKOUT-0142 stays fully checked through `TotalsTest`.
 
 | Rule             | Level    | Test                                                                                                                                                                                               | Verdict | Note                                                                                                                                                                                                                                                     |
 | ---------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CART-0003        | MUST     | `CartTest.test_conversion_uses_cart_line_items_over_payload`, `CartTest.test_conversion_uses_cart_buyer_over_payload`                                                                              | Full    | The checkout holds the cart's lines and the cart's buyer when the conversion request names others. The buyer test skips when the cart doesn't keep the buyer it was created with; no rule makes it.                                                      |
+| CART-0004        | MUST     | the same two tests                                                                                                                                                                                 | Full    | The payload's line items and buyer are what the business must ignore.                                                                                                                                                                                    |
+| CART-0005        | MUST     | `CartTest.test_second_conversion_returns_the_existing_checkout`                                                                                                                                    | Full    | A second Create Checkout with the same `cart_id`, under a new Idempotency-Key, returns the first checkout's ID while it is incomplete.                                                                                                                   |
+| CART-0025        | MUST     | `CartTest.test_cancel_returns_the_cart_state_before_deletion`                                                                                                                                      | Full    | The cancel response is compared with Get Cart taken just before, on lines, currency, totals, buyer, context and discounts.                                                                                                                               |
 | CHECKOUT-0010    | MUST     | `ValidationTest.test_quantity_revision_is_explained`                                                                                                                                               | Full    | See [Rule scope](#rule-scope). Any `messages[]` entry about the line or its quantity counts as the explanation. Skips when the server rejects or accepts the quantity instead of revising it.                                                            |
 | CHECKOUT-0011    | MUST NOT | `ValidationTest.test_quantity_revision_is_explained`                                                                                                                                               | Full    | See [Rule scope](#rule-scope). A lowered quantity without such a message fails.                                                                                                                                                                          |
 | CHECKOUT-0016    | MUST     | `BusinessLogicTest.test_totals_calculation_on_create`, `BusinessLogicTest.test_totals_recalculation_on_update`                                                                                     | Full    | Each line's `subtotal` is checked as `price × quantity × 10^-scale` from the line's own values: exact at scale 0, within one minor unit when the item carries a `quantity_unit` scale.                                                                   |
@@ -47,6 +51,7 @@ rule in part. CHECKOUT-0142 stays fully checked through `TotalsTest`.
 | CHECKOUT-0142    | MUST     | `TotalsTest.test_discount_entry_is_negative`                                                                                                                                                       | Full    | Checks `discount` and `items_discount` entries; skips when there are none.                                                                                                                                                                               |
 | CHECKOUT-0142    | MUST     | `DiscountSemanticsTest.test_discount_total_is_negative`                                                                                                                                            | Partial | Checks only the `discount` entry.                                                                                                                                                                                                                        |
 | CHECKOUT-0143    | MUST     | `TotalsTest.test_additive_entries_non_negative`                                                                                                                                                    | Full    |                                                                                                                                                                                                                                                          |
+| DISCOUNT-0003    | MUST     | `CartTest.test_cart_discount_codes_carry_forward_to_checkout`                                                                                                                                      | Full    | The checkout must name the code: in `discounts.codes`, as an applied discount, or in a `messages[]` rejection. Skips when the discount extension doesn't extend both cart and checkout, or when the code wasn't applied to the cart.                     |
 | FULFILLMENT-0012 | MUST     | `FulfillmentTest.test_known_customer_multiple_addresses_selection`                                                                                                                                 | Full    | For a destination the business listed itself (a saved address).                                                                                                                                                                                          |
 | FULFILLMENT-0015 | MUST NOT | `FulfillmentTest.test_known_customer_multiple_addresses_selection`                                                                                                                                 | Full    | Both parts: the same ID comes back, and its destination is the selected address.                                                                                                                                                                         |
 | FULFILLMENT-0018 | MUST     | `FulfillmentStructureTest.test_option_titles_distinguish_siblings`                                                                                                                                 | Full    | Non-empty titles that stay distinct after case folding and whitespace collapsing; the reading of "distinguish" a machine can check.                                                                                                                      |
@@ -146,6 +151,15 @@ add them, and change the counts above.
 
 ## Test findings
 
+- **Cart suite:** `shopping/cart/cart_test.py` adopts the four assertions of
+  conformance PR #108 with the suite's markers and helpers, and tightens
+  two: DISCOUNT-0003 requires the code itself on the checkout (a negative
+  `discount` total could be an automatic discount), and CART-0025 compares
+  the cancel response with Get Cart rather than with the cart as created. It
+  adds the buyer as a second overlapping field for CART-0003 and CART-0004.
+  Two behaviours it relies on have no rule: that a cart keeps the buyer it
+  was created with, and that a valid code applies to a cart; the tests skip
+  as not exercised when they don't hold.
 - **Accepts what the spec doesn't describe:** the 6 `ValidationTest` tests
   also accept a 4xx for a business outcome. `test_repeated_cancel` accepts a
   200 or an error, so it can't fail on CHECKOUT-0119.
@@ -202,6 +216,6 @@ that apply to its version:
 
 ## Coverage gaps
 
-85 testable MUST and MUST NOT rules have no test: checkout 30, catalog 18
+80 testable MUST and MUST NOT rules have no test: checkout 30, catalog 18
 (16 for lookup and 11 for search, 9 of them shared), fulfillment 12, order 9,
-cart 8, discount 4 and buyer consent 4. Each is a candidate for a new test.
+cart 4, discount 3 and buyer consent 4. Each is a candidate for a new test.

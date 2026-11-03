@@ -24,6 +24,7 @@ import base64
 import unittest
 
 from shopping import base
+from shopping.cart import cart_test
 from shopping.order import webhook_structure_test as webhook
 from shopping.validation import validation_test
 
@@ -337,6 +338,89 @@ class ExplainsLineTest(unittest.TestCase):
     self.assertFalse(
       validation_test._explains_line(
         {"type": "info", "code": "promo", "content": "Free shipping"}
+      )
+    )
+
+
+class CartHelpersTest(unittest.TestCase):
+  """The cart suite's helpers: contents by bag, state, and naming a code."""
+
+  def test_line_item_bag_ignores_line_ids_and_order(self) -> None:
+    """Two entities with the same items and quantities have the same bag."""
+    cart = {
+      "line_items": [
+        {"id": "c1", "item": {"id": "roses"}, "quantity": 2},
+        {"id": "c2", "item": {"id": "lilies"}, "quantity": 1},
+      ]
+    }
+    checkout = {
+      "line_items": [
+        {"id": "x9", "item": {"id": "lilies"}, "quantity": 1},
+        {"id": "x8", "item": {"id": "roses"}, "quantity": 2},
+      ]
+    }
+    bag = base.ShoppingIntegrationTestBase.line_item_bag
+    self.assertEqual(bag(cart), bag(checkout))
+    checkout["line_items"][1]["quantity"] = 9
+    self.assertNotEqual(bag(cart), bag(checkout))
+
+  def test_cart_state_keeps_only_state_members(self) -> None:
+    """Envelope and bookkeeping members are left out of the state."""
+    state = cart_test._cart_state(
+      {
+        "ucp": {"version": "x"},
+        "id": "cart_1",
+        "line_items": [],
+        "currency": "USD",
+        "totals": [],
+        "messages": [{"type": "info"}],
+        "expires_at": "2026-01-01T00:00:00Z",
+      }
+    )
+    self.assertEqual(
+      set(state),
+      {"line_items", "currency", "totals", "buyer", "context", "discounts"},
+    )
+    self.assertNotIn("messages", state)
+
+  def test_names_code_in_codes_or_applied_any_case(self) -> None:
+    """The code counts when submitted or applied, case-insensitively."""
+    self.assertTrue(
+      cart_test._names_code({"discounts": {"codes": ["save10"]}}, "SAVE10")
+    )
+    self.assertTrue(
+      cart_test._names_code(
+        {"discounts": {"applied": [{"code": "SAVE10", "amount": 100}]}},
+        "save10",
+      )
+    )
+    self.assertFalse(
+      cart_test._names_code(
+        {"discounts": {"applied": [{"title": "Auto", "amount": 100}]}},
+        "SAVE10",
+      )
+    )
+    self.assertFalse(cart_test._names_code({}, "SAVE10"))
+
+  def test_message_names_code(self) -> None:
+    """A rejection message mentioning the code counts; others don't."""
+    self.assertTrue(
+      cart_test._message_names_code(
+        {
+          "messages": [
+            {
+              "type": "warning",
+              "code": "discount_code_invalid",
+              "content": "Code SAVE10 has expired",
+            }
+          ]
+        },
+        "save10",
+      )
+    )
+    self.assertFalse(
+      cart_test._message_names_code(
+        {"messages": [{"type": "info", "content": "Free shipping"}]}, "SAVE10"
       )
     )
 
