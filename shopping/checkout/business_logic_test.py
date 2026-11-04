@@ -22,6 +22,7 @@ from framework.decorators import (
   spec_assert,
 )
 from shopping.base import (
+  build_consent_confirmation,
   quantity_unit_machine_identity,
   ShoppingIntegrationTestBase,
 )
@@ -390,6 +391,79 @@ class BusinessLogicTest(ShoppingIntegrationTestBase):
       lines[0],
       created.get("currency"),
       where=f"checkout line_items[0] ({sku!r})",
+    )
+
+  @requires_capability("dev.ucp.shopping.buyer_consent")
+  @spec_assert(
+    "REQ-SHOPPING-BUYER-CONSENT-0010",  # ignore unadvertised purposes/segments
+  )
+  def test_unadvertised_consent_purposes_and_segments_ignored(self) -> None:
+    """Business ignores unadvertised consent purposes and segments."""
+    buyer_base = {
+      "first_name": "Consent",
+      "last_name": "Tester",
+      "email": "consent@example.com",
+    }
+    created = self.create_checkout_session(
+      buyer=buyer_base, select_fulfillment=False
+    )
+    checkout_id = created["id"]
+    checkout_obj = checkout.Checkout(**created)
+    advertised = (created.get("buyer") or {}).get("consent")
+    confirm_consent = build_consent_confirmation(
+      advertised,
+      unadvertised_purpose="org.ucp.conformance.unadvertised_purpose",
+      unadvertised_segment="org.ucp.conformance.unadvertised_segment",
+    )
+    updated = self.update_checkout_session(
+      checkout_obj,
+      buyer={**buyer_base, "consent": confirm_consent},
+    )
+    self.assert_unadvertised_consent_ignored(
+      created,
+      updated,
+      where=f"PUT /checkout-sessions/{checkout_id}",
+    )
+
+  @requires_capability("dev.ucp.shopping.buyer_consent")
+  @spec_assert(
+    "REQ-SHOPPING-BUYER-CONSENT-0003",  # must not complete with unmet dep
+    "REQ-SHOPPING-BUYER-CONSENT-0004",  # surface missing dep via error flow
+  )
+  def test_consent_unmet_dependency_blocks_completion_with_error(self) -> None:
+    """Unmet consent data dependency blocks completion and surfaces error."""
+    dep = self.require_trigger("consent_with_dependency")
+    buyer_base = {
+      "first_name": "Consent",
+      "last_name": "Tester",
+      "email": "consent@example.com",
+    }
+    created = self.create_checkout_session(buyer=buyer_base)
+    checkout_id = created["id"]
+    advertised = (created.get("buyer") or {}).get("consent")
+    confirm_consent = build_consent_confirmation(
+      advertised,
+      grant_purpose=dep["purpose"],
+      grant_segment=dep.get("segment"),
+    )
+    buyer_payload = {**buyer_base, "consent": confirm_consent}
+    buyer_payload.pop(dep["missing_buyer_field"], None)
+
+    checkout_obj = checkout.Checkout(**created)
+    self.update_checkout_session(checkout_obj, buyer=buyer_payload)
+
+    complete_resp = self.attempt_complete_checkout(
+      checkout_id, buyer=buyer_payload
+    )
+    get_resp = self.client.get(
+      self.get_shopping_url(f"/checkout-sessions/{checkout_id}"),
+      headers=self.get_headers(),
+    )
+    after_checkout = get_resp.json() if get_resp.status_code == 200 else None
+    self.assert_consent_unmet_dependency_completion(
+      complete_resp,
+      after_checkout=after_checkout,
+      where=f"POST /checkout-sessions/{checkout_id}/complete ({dep!r})",
     )
 
 

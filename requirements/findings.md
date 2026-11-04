@@ -1,27 +1,27 @@
 # Findings from linking the tests to the catalog (demo)
 
-> **Demo only, not for merge.** These findings come from giving each of the 128
+> **Demo only, not for merge.** These findings come from giving each of the 130
 > shopping tests a marker against the catalog at `f2626c28` (see
 > [Linking tests to rules](README.md#linking-tests-to-rules)). Rule IDs are the
 > demo's stable IDs without the `REQ-SHOPPING-` prefix. They aren't official.
 
 ## Summary
 
-- **Markers:** 80 tests cite rules, 24 are `no_rule`, 16 are `scenario`, 6
+- **Markers:** 82 tests cite rules, 24 are `no_rule`, 16 are `scenario`, 6
   are `outside_catalog` and 2 are `older_version`.
-- **Rules cited:** 95, all testable: 84 MUST, 8 MUST NOT and 3 SHOULD.
-- **Coverage:** the tests cite 92 of the 104 testable MUST and MUST NOT rules
-  (88%): catalog 18 of 18, discount 4 of 4, order 16 of 17, checkout 34 of 37,
-  cart 7 of 8 and fulfillment 13 of 16. Buyer consent has none.
-- **Depth:** all 92 are checked in full (see
+- **Rules cited:** 98, all testable: 87 MUST, 8 MUST NOT and 3 SHOULD.
+- **Coverage:** the tests cite 95 of the 104 testable MUST and MUST NOT rules
+  (91%): catalog 18 of 18, discount 4 of 4, order 16 of 17, checkout 34 of 37,
+  cart 7 of 8, fulfillment 13 of 16 and buyer consent 3 of 4.
+- **Depth:** all 95 are checked in full (see
   [Claims reviewed](#claims-reviewed)). ORDER-0022 is cited in part by the
   envelope test and in full by the test that verifies the signature value,
-  so the coverage report counts 92 of the 104 (88%) as fully checked and
+  so the coverage report counts 95 of the 104 (91%) as fully checked and
   none only in part.
 - **Sample server:** against `samples` at `360adbc`, with the marker check
-  on, 81 of the 128 shopping tests pass, 1 fails (Get Order answers an
+  on, 81 of the 130 shopping tests pass, 1 fails (Get Order answers an
   unauthenticated request; see [Sample server findings](#sample-server-findings)),
-  18 don't apply (the server implements 2026-04-08, which doesn't state the
+  20 don't apply (the server implements 2026-04-08, which doesn't state the
   rules they cite), 14 skip because the sample doesn't advertise the catalog
   capabilities, 9 skip because no trigger is declared, 2 skip as not
   exercised (the sample emits no `options[].description` and omits
@@ -43,6 +43,9 @@ rule in part. CHECKOUT-0142 stays fully checked through `TotalsTest`.
 
 | Rule                | Level    | Test                                                                                                                                                                                                                             | Verdict | Note                                                                                                                                                                                                                                                                                                                                       |
 | ------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| BUYER-CONSENT-0003  | MUST     | `BusinessLogicTest.test_consent_unmet_dependency_blocks_completion_with_error`                                                                                                                                                   | Full    | Attempting Complete Checkout after confirming the purpose/segment in `consent_with_dependency` while omitting its required `buyer` field returns an error `Message` (`type: "error"`, `severity: "recoverable"`, `path` under `$.buyer`) and does not complete the checkout.                                                               |
+| BUYER-CONSENT-0004  | MUST     | `BusinessLogicTest.test_consent_unmet_dependency_blocks_completion_with_error`                                                                                                                                                   | Full    | The checkout remains uncompleted (`status != "completed"`, no `order`) until the missing `buyer` dependency is satisfied.                                                                                                                                                                                                                  |
+| BUYER-CONSENT-0010  | MUST     | `BusinessLogicTest.test_unadvertised_consent_purposes_and_segments_ignored`                                                                                                                                                      | Full    | Sending an unadvertised purpose and an unadvertised segment under an advertised purpose in `buyer.consent` on Update Checkout returns HTTP 200 without echoing either unadvertised key in the response `buyer.consent` or failing the update.                                                                                              |
 | CART-0003           | MUST     | `CartTest.test_conversion_uses_cart_line_items_over_payload`, `CartTest.test_conversion_uses_cart_buyer_over_payload`                                                                                                            | Full    | The checkout holds the cart's lines and the cart's buyer when the conversion request names others. The buyer test skips when the cart doesn't keep the buyer it was created with; no rule makes it.                                                                                                                                        |
 | CART-0004           | MUST     | the same two tests                                                                                                                                                                                                               | Full    | The payload's line items and buyer are what the business must ignore.                                                                                                                                                                                                                                                                      |
 | CART-0005           | MUST     | `CartTest.test_second_conversion_returns_the_existing_checkout`                                                                                                                                                                  | Full    | A second Create Checkout with the same `cart_id`, under a new Idempotency-Key, returns the first checkout's ID while it is incomplete.                                                                                                                                                                                                     |
@@ -350,6 +353,13 @@ add them, and change the counts above.
   fall back to `get_test_sku()` when `measured_item_sku` is not declared, so
   machine-identity comparison (ignoring `display_text`) and rejection of
   irreconcilable unit assertions are verified against any `2026-08-25` server.
+- **Buyer consent (draft model):** `BusinessLogicTest` covers the 3 testable
+  MUST rules for the `2026-08-25` reverse-DNS `buyer.consent` map
+  (`BUYER-CONSENT-0003, -0004, -0010`) alongside the `2026-04-08` boolean
+  consent test (`test_buyer_consent`, marked `older_version`).
+  `BUYER-CONSENT-0010` needs no trigger and runs against any `2026-08-25`
+  server advertising `dev.ucp.shopping.buyer_consent`, while
+  `BUYER-CONSENT-0003` and `BUYER-CONSENT-0004` use `consent_with_dependency`.
 - **Needs fixtures:** these skip without the matching `test_fixtures.json`
   entries: known customers with and without saved addresses, a
   free-shipping threshold and item, dynamic fulfillment destinations, a
@@ -362,8 +372,9 @@ add them, and change the counts above.
   `catalog_fulfills_to`), the totals and disclosure triggers
   (`custom_total_item_sku`, `total_lines_item_sku`, `disclosure_item_sku`),
   the completion-state triggers (`async_completion_item_sku`,
-  `escalation_item_sku`), the Action trigger (`action_item_sku`), and the
-  quantity-unit triggers (`measured_item_sku`, `settlement_item_sku`).
+  `escalation_item_sku`), the Action trigger (`action_item_sku`), the
+  quantity-unit triggers (`measured_item_sku`, `settlement_item_sku`), and
+  the buyer-consent dependency trigger (`consent_with_dependency`).
 - **Needs the sample server:**
   - `PUT /orders/{id}`, which neither the draft nor any release defines:
     `test_order_update`, `test_order_adjustments`,
@@ -396,6 +407,6 @@ of the tests that apply to its version:
 
 ## Coverage gaps
 
-12 testable MUST and MUST NOT rules have no test: buyer consent 4, checkout
-3, fulfillment 3, cart 1 and order 1. Catalog (18 of 18) and discount (4 of 4)
+9 testable MUST and MUST NOT rules have no test: checkout 3, fulfillment 3,
+buyer consent 1, cart 1 and order 1. Catalog (18 of 18) and discount (4 of 4)
 have all of theirs covered. Each remaining rule is a candidate for a new test.

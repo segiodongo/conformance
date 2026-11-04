@@ -1604,5 +1604,127 @@ class QuantityUnitAndSettlementHelpersTest(unittest.TestCase):
     self.assertTrue(any("ORDER-0007" in p for p in problems))
 
 
+class BuyerConsentHelpersTest(unittest.TestCase):
+  """Unit tests for W13 buyer consent helpers."""
+
+  def _advertised_consent(self) -> dict:
+    return {
+      "dev.ucp.consent.marketing": {
+        "granted": False,
+        "source": "business",
+        "description": "Promotional communications",
+        "segments": {
+          "dev.ucp.consent.marketing.email": {
+            "granted": False,
+            "source": "business",
+            "description": "Promotional emails",
+          },
+          "dev.ucp.consent.marketing.sms": {
+            "granted": False,
+            "source": "business",
+            "description": "Marketing text messages",
+          },
+        },
+      },
+      "dev.ucp.consent.analytics": {
+        "granted": True,
+        "source": "business",
+        "description": "Site analytics",
+      },
+    }
+
+  def test_build_consent_confirmation_echoes_and_injects(self) -> None:
+    """Confirm map echoes advertised entries and injects requested changes."""
+    confirmed = base.build_consent_confirmation(
+      self._advertised_consent(),
+      grant_purpose="dev.ucp.consent.marketing",
+      grant_segment="dev.ucp.consent.marketing.sms",
+      unadvertised_purpose="org.ucp.conformance.unadvertised_purpose",
+      unadvertised_segment="org.ucp.conformance.unadvertised_segment",
+    )
+    self.assertEqual(
+      confirmed["dev.ucp.consent.analytics"],
+      {"granted": True, "source": "business"},
+    )
+    mkt_segs = confirmed["dev.ucp.consent.marketing"]["segments"]
+    self.assertEqual(
+      mkt_segs["dev.ucp.consent.marketing.sms"],
+      {"granted": True, "source": "platform"},
+    )
+    self.assertEqual(
+      mkt_segs["org.ucp.conformance.unadvertised_segment"],
+      {"granted": True, "source": "platform"},
+    )
+    self.assertEqual(
+      confirmed["org.ucp.conformance.unadvertised_purpose"],
+      {"granted": True, "source": "platform"},
+    )
+
+  def test_unadvertised_consent_ignored_problems_accepts_clean_response(
+    self,
+  ) -> None:
+    """Response ignoring unadvertised purpose and segment passes."""
+    before = {"buyer": {"consent": self._advertised_consent()}}
+    after = {"buyer": {"consent": self._advertised_consent()}}
+    self.assertEqual(
+      base.unadvertised_consent_ignored_problems(before, after), []
+    )
+
+  def test_unadvertised_consent_ignored_problems_rejects_echoed_unadvertised(
+    self,
+  ) -> None:
+    """Response echoing unadvertised purpose or segment fails."""
+    before = {"buyer": {"consent": self._advertised_consent()}}
+    after_consent = self._advertised_consent()
+    after_consent["org.ucp.conformance.unadvertised_purpose"] = {
+      "granted": True,
+      "source": "platform",
+      "description": "Unadvertised",
+    }
+    after_consent["dev.ucp.consent.marketing"]["segments"][
+      "org.ucp.conformance.unadvertised_segment"
+    ] = {
+      "granted": True,
+      "source": "platform",
+      "description": "Unadvertised seg",
+    }
+    after = {"buyer": {"consent": after_consent}}
+    problems = base.unadvertised_consent_ignored_problems(before, after)
+    self.assertEqual(len(problems), 2)
+    self.assertTrue(all("BUYER-CONSENT-0010" in p for p in problems))
+
+  def test_consent_unmet_dependency_completion_problems(self) -> None:
+    """Unmet consent dependency must block completion and surface an error."""
+    valid_error_resp = {
+      "status": "incomplete",
+      "messages": [
+        {
+          "type": "error",
+          "code": "missing_consent_data",
+          "severity": "recoverable",
+          "content": "Phone number is required for SMS marketing.",
+          "path": "$.buyer.phone_number",
+        }
+      ],
+    }
+    self.assertEqual(
+      base.consent_unmet_dependency_completion_problems(
+        valid_error_resp, after_checkout={"status": "incomplete"}
+      ),
+      [],
+    )
+
+    completed_resp = {
+      "status": "completed",
+      "order": {"id": "ord_123"},
+      "messages": [],
+    }
+    problems = base.consent_unmet_dependency_completion_problems(
+      completed_resp, after_checkout={"status": "completed"}
+    )
+    self.assertTrue(any("BUYER-CONSENT-0003" in p for p in problems))
+    self.assertTrue(any("BUYER-CONSENT-0004" in p for p in problems))
+
+
 if __name__ == "__main__":
   unittest.main()

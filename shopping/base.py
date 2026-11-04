@@ -2164,6 +2164,290 @@ def order_measurement_settlement_problems(
   return problems
 
 
+# ---------------------------------------------------------------------------
+# W13: Buyer consent (draft model) (REQ-SHOPPING-BUYER-CONSENT-0003, -0004,
+# -0010)
+# ---------------------------------------------------------------------------
+
+
+def _is_advertised_consent_purpose(entry: Any) -> bool:
+  """Return whether `entry` is a valid advertised `ConsentPurpose` dict."""
+  if not isinstance(entry, dict):
+    return False
+  granted = entry.get("granted")
+  source = entry.get("source")
+  description = entry.get("description")
+  return (
+    isinstance(granted, bool)
+    and source in ("business", "platform")
+    and isinstance(description, str)
+    and bool(description.strip())
+  )
+
+
+def build_consent_confirmation(
+  advertised_consent: Any,
+  *,
+  grant_purpose: str | None = None,
+  grant_segment: str | None = None,
+  unadvertised_purpose: str | None = None,
+  unadvertised_segment: str | None = None,
+) -> dict[str, Any]:
+  """Build a platform `buyer.consent` confirmation map from advertised consent.
+
+  Per `extensions/buyer-consent.md` (Confirm semantics), a confirm map echoes
+  every advertised purpose and segment key with `granted` and `source` (omitting
+  response-only `description` and `links`), optionally setting `grant_purpose` /
+  `grant_segment` to `granted: True, source: "platform"` or injecting
+  `unadvertised_purpose` / `unadvertised_segment` for negative tests.
+  """
+  confirmed: dict[str, Any] = {}
+  first_advertised_purpose: str | None = None
+  if isinstance(advertised_consent, dict):
+    for p_key, p_val in advertised_consent.items():
+      if not _is_reverse_domain_claim(p_key) or not isinstance(p_val, dict):
+        continue
+      if first_advertised_purpose is None:
+        first_advertised_purpose = p_key
+      p_entry: dict[str, Any] = {
+        "granted": bool(p_val.get("granted", False)),
+        "source": (
+          p_val["source"]
+          if p_val.get("source") in ("business", "platform")
+          else "business"
+        ),
+      }
+      raw_segments = p_val.get("segments")
+      if isinstance(raw_segments, dict) and raw_segments:
+        segs: dict[str, Any] = {}
+        for s_key, s_val in raw_segments.items():
+          if not _is_reverse_domain_claim(s_key) or not isinstance(s_val, dict):
+            continue
+          segs[s_key] = {
+            "granted": bool(s_val.get("granted", False)),
+            "source": (
+              s_val["source"]
+              if s_val.get("source") in ("business", "platform")
+              else "business"
+            ),
+          }
+        if segs:
+          p_entry["segments"] = segs
+      confirmed[p_key] = p_entry
+
+  if grant_purpose is not None:
+    p_entry = dict(
+      confirmed.get(grant_purpose, {"granted": False, "source": "business"})
+    )
+    if grant_segment is None:
+      p_entry["granted"] = True
+      p_entry["source"] = "platform"
+    else:
+      segs = dict(p_entry.get("segments") or {})
+      segs[grant_segment] = {"granted": True, "source": "platform"}
+      p_entry["segments"] = segs
+    confirmed[grant_purpose] = p_entry
+    if first_advertised_purpose is None:
+      first_advertised_purpose = grant_purpose
+
+  if unadvertised_segment is not None:
+    target_purpose = first_advertised_purpose or unadvertised_purpose
+    if target_purpose is not None:
+      p_entry = dict(
+        confirmed.get(target_purpose, {"granted": True, "source": "platform"})
+      )
+      segs = dict(p_entry.get("segments") or {})
+      segs[unadvertised_segment] = {"granted": True, "source": "platform"}
+      p_entry["segments"] = segs
+      confirmed[target_purpose] = p_entry
+
+  if unadvertised_purpose is not None and unadvertised_purpose not in confirmed:
+    confirmed[unadvertised_purpose] = {"granted": True, "source": "platform"}
+
+  return confirmed
+
+
+def unadvertised_consent_ignored_problems(
+  before_checkout: Any,
+  after_checkout: Any,
+  unadvertised_purpose: str = "org.ucp.conformance.unadvertised_purpose",
+  unadvertised_segment: str = "org.ucp.conformance.unadvertised_segment",
+  where: str = "update response",
+) -> list[str]:
+  """Return every violation of `REQ-SHOPPING-BUYER-CONSENT-0010`.
+
+  Checks `extensions/buyer-consent.md` (Normative requirements):
+    - REQ-SHOPPING-BUYER-CONSENT-0010: Businesses MUST ignore purposes and
+      segments in a request that were not advertised in a prior response.
+  """
+  if not isinstance(before_checkout, dict):
+    return [f"{where}: before_checkout is not a dict ({before_checkout!r})"]
+  if not isinstance(after_checkout, dict):
+    return [f"{where}: after_checkout is not a dict ({after_checkout!r})"]
+
+  before_buyer = before_checkout.get("buyer")
+  before_consent = (
+    before_buyer.get("consent") if isinstance(before_buyer, dict) else None
+  )
+  advertised_purposes: dict[str, set[str]] = {}
+  if isinstance(before_consent, dict):
+    for p_key, p_val in before_consent.items():
+      if _is_reverse_domain_claim(p_key) and _is_advertised_consent_purpose(
+        p_val
+      ):
+        raw_segs = p_val.get("segments")
+        seg_keys = (
+          {
+            s_key
+            for s_key, s_val in raw_segs.items()
+            if _is_reverse_domain_claim(s_key)
+            and _is_advertised_consent_purpose(s_val)
+          }
+          if isinstance(raw_segs, dict)
+          else set()
+        )
+        advertised_purposes[p_key] = seg_keys
+
+  problems: list[str] = []
+  if not advertised_purposes:
+    problems.append(
+      f"{where}: prior checkout response did not advertise any reverse-DNS "
+      f"consent purposes in buyer.consent, got {before_consent!r} "
+      "(BUYER-CONSENT-0010)"
+    )
+
+  after_buyer = after_checkout.get("buyer")
+  after_consent = (
+    after_buyer.get("consent") if isinstance(after_buyer, dict) else None
+  )
+  if not isinstance(after_consent, dict):
+    problems.append(
+      f"{where}.buyer.consent: expected a consent map dict, got "
+      f"{after_consent!r} (BUYER-CONSENT-0010)"
+    )
+    return problems
+
+  if unadvertised_purpose in after_consent:
+    problems.append(
+      f"{where}.buyer.consent[{unadvertised_purpose!r}]: business MUST ignore "
+      "unadvertised consent purpose, but echoed it in response "
+      "(BUYER-CONSENT-0010)"
+    )
+
+  for p_key, p_val in after_consent.items():
+    if advertised_purposes and p_key not in advertised_purposes:
+      if p_key != unadvertised_purpose:
+        problems.append(
+          f"{where}.buyer.consent[{p_key!r}]: purpose was not advertised in "
+          "prior response (BUYER-CONSENT-0010)"
+        )
+      continue
+    if not isinstance(p_val, dict):
+      problems.append(
+        f"{where}.buyer.consent[{p_key!r}]: expected ConsentPurpose dict, "
+        f"got {p_val!r} (BUYER-CONSENT-0010)"
+      )
+      continue
+    raw_segs = p_val.get("segments")
+    if isinstance(raw_segs, dict):
+      allowed_segs = advertised_purposes.get(p_key, set())
+      if unadvertised_segment in raw_segs:
+        problems.append(
+          f"{where}.buyer.consent[{p_key!r}].segments["
+          f"{unadvertised_segment!r}]: business MUST ignore unadvertised "
+          "consent segment, but echoed it in response (BUYER-CONSENT-0010)"
+        )
+      for s_key in raw_segs:
+        if s_key != unadvertised_segment and s_key not in allowed_segs:
+          problems.append(
+            f"{where}.buyer.consent[{p_key!r}].segments[{s_key!r}]: segment "
+            "was not advertised in prior response (BUYER-CONSENT-0010)"
+          )
+
+  return problems
+
+
+def consent_unmet_dependency_completion_problems(
+  complete_resp: Any,
+  after_checkout: Any | None = None,
+  where: str = "complete_checkout",
+) -> list[str]:
+  """Return every violation of `REQ-SHOPPING-BUYER-CONSENT-0003` and `-0004`.
+
+  Checks `extensions/buyer-consent.md` (Data dependencies):
+    - REQ-SHOPPING-BUYER-CONSENT-0003: On `complete_checkout`, businesses MUST
+      NOT transition the checkout to `completed` while a confirmed consent
+      decision has unmet data dependencies.
+    - REQ-SHOPPING-BUYER-CONSENT-0004: Missing dependencies MUST be surfaced via
+      the standard Error Handling flow.
+  """
+  if hasattr(complete_resp, "status_code") and hasattr(complete_resp, "json"):
+    try:
+      body = complete_resp.json()
+    except ValueError as exc:
+      return [
+        f"{where}: response (HTTP {complete_resp.status_code}) is not valid "
+        f"JSON: {exc} (BUYER-CONSENT-0004)"
+      ]
+  elif isinstance(complete_resp, dict):
+    body = complete_resp
+  else:
+    return [f"{where}: response is not a JSON object ({complete_resp!r})"]
+
+  if not isinstance(body, dict):
+    return [f"{where}: response body is not a JSON object ({body!r})"]
+
+  problems: list[str] = []
+  if body.get("status") == "completed":
+    problems.append(
+      f"{where}.status: checkout MUST NOT transition to 'completed' while a "
+      "confirmed consent decision has unmet data dependencies "
+      "(BUYER-CONSENT-0003)"
+    )
+  if body.get("order") is not None:
+    problems.append(
+      f"{where}.order: checkout with unmet consent data dependencies MUST NOT "
+      f"produce a completed order, got {body.get('order')!r} "
+      "(BUYER-CONSENT-0003)"
+    )
+
+  if isinstance(after_checkout, dict) and (
+    after_checkout.get("status") == "completed"
+  ):
+    problems.append(
+      f"{where} (subsequent GET): checkout transitioned to 'completed' "
+      "despite unmet consent data dependencies (BUYER-CONSENT-0003)"
+    )
+
+  messages = body.get("messages")
+  if not isinstance(messages, list) or not messages:
+    problems.append(
+      f"{where}.messages: missing dependencies MUST be surfaced via the "
+      f"standard Error Handling flow (messages[]), got {messages!r} "
+      "(BUYER-CONSENT-0004)"
+    )
+    return problems
+
+  error_msgs = [
+    m
+    for m in messages
+    if isinstance(m, dict)
+    and m.get("type") == "error"
+    and isinstance(m.get("code"), str)
+    and m["code"].strip()
+    and isinstance(m.get("content"), str)
+    and m["content"].strip()
+  ]
+  if not error_msgs:
+    problems.append(
+      f"{where}.messages: expected at least one error Message with non-empty "
+      f"'code' and 'content' surfacing the missing consent dependency, got "
+      f"{messages!r} (BUYER-CONSENT-0004)"
+    )
+
+  return problems
+
+
 class UnifiedUpdate(CheckoutUpdateRequest):
   """Client-side unified update model to support extensions."""
 
@@ -2359,6 +2643,14 @@ class CatalogFulfillsToFixture(TypedDict):
   conflicting_location: str
 
 
+class ConsentWithDependencyFixture(TypedDict, total=False):
+  """An advertised consent purpose/segment and the buyer field it requires."""
+
+  purpose: str
+  segment: str
+  missing_buyer_field: str
+
+
 class DynamicFixtureContext:
   """Context for loading dynamic test fixtures from configuration.
 
@@ -2398,6 +2690,7 @@ class DynamicFixtureContext:
     "action_item_sku": "get_action_item_sku",
     "measured_item_sku": "get_measured_item_sku",
     "settlement_item_sku": "get_settlement_item_sku",
+    "consent_with_dependency": "get_consent_with_dependency",
   }
 
   def __init__(
@@ -2845,6 +3138,32 @@ class DynamicFixtureContext:
     if isinstance(val, str) and val.strip():
       return val
     return None
+
+  def get_consent_with_dependency(
+    self,
+  ) -> ConsentWithDependencyFixture | None:
+    """Get a consent purpose/segment with a buyer data dependency."""
+    val = self._get_test_fixture("consent_with_dependency")
+    if not isinstance(val, dict):
+      return None
+    purpose = val.get("purpose")
+    missing_field = val.get("missing_buyer_field")
+    if (
+      not _is_reverse_domain_claim(purpose)
+      or not isinstance(missing_field, str)
+      or not missing_field.strip()
+    ):
+      return None
+    segment = val.get("segment")
+    if segment is not None and not _is_reverse_domain_claim(segment):
+      return None
+    result = ConsentWithDependencyFixture(
+      purpose=purpose,
+      missing_buyer_field=missing_field.strip(),
+    )
+    if segment is not None:
+      result["segment"] = segment
+    return result
 
   def get_non_existent_id(self) -> str:
     """Get an identifier the server under test does not sell."""
@@ -3331,11 +3650,15 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     if headers:
       request_headers.update(headers)
 
+    payload_dict = create_payload.model_dump(
+      mode="json", by_alias=True, exclude_none=True
+    )
+    if isinstance(buyer, dict) and "consent" in buyer:
+      payload_dict.setdefault("buyer", {})["consent"] = buyer["consent"]
+
     response = self.client.post(
       self.get_shopping_url("/checkout-sessions"),
-      json=create_payload.model_dump(
-        mode="json", by_alias=True, exclude_none=True
-      ),
+      json=payload_dict,
       headers=request_headers,
     )
     self.assert_response_status(response, [200, 201])
@@ -3446,11 +3769,16 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     return checkout_data
 
   def attempt_complete_checkout(
-    self, checkout_id: str, payment_payload: dict[str, Any] | None = None
+    self,
+    checkout_id: str,
+    payment_payload: dict[str, Any] | None = None,
+    buyer: dict[str, Any] | None = None,
   ) -> httpx.Response:
     """POST /checkout-sessions/{id}/complete and return the raw response."""
     if payment_payload is None:
       payment_payload = get_valid_payment_payload()
+    if buyer is not None:
+      payment_payload = {**payment_payload, "buyer": buyer}
     return self.client.post(
       self.get_shopping_url(f"/checkout-sessions/{checkout_id}/complete"),
       json=payment_payload,
@@ -3554,6 +3882,8 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     dumped = update_payload.model_dump(
       mode="json", by_alias=True, exclude_none=True
     )
+    if isinstance(buyer, dict) and "consent" in buyer:
+      dumped.setdefault("buyer", {})["consent"] = buyer["consent"]
     if context is not None:
       dumped["context"] = context
     return dumped
@@ -3895,6 +4225,44 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     self.assertFalse(
       problems,
       f"{where} violates measurement settlement adjustment rules:\n  "
+      + "\n  ".join(problems),
+    )
+
+  def assert_unadvertised_consent_ignored(
+    self,
+    before_checkout: Any,
+    after_checkout: Any,
+    unadvertised_purpose: str = "org.ucp.conformance.unadvertised_purpose",
+    unadvertised_segment: str = "org.ucp.conformance.unadvertised_segment",
+    where: str = "update response",
+  ) -> None:
+    """Assert unadvertised consent purposes and segments are ignored."""
+    problems = unadvertised_consent_ignored_problems(
+      before_checkout,
+      after_checkout,
+      unadvertised_purpose=unadvertised_purpose,
+      unadvertised_segment=unadvertised_segment,
+      where=where,
+    )
+    self.assertFalse(
+      problems,
+      f"{where} violates authoritative advertised consent rules:\n  "
+      + "\n  ".join(problems),
+    )
+
+  def assert_consent_unmet_dependency_completion(
+    self,
+    complete_resp: Any,
+    after_checkout: Any | None = None,
+    where: str = "complete_checkout",
+  ) -> None:
+    """Assert unmet consent data dependency prevents completion with error."""
+    problems = consent_unmet_dependency_completion_problems(
+      complete_resp, after_checkout=after_checkout, where=where
+    )
+    self.assertFalse(
+      problems,
+      f"{where} violates consent data-dependency completion rules:\n  "
       + "\n  ".join(problems),
     )
 

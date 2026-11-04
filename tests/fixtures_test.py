@@ -110,6 +110,11 @@ class TriggerTest(unittest.TestCase):
         "action_item_sku": "warranty_registration_bouquet",
         "measured_item_sku": "olive_oil_kg",
         "settlement_item_sku": "ribeye_pack",
+        "consent_with_dependency": {
+          "purpose": "dev.ucp.consent.marketing",
+          "segment": "dev.ucp.consent.marketing.sms",
+          "missing_buyer_field": "phone_number",
+        },
       }
     )
     context = DynamicFixtureContext(merged)
@@ -156,6 +161,10 @@ class TriggerTest(unittest.TestCase):
           "action_item_sku": "",
           "measured_item_sku": "   ",
           "settlement_item_sku": 42,
+          "consent_with_dependency": {
+            "purpose": "not_reverse_domain",
+            "missing_buyer_field": "phone_number",
+          },
         }
       }
     )
@@ -181,6 +190,7 @@ class TriggerTest(unittest.TestCase):
       "action_item_sku",
       "measured_item_sku",
       "settlement_item_sku",
+      "consent_with_dependency",
     ):
       with self.subTest(key=key):
         self.assertIsNotNone(DynamicFixtureContext.TRIGGERS.get(key))
