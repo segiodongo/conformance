@@ -115,6 +115,7 @@ class TriggerTest(unittest.TestCase):
           "segment": "dev.ucp.consent.marketing.sms",
           "missing_buyer_field": "phone_number",
         },
+        "edited_order_item_sku": "edited_order_bouquet",
       }
     )
     context = DynamicFixtureContext(merged)
@@ -165,6 +166,7 @@ class TriggerTest(unittest.TestCase):
             "purpose": "not_reverse_domain",
             "missing_buyer_field": "phone_number",
           },
+          "edited_order_item_sku": "   ",
         }
       }
     )
@@ -191,6 +193,7 @@ class TriggerTest(unittest.TestCase):
       "measured_item_sku",
       "settlement_item_sku",
       "consent_with_dependency",
+      "edited_order_item_sku",
     ):
       with self.subTest(key=key):
         self.assertIsNotNone(DynamicFixtureContext.TRIGGERS.get(key))

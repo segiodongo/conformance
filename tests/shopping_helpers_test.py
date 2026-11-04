@@ -1726,5 +1726,105 @@ class BuyerConsentHelpersTest(unittest.TestCase):
     self.assertTrue(any("BUYER-CONSENT-0004" in p for p in problems))
 
 
+class OrderLineItemsRetentionTest(unittest.TestCase):
+  """Tests for W14 `order_line_items_retained_after_edit_problems`."""
+
+  def test_removed_line_item_retained_with_status_removed_passes(self) -> None:
+    """Line edited to `total: 0` with `status: 'removed'` and `original`."""
+    checkout_body = {
+      "id": "chk_1",
+      "line_items": [
+        {"id": "li_1", "item": {"id": "sku_edit"}, "quantity": 2},
+      ],
+    }
+    order_body = {
+      "id": "ord_1",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {"id": "sku_edit"},
+          "quantity": {"total": 0, "original": 2, "fulfilled": 0},
+          "status": "removed",
+        }
+      ],
+    }
+    self.assertEqual(
+      base.order_line_items_retained_after_edit_problems(
+        checkout_body, order_body
+      ),
+      [],
+    )
+
+  def test_omitted_originating_line_item_reported(self) -> None:
+    """Dropping an originating line item after an edit violates ORDER-0001."""
+    checkout_body = {
+      "id": "chk_1",
+      "line_items": [
+        {"id": "li_1", "item": {"id": "sku_removed"}, "quantity": 1},
+        {"id": "li_2", "item": {"id": "sku_kept"}, "quantity": 1},
+      ],
+    }
+    order_body = {
+      "id": "ord_1",
+      "line_items": [
+        {
+          "id": "li_2",
+          "item": {"id": "sku_kept"},
+          "quantity": {"total": 1, "original": 1, "fulfilled": 0},
+          "status": "processing",
+        }
+      ],
+    }
+    problems = base.order_line_items_retained_after_edit_problems(
+      checkout_body, order_body
+    )
+    self.assertTrue(any("was omitted after edit" in p for p in problems))
+    self.assertTrue(any("ORDER-0001" in p for p in problems))
+
+  def test_zero_total_without_removed_status_or_unaltered_order_reported(
+    self,
+  ) -> None:
+    """`total == 0` without `status: 'removed'` or an unedited order fails."""
+    checkout_body = {
+      "id": "chk_1",
+      "line_items": [
+        {"id": "li_1", "item": {"id": "sku_edit"}, "quantity": 2},
+      ],
+    }
+    bad_status_order = {
+      "id": "ord_1",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {"id": "sku_edit"},
+          "quantity": {"total": 0, "original": 2},
+          "status": "processing",
+        }
+      ],
+    }
+    problems = base.order_line_items_retained_after_edit_problems(
+      checkout_body, bad_status_order
+    )
+    self.assertTrue(any("status 'removed'" in p for p in problems))
+
+    unedited_order = {
+      "id": "ord_1",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {"id": "sku_edit"},
+          "quantity": {"total": 2, "original": 2},
+          "status": "processing",
+        }
+      ],
+    }
+    unedited_problems = base.order_line_items_retained_after_edit_problems(
+      checkout_body, unedited_order
+    )
+    self.assertTrue(
+      any("shows no edit or alteration" in p for p in unedited_problems)
+    )
+
+
 if __name__ == "__main__":
   unittest.main()

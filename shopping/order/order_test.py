@@ -517,6 +517,35 @@ class OrderTest(ShoppingIntegrationTestBase):
       resp.json(), where=f"GET /orders/{order_id} ({sku!r})"
     )
 
+  # ── order/index.md, Line Items (W14) ────────────────────────────────────
+  @spec_assert(
+    "REQ-SHOPPING-ORDER-0001",  # MUST include all line items that ever existed
+  )
+  def test_edited_order_retains_all_historical_line_items(self) -> None:
+    """Edited order retains all line items that ever existed on the order.
+
+    Per `order/index.md` (Line Items, Status Derivation):
+    - `order.line_items` MUST include all line items that ever existed on the
+      order regardless of edits or alterations (`REQ-SHOPPING-ORDER-0001`).
+    - When a line item's current quantity is reduced to `total == 0`, the line
+      remains in `order.line_items[]` with `quantity.original > 0` and
+      `status == "removed"`.
+    """
+    sku = self.require_trigger("edited_order_item_sku")
+    checkout_data = self.create_checkout_session(item_id=sku, quantity=2)
+    complete_data = self.complete_checkout_session(checkout_data["id"])
+    order_id = complete_data["order"]["id"]
+
+    resp = self.client.get(
+      self.get_order_url(order_id), headers=self.get_headers()
+    )
+    self.assert_response_status(resp, 200)
+    self.assert_order_line_items_retained_after_edit(
+      complete_data,
+      resp.json(),
+      where=f"GET /orders/{order_id} ({sku!r})",
+    )
+
 
 if __name__ == "__main__":
   absltest.main()

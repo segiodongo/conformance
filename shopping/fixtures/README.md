@@ -53,6 +53,7 @@ run them, declare the key.
 | `measured_item_sku`                | The SKU or item ID of an item whose sale basis (`quantity_unit`) differs from the default `("C62", 0)`                                                                                                                                   | `business_logic_test.test_measured_item_echoes_non_default_quantity_unit` (and preferred by `business_logic_test.test_quantity_unit_machine_identity_comparison_and_mismatch_rejection`)                                                                                                                                                                                                                     |
 | `settlement_item_sku`              | The SKU or item ID of a count-sold, measure-priced item whose completed order records a measurement price-settlement adjustment in `adjustments[]`                                                                                       | `order_test.test_measurement_price_settlement_adjustment_carries_settled_measure`                                                                                                                                                                                                                                                                                                                            |
 | `consent_with_dependency`          | `{"purpose": "<purpose_id>", "segment": "<optional_segment_id>", "missing_buyer_field": "<buyer_field>"}`: an advertised consent purpose/segment that requires a buyer field (`phone_number`) on checkout completion                     | `business_logic_test.test_consent_unmet_dependency_blocks_completion_with_error`                                                                                                                                                                                                                                                                                                                             |
+| `edited_order_item_sku`            | An item SKU whose completed order undergoes a post-order edit or alteration (for example quantity reduction/removal to `total: 0, status: "removed"`, quantity change `total != original`, or an added exchange line item)               | `order_test.test_edited_order_retains_all_historical_line_items`                                                                                                                                                                                                                                                                                                                                             |
 
 A test that needs more of a declared trigger than its presence, such as a
 `known_customer` with two stored addresses, checks that itself and skips
@@ -89,15 +90,6 @@ against any server. Declare them so the tests use your data.
 | `items`                 | A fallback for `valid_item` when `test_fixtures.json` lacks it     |
 | `out_of_stock_item`     | `validation_test`: an item the server has none of, by `id`         |
 | `non_existent_item`     | `validation_test`, `lookup_test`: an `id` the server doesn't sell  |
-
-## Keys to come
-
-The work packages that take the shopping suite to full MUST coverage each
-add the triggers they need, as entries in `TRIGGERS` and rows above. None of
-these is read by a test yet, and the flower-shop fixtures declare none until
-the sample server is upgraded to meet the tests:
-
-- **Order edits:** an order-edit trigger.
 
 ## Checking a target folder
 

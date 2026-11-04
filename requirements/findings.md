@@ -1,29 +1,29 @@
 # Findings from linking the tests to the catalog (demo)
 
-> **Demo only, not for merge.** These findings come from giving each of the 130
+> **Demo only, not for merge.** These findings come from giving each of the 131
 > shopping tests a marker against the catalog at `f2626c28` (see
 > [Linking tests to rules](README.md#linking-tests-to-rules)). Rule IDs are the
 > demo's stable IDs without the `REQ-SHOPPING-` prefix. They aren't official.
 
 ## Summary
 
-- **Markers:** 82 tests cite rules, 24 are `no_rule`, 16 are `scenario`, 6
+- **Markers:** 83 tests cite rules, 24 are `no_rule`, 16 are `scenario`, 6
   are `outside_catalog` and 2 are `older_version`.
-- **Rules cited:** 98, all testable: 87 MUST, 8 MUST NOT and 3 SHOULD.
-- **Coverage:** the tests cite 95 of the 104 testable MUST and MUST NOT rules
-  (91%): catalog 18 of 18, discount 4 of 4, order 16 of 17, checkout 34 of 37,
+- **Rules cited:** 99, all testable: 88 MUST, 8 MUST NOT and 3 SHOULD.
+- **Coverage:** the tests cite 96 of the 104 testable MUST and MUST NOT rules
+  (92%): catalog 18 of 18, order 17 of 17, discount 4 of 4, checkout 34 of 37,
   cart 7 of 8, fulfillment 13 of 16 and buyer consent 3 of 4.
-- **Depth:** all 95 are checked in full (see
+- **Depth:** all 96 are checked in full (see
   [Claims reviewed](#claims-reviewed)). ORDER-0022 is cited in part by the
   envelope test and in full by the test that verifies the signature value,
-  so the coverage report counts 95 of the 104 (91%) as fully checked and
+  so the coverage report counts 96 of the 104 (92%) as fully checked and
   none only in part.
 - **Sample server:** against `samples` at `360adbc`, with the marker check
-  on, 81 of the 130 shopping tests pass, 1 fails (Get Order answers an
+  on, 81 of the 131 shopping tests pass, 1 fails (Get Order answers an
   unauthenticated request; see [Sample server findings](#sample-server-findings)),
   20 don't apply (the server implements 2026-04-08, which doesn't state the
   rules they cite), 14 skip because the sample doesn't advertise the catalog
-  capabilities, 9 skip because no trigger is declared, 2 skip as not
+  capabilities, 10 skip because no trigger is declared, 2 skip as not
   exercised (the sample emits no `options[].description` and omits
   `continue_url` on `incomplete` and `ready_for_complete` checkouts), and
   the 3 TLS tests skip: the sample is reached over `http://` on localhost, so
@@ -126,6 +126,7 @@ rule in part. CHECKOUT-0142 stays fully checked through `TotalsTest`.
 | FULFILLMENT-0021    | MUST NOT | `FulfillmentStructureTest.test_option_descriptions_do_not_repeat_title_or_total`                                                                                                                                                 | Full    | Each option's `description` (plain/markdown or string) is checked not to repeat `option.title` or the formatted `total` amount; skips as not exercised when the server emits no `options[].description`.                                                                                                                                   |
 | FULFILLMENT-0035    | MUST     | `FulfillmentStructureTest.test_pickup_location_id_returns_business_location`                                                                                                                                                     | Full    | A `pickup` method in Checkout accepts `pickup_location_id` as `selected_destination_id` without requiring `destinations[]` in the request.                                                                                                                                                                                                 |
 | FULFILLMENT-0048    | MUST     | `FulfillmentStructureTest.test_default_config_single_group_per_method`                                                                                                                                                           | Full    |                                                                                                                                                                                                                                                                                                                                            |
+| ORDER-0001          | MUST     | `OrderTest.test_edited_order_retains_all_historical_line_items`                                                                                                                                                                  | Full    | A completed order for `edited_order_item_sku` that undergoes a post-order edit or alteration retains every line item from the originating checkout in `order.line_items[]` with `quantity.original` preserved, and any line edited to `quantity.total == 0` stays in `order.line_items[]` with `status == "removed"`.                      |
 | ORDER-0006          | MUST     | `OrderTest.test_measurement_price_settlement_adjustment_carries_settled_measure`                                                                                                                                                 | Full    | A completed order for `settlement_item_sku` that records a measurement price-settlement adjustment in `adjustments[]` carries a settled `measure` (`value`, `unit`, `display_text`, optional `scale`) on the adjustment's `line_items[]` entry.                                                                                            |
 | ORDER-0007          | MUST     | `OrderTest.test_measurement_price_settlement_adjustment_carries_settled_measure`                                                                                                                                                 | Full    | The settled `measure`'s unit identity `(unit, effective_scale)` matches the order line's `item.unit_price.measure` pricing basis (no conversion), and a pure price settlement sets `quantity: 0` on the adjustment line while leaving `line_items[].quantity.total` equal to `original`.                                                   |
 | ORDER-0008          | MUST     | `OrderTest.test_order_retrieval`, and both `WebhookStructureTest` full-entity tests                                                                                                                                              | Full    | Get Order validates against the order schema and carries the placed checkout (ID, currency, lines, total); each delivery is compared with Get Order member for member. The completion response's `order` is an order confirmation, so it isn't compared.                                                                                   |
@@ -360,6 +361,12 @@ add them, and change the counts above.
   `BUYER-CONSENT-0010` needs no trigger and runs against any `2026-08-25`
   server advertising `dev.ucp.shopping.buyer_consent`, while
   `BUYER-CONSENT-0003` and `BUYER-CONSENT-0004` use `consent_with_dependency`.
+- **Order line-item retention across edits:** `OrderTest` covers `ORDER-0001`
+  using `edited_order_item_sku`, verifying that every line item from the
+  originating checkout remains in `order.line_items[]` with `quantity.original`
+  preserved after a post-order edit or alteration, and that any line item
+  reduced to `quantity.total == 0` stays in `order.line_items[]` with
+  `status == "removed"`.
 - **Needs fixtures:** these skip without the matching `test_fixtures.json`
   entries: known customers with and without saved addresses, a
   free-shipping threshold and item, dynamic fulfillment destinations, a
@@ -373,8 +380,9 @@ add them, and change the counts above.
   (`custom_total_item_sku`, `total_lines_item_sku`, `disclosure_item_sku`),
   the completion-state triggers (`async_completion_item_sku`,
   `escalation_item_sku`), the Action trigger (`action_item_sku`), the
-  quantity-unit triggers (`measured_item_sku`, `settlement_item_sku`), and
-  the buyer-consent dependency trigger (`consent_with_dependency`).
+  quantity-unit triggers (`measured_item_sku`, `settlement_item_sku`), the
+  buyer-consent dependency trigger (`consent_with_dependency`), and the
+  order-edit trigger (`edited_order_item_sku`).
 - **Needs the sample server:**
   - `PUT /orders/{id}`, which neither the draft nor any release defines:
     `test_order_update`, `test_order_adjustments`,
@@ -407,6 +415,7 @@ of the tests that apply to its version:
 
 ## Coverage gaps
 
-9 testable MUST and MUST NOT rules have no test: checkout 3, fulfillment 3,
-buyer consent 1, cart 1 and order 1. Catalog (18 of 18) and discount (4 of 4)
-have all of theirs covered. Each remaining rule is a candidate for a new test.
+8 testable MUST and MUST NOT rules have no test: checkout 3, fulfillment 3,
+buyer consent 1 and cart 1. Catalog (18 of 18), order (17 of 17) and discount
+(4 of 4) have all of theirs covered. Each remaining rule is a candidate for a
+new test or specification clarification.

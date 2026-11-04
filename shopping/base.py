@@ -2448,6 +2448,162 @@ def consent_unmet_dependency_completion_problems(
   return problems
 
 
+# ---------------------------------------------------------------------------
+# W14: Order edits (REQ-SHOPPING-ORDER-0001)
+# ---------------------------------------------------------------------------
+
+
+def order_line_items_retained_after_edit_problems(
+  checkout_body: Any,
+  order_body: Any,
+  where: str = "order",
+) -> list[str]:
+  """Check that an edited order retains all historical line items.
+
+  Per `order/index.md` (Line Items, Status Derivation):
+  - `order.line_items` **MUST** include all line items that ever existed on the
+    order regardless of edits or alterations (`REQ-SHOPPING-ORDER-0001`).
+  - `quantity.total` (`>= 0`) represents the current state while
+    `quantity.original` (`> 0`) preserves the quantity from order creation.
+  - When a line item's current quantity is reduced to `total == 0`, the line
+    item remains in `order.line_items[]` with `status == "removed"`.
+  """
+  if not isinstance(checkout_body, dict):
+    return [f"{where}: checkout_body is not a JSON object (ORDER-0001)"]
+  if not isinstance(order_body, dict):
+    return [f"{where}: order_body is not a JSON object (ORDER-0001)"]
+
+  checkout_lines = checkout_body.get("line_items")
+  if not isinstance(checkout_lines, list) or not checkout_lines:
+    return [
+      f"{where}: originating checkout has no line_items: {checkout_lines!r} "
+      "(ORDER-0001)"
+    ]
+
+  order_lines = order_body.get("line_items")
+  if not isinstance(order_lines, list) or not order_lines:
+    return [
+      f"{where}.line_items: expected non-empty list, got {order_lines!r} "
+      "(ORDER-0001)"
+    ]
+
+  problems: list[str] = []
+  order_lines_by_id: dict[str, dict[str, Any]] = {}
+  order_lines_by_sku: dict[str, list[dict[str, Any]]] = {}
+  has_quantity_edit = False
+
+  for idx, oli in enumerate(order_lines):
+    prefix = f"{where}.line_items[{idx}]"
+    if not isinstance(oli, dict):
+      problems.append(f"{prefix}: expected JSON object (ORDER-0001)")
+      continue
+    lid = oli.get("id")
+    if isinstance(lid, str) and lid:
+      order_lines_by_id[lid] = oli
+    item = oli.get("item")
+    sku = item.get("id") if isinstance(item, dict) else None
+    if isinstance(sku, str) and sku:
+      order_lines_by_sku.setdefault(sku, []).append(oli)
+
+    qty = oli.get("quantity")
+    if not isinstance(qty, dict):
+      problems.append(
+        f"{prefix}.quantity: expected OrderQuantityCounts object, got {qty!r} "
+        "(ORDER-0001)"
+      )
+      continue
+    total = qty.get("total")
+    original = qty.get("original")
+    if not isinstance(total, int) or isinstance(total, bool) or total < 0:
+      problems.append(
+        f"{prefix}.quantity.total: expected integer >= 0, got {total!r} "
+        "(ORDER-0001)"
+      )
+    if (
+      not isinstance(original, int)
+      or isinstance(original, bool)
+      or original < 1
+    ):
+      problems.append(
+        f"{prefix}.quantity.original: expected integer >= 1 preserving "
+        f"original quantity, got {original!r} (ORDER-0001)"
+      )
+    if (
+      isinstance(total, int)
+      and not isinstance(total, bool)
+      and isinstance(original, int)
+      and not isinstance(original, bool)
+    ):
+      if total != original:
+        has_quantity_edit = True
+      if total == 0 and oli.get("status") != "removed":
+        problems.append(
+          f"{prefix}.status: line item edited to quantity.total == 0 MUST "
+          f"remain on the order with status 'removed', got "
+          f"{oli.get('status')!r} (ORDER-0001)"
+        )
+
+  for idx, cli in enumerate(checkout_lines):
+    if not isinstance(cli, dict):
+      continue
+    c_id = cli.get("id")
+    c_item = cli.get("item")
+    c_sku = c_item.get("id") if isinstance(c_item, dict) else None
+    c_qty = cli.get("quantity")
+
+    matched = (
+      order_lines_by_id.get(c_id)
+      if isinstance(c_id, str) and c_id in order_lines_by_id
+      else None
+    )
+    if matched is None and isinstance(c_sku, str):
+      candidates = order_lines_by_sku.get(c_sku) or []
+      if candidates:
+        matched = candidates[0]
+
+    if matched is None:
+      problems.append(
+        f"{where}.line_items: originating line item {idx} "
+        f"(id={c_id!r}, item.id={c_sku!r}) was omitted after edit; "
+        "order.line_items MUST include all line items that ever existed on "
+        "the order regardless of edits or alterations (ORDER-0001)"
+      )
+      continue
+
+    m_item = matched.get("item")
+    m_sku = m_item.get("id") if isinstance(m_item, dict) else None
+    if isinstance(c_sku, str) and m_sku != c_sku:
+      problems.append(
+        f"{where}.line_items[id={matched.get('id')!r}].item.id: expected "
+        f"{c_sku!r} from originating checkout line, got {m_sku!r} (ORDER-0001)"
+      )
+
+    m_qty = matched.get("quantity")
+    if (
+      isinstance(c_qty, int)
+      and not isinstance(c_qty, bool)
+      and isinstance(m_qty, dict)
+      and m_qty.get("original") != c_qty
+    ):
+      problems.append(
+        f"{where}.line_items[id={matched.get('id')!r}].quantity.original: "
+        f"expected {c_qty} from order creation, got "
+        f"{m_qty.get('original')!r} (ORDER-0001)"
+      )
+
+  has_added_line = len(order_lines) > len(checkout_lines)
+  adjustments = order_body.get("adjustments")
+  has_edit_adjustment = isinstance(adjustments, list) and len(adjustments) > 0
+  if not (has_quantity_edit or has_added_line or has_edit_adjustment):
+    problems.append(
+      f"{where}: order for edited_order_item_sku shows no edit or alteration "
+      "(all line items have quantity.total == quantity.original, no line item "
+      "was added, and adjustments[] is empty) (ORDER-0001)"
+    )
+
+  return problems
+
+
 class UnifiedUpdate(CheckoutUpdateRequest):
   """Client-side unified update model to support extensions."""
 
@@ -2691,6 +2847,7 @@ class DynamicFixtureContext:
     "measured_item_sku": "get_measured_item_sku",
     "settlement_item_sku": "get_settlement_item_sku",
     "consent_with_dependency": "get_consent_with_dependency",
+    "edited_order_item_sku": "get_edited_order_item_sku",
   }
 
   def __init__(
@@ -3164,6 +3321,13 @@ class DynamicFixtureContext:
     if segment is not None:
       result["segment"] = segment
     return result
+
+  def get_edited_order_item_sku(self) -> str | None:
+    """Get an item SKU whose completed order undergoes a post-order edit."""
+    val = self._get_test_fixture("edited_order_item_sku")
+    if isinstance(val, str) and val.strip():
+      return val
+    return None
 
   def get_non_existent_id(self) -> str:
     """Get an identifier the server under test does not sell."""
@@ -4263,6 +4427,22 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     self.assertFalse(
       problems,
       f"{where} violates consent data-dependency completion rules:\n  "
+      + "\n  ".join(problems),
+    )
+
+  def assert_order_line_items_retained_after_edit(
+    self,
+    checkout_body: Any,
+    order_body: Any,
+    where: str = "order",
+  ) -> None:
+    """Assert `order_body` retains all originating line items after an edit."""
+    problems = order_line_items_retained_after_edit_problems(
+      checkout_body, order_body, where=where
+    )
+    self.assertFalse(
+      problems,
+      f"{where} violates order line item retention rules:\n  "
       + "\n  ".join(problems),
     )
 
