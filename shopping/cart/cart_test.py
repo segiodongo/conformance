@@ -404,6 +404,24 @@ class CartTest(ShoppingIntegrationTestBase):
       [self.discovery_url, self.get_shopping_url("/carts")]
     )
 
+  # ── cart/embedded.md, Discovery: Per-Cart Configuration ─────────────────
+  @spec_assert(
+    "REQ-SHOPPING-CART-0030",  # embedded binding with config.delegate in cart
+  )
+  def test_embedded_cart_response_includes_config_delegate(self) -> None:
+    """Cart response includes embedded service binding with `config.delegate`.
+
+    Per `cart/embedded.md` (Per-Cart Configuration):
+    - Businesses MUST include an embedded service binding with `config.delegate`
+      in cart responses to indicate ECaP availability and allowed delegations
+      for a specific session (`REQ-SHOPPING-CART-0030`).
+    """
+    self.require_embedded_shopping()
+    cart = self.create_cart(quantity=1, buyer=_CART_BUYER)
+    self.assert_embedded_service_binding(
+      cart, rule_id="CART-0030", where="Create Cart"
+    )
+
 
 if __name__ == "__main__":
   absltest.main()

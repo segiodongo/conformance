@@ -35,6 +35,7 @@ from framework.base_test import (
   flag_value,
 )
 from framework.decorators import requires_capability
+from framework.outcomes import CAPABILITY, skip_reason
 import httpx
 from ucp_sdk.models.schemas import payment_handler
 from ucp_sdk.models.schemas.shopping import checkout as f_models
@@ -2604,6 +2605,119 @@ def order_line_items_retained_after_edit_problems(
   return problems
 
 
+# ---------------------------------------------------------------------------
+# W5 (Sub-decision 1A): Embedded binding delegation in REST Cart & Checkout
+# responses (REQ-SHOPPING-CART-0030, REQ-SHOPPING-CHECKOUT-0152)
+# ---------------------------------------------------------------------------
+
+
+def embedded_entry(entries: Any) -> dict[str, Any] | None:
+  """Return the embedded (`transport == 'embedded'`) service entry, if any."""
+  items = entries if isinstance(entries, list) else [entries]
+  return next(
+    (
+      item
+      for item in items
+      if isinstance(item, dict) and item.get("transport") == "embedded"
+    ),
+    None,
+  )
+
+
+def advertises_embedded_shopping(profile_or_body: Any) -> bool:
+  """Return whether a `UcpProfile` or UCP JSON dict advertises `embedded`."""
+  if profile_or_body is None:
+    return False
+  services = getattr(profile_or_body, "services", None)
+  if isinstance(services, dict):
+    return embedded_entry(services.get("dev.ucp.shopping", [])) is not None
+  if isinstance(profile_or_body, dict):
+    ucp_section = (
+      profile_or_body.get("ucp")
+      if isinstance(profile_or_body.get("ucp"), dict)
+      else profile_or_body
+    )
+    svc_map = ucp_section.get("services")
+    if isinstance(svc_map, dict):
+      return embedded_entry(svc_map.get("dev.ucp.shopping", [])) is not None
+  return False
+
+
+def embedded_service_binding_problems(
+  response_body: Any,
+  *,
+  rule_id: str = "CHECKOUT-0152",
+  where: str = "response",
+) -> list[str]:
+  """Check that a Cart/Checkout response carries an embedded `config.delegate`.
+
+  Per `cart/embedded.md` (`REQ-SHOPPING-CART-0030`) and `checkout/embedded.md`
+  (`REQ-SHOPPING-CHECKOUT-0152`):
+  - Businesses **MUST** include an embedded service binding (`transport:
+    "embedded"`) with `config.delegate` in cart/checkout responses to indicate
+    ECaP/ECP availability and allowed delegations for a specific session.
+  """
+  if not isinstance(response_body, dict):
+    return [f"{where}: response is not a JSON object ({rule_id})"]
+
+  ucp_meta = response_body.get("ucp")
+  if not isinstance(ucp_meta, dict):
+    return [
+      f"{where}.ucp: missing or not a JSON object: {ucp_meta!r} ({rule_id})"
+    ]
+
+  services = ucp_meta.get("services")
+  if not isinstance(services, dict):
+    return [
+      f"{where}.ucp.services: expected object containing 'dev.ucp.shopping' "
+      f"embedded binding, got {services!r} ({rule_id})"
+    ]
+
+  shopping_entries = services.get("dev.ucp.shopping")
+  items = (
+    shopping_entries
+    if isinstance(shopping_entries, list)
+    else ([shopping_entries] if isinstance(shopping_entries, dict) else [])
+  )
+  embedded_entries = [
+    item
+    for item in items
+    if isinstance(item, dict) and item.get("transport") == "embedded"
+  ]
+  if not embedded_entries:
+    return [
+      f"{where}.ucp.services['dev.ucp.shopping']: missing embedded service "
+      f"binding (transport='embedded') with config.delegate ({rule_id})"
+    ]
+
+  problems: list[str] = []
+  for idx, entry in enumerate(embedded_entries):
+    prefix = f"{where}.ucp.services['dev.ucp.shopping'][embedded:{idx}]"
+    version = entry.get("version")
+    if not isinstance(version, str) or not version.strip():
+      problems.append(
+        f"{prefix}.version: expected non-empty version string, got "
+        f"{version!r} ({rule_id})"
+      )
+    config = entry.get("config")
+    if not isinstance(config, dict):
+      problems.append(
+        f"{prefix}.config: expected object with 'delegate' array, got "
+        f"{config!r} ({rule_id})"
+      )
+      continue
+    delegate = config.get("delegate")
+    if not isinstance(delegate, list) or not all(
+      isinstance(d, str) and bool(d.strip()) for d in delegate
+    ):
+      problems.append(
+        f"{prefix}.config.delegate: expected array of delegation strings, got "
+        f"{delegate!r} ({rule_id})"
+      )
+
+  return problems
+
+
 class UnifiedUpdate(CheckoutUpdateRequest):
   """Client-side unified update model to support extensions."""
 
@@ -4443,6 +4557,32 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     self.assertFalse(
       problems,
       f"{where} violates order line item retention rules:\n  "
+      + "\n  ".join(problems),
+    )
+
+  def require_embedded_shopping(self) -> None:
+    """Skip if the server does not advertise the embedded shopping transport."""
+    if self.server_profile is not None and not advertises_embedded_shopping(
+      self.server_profile
+    ):
+      self.skipTest(
+        skip_reason(CAPABILITY, "dev.ucp.shopping (embedded transport)")
+      )
+
+  def assert_embedded_service_binding(
+    self,
+    response_body: Any,
+    *,
+    rule_id: str = "CHECKOUT-0152",
+    where: str = "response",
+  ) -> None:
+    """Assert `response_body` carries an embedded binding `config.delegate`."""
+    problems = embedded_service_binding_problems(
+      response_body, rule_id=rule_id, where=where
+    )
+    self.assertFalse(
+      problems,
+      f"{where} violates embedded service binding rules:\n  "
       + "\n  ".join(problems),
     )
 

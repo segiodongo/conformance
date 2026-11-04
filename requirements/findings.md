@@ -1,29 +1,30 @@
 # Findings from linking the tests to the catalog (demo)
 
-> **Demo only, not for merge.** These findings come from giving each of the 131
+> **Demo only, not for merge.** These findings come from giving each of the 133
 > shopping tests a marker against the catalog at `f2626c28` (see
 > [Linking tests to rules](README.md#linking-tests-to-rules)). Rule IDs are the
 > demo's stable IDs without the `REQ-SHOPPING-` prefix. They aren't official.
 
 ## Summary
 
-- **Markers:** 83 tests cite rules, 24 are `no_rule`, 16 are `scenario`, 6
+- **Markers:** 85 tests cite rules, 24 are `no_rule`, 16 are `scenario`, 6
   are `outside_catalog` and 2 are `older_version`.
-- **Rules cited:** 99, all testable: 88 MUST, 8 MUST NOT and 3 SHOULD.
-- **Coverage:** the tests cite 96 of the 104 testable MUST and MUST NOT rules
-  (92%): catalog 18 of 18, order 17 of 17, discount 4 of 4, checkout 34 of 37,
-  cart 7 of 8, fulfillment 13 of 16 and buyer consent 3 of 4.
-- **Depth:** all 96 are checked in full (see
+- **Rules cited:** 101, all testable: 90 MUST, 8 MUST NOT and 3 SHOULD.
+- **Coverage:** the tests cite 98 of the 104 testable MUST and MUST NOT rules
+  (94%): catalog 18 of 18, order 17 of 17, cart 8 of 8, discount 4 of 4,
+  checkout 35 of 37, fulfillment 13 of 16 and buyer consent 3 of 4.
+- **Depth:** all 98 are checked in full (see
   [Claims reviewed](#claims-reviewed)). ORDER-0022 is cited in part by the
   envelope test and in full by the test that verifies the signature value,
-  so the coverage report counts 96 of the 104 (92%) as fully checked and
+  so the coverage report counts 98 of the 104 (94%) as fully checked and
   none only in part.
 - **Sample server:** against `samples` at `360adbc`, with the marker check
-  on, 81 of the 131 shopping tests pass, 1 fails (Get Order answers an
+  on, 81 of the 133 shopping tests pass, 1 fails (Get Order answers an
   unauthenticated request; see [Sample server findings](#sample-server-findings)),
   20 don't apply (the server implements 2026-04-08, which doesn't state the
-  rules they cite), 14 skip because the sample doesn't advertise the catalog
-  capabilities, 10 skip because no trigger is declared, 2 skip as not
+  rules they cite), 16 skip because the sample doesn't advertise the catalog
+  capabilities (14) or the embedded transport on `dev.ucp.shopping` (2), 10
+  skip because no trigger is declared, 2 skip as not
   exercised (the sample emits no `options[].description` and omits
   `continue_url` on `incomplete` and `ready_for_complete` checkouts), and
   the 3 TLS tests skip: the sample is reached over `http://` on localhost, so
@@ -51,6 +52,7 @@ rule in part. CHECKOUT-0142 stays fully checked through `TotalsTest`.
 | CART-0005           | MUST     | `CartTest.test_second_conversion_returns_the_existing_checkout`                                                                                                                                                                  | Full    | A second Create Checkout with the same `cart_id`, under a new Idempotency-Key, returns the first checkout's ID while it is incomplete.                                                                                                                                                                                                     |
 | CART-0010           | MUST NOT | `CartTest.test_outstanding_action_does_not_block_unrelated_cart_update`                                                                                                                                                          | Full    | A cart created with `action_item_sku` that surfaces an outstanding Action in `actions` accepts an unrelated `PUT /carts/{id}` updating line items and buyer without rejecting the operation.                                                                                                                                               |
 | CART-0025           | MUST     | `CartTest.test_cancel_returns_the_cart_state_before_deletion`                                                                                                                                                                    | Full    | The cancel response is compared with Get Cart taken just before, on lines, currency, totals, buyer, context and discounts.                                                                                                                                                                                                                 |
+| CART-0030           | MUST     | `CartTest.test_embedded_cart_response_includes_config_delegate`                                                                                                                                                                  | Full    | When the business advertises an `embedded` transport entry on `dev.ucp.shopping`, Cart responses include that embedded binding in `ucp.services['dev.ucp.shopping']` with `config.delegate` as an array of strings.                                                                                                                        |
 | CART-0062           | MUST     | `CartTest.test_response_bodies_are_strict_json`                                                                                                                                                                                  | Full    | Create, Get, Update and Cancel Cart, the error for a malformed body and the answer after cancel: UTF-8, no byte order mark, the RFC 8259 grammar with no `NaN`/`Infinity`, served as `application/json`. The request half binds the platform; the malformed request shows the business rejects a body that isn't JSON and answers in JSON. |
 | CART-0063           | MUST     | `CartTest.test_endpoints_are_served_over_tls_1_3`                                                                                                                                                                                | Full    | A TLS 1.3 handshake completes and one capped at TLS 1.2 is refused, on the profile's host and the endpoint's. Plaintext on a local address skips as an environment limit; elsewhere it fails.                                                                                                                                              |
 | CATALOG-0003        | MUST     | `CatalogLookupTest.test_variant_unit_price_invariants`                                                                                                                                                                           | Full    | Both `unit_price.measure.value` and `unit_price.reference.value` are checked as positive integers on `/catalog/lookup` and `/catalog/product` for `unit_price_item_sku`.                                                                                                                                                                   |
@@ -109,6 +111,7 @@ rule in part. CHECKOUT-0142 stays fully checked through `TotalsTest`.
 | CHECKOUT-0143       | MUST     | `TotalsTest.test_additive_entries_non_negative`                                                                                                                                                                                  | Full    |                                                                                                                                                                                                                                                                                                                                            |
 | CHECKOUT-0145       | MUST     | `TotalsTest.test_unknown_total_types_include_display_text`                                                                                                                                                                       | Full    | Each unknown `totals[]` entry on a checkout with `custom_total_item_sku` carries a non-empty `display_text` and an integer `amount`; see [A rule stated twice](#a-rule-stated-twice).                                                                                                                                                      |
 | CHECKOUT-0148       | MUST     | `TotalsTest.test_sub_lines_sum_equals_parent_amount`                                                                                                                                                                             | Full    | Every `totals[]` entry with a non-empty `lines[]` array has `sum(lines[].amount)` equal to the parent entry's `amount` (checked on a default checkout first, falling back to `total_lines_item_sku`).                                                                                                                                      |
+| CHECKOUT-0152       | MUST     | `ShoppingProtocolTest.test_embedded_checkout_response_includes_config_delegate`                                                                                                                                                  | Full    | When the business advertises an `embedded` transport entry on `dev.ucp.shopping`, Checkout responses include that embedded binding in `ucp.services['dev.ucp.shopping']` with `config.delegate` as an array of strings.                                                                                                                    |
 | DISCOUNT-0003       | MUST     | `CartTest.test_cart_discount_codes_carry_forward_to_checkout`                                                                                                                                                                    | Full    | The checkout must name the code: in `discounts.codes`, as an applied discount, or in a `messages[]` rejection. Skips when the discount extension doesn't extend both cart and checkout, or when the code wasn't applied to the cart.                                                                                                       |
 | DISCOUNT-0006       | MUST     | `DiscountSemanticsTest.test_pricing_eligibility_claim_surfaces_provisional_discount`                                                                                                                                             | Full    | A checkout with `pricing_eligibility_claim` in `context.eligibility` surfaces a provisional discount in `discounts.applied`, a negative `discount`/`items_discount` entry in `totals[]`, and a lower checkout total than the baseline without the claim.                                                                                   |
 | DISCOUNT-0008       | MUST     | `DiscountSemanticsTest.test_pricing_eligibility_claim_surfaces_provisional_discount`                                                                                                                                             | Full    | The `discounts.applied` entry carries `eligibility` equal to the claim, `provisional: true`, `automatic: true`, `code` omitted, a non-empty `title`, and a positive integer `amount`.                                                                                                                                                      |
@@ -367,6 +370,13 @@ add them, and change the counts above.
   preserved after a post-order edit or alteration, and that any line item
   reduced to `quantity.total == 0` stays in `order.line_items[]` with
   `status == "removed"`.
+- **Embedded service binding delegation:** `CartTest` and `ShoppingProtocolTest`
+  cover `CART-0030` and `CHECKOUT-0152`, checking that when the business profile
+  advertises an `embedded` transport entry on `dev.ucp.shopping`, Cart and
+  Checkout responses include that embedded binding in
+  `ucp.services['dev.ucp.shopping']` with `config.delegate` as an array of
+  strings (skipping as `capability not advertised: dev.ucp.shopping (embedded
+transport)` on REST-only servers).
 - **Needs fixtures:** these skip without the matching `test_fixtures.json`
   entries: known customers with and without saved addresses, a
   free-shipping threshold and item, dynamic fulfillment destinations, a
@@ -415,7 +425,7 @@ of the tests that apply to its version:
 
 ## Coverage gaps
 
-8 testable MUST and MUST NOT rules have no test: checkout 3, fulfillment 3,
-buyer consent 1 and cart 1. Catalog (18 of 18), order (17 of 17) and discount
-(4 of 4) have all of theirs covered. Each remaining rule is a candidate for a
-new test or specification clarification.
+6 testable MUST and MUST NOT rules have no test: checkout 2, fulfillment 3
+and buyer consent 1. Catalog (18 of 18), order (17 of 17), cart (8 of 8) and
+discount (4 of 4) have all of theirs covered. Each remaining rule is a
+candidate for specification clarification or `review.json` reclassification.

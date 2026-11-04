@@ -276,6 +276,24 @@ class ShoppingProtocolTest(ShoppingIntegrationTestBase):
       [self.discovery_url, self.get_shopping_url("/checkout-sessions")]
     )
 
+  # ── checkout/embedded.md, Discovery: Per-Checkout Configuration ─────────
+  @spec_assert(
+    "REQ-SHOPPING-CHECKOUT-0152",  # embedded binding with config.delegate
+  )
+  def test_embedded_checkout_response_includes_config_delegate(self) -> None:
+    """Checkout response includes embedded binding with `config.delegate`.
+
+    Per `checkout/embedded.md` (Per-Checkout Configuration):
+    - Businesses MUST include an embedded service binding with `config.delegate`
+      in checkout responses to indicate ECP availability and allowed delegations
+      for a specific session (`REQ-SHOPPING-CHECKOUT-0152`).
+    """
+    self.require_embedded_shopping()
+    checkout_data = self.create_checkout_session()
+    self.assert_embedded_service_binding(
+      checkout_data, rule_id="CHECKOUT-0152", where="Create Checkout"
+    )
+
 
 if __name__ == "__main__":
   absltest.main()

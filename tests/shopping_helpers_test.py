@@ -1826,5 +1826,115 @@ class OrderLineItemsRetentionTest(unittest.TestCase):
     )
 
 
+class EmbeddedServiceBindingTest(unittest.TestCase):
+  """Tests for embedded service binding helpers."""
+
+  def test_advertises_embedded_shopping_checks_services_list(self) -> None:
+    """`advertises_embedded_shopping` detects `transport: 'embedded'`."""
+    rest_only = {
+      "ucp": {
+        "version": "2026-08-25",
+        "services": {
+          "dev.ucp.shopping": [{"version": "2026-08-25", "transport": "rest"}]
+        },
+      }
+    }
+    with_embedded = {
+      "ucp": {
+        "version": "2026-08-25",
+        "services": {
+          "dev.ucp.shopping": [
+            {"version": "2026-08-25", "transport": "rest"},
+            {"version": "2026-08-25", "transport": "embedded"},
+          ]
+        },
+      }
+    }
+    self.assertFalse(base.advertises_embedded_shopping(rest_only))
+    self.assertTrue(base.advertises_embedded_shopping(with_embedded))
+
+  def test_valid_embedded_binding_with_config_delegate_passes(self) -> None:
+    """Valid `transport: 'embedded'` with `config.delegate` passes."""
+    valid_cart = {
+      "id": "cart_1",
+      "ucp": {
+        "version": "2026-08-25",
+        "services": {
+          "dev.ucp.shopping": [
+            {
+              "version": "2026-08-25",
+              "transport": "embedded",
+              "config": {"delegate": []},
+            }
+          ]
+        },
+      },
+    }
+    valid_checkout = {
+      "id": "chk_1",
+      "ucp": {
+        "version": "2026-08-25",
+        "services": {
+          "dev.ucp.shopping": [
+            {
+              "version": "2026-08-25",
+              "transport": "embedded",
+              "config": {
+                "delegate": ["payment.credential", "fulfillment.address_change"]
+              },
+            }
+          ]
+        },
+      },
+    }
+    self.assertEqual(
+      base.embedded_service_binding_problems(valid_cart, rule_id="CART-0030"),
+      [],
+    )
+    self.assertEqual(
+      base.embedded_service_binding_problems(
+        valid_checkout, rule_id="CHECKOUT-0152"
+      ),
+      [],
+    )
+
+  def test_missing_or_malformed_embedded_delegate_reported(self) -> None:
+    """Missing embedded binding or missing `config.delegate` is reported."""
+    no_embedded = {
+      "id": "chk_1",
+      "ucp": {
+        "version": "2026-08-25",
+        "services": {
+          "dev.ucp.shopping": [{"version": "2026-08-25", "transport": "rest"}]
+        },
+      },
+    }
+    problems = base.embedded_service_binding_problems(
+      no_embedded, rule_id="CHECKOUT-0152"
+    )
+    self.assertTrue(any("CHECKOUT-0152" in p for p in problems))
+
+    bad_delegate = {
+      "id": "cart_1",
+      "ucp": {
+        "version": "2026-08-25",
+        "services": {
+          "dev.ucp.shopping": [
+            {
+              "version": "2026-08-25",
+              "transport": "embedded",
+              "config": {},
+            }
+          ]
+        },
+      },
+    }
+    bad_problems = base.embedded_service_binding_problems(
+      bad_delegate, rule_id="CART-0030"
+    )
+    self.assertTrue(any("config.delegate" in p for p in bad_problems))
+    self.assertTrue(any("CART-0030" in p for p in bad_problems))
+
+
 if __name__ == "__main__":
   unittest.main()
