@@ -811,7 +811,7 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
   def _reach_requires_escalation(self, sku: str) -> dict:
     """Create or complete a checkout for `sku` into `requires_escalation`."""
     created = self.create_checkout_session(
-      sku=sku,
+      item_id=sku,
       buyer=self.DEFAULT_BUYER,
       select_fulfillment=True,
     )
@@ -834,7 +834,7 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
     """A `complete_in_progress` response must not contain `order`."""
     sku = self.require_trigger("async_completion_item_sku")
     created = self.create_checkout_session(
-      sku=sku,
+      item_id=sku,
       buyer=self.DEFAULT_BUYER,
       select_fulfillment=True,
     )
@@ -859,7 +859,7 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
     """Update during `complete_in_progress` leaves Checkout unchanged."""
     sku = self.require_trigger("async_completion_item_sku")
     created = self.create_checkout_session(
-      sku=sku,
+      item_id=sku,
       buyer=self.DEFAULT_BUYER,
       select_fulfillment=True,
     )
@@ -929,6 +929,54 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
       check_continue_url=False,
       check_buyer_message=True,
       where="requires_escalation checkout",
+    )
+
+  @spec_assert(
+    "REQ-SHOPPING-CHECKOUT-0032",  # MUST surface Actions before Complete
+  )
+  def test_action_requiring_input_surfaced_before_complete(self):
+    """Actions requiring input must be surfaced prior to Complete Checkout."""
+    sku = self.require_trigger("action_item_sku")
+    created = self.create_checkout_session(
+      item_id=sku,
+      buyer=self.DEFAULT_BUYER,
+      select_fulfillment=True,
+    )
+    complete_resp = self.attempt_complete_checkout(created["id"])
+    try:
+      complete_body = complete_resp.json()
+    except ValueError:
+      complete_body = None
+    self.assert_action_surfaced_before_complete(
+      created,
+      complete_body,
+      where="pre-Complete checkout",
+    )
+
+  @spec_assert(
+    "REQ-SHOPPING-CHECKOUT-0023",  # Action blocks Complete -> incomplete + path
+    "REQ-SHOPPING-CHECKOUT-0054",  # Error Message path selects exact occurrence
+  )
+  def test_action_prevents_complete_with_occurrence_path(self):
+    """Unsatisfied Action blocking Complete returns `incomplete` and `path`."""
+    sku = self.require_trigger("action_item_sku")
+    created = self.create_checkout_session(
+      item_id=sku,
+      buyer=self.DEFAULT_BUYER,
+      select_fulfillment=True,
+    )
+    complete_resp = self.attempt_complete_checkout(created["id"])
+    try:
+      complete_body = complete_resp.json()
+    except ValueError:
+      self.fail(
+        f"POST complete for action_item_sku {sku!r} returned non-JSON "
+        f"(HTTP {complete_resp.status_code})"
+      )
+    self.assert_action_prevents_complete(
+      created,
+      complete_body,
+      where="POST complete with unsatisfied Action",
     )
 
 

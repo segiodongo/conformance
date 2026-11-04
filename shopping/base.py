@@ -1414,6 +1414,343 @@ def requires_escalation_problems(
   return problems
 
 
+_ACTION_OCCURRENCE_PATH_RE = re.compile(
+  r"^\$(?:\.actions|\['actions'\]|\[\"actions\"\])"
+  r"(?:\['([^'\[\]]+)'\]|\[\"([^\"\[\]]+)\"\]|\.([A-Za-z_][A-Za-z0-9_]*))"
+  r"\[(-?\d+|\?@\.id\s*==\s*(?:'[^']+'|\"[^\"]+\"))\]$"
+)
+
+
+def outstanding_actions_problems(
+  body: Any, where: str = "response"
+) -> list[str]:
+  """Return problems when `body.actions` does not hold a valid Action."""
+  if not isinstance(body, dict):
+    return [f"{where} must be a JSON object, got {type(body).__name__}"]
+  actions = body.get("actions")
+  if not isinstance(actions, dict) or not actions:
+    return [
+      f"{where}.actions: expected a non-empty map of reverse-domain Action "
+      f"types to instance arrays, got {actions!r}"
+    ]
+
+  problems: list[str] = []
+  seen_ids: set[str] = set()
+  for action_type, instances in actions.items():
+    if not _is_reverse_domain_claim(action_type):
+      problems.append(
+        f"{where}.actions[{action_type!r}]: Action type key must be a "
+        f"reverse-domain name"
+      )
+    if not isinstance(instances, list) or not instances:
+      problems.append(
+        f"{where}.actions[{action_type!r}]: must be a non-empty array of "
+        f"Action instances, got {instances!r}"
+      )
+      continue
+    for idx, inst in enumerate(instances):
+      label = f"{where}.actions[{action_type!r}][{idx}]"
+      if not isinstance(inst, dict):
+        problems.append(f"{label}: must be a JSON object, got {inst!r}")
+        continue
+      inst_id = inst.get("id")
+      if inst_id is not None:
+        if not isinstance(inst_id, str) or not inst_id.strip():
+          problems.append(
+            f"{label}.id: must be a non-empty string, got {inst_id!r}"
+          )
+        elif inst_id in seen_ids:
+          problems.append(
+            f"{label}.id: duplicate Action instance id {inst_id!r} in response"
+          )
+        else:
+          seen_ids.add(inst_id)
+  return problems
+
+
+def action_occurrence_path_problems(
+  path: Any, body: Any, where: str = "messages[].path"
+) -> list[str]:
+  """Return problems for `path` selecting an exact Action occurrence.
+
+  Checks:
+  - `REQ-SHOPPING-CHECKOUT-0023` and `REQ-SHOPPING-CHECKOUT-0054`: when an
+    Action prevents the requested effect (including Complete Checkout), the
+    Business MUST set that error Message's `path` to select the exact Action
+    occurrence in `actions` (e.g. `$.actions['com.example.verify'][0]`).
+  """
+  problems = rfc9535_jsonpath_problems(path, body, where=where)
+  if problems:
+    return [f"{p} (CHECKOUT-0023, CHECKOUT-0054)" for p in problems]
+  assert isinstance(path, str)
+
+  match = _ACTION_OCCURRENCE_PATH_RE.match(path)
+  if match is None:
+    return [
+      f"{where}: MUST select an exact Action occurrence under $.actions "
+      f"(e.g. \"$.actions['<type>'][0]\"), got {path!r} "
+      f"(CHECKOUT-0023, CHECKOUT-0054)"
+    ]
+
+  action_type = match.group(1) or match.group(2) or match.group(3)
+  selector = match.group(4)
+
+  if not isinstance(body, dict):
+    return [
+      f"{where}: response body must be a JSON object "
+      f"(CHECKOUT-0023, CHECKOUT-0054)"
+    ]
+  actions = body.get("actions")
+  if not isinstance(actions, dict) or action_type not in actions:
+    return [
+      f"{where}: Action type {action_type!r} selected by {path!r} is not "
+      f"present in response actions {actions!r} (CHECKOUT-0023, CHECKOUT-0054)"
+    ]
+  instances = actions.get(action_type)
+  if not isinstance(instances, list) or not instances:
+    return [
+      f"{where}: response actions[{action_type!r}] is not a non-empty array "
+      f"(CHECKOUT-0023, CHECKOUT-0054)"
+    ]
+
+  if selector.startswith("?"):
+    quoted = selector.split("==", 1)[1].strip()
+    target_id = quoted[1:-1]
+    matched = [
+      inst
+      for inst in instances
+      if isinstance(inst, dict) and inst.get("id") == target_id
+    ]
+    if len(matched) != 1:
+      return [
+        f"{where}: filter selector in {path!r} matched {len(matched)} "
+        f"Action instances in actions[{action_type!r}], expected 1 "
+        f"(CHECKOUT-0023, CHECKOUT-0054)"
+      ]
+  else:
+    idx = int(selector)
+    if not (-len(instances) <= idx < len(instances)):
+      return [
+        f"{where}: index {idx} in {path!r} is out of bounds for "
+        f"actions[{action_type!r}] of length {len(instances)} "
+        f"(CHECKOUT-0023, CHECKOUT-0054)"
+      ]
+
+  return []
+
+
+def cart_action_non_blocking_problems(
+  before_cart: Any,
+  after_cart: Any,
+  expected_bag: list[tuple[Any, Any]],
+  where: str = "PUT /carts/{id}",
+) -> list[str]:
+  """Return problems for `CART-0010` when updating a cart with an Action.
+
+  Checks:
+  - `REQ-SHOPPING-CART-0010`: the Business MUST NOT treat an outstanding Action
+    as a reason to reject an unrelated cart operation.
+  """
+  problems = outstanding_actions_problems(before_cart, where="initial cart")
+  if not isinstance(after_cart, dict):
+    problems.append(
+      f"{where} must return a JSON object, got {type(after_cart).__name__} "
+      f"(CART-0010)"
+    )
+    return problems
+
+  if isinstance(before_cart, dict) and after_cart.get("id") != before_cart.get(
+    "id"
+  ):
+    problems.append(
+      f"{where}.id: expected {before_cart.get('id')!r}, got "
+      f"{after_cart.get('id')!r} (CART-0010)"
+    )
+
+  actual_bag = sorted(
+    ((line.get("item") or {}).get("id"), line.get("quantity"))
+    for line in (after_cart.get("line_items") or [])
+    if isinstance(line, dict)
+  )
+  if actual_bag != sorted(expected_bag):
+    problems.append(
+      f"{where}.line_items: unrelated cart update was not applied while an "
+      f"Action was outstanding; expected items {sorted(expected_bag)!r}, got "
+      f"{actual_bag!r} (CART-0010)"
+    )
+
+  error_msgs = [
+    m
+    for m in (after_cart.get("messages") or [])
+    if isinstance(m, dict) and m.get("type") == "error"
+  ]
+  if error_msgs:
+    problems.append(
+      f"{where}.messages: MUST NOT reject an unrelated cart operation because "
+      f"of an outstanding Action, got error messages {error_msgs!r} (CART-0010)"
+    )
+
+  return problems
+
+
+def action_surfaced_before_complete_problems(
+  pre_complete_checkout: Any,
+  complete_response_checkout: Any,
+  where: str = "checkout",
+) -> list[str]:
+  """Return problems for `CHECKOUT-0032` on Action requiring input.
+
+  Checks:
+  - `REQ-SHOPPING-CHECKOUT-0032`: because Update Checkout is unavailable after
+    Complete Checkout is accepted, the Business MUST surface any Action that
+    requires input through Update Checkout before accepting Complete Checkout.
+  """
+  problems: list[str] = []
+  action_errs = outstanding_actions_problems(
+    pre_complete_checkout, where=f"{where} before Complete Checkout"
+  )
+  if action_errs:
+    problems.extend(f"{e} (CHECKOUT-0032)" for e in action_errs)
+
+  if isinstance(pre_complete_checkout, dict):
+    pre_status = pre_complete_checkout.get("status")
+    if pre_status != "incomplete":
+      problems.append(
+        f"{where} before Complete Checkout: expected status 'incomplete' "
+        f"while an Action requiring input is outstanding, got {pre_status!r} "
+        f"(CHECKOUT-0032)"
+      )
+
+  if not isinstance(complete_response_checkout, dict):
+    problems.append(
+      f"{where} on Complete Checkout: must be a JSON object, got "
+      f"{type(complete_response_checkout).__name__} (CHECKOUT-0032)"
+    )
+    return problems
+
+  post_status = complete_response_checkout.get("status")
+  if post_status in ("complete_in_progress", "completed"):
+    problems.append(
+      f"{where} on Complete Checkout: Business MUST NOT accept Complete "
+      f"Checkout (status {post_status!r}) while an Action requiring input "
+      f"through Update Checkout remains outstanding (CHECKOUT-0032)"
+    )
+  if complete_response_checkout.get("order") is not None:
+    problems.append(
+      f"{where} on Complete Checkout: order MUST NOT be created while an "
+      f"Action requiring input remains outstanding, got "
+      f"{complete_response_checkout.get('order')!r} (CHECKOUT-0032)"
+    )
+  pre_actions = (
+    pre_complete_checkout.get("actions")
+    if isinstance(pre_complete_checkout, dict)
+    else None
+  )
+  post_actions = complete_response_checkout.get("actions")
+  if isinstance(pre_actions, dict) and isinstance(post_actions, dict):
+    unsurfaced = sorted(set(post_actions) - set(pre_actions))
+    if unsurfaced:
+      problems.append(
+        f"{where} on Complete Checkout: Action types {unsurfaced!r} were not "
+        f"surfaced before Complete Checkout (CHECKOUT-0032)"
+      )
+
+  return problems
+
+
+def action_prevents_complete_problems(
+  before_checkout: Any,
+  complete_body: Any,
+  where: str = "POST complete response",
+) -> list[str]:
+  """Return problems for `CHECKOUT-0023` and `CHECKOUT-0054` on Complete.
+
+  Checks:
+  - `REQ-SHOPPING-CHECKOUT-0023`: if an Action prevents Complete Checkout from
+    being accepted, the Business MUST return the current Checkout with
+    `status: incomplete` and an error Message with `severity: "recoverable"`
+    whose `path` selects that exact Action occurrence.
+  - `REQ-SHOPPING-CHECKOUT-0054`: when an Action prevents the requested effect,
+    the Business MUST set that error Message's `path` to select the exact
+    Action occurrence as specified in Actions.
+  """
+  if not isinstance(complete_body, dict):
+    return [
+      f"{where} must be a JSON object, got {type(complete_body).__name__} "
+      f"(CHECKOUT-0023, CHECKOUT-0054)"
+    ]
+
+  problems: list[str] = []
+  status = complete_body.get("status")
+  if status != "incomplete":
+    problems.append(
+      f"{where}.status: expected 'incomplete' when an Action prevents Complete "
+      f"Checkout, got {status!r} (CHECKOUT-0023)"
+    )
+  if complete_body.get("order") is not None:
+    problems.append(
+      f"{where}.order: MUST NOT contain an order when an Action prevents "
+      f"Complete Checkout, got {complete_body.get('order')!r} (CHECKOUT-0023)"
+    )
+
+  if isinstance(before_checkout, dict) and complete_body.get(
+    "id"
+  ) != before_checkout.get("id"):
+    problems.append(
+      f"{where}.id: expected current Checkout id "
+      f"{before_checkout.get('id')!r}, got {complete_body.get('id')!r} "
+      f"(CHECKOUT-0023)"
+    )
+
+  action_errs = outstanding_actions_problems(complete_body, where=where)
+  if action_errs:
+    problems.extend(f"{e} (CHECKOUT-0023)" for e in action_errs)
+
+  messages = complete_body.get("messages")
+  if not isinstance(messages, list) or not messages:
+    problems.append(
+      f"{where}.messages: expected at least one recoverable error Message "
+      f"selecting the Action occurrence, got {messages!r} "
+      f"(CHECKOUT-0023, CHECKOUT-0054)"
+    )
+    return problems
+
+  recoverable_errors = [
+    m
+    for m in messages
+    if isinstance(m, dict)
+    and m.get("type") == "error"
+    and m.get("severity") == "recoverable"
+    and isinstance(m.get("content"), str)
+    and bool(m.get("content", "").strip())
+  ]
+  if not recoverable_errors:
+    problems.append(
+      f"{where}.messages: expected at least one message with type=='error', "
+      f"severity=='recoverable', and non-empty content, got {messages!r} "
+      f"(CHECKOUT-0023)"
+    )
+    return problems
+
+  matching_path_found = False
+  path_errors: list[str] = []
+  for idx, msg in enumerate(recoverable_errors):
+    p_errs = action_occurrence_path_problems(
+      msg.get("path"),
+      complete_body,
+      where=f"{where}.messages[{idx}].path",
+    )
+    if not p_errs:
+      matching_path_found = True
+      break
+    path_errors.extend(p_errs)
+
+  if not matching_path_found:
+    problems.extend(path_errors)
+
+  return problems
+
+
 class UnifiedUpdate(CheckoutUpdateRequest):
   """Client-side unified update model to support extensions."""
 
@@ -1645,6 +1982,7 @@ class DynamicFixtureContext:
     "disclosure_item_sku": "get_disclosure_item_sku",
     "async_completion_item_sku": "get_async_completion_item_sku",
     "escalation_item_sku": "get_escalation_item_sku",
+    "action_item_sku": "get_action_item_sku",
   }
 
   def __init__(
@@ -2068,6 +2406,13 @@ class DynamicFixtureContext:
   def get_escalation_item_sku(self) -> str | None:
     """Get an item SKU whose checkout returns `status: requires_escalation`."""
     val = self._get_test_fixture("escalation_item_sku")
+    if isinstance(val, str) and val.strip():
+      return val
+    return None
+
+  def get_action_item_sku(self) -> str | None:
+    """Get an item SKU that surfaces an outstanding Action."""
+    val = self._get_test_fixture("action_item_sku")
     if isinstance(val, str) and val.strip():
       return val
     return None
@@ -3005,6 +3350,67 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
       + "\n  ".join(problems),
     )
 
+  def assert_outstanding_actions(
+    self, body: Any, where: str = "entity"
+  ) -> None:
+    """Assert `body` surfaces at least one outstanding Action in `actions`."""
+    problems = outstanding_actions_problems(body, where=where)
+    self.assertFalse(
+      problems,
+      f"{where} violates outstanding Actions rules:\n  "
+      + "\n  ".join(problems),
+    )
+
+  def assert_cart_action_non_blocking(
+    self,
+    before_cart: Any,
+    after_cart: Any,
+    *,
+    expected_bag: list[tuple[Any, Any]] | None = None,
+    where: str = "cart update response",
+  ) -> None:
+    """Assert an outstanding Action does not block an unrelated cart update."""
+    problems = cart_action_non_blocking_problems(
+      before_cart, after_cart, expected_bag=expected_bag, where=where
+    )
+    self.assertFalse(
+      problems,
+      f"{where} violates non-blocking Cart Action rules:\n  "
+      + "\n  ".join(problems),
+    )
+
+  def assert_action_surfaced_before_complete(
+    self,
+    pre_complete_checkout: Any,
+    complete_response_checkout: Any = None,
+    where: str = "checkout",
+  ) -> None:
+    """Assert Actions requiring input were surfaced before Complete Checkout."""
+    problems = action_surfaced_before_complete_problems(
+      pre_complete_checkout, complete_response_checkout, where=where
+    )
+    self.assertFalse(
+      problems,
+      f"{where} violates pre-Complete Action surfacing rules:\n  "
+      + "\n  ".join(problems),
+    )
+
+  def assert_action_prevents_complete(
+    self,
+    before_checkout: Any,
+    complete_body: Any,
+    where: str = "complete response",
+  ) -> None:
+    """Assert Complete blocked by an Action returns `incomplete` + `path`."""
+    problems = action_prevents_complete_problems(
+      before_checkout, complete_body, where=where
+    )
+    self.assertFalse(
+      problems,
+      f"{where} violates Action-blocked Complete Checkout rules:\n  "
+      + "\n  ".join(problems),
+    )
+
   # ── cart capability (cart.md, cart/rest.md) ──────────────────────────────
 
   def create_cart(
@@ -3049,6 +3455,21 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     cart = response.json()
     self.assertTrue(cart.get("id"), f"the created cart has no id: {cart}")
     return cart
+
+  def update_cart(
+    self,
+    cart_id: str,
+    line_items: list[dict[str, Any]],
+    **extra: Any,
+  ) -> httpx.Response:
+    """PUT /carts/{id} with full replacement payload; return raw response."""
+    payload: dict[str, Any] = {"id": cart_id, "line_items": line_items}
+    payload.update(extra)
+    return self.client.put(
+      self.get_shopping_url(f"/carts/{cart_id}"),
+      json=payload,
+      headers=self.get_headers(),
+    )
 
   def get_cart(self, cart_id: str) -> httpx.Response:
     """GET /carts/{id}; return the raw response."""

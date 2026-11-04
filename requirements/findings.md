@@ -1,27 +1,27 @@
 # Findings from linking the tests to the catalog (demo)
 
-> **Demo only, not for merge.** These findings come from giving each of the 121
+> **Demo only, not for merge.** These findings come from giving each of the 124
 > shopping tests a marker against the catalog at `f2626c28` (see
 > [Linking tests to rules](README.md#linking-tests-to-rules)). Rule IDs are the
 > demo's stable IDs without the `REQ-SHOPPING-` prefix. They aren't official.
 
 ## Summary
 
-- **Markers:** 73 tests cite rules, 24 are `no_rule`, 16 are `scenario`, 6
+- **Markers:** 76 tests cite rules, 24 are `no_rule`, 16 are `scenario`, 6
   are `outside_catalog` and 2 are `older_version`.
-- **Rules cited:** 85, all testable: 75 MUST, 7 MUST NOT and 3 SHOULD.
-- **Coverage:** the tests cite 82 of the 104 testable MUST and MUST NOT rules
-  (79%): catalog 18 of 18, discount 4 of 4, order 14 of 17, fulfillment 13 of
-  16, cart 6 of 8 and checkout 27 of 37. Buyer consent has none.
-- **Depth:** all 82 are checked in full (see
+- **Rules cited:** 89, all testable: 78 MUST, 8 MUST NOT and 3 SHOULD.
+- **Coverage:** the tests cite 86 of the 104 testable MUST and MUST NOT rules
+  (83%): catalog 18 of 18, discount 4 of 4, cart 7 of 8, order 14 of 17,
+  fulfillment 13 of 16 and checkout 30 of 37. Buyer consent has none.
+- **Depth:** all 86 are checked in full (see
   [Claims reviewed](#claims-reviewed)). ORDER-0022 is cited in part by the
   envelope test and in full by the test that verifies the signature value,
-  so the coverage report counts 82 of the 104 (79%) as fully checked and
+  so the coverage report counts 86 of the 104 (83%) as fully checked and
   none only in part.
 - **Sample server:** against `samples` at `360adbc`, with the marker check
-  on, 81 of the 121 shopping tests pass, 1 fails (Get Order answers an
+  on, 81 of the 124 shopping tests pass, 1 fails (Get Order answers an
   unauthenticated request; see [Sample server findings](#sample-server-findings)),
-  11 don't apply (the server implements 2026-04-08, which doesn't state the
+  14 don't apply (the server implements 2026-04-08, which doesn't state the
   rules they cite), 14 skip because the sample doesn't advertise the catalog
   capabilities, 9 skip because no trigger is declared, 2 skip as not
   exercised (the sample emits no `options[].description` and omits
@@ -46,6 +46,7 @@ rule in part. CHECKOUT-0142 stays fully checked through `TotalsTest`.
 | CART-0003           | MUST     | `CartTest.test_conversion_uses_cart_line_items_over_payload`, `CartTest.test_conversion_uses_cart_buyer_over_payload`                                                                                                            | Full    | The checkout holds the cart's lines and the cart's buyer when the conversion request names others. The buyer test skips when the cart doesn't keep the buyer it was created with; no rule makes it.                                                                                                                                        |
 | CART-0004           | MUST     | the same two tests                                                                                                                                                                                                               | Full    | The payload's line items and buyer are what the business must ignore.                                                                                                                                                                                                                                                                      |
 | CART-0005           | MUST     | `CartTest.test_second_conversion_returns_the_existing_checkout`                                                                                                                                                                  | Full    | A second Create Checkout with the same `cart_id`, under a new Idempotency-Key, returns the first checkout's ID while it is incomplete.                                                                                                                                                                                                     |
+| CART-0010           | MUST NOT | `CartTest.test_outstanding_action_does_not_block_unrelated_cart_update`                                                                                                                                                          | Full    | A cart created with `action_item_sku` that surfaces an outstanding Action in `actions` accepts an unrelated `PUT /carts/{id}` updating line items and buyer without rejecting the operation.                                                                                                                                               |
 | CART-0025           | MUST     | `CartTest.test_cancel_returns_the_cart_state_before_deletion`                                                                                                                                                                    | Full    | The cancel response is compared with Get Cart taken just before, on lines, currency, totals, buyer, context and discounts.                                                                                                                                                                                                                 |
 | CART-0062           | MUST     | `CartTest.test_response_bodies_are_strict_json`                                                                                                                                                                                  | Full    | Create, Get, Update and Cancel Cart, the error for a malformed body and the answer after cancel: UTF-8, no byte order mark, the RFC 8259 grammar with no `NaN`/`Infinity`, served as `application/json`. The request half binds the platform; the malformed request shows the business rejects a body that isn't JSON and answers in JSON. |
 | CART-0063           | MUST     | `CartTest.test_endpoints_are_served_over_tls_1_3`                                                                                                                                                                                | Full    | A TLS 1.3 handshake completes and one capped at TLS 1.2 is refused, on the profile's host and the endpoint's. Plaintext on a local address skips as an environment limit; elsewhere it fails.                                                                                                                                              |
@@ -71,13 +72,16 @@ rule in part. CHECKOUT-0142 stays fully checked through `TotalsTest`.
 | CHECKOUT-0011       | MUST NOT | `ValidationTest.test_quantity_revision_is_explained`                                                                                                                                                                             | Full    | See [Rule scope](#rule-scope). A lowered quantity without such a message fails.                                                                                                                                                                                                                                                            |
 | CHECKOUT-0016       | MUST     | `BusinessLogicTest.test_totals_calculation_on_create`, `BusinessLogicTest.test_totals_recalculation_on_update`                                                                                                                   | Full    | Each line's `subtotal` is checked as `price × quantity × 10^-scale` from the line's own values: exact at scale 0, within one minor unit when the item carries a `quantity_unit` scale.                                                                                                                                                     |
 | CHECKOUT-0021       | MUST NOT | `CheckoutLifecycleTest.test_complete_in_progress_omits_order`                                                                                                                                                                    | Full    | Completing a checkout with `async_completion_item_sku` returns `status: "complete_in_progress"` with `order` omitted (or `null`).                                                                                                                                                                                                          |
+| CHECKOUT-0023       | MUST     | `CheckoutLifecycleTest.test_action_prevents_complete_with_occurrence_path`                                                                                                                                                       | Full    | Attempting Complete Checkout while an Action for `action_item_sku` is unsatisfied returns the current Checkout with `status: "incomplete"` and an error `Message` with `severity: "recoverable"` whose `path` selects the exact Action occurrence in `actions` (for example `$.actions['<type>'][0]`).                                     |
 | CHECKOUT-0028       | MUST     | `CheckoutLifecycleTest.test_update_rejected_during_complete_in_progress`                                                                                                                                                         | Full    | Sending `PUT /checkout-sessions/{id}` while `status: "complete_in_progress"` leaves the Checkout state (`status`, `line_items`, `totals`, `buyer`) unchanged and returns a `messages[]` entry with `type: "error"` and `severity: "recoverable"`.                                                                                          |
+| CHECKOUT-0032       | MUST     | `CheckoutLifecycleTest.test_action_requiring_input_surfaced_before_complete`                                                                                                                                                     | Full    | A checkout with `action_item_sku` surfaces the Action requiring input in `actions` with `status: "incomplete"` prior to accepting Complete Checkout, and Complete Checkout neither accepts completion nor introduces unsurfaced Action types.                                                                                              |
 | CHECKOUT-0044       | MUST     | `ValidationTest.test_message_paths_are_rfc9535_jsonpath`                                                                                                                                                                         | Full    | Every `messages[].path` emitted across checkout creation and recoverable error/warning responses is checked as an RFC 9535 JSONPath expression rooted at `$` relative to the UCP response object; skips as not exercised when no response includes `messages[].path`.                                                                      |
 | CHECKOUT-0047       | MUST     | `CheckoutLifecycleTest.test_accepted_eligibility_claim_resolved_by_rescission_before_complete`, `CheckoutLifecycleTest.test_unverified_eligibility_claim_rejected_at_completion`                                                 | Full    | Covers both resolution paths before completion may succeed: rescinding `context.eligibility: []` removes the provisional discount and allows completion, and an accepted claim that remains unverified at completion fails to complete.                                                                                                    |
 | CHECKOUT-0048       | MUST NOT | `CheckoutLifecycleTest.test_unrecognized_eligibility_claim_does_not_block_checkout`                                                                                                                                              | Full    | Sending an unrecognized reverse-domain claim in `context.eligibility` on Create and Update adds no error message, keeps any `eligibility_not_accepted` message as `info` or `warning`, does not degrade checkout `status`, and completes the checkout.                                                                                     |
 | CHECKOUT-0051       | MUST     | `CheckoutLifecycleTest.test_unverified_eligibility_claim_rejected_at_completion`                                                                                                                                                 | Full    | Attempting `/complete` with `unverifiable_eligibility_claim` returns a `messages[]` entry with `type: "error"` and `code: "eligibility_invalid"`.                                                                                                                                                                                          |
 | CHECKOUT-0052       | MUST NOT | `CheckoutLifecycleTest.test_unverified_eligibility_claim_rejected_at_completion`                                                                                                                                                 | Full    | Neither the `/complete` response nor a subsequent Get Checkout reports `status: "completed"` or an `order` when an accepted claim is unresolved.                                                                                                                                                                                           |
 | CHECKOUT-0053       | MUST     | `CheckoutLifecycleTest.test_unverified_eligibility_claim_rejected_at_completion`                                                                                                                                                 | Full    | The `eligibility_invalid` error entry carries `severity: "recoverable"`.                                                                                                                                                                                                                                                                   |
+| CHECKOUT-0054       | MUST     | `CheckoutLifecycleTest.test_action_prevents_complete_with_occurrence_path`                                                                                                                                                       | Full    | When an Action prevents the requested effect, the error `Message`'s `path` selects the exact Action occurrence in `actions`; see [A rule stated twice](#a-rule-stated-twice).                                                                                                                                                              |
 | CHECKOUT-0083       | MUST     | `ValidationTest.test_disclosure_item_emits_disclosure_warning`                                                                                                                                                                   | Full    | A checkout with `disclosure_item_sku` emits at least one `messages[]` warning with `presentation: "disclosure"`, non-empty `content`, and an RFC 9535 JSONPath `path` pointing to the subject component.                                                                                                                                   |
 | CHECKOUT-0086       | MUST     | `ValidationTest.test_policy_disclosure_code_matches_policy_type`                                                                                                                                                                 | Full    | When a `presentation: "disclosure"` warning renders a structured `policies[]` entry on a checkout with `disclosure_item_sku`, its `code` equals that policy's `type`.                                                                                                                                                                      |
 | CHECKOUT-0091       | MUST     | `CheckoutLifecycleTest.test_requires_escalation_includes_continue_url`                                                                                                                                                           | Full    | A checkout with `escalation_item_sku` that transitions to `status: "requires_escalation"` provides a valid absolute `https://` `continue_url`.                                                                                                                                                                                             |
@@ -179,6 +183,13 @@ order TLS test cites both. ORDER-0009 (Get Order, Authorization) and
 ORDER-0015 (Operations, Guidelines) both require authenticating requests to
 order data; the authentication test cites both. And in `checkout/`:
 
+- CHECKOUT-0023 (`checkout/index.md`, Overview > Actions) and CHECKOUT-0054
+  (`checkout/index.md`, Error Handling > Eligibility Verification at
+  Completion) both require that when an Action prevents the requested effect
+  (including Complete Checkout), the Business return an error `Message` with
+  `severity: "recoverable"` whose `path` selects the exact Action occurrence
+  in `actions`; `test_action_prevents_complete_with_occurrence_path` cites
+  both.
 - CHECKOUT-0028 (`checkout/index.md`, Accepted completion) and CHECKOUT-0245
   (`checkout/rest.md`, Update Checkout) both require leaving the Checkout
   unchanged and returning the current Checkout with a recoverable error
@@ -312,6 +323,15 @@ add them, and change the counts above.
   `escalation_item_sku`. `CHECKOUT-0091/-0107` (`since: 2026-01-11`) and
   `CHECKOUT-0108` (`since: 2026-04-08`) are split into separate test methods
   so version gating applies accurately across earlier releases.
+- **Actions (Cart and Checkout):** `CartTest` and `CheckoutLifecycleTest`
+  cover the 4 testable MUST and MUST NOT rules for `actions` (`CART-0010`;
+  `CHECKOUT-0023, -0032, -0054`) using `action_item_sku`. In Cart, an
+  outstanding Action is verified not to block an unrelated `PUT /carts/{id}`
+  update (`CART-0010`). In Checkout, Actions requiring input through Update
+  Checkout must be surfaced before Complete Checkout (`CHECKOUT-0032`), and
+  an unsatisfied Action that blocks Complete Checkout must return
+  `status: "incomplete"` with a recoverable error `Message` whose `path`
+  selects the exact Action occurrence (`CHECKOUT-0023, -0054`).
 - **Needs fixtures:** these skip without the matching `test_fixtures.json`
   entries: known customers with and without saved addresses, a
   free-shipping threshold and item, dynamic fulfillment destinations, a
@@ -323,8 +343,8 @@ add them, and change the counts above.
   destination triggers (`unserviceable_destination_id`, `pickup_location_id`,
   `catalog_fulfills_to`), the totals and disclosure triggers
   (`custom_total_item_sku`, `total_lines_item_sku`, `disclosure_item_sku`),
-  and the completion-state triggers (`async_completion_item_sku`,
-  `escalation_item_sku`).
+  the completion-state triggers (`async_completion_item_sku`,
+  `escalation_item_sku`), and the Action trigger (`action_item_sku`).
 - **Needs the sample server:**
   - `PUT /orders/{id}`, which neither the draft nor any release defines:
     `test_order_update`, `test_order_adjustments`,
@@ -357,6 +377,6 @@ of the tests that apply to its version:
 
 ## Coverage gaps
 
-22 testable MUST and MUST NOT rules have no test: checkout 10, buyer consent
-4, fulfillment 3, order 3 and cart 2. Catalog (18 of 18) and discount (4 of 4)
+18 testable MUST and MUST NOT rules have no test: checkout 7, buyer consent
+4, fulfillment 3, order 3 and cart 1. Catalog (18 of 18) and discount (4 of 4)
 have all of theirs covered. Each remaining rule is a candidate for a new test.

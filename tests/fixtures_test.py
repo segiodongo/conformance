@@ -107,6 +107,7 @@ class TriggerTest(unittest.TestCase):
         "disclosure_item_sku": "allergen_bouquet",
         "async_completion_item_sku": "async_order_bouquet",
         "escalation_item_sku": "age_restricted_bouquet",
+        "action_item_sku": "warranty_registration_bouquet",
       }
     )
     context = DynamicFixtureContext(merged)
@@ -150,6 +151,7 @@ class TriggerTest(unittest.TestCase):
           "disclosure_item_sku": "",
           "async_completion_item_sku": "   ",
           "escalation_item_sku": 999,
+          "action_item_sku": "",
         }
       }
     )
@@ -172,8 +174,10 @@ class TriggerTest(unittest.TestCase):
       "disclosure_item_sku",
       "async_completion_item_sku",
       "escalation_item_sku",
+      "action_item_sku",
     ):
       with self.subTest(key=key):
+        self.assertIsNotNone(DynamicFixtureContext.TRIGGERS.get(key))
         self.assertIsNone(context.trigger(key))
 
   def test_fallback_config(self):

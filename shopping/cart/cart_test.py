@@ -24,6 +24,9 @@ tightened where a rule asks for more than the original checked:
     contents the page says initialize the checkout.
   * CART-0005: a second conversion of a cart whose checkout is still
     incomplete MUST return that checkout.
+  * CART-0010: an outstanding Action on a cart is non-blocking and MUST NOT
+    prevent unrelated Cart operations such as adding items or updating
+    quantities.
   * CART-0025: cancel MUST return the cart state before deletion. Compared
     with Get Cart taken just before, on the state a cart carries: lines,
     currency, totals, buyer, context and discounts.
@@ -197,6 +200,47 @@ class CartTest(ShoppingIntegrationTestBase):
       "a second conversion must return the existing checkout (cart.md: if an "
       "incomplete checkout already exists for the cart_id, the business MUST "
       "return it rather than creating a new one)",
+    )
+
+  # ── cart.md, Overview: Actions ───────────────────────────────────────────
+  @spec_assert(
+    "REQ-SHOPPING-CART-0010",  # Actions MUST NOT block unrelated Cart updates
+  )
+  def test_outstanding_action_does_not_block_unrelated_cart_update(
+    self,
+  ) -> None:
+    """An outstanding Action does not block an unrelated Update Cart call.
+
+    cart.md (Actions): Actions are non-blocking in Cart and MUST NOT prevent
+    unrelated Cart operations such as adding items or updating quantities.
+    """
+    action_sku = self.require_trigger("action_item_sku")
+    cart = self.create_cart(quantity=1, item_id=action_sku)
+    self.assert_outstanding_actions(cart, where="created cart")
+
+    regular_sku = self.fixture_ctx.get_test_sku()
+    if regular_sku != action_sku:
+      updated_lines = [
+        {"item": {"id": action_sku}, "quantity": 1},
+        {"item": {"id": regular_sku}, "quantity": 2},
+      ]
+    else:
+      updated_lines = [{"item": {"id": action_sku}, "quantity": 2}]
+    expected_bag = sorted(
+      (line["item"]["id"], line["quantity"]) for line in updated_lines
+    )
+
+    update_resp = self.update_cart(
+      cart["id"],
+      line_items=updated_lines,
+      buyer=_CART_BUYER,
+    )
+    self.assert_response_status(update_resp, 200)
+    self.assert_cart_action_non_blocking(
+      cart,
+      update_resp.json(),
+      expected_bag=expected_bag,
+      where="PUT /carts/{id} with outstanding Action",
     )
 
   # ── cart.md, Operations: Cancel Cart ─────────────────────────────────────

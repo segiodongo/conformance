@@ -1189,5 +1189,176 @@ class CompletionStatesHelpersTest(unittest.TestCase):
     self.assertTrue(any("CHECKOUT-0108" in p for p in msg_problems))
 
 
+class ActionsHelpersTest(unittest.TestCase):
+  """Tests for W11 Actions helpers (CART-0010, CHECKOUT-0023, -0032, -0054)."""
+
+  def test_outstanding_actions_problems(self) -> None:
+    """outstanding_actions_problems validates non-empty reverse-domain keys."""
+    valid_entity = {
+      "id": "cart_1",
+      "actions": {
+        "com.example.warranty_registration": [
+          {
+            "targets": ["$.line_items[0]"],
+            "description": "Provide serial number for warranty registration",
+          }
+        ]
+      },
+    }
+    self.assertEqual(base.outstanding_actions_problems(valid_entity), [])
+    self.assertTrue(base.outstanding_actions_problems({"id": "cart_1"}))
+    self.assertTrue(
+      base.outstanding_actions_problems(
+        {"id": "cart_1", "actions": {"not_reverse_domain": [{}]}}
+      )
+    )
+    self.assertTrue(
+      base.outstanding_actions_problems(
+        {"id": "cart_1", "actions": {"com.example.empty": []}}
+      )
+    )
+
+  def test_cart_action_non_blocking_problems(self) -> None:
+    """cart_action_non_blocking_problems checks unrelated Cart updates."""
+    before_cart = {
+      "id": "cart_1",
+      "line_items": [
+        {"id": "li_1", "item": {"id": "action_sku"}, "quantity": 1}
+      ],
+      "actions": {
+        "com.example.age_attestation": [{"description": "Confirm buyer is 21+"}]
+      },
+    }
+    after_cart = {
+      "id": "cart_1",
+      "line_items": [
+        {"id": "li_1", "item": {"id": "action_sku"}, "quantity": 1},
+        {"id": "li_2", "item": {"id": "bouquet_roses"}, "quantity": 2},
+      ],
+      "actions": {
+        "com.example.age_attestation": [{"description": "Confirm buyer is 21+"}]
+      },
+    }
+    expected_bag = [("action_sku", 1), ("bouquet_roses", 2)]
+    self.assertEqual(
+      base.cart_action_non_blocking_problems(
+        before_cart, after_cart, expected_bag=expected_bag
+      ),
+      [],
+    )
+
+    blocked_cart = {
+      "id": "cart_1",
+      "line_items": [
+        {"id": "li_1", "item": {"id": "action_sku"}, "quantity": 1}
+      ],
+    }
+    problems = base.cart_action_non_blocking_problems(
+      before_cart, blocked_cart, expected_bag=expected_bag
+    )
+    self.assertTrue(any("CART-0010" in p for p in problems))
+
+  def test_action_surfaced_before_complete_problems(self) -> None:
+    """Actions requiring input must appear before Complete (CHECKOUT-0032)."""
+    pre_complete = {
+      "id": "chk_1",
+      "status": "incomplete",
+      "actions": {
+        "com.example.prescription_upload": [
+          {"targets": ["$.line_items[0]"], "description": "Upload Rx"}
+        ]
+      },
+    }
+    complete_resp = {
+      "id": "chk_1",
+      "status": "incomplete",
+      "actions": {
+        "com.example.prescription_upload": [
+          {"targets": ["$.line_items[0]"], "description": "Upload Rx"}
+        ]
+      },
+    }
+    self.assertEqual(
+      base.action_surfaced_before_complete_problems(
+        pre_complete, complete_resp
+      ),
+      [],
+    )
+
+    surprise_action_at_complete = {
+      "id": "chk_1",
+      "status": "incomplete",
+      "actions": {
+        "com.example.prescription_upload": [
+          {"targets": ["$.line_items[0]"], "description": "Upload Rx"}
+        ],
+        "com.example.surprise_waiver": [
+          {"description": "Sign waiver only surfaced at Complete"}
+        ],
+      },
+    }
+    problems = base.action_surfaced_before_complete_problems(
+      pre_complete, surprise_action_at_complete
+    )
+    self.assertTrue(any("CHECKOUT-0032" in p for p in problems))
+
+  def test_action_prevents_complete_problems(self) -> None:
+    """Action blocking Complete returns incomplete + occurrence path."""
+    before = {
+      "id": "chk_1",
+      "status": "incomplete",
+      "actions": {
+        "com.example.prescription_upload": [
+          {"targets": ["$.line_items[0]"], "description": "Upload Rx"}
+        ]
+      },
+    }
+    valid_complete = {
+      "id": "chk_1",
+      "status": "incomplete",
+      "actions": {
+        "com.example.prescription_upload": [
+          {"targets": ["$.line_items[0]"], "description": "Upload Rx"}
+        ]
+      },
+      "messages": [
+        {
+          "type": "error",
+          "code": "action_required",
+          "severity": "recoverable",
+          "path": "$.actions['com.example.prescription_upload'][0]",
+          "content": "Prescription upload is required before completion.",
+        }
+      ],
+    }
+    self.assertEqual(
+      base.action_prevents_complete_problems(before, valid_complete), []
+    )
+
+    wrong_path_complete = {
+      "id": "chk_1",
+      "status": "incomplete",
+      "actions": {
+        "com.example.prescription_upload": [
+          {"targets": ["$.line_items[0]"], "description": "Upload Rx"}
+        ]
+      },
+      "messages": [
+        {
+          "type": "error",
+          "code": "action_required",
+          "severity": "recoverable",
+          "path": "$.actions",
+          "content": "Points at map rather than occurrence.",
+        }
+      ],
+    }
+    problems = base.action_prevents_complete_problems(
+      before, wrong_path_complete
+    )
+    self.assertTrue(any("CHECKOUT-0023" in p for p in problems))
+    self.assertTrue(any("CHECKOUT-0054" in p for p in problems))
+
+
 if __name__ == "__main__":
   unittest.main()
