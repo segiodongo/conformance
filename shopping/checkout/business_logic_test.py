@@ -21,7 +21,10 @@ from framework.decorators import (
   requires_capability,
   spec_assert,
 )
-from shopping.base import ShoppingIntegrationTestBase
+from shopping.base import (
+  quantity_unit_machine_identity,
+  ShoppingIntegrationTestBase,
+)
 from ucp_sdk.models.schemas.shopping import checkout as checkout
 from ucp_sdk.models.schemas.shopping import (
   checkout_update_request as checkout_update_req,
@@ -283,6 +286,110 @@ class BusinessLogicTest(ShoppingIntegrationTestBase):
     )
     self.assertEqual(
       checkout_obj.buyer.first_name, "Test", "First name mismatch"
+    )
+
+  @spec_assert(
+    "REQ-SHOPPING-CHECKOUT-0003",  # compare quantity_unit machine identities
+    "REQ-SHOPPING-CHECKOUT-0005",  # reject unreconcilable unit with error
+  )
+  def test_quantity_unit_machine_identity_comparison_and_mismatch_rejection(
+    self,
+  ) -> None:
+    """Business compares `quantity_unit` identities and rejects mismatches."""
+    sku = (
+      self.fixture_ctx.get_measured_item_sku()
+      or self.fixture_ctx.get_test_sku()
+    )
+    created = self.create_checkout_session(
+      item_id=sku, quantity=1, select_fulfillment=False
+    )
+    checkout_id = created["id"]
+    lines = created.get("line_items") or []
+    self.assertTrue(lines, f"checkout has no line_items: {created}")
+    before_line = lines[0]
+    auth_unit, auth_scale = quantity_unit_machine_identity(
+      (before_line.get("item") or {}).get("quantity_unit")
+    ) or ("C62", 0)
+
+    # 1. Explicit assertion with matching (unit, scale) and alternate
+    #    display_text MUST match and apply the updated quantity.
+    matching_payload = self.checkout_update_payload(
+      checkout.Checkout(**created)
+    )
+    matching_payload["line_items"][0]["quantity"] = 2
+    matching_payload["line_items"][0]["item"]["quantity_unit"] = {
+      "unit": auth_unit,
+      "scale": auth_scale,
+      "display_text": "alt-unit-label",
+    }
+    matching_resp = self.client.put(
+      self.get_shopping_url(f"/checkout-sessions/{checkout_id}"),
+      json=matching_payload,
+      headers=self.get_headers(),
+    )
+    self.assert_response_status(matching_resp, 200)
+    matching_checkout = matching_resp.json()
+
+    # 2. Assertion with an incompatible unit identity MUST be rejected with a
+    #    recoverable error and leave the line at its previous state.
+    mismatch_unit = "HUR" if auth_unit != "HUR" else "LTR"
+    mismatch_payload = self.checkout_update_payload(
+      checkout.Checkout(**matching_checkout)
+    )
+    mismatch_payload["line_items"][0]["quantity"] = 3
+    mismatch_payload["line_items"][0]["item"]["quantity_unit"] = {
+      "unit": mismatch_unit,
+      "scale": 1,
+      "display_text": "hr" if mismatch_unit == "HUR" else "0.1 L",
+    }
+    mismatch_resp = self.client.put(
+      self.get_shopping_url(f"/checkout-sessions/{checkout_id}"),
+      json=mismatch_payload,
+      headers=self.get_headers(),
+    )
+    self.assert_response_status(mismatch_resp, 200)
+    mismatch_checkout = mismatch_resp.json()
+
+    self.assert_quantity_unit_comparison(
+      before_line,
+      matching_checkout,
+      mismatch_checkout,
+      expected_matching_qty=2,
+      where=f"PUT /checkout-sessions/{checkout_id}",
+    )
+
+  @spec_assert(
+    "REQ-SHOPPING-CHECKOUT-0015",  # include quantity_unit when != ('C62', 0)
+  )
+  def test_measured_item_echoes_non_default_quantity_unit(self) -> None:
+    """Line includes `item.quantity_unit` when sale basis != ('C62', 0)."""
+    sku = self.require_trigger("measured_item_sku")
+    created = self.create_checkout_session(
+      item_id=sku, select_fulfillment=False
+    )
+    lines = created.get("line_items") or []
+    self.assertTrue(lines, f"checkout has no line_items: {created}")
+    self.assert_non_default_quantity_unit(
+      lines[0], where=f"checkout line_items[0] ({sku!r})"
+    )
+
+  @spec_assert(
+    "REQ-SHOPPING-CHECKOUT-0019",  # include unit_price when pricing != sale
+  )
+  def test_line_item_includes_unit_price_when_pricing_basis_differs(
+    self,
+  ) -> None:
+    """Line includes `item.unit_price` when pricing basis != sale basis."""
+    sku = self.require_trigger("unit_price_item_sku")
+    created = self.create_checkout_session(
+      item_id=sku, select_fulfillment=False
+    )
+    lines = created.get("line_items") or []
+    self.assertTrue(lines, f"checkout has no line_items: {created}")
+    self.assert_line_pricing_basis_unit_price(
+      lines[0],
+      created.get("currency"),
+      where=f"checkout line_items[0] ({sku!r})",
     )
 
 

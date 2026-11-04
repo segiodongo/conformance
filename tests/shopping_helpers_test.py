@@ -1360,5 +1360,249 @@ class ActionsHelpersTest(unittest.TestCase):
     self.assertTrue(any("CHECKOUT-0054" in p for p in problems))
 
 
+class QuantityUnitAndSettlementHelpersTest(unittest.TestCase):
+  """Unit tests for W12 quantity_unit, pricing basis, and settlement helpers."""
+
+  def test_quantity_unit_machine_identity(self) -> None:
+    """Absent descriptor defaults to ('C62', 0); invalid returns None."""
+    self.assertEqual(base.quantity_unit_machine_identity(None), ("C62", 0))
+    self.assertEqual(
+      base.quantity_unit_machine_identity(
+        {"unit": "C62", "display_text": "each"}
+      ),
+      ("C62", 0),
+    )
+    self.assertEqual(
+      base.quantity_unit_machine_identity(
+        {"unit": "KGM", "scale": 3, "display_text": "kg"}
+      ),
+      ("KGM", 3),
+    )
+    self.assertIsNone(
+      base.quantity_unit_machine_identity({"unit": "", "scale": 0})
+    )
+    self.assertIsNone(
+      base.quantity_unit_machine_identity({"unit": "KGM", "scale": 16})
+    )
+
+  def test_non_default_quantity_unit_problems(self) -> None:
+    """Line whose sale basis != ('C62', 0) must include valid quantity_unit."""
+    measured_line = {
+      "id": "li_1",
+      "item": {
+        "id": "olive_oil",
+        "price": 1200,
+        "quantity_unit": {"unit": "KGM", "scale": 3, "display_text": "kg"},
+      },
+      "quantity": 1500,
+    }
+    self.assertEqual(base.non_default_quantity_unit_problems(measured_line), [])
+
+    missing_qu = {
+      "id": "li_1",
+      "item": {"id": "olive_oil", "price": 1200},
+      "quantity": 1500,
+    }
+    problems = base.non_default_quantity_unit_problems(missing_qu)
+    self.assertTrue(any("CHECKOUT-0015" in p for p in problems))
+
+    default_qu = {
+      "id": "li_1",
+      "item": {
+        "id": "olive_oil",
+        "price": 1200,
+        "quantity_unit": {"unit": "C62", "scale": 0, "display_text": "each"},
+      },
+      "quantity": 2,
+    }
+    problems = base.non_default_quantity_unit_problems(default_qu)
+    self.assertTrue(any("CHECKOUT-0015" in p for p in problems))
+
+  def test_quantity_unit_comparison_problems(self) -> None:
+    """Matching machine identity succeeds; incompatible unit is rejected."""
+    before_line = {
+      "id": "li_1",
+      "item": {"id": "bouquet_roses", "price": 3500},
+      "quantity": 1,
+    }
+    matching_checkout = {
+      "id": "chk_1",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {"id": "bouquet_roses", "price": 3500},
+          "quantity": 2,
+        }
+      ],
+    }
+    mismatch_checkout = {
+      "id": "chk_1",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {"id": "bouquet_roses", "price": 3500},
+          "quantity": 2,
+        }
+      ],
+      "messages": [
+        {
+          "type": "error",
+          "code": "quantity_unit_mismatch",
+          "severity": "recoverable",
+          "path": "$.line_items[0].item.quantity_unit",
+          "content": "Bouquet is sold per item (C62, scale 0), not by hour.",
+        }
+      ],
+    }
+    self.assertEqual(
+      base.quantity_unit_comparison_problems(
+        before_line,
+        matching_checkout,
+        mismatch_checkout,
+        expected_matching_qty=2,
+      ),
+      [],
+    )
+
+    silently_accepted_mismatch = {
+      "id": "chk_1",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {"id": "bouquet_roses", "price": 3500},
+          "quantity": 3,
+        }
+      ],
+    }
+    problems = base.quantity_unit_comparison_problems(
+      before_line,
+      matching_checkout,
+      silently_accepted_mismatch,
+      expected_matching_qty=2,
+    )
+    self.assertTrue(any("CHECKOUT-0003" in p for p in problems))
+    self.assertTrue(any("CHECKOUT-0005" in p for p in problems))
+
+  def test_line_pricing_basis_unit_price_problems(self) -> None:
+    """Line whose pricing basis != sale basis must include item.unit_price."""
+    valid_line = {
+      "id": "li_1",
+      "item": {
+        "id": "ribeye_pack",
+        "price": 1800,
+        "unit_price": {
+          "amount": 2400,
+          "currency": "USD",
+          "measure": {
+            "value": 750,
+            "scale": 3,
+            "unit": "KGM",
+            "display_text": "0.75 kg",
+          },
+          "reference": {
+            "value": 1,
+            "scale": 0,
+            "unit": "KGM",
+            "display_text": "1 kg",
+          },
+        },
+      },
+      "quantity": 1,
+    }
+    self.assertEqual(
+      base.line_pricing_basis_unit_price_problems(valid_line, "USD"), []
+    )
+
+    missing_up = {
+      "id": "li_1",
+      "item": {"id": "ribeye_pack", "price": 1800},
+      "quantity": 1,
+    }
+    problems = base.line_pricing_basis_unit_price_problems(missing_up, "USD")
+    self.assertTrue(any("CHECKOUT-0019" in p for p in problems))
+
+  def test_order_measurement_settlement_problems(self) -> None:
+    """Settlement adjustment carries measure matching pricing basis."""
+    valid_order = {
+      "id": "ord_1",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "ribeye_pack",
+            "price": 1800,
+            "unit_price": {
+              "amount": 2400,
+              "currency": "USD",
+              "measure": {
+                "value": 750,
+                "scale": 3,
+                "unit": "KGM",
+                "display_text": "0.75 kg",
+              },
+              "reference": {
+                "value": 1,
+                "scale": 0,
+                "unit": "KGM",
+                "display_text": "1 kg",
+              },
+            },
+          },
+          "quantity": {"original": 1, "total": 1, "fulfilled": 1},
+        }
+      ],
+      "adjustments": [
+        {
+          "id": "adj_1",
+          "type": "price_adjustment",
+          "status": "completed",
+          "line_items": [
+            {
+              "id": "li_1",
+              "quantity": 0,
+              "measure": {
+                "value": 780,
+                "scale": 3,
+                "unit": "KGM",
+                "display_text": "0.78 kg",
+              },
+            }
+          ],
+          "totals": [{"type": "total", "amount": 72}],
+        }
+      ],
+    }
+    self.assertEqual(
+      base.order_measurement_settlement_problems(valid_order), []
+    )
+
+    wrong_unit_and_qty = {
+      "id": "ord_1",
+      "line_items": valid_order["line_items"],
+      "adjustments": [
+        {
+          "id": "adj_1",
+          "type": "price_adjustment",
+          "status": "completed",
+          "line_items": [
+            {
+              "id": "li_1",
+              "quantity": 1,
+              "measure": {
+                "value": 780,
+                "scale": 0,
+                "unit": "GRM",
+                "display_text": "780 g",
+              },
+            }
+          ],
+          "totals": [{"type": "total", "amount": 72}],
+        }
+      ],
+    }
+    problems = base.order_measurement_settlement_problems(wrong_unit_and_qty)
+    self.assertTrue(any("ORDER-0007" in p for p in problems))
+
+
 if __name__ == "__main__":
   unittest.main()

@@ -1,27 +1,27 @@
 # Findings from linking the tests to the catalog (demo)
 
-> **Demo only, not for merge.** These findings come from giving each of the 124
+> **Demo only, not for merge.** These findings come from giving each of the 128
 > shopping tests a marker against the catalog at `f2626c28` (see
 > [Linking tests to rules](README.md#linking-tests-to-rules)). Rule IDs are the
 > demo's stable IDs without the `REQ-SHOPPING-` prefix. They aren't official.
 
 ## Summary
 
-- **Markers:** 76 tests cite rules, 24 are `no_rule`, 16 are `scenario`, 6
+- **Markers:** 80 tests cite rules, 24 are `no_rule`, 16 are `scenario`, 6
   are `outside_catalog` and 2 are `older_version`.
-- **Rules cited:** 89, all testable: 78 MUST, 8 MUST NOT and 3 SHOULD.
-- **Coverage:** the tests cite 86 of the 104 testable MUST and MUST NOT rules
-  (83%): catalog 18 of 18, discount 4 of 4, cart 7 of 8, order 14 of 17,
-  fulfillment 13 of 16 and checkout 30 of 37. Buyer consent has none.
-- **Depth:** all 86 are checked in full (see
+- **Rules cited:** 95, all testable: 84 MUST, 8 MUST NOT and 3 SHOULD.
+- **Coverage:** the tests cite 92 of the 104 testable MUST and MUST NOT rules
+  (88%): catalog 18 of 18, discount 4 of 4, order 16 of 17, checkout 34 of 37,
+  cart 7 of 8 and fulfillment 13 of 16. Buyer consent has none.
+- **Depth:** all 92 are checked in full (see
   [Claims reviewed](#claims-reviewed)). ORDER-0022 is cited in part by the
   envelope test and in full by the test that verifies the signature value,
-  so the coverage report counts 86 of the 104 (83%) as fully checked and
+  so the coverage report counts 92 of the 104 (88%) as fully checked and
   none only in part.
 - **Sample server:** against `samples` at `360adbc`, with the marker check
-  on, 81 of the 124 shopping tests pass, 1 fails (Get Order answers an
+  on, 81 of the 128 shopping tests pass, 1 fails (Get Order answers an
   unauthenticated request; see [Sample server findings](#sample-server-findings)),
-  14 don't apply (the server implements 2026-04-08, which doesn't state the
+  18 don't apply (the server implements 2026-04-08, which doesn't state the
   rules they cite), 14 skip because the sample doesn't advertise the catalog
   capabilities, 9 skip because no trigger is declared, 2 skip as not
   exercised (the sample emits no `options[].description` and omits
@@ -68,9 +68,13 @@ rule in part. CHECKOUT-0142 stays fully checked through `TotalsTest`.
 | CATALOG-LOOKUP-0014 | MUST     | `CatalogLookupTest.test_get_product_includes_effective_selected_options`                                                                                                                                                         | Full    | `/catalog/product` on `catalog_product_with_options` includes `product.selected` both when `selected` is omitted (matching `variants[0].options`) and when `selected` is sent.                                                                                                                                                             |
 | CATALOG-SEARCH-0003 | MUST     | `CatalogSearchTest.test_empty_search_request_is_rejected`                                                                                                                                                                        | Full    | `/catalog/search` with `{}` and with context-only `{"context": ...}` is rejected (HTTP 400 or `ucp.status: "error"`).                                                                                                                                                                                                                      |
 | CATALOG-SEARCH-0007 | MUST     | `CatalogSearchTest.test_search_without_limit_applies_default_page_size`                                                                                                                                                          | Full    | `/catalog/search` with `pagination.limit` omitted returns at most `catalog_search_default_page_size` items (exact when `has_next_page` is true) and matches the count for an explicit `limit` of that size.                                                                                                                                |
+| CHECKOUT-0003       | MUST     | `BusinessLogicTest.test_quantity_unit_machine_identity_comparison_and_mismatch_rejection`                                                                                                                                        | Full    | An explicit `quantity_unit` assertion matching the item's authoritative `(unit, effective_scale)` with a different `display_text` is accepted on Update Checkout, while an incompatible unit identity (`HUR`/`LTR`) is not accepted.                                                                                                       |
+| CHECKOUT-0005       | MUST     | `BusinessLogicTest.test_quantity_unit_machine_identity_comparison_and_mismatch_rejection`                                                                                                                                        | Full    | An irreconcilable `quantity_unit` assertion on Update Checkout is rejected with a recoverable error in `messages[]`, leaving the line's `quantity` and authoritative `quantity_unit` at their previous authoritative state.                                                                                                                |
 | CHECKOUT-0010       | MUST     | `ValidationTest.test_quantity_revision_is_explained`                                                                                                                                                                             | Full    | See [Rule scope](#rule-scope). Any `messages[]` entry about the line or its quantity counts as the explanation. Skips when the server rejects or accepts the quantity instead of revising it.                                                                                                                                              |
 | CHECKOUT-0011       | MUST NOT | `ValidationTest.test_quantity_revision_is_explained`                                                                                                                                                                             | Full    | See [Rule scope](#rule-scope). A lowered quantity without such a message fails.                                                                                                                                                                                                                                                            |
+| CHECKOUT-0015       | MUST     | `BusinessLogicTest.test_measured_item_echoes_non_default_quantity_unit`                                                                                                                                                          | Full    | A checkout created with `measured_item_sku` (omitting `quantity_unit` in the request) echoes `item.quantity_unit` on the line with a valid machine identity differing from the default `("C62", 0)`.                                                                                                                                       |
 | CHECKOUT-0016       | MUST     | `BusinessLogicTest.test_totals_calculation_on_create`, `BusinessLogicTest.test_totals_recalculation_on_update`                                                                                                                   | Full    | Each line's `subtotal` is checked as `price × quantity × 10^-scale` from the line's own values: exact at scale 0, within one minor unit when the item carries a `quantity_unit` scale.                                                                                                                                                     |
+| CHECKOUT-0019       | MUST     | `BusinessLogicTest.test_line_item_includes_unit_price_when_pricing_basis_differs`                                                                                                                                                | Full    | A checkout created with `unit_price_item_sku` includes `item.unit_price` on the line whose pricing-basis unit identity (`unit_price.measure`) differs from the line's sale-basis unit identity (`item.quantity_unit`).                                                                                                                     |
 | CHECKOUT-0021       | MUST NOT | `CheckoutLifecycleTest.test_complete_in_progress_omits_order`                                                                                                                                                                    | Full    | Completing a checkout with `async_completion_item_sku` returns `status: "complete_in_progress"` with `order` omitted (or `null`).                                                                                                                                                                                                          |
 | CHECKOUT-0023       | MUST     | `CheckoutLifecycleTest.test_action_prevents_complete_with_occurrence_path`                                                                                                                                                       | Full    | Attempting Complete Checkout while an Action for `action_item_sku` is unsatisfied returns the current Checkout with `status: "incomplete"` and an error `Message` with `severity: "recoverable"` whose `path` selects the exact Action occurrence in `actions` (for example `$.actions['<type>'][0]`).                                     |
 | CHECKOUT-0028       | MUST     | `CheckoutLifecycleTest.test_update_rejected_during_complete_in_progress`                                                                                                                                                         | Full    | Sending `PUT /checkout-sessions/{id}` while `status: "complete_in_progress"` leaves the Checkout state (`status`, `line_items`, `totals`, `buyer`) unchanged and returns a `messages[]` entry with `type: "error"` and `severity: "recoverable"`.                                                                                          |
@@ -119,6 +123,8 @@ rule in part. CHECKOUT-0142 stays fully checked through `TotalsTest`.
 | FULFILLMENT-0021    | MUST NOT | `FulfillmentStructureTest.test_option_descriptions_do_not_repeat_title_or_total`                                                                                                                                                 | Full    | Each option's `description` (plain/markdown or string) is checked not to repeat `option.title` or the formatted `total` amount; skips as not exercised when the server emits no `options[].description`.                                                                                                                                   |
 | FULFILLMENT-0035    | MUST     | `FulfillmentStructureTest.test_pickup_location_id_returns_business_location`                                                                                                                                                     | Full    | A `pickup` method in Checkout accepts `pickup_location_id` as `selected_destination_id` without requiring `destinations[]` in the request.                                                                                                                                                                                                 |
 | FULFILLMENT-0048    | MUST     | `FulfillmentStructureTest.test_default_config_single_group_per_method`                                                                                                                                                           | Full    |                                                                                                                                                                                                                                                                                                                                            |
+| ORDER-0006          | MUST     | `OrderTest.test_measurement_price_settlement_adjustment_carries_settled_measure`                                                                                                                                                 | Full    | A completed order for `settlement_item_sku` that records a measurement price-settlement adjustment in `adjustments[]` carries a settled `measure` (`value`, `unit`, `display_text`, optional `scale`) on the adjustment's `line_items[]` entry.                                                                                            |
+| ORDER-0007          | MUST     | `OrderTest.test_measurement_price_settlement_adjustment_carries_settled_measure`                                                                                                                                                 | Full    | The settled `measure`'s unit identity `(unit, effective_scale)` matches the order line's `item.unit_price.measure` pricing basis (no conversion), and a pure price settlement sets `quantity: 0` on the adjustment line while leaving `line_items[].quantity.total` equal to `original`.                                                   |
 | ORDER-0008          | MUST     | `OrderTest.test_order_retrieval`, and both `WebhookStructureTest` full-entity tests                                                                                                                                              | Full    | Get Order validates against the order schema and carries the placed checkout (ID, currency, lines, total); each delivery is compared with Get Order member for member. The completion response's `order` is an order confirmation, so it isn't compared.                                                                                   |
 | ORDER-0009          | MUST     | `OrderTest.test_order_read_requires_authentication`                                                                                                                                                                              | Full    | Get Order with the transport headers but no credential (no signature, no `--auth_header`) must answer 4xx without the order's data; the same request signed with the platform key, which the agent profile publishes, must get the order.                                                                                                  |
 | ORDER-0015          | MUST     | `OrderTest.test_order_read_requires_authentication`                                                                                                                                                                              | Full    | The same rule as ORDER-0009; see [A rule stated twice](#a-rule-stated-twice).                                                                                                                                                                                                                                                              |
@@ -204,6 +210,11 @@ order data; the authentication test cites both. And in `checkout/`:
   (`checkout/index.md`, Totals Invariants) both require unknown `totals[]`
   types to include `display_text`; `test_unknown_total_types_include_display_text`
   cites both.
+- CATALOG-0011 (`catalog/index.md`, Unit Price > Line Item Echo) and
+  CHECKOUT-0019 (`checkout/index.md`, Line Items > Pricing a line) both require
+  including `item.unit_price` on every cart, checkout, and order line whose
+  pricing basis differs from its sale basis; `CatalogLookupTest` and
+  `BusinessLogicTest` check them under their respective capabilities.
 
 ### Rule scope
 
@@ -332,6 +343,13 @@ add them, and change the counts above.
   an unsatisfied Action that blocks Complete Checkout must return
   `status: "incomplete"` with a recoverable error `Message` whose `path`
   selects the exact Action occurrence (`CHECKOUT-0023, -0054`).
+- **Quantity units and pricing basis:** `BusinessLogicTest` and `OrderTest`
+  cover the 6 testable MUST rules for `quantity_unit`, `unit_price` on line
+  items, and measurement price-settlement adjustments (`CHECKOUT-0003, -0005,
+-0015, -0019`; `ORDER-0006, -0007`). `CHECKOUT-0003` and `CHECKOUT-0005`
+  fall back to `get_test_sku()` when `measured_item_sku` is not declared, so
+  machine-identity comparison (ignoring `display_text`) and rejection of
+  irreconcilable unit assertions are verified against any `2026-08-25` server.
 - **Needs fixtures:** these skip without the matching `test_fixtures.json`
   entries: known customers with and without saved addresses, a
   free-shipping threshold and item, dynamic fulfillment destinations, a
@@ -344,7 +362,8 @@ add them, and change the counts above.
   `catalog_fulfills_to`), the totals and disclosure triggers
   (`custom_total_item_sku`, `total_lines_item_sku`, `disclosure_item_sku`),
   the completion-state triggers (`async_completion_item_sku`,
-  `escalation_item_sku`), and the Action trigger (`action_item_sku`).
+  `escalation_item_sku`), the Action trigger (`action_item_sku`), and the
+  quantity-unit triggers (`measured_item_sku`, `settlement_item_sku`).
 - **Needs the sample server:**
   - `PUT /orders/{id}`, which neither the draft nor any release defines:
     `test_order_update`, `test_order_adjustments`,
@@ -377,6 +396,6 @@ of the tests that apply to its version:
 
 ## Coverage gaps
 
-18 testable MUST and MUST NOT rules have no test: checkout 7, buyer consent
-4, fulfillment 3, order 3 and cart 1. Catalog (18 of 18) and discount (4 of 4)
+12 testable MUST and MUST NOT rules have no test: buyer consent 4, checkout
+3, fulfillment 3, cart 1 and order 1. Catalog (18 of 18) and discount (4 of 4)
 have all of theirs covered. Each remaining rule is a candidate for a new test.

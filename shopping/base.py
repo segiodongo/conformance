@@ -1751,6 +1751,419 @@ def action_prevents_complete_problems(
   return problems
 
 
+def quantity_unit_machine_identity(
+  descriptor: Any,
+) -> tuple[str, int] | None:
+  """Return the `(unit, effective_scale)` machine identity of a unit descriptor.
+
+  An absent (`None`) `quantity_unit` descriptor represents the default identity
+  `("C62", 0)`. Returns `None` when `descriptor` is malformed.
+  """
+  if descriptor is None:
+    return ("C62", 0)
+  if not isinstance(descriptor, dict):
+    return None
+  unit = descriptor.get("unit")
+  if not isinstance(unit, str) or not unit.strip():
+    return None
+  scale = descriptor.get("scale", 0)
+  if scale is None:
+    scale = 0
+  if not _is_int(scale) or scale < 0 or scale > 15:
+    return None
+  return (unit.strip(), scale)
+
+
+def non_default_quantity_unit_problems(
+  line: Any, where: str = "line_item"
+) -> list[str]:
+  """Return problems for `CHECKOUT-0015` on a non-default sale-basis line.
+
+  Checks:
+  - `REQ-SHOPPING-CHECKOUT-0015`: the Business MUST include `quantity_unit` on
+    the item in every Cart, Checkout, and Order line response whenever the
+    effective identity differs from the default identity `("C62", 0)`.
+  """
+  if not isinstance(line, dict):
+    return [
+      f"{where}: expected a JSON object, got {type(line).__name__} "
+      f"(CHECKOUT-0015)"
+    ]
+  item = line.get("item")
+  if not isinstance(item, dict):
+    return [
+      f"{where}.item: expected a JSON object, got {item!r} (CHECKOUT-0015)"
+    ]
+  qu = item.get("quantity_unit")
+  if not isinstance(qu, dict):
+    return [
+      f"{where}.item.quantity_unit: MUST be included whenever the effective "
+      f"identity differs from the default ('C62', 0), got {qu!r} "
+      f"(CHECKOUT-0015)"
+    ]
+
+  problems: list[str] = []
+  identity = quantity_unit_machine_identity(qu)
+  if identity is None:
+    problems.append(
+      f"{where}.item.quantity_unit: invalid unit or scale (expected non-empty "
+      f"unit string and integer scale in 0..15), got {qu!r} (CHECKOUT-0015)"
+    )
+  else:
+    unit, scale = identity
+    if unit == "C62" and scale != 0:
+      problems.append(
+        f"{where}.item.quantity_unit: unit 'C62' requires effective scale 0, "
+        f"got scale={scale} (CHECKOUT-0015)"
+      )
+    if identity == ("C62", 0):
+      problems.append(
+        f"{where}.item.quantity_unit: expected non-default machine identity "
+        f"differing from ('C62', 0) for measured item, got {qu!r} "
+        f"(CHECKOUT-0015)"
+      )
+
+  display_text = qu.get("display_text")
+  if not isinstance(display_text, str) or not display_text.strip():
+    problems.append(
+      f"{where}.item.quantity_unit.display_text: must be a non-empty string, "
+      f"got {display_text!r} (CHECKOUT-0015)"
+    )
+
+  return problems
+
+
+def quantity_unit_comparison_problems(
+  before_line: Any,
+  matching_checkout: Any,
+  mismatch_checkout: Any,
+  *,
+  expected_matching_qty: int = 2,
+  where: str = "checkout",
+) -> list[str]:
+  """Return problems for `CHECKOUT-0003` and `CHECKOUT-0005` on unit assertions.
+
+  Checks:
+  - `REQ-SHOPPING-CHECKOUT-0003`: when the Platform includes `quantity_unit`,
+    the Business MUST compare the asserted and authoritative machine identities
+    `(unit, effective_scale)` (a `display_text` difference is not a mismatch).
+  - `REQ-SHOPPING-CHECKOUT-0005`: if the identities cannot be reconciled, the
+    Business MUST reject the request's effect on that line with a recoverable
+    business outcome (`messages[]` entry with `type: "error"`,
+    `severity: "recoverable"`, naming the authoritative basis), leaving the
+    line at its previous authoritative state on an update.
+  """
+  if not isinstance(before_line, dict):
+    return [
+      f"{where} initial line: expected a JSON object, got {before_line!r} "
+      f"(CHECKOUT-0003)"
+    ]
+  before_item = before_line.get("item") or {}
+  auth_identity = quantity_unit_machine_identity(
+    before_item.get("quantity_unit") if isinstance(before_item, dict) else None
+  )
+  if auth_identity is None:
+    return [
+      f"{where} initial line: malformed authoritative quantity_unit "
+      f"{before_item.get('quantity_unit')!r} (CHECKOUT-0003)"
+    ]
+
+  problems: list[str] = []
+
+  # 1. Matching machine identity (even with different display_text) MUST match.
+  if not isinstance(matching_checkout, dict):
+    problems.append(
+      f"{where} on matching quantity_unit update: expected JSON object, got "
+      f"{type(matching_checkout).__name__} (CHECKOUT-0003)"
+    )
+  else:
+    m_lines = matching_checkout.get("line_items") or []
+    if not isinstance(m_lines, list) or not m_lines:
+      problems.append(
+        f"{where} on matching quantity_unit update: line_items is empty "
+        f"(CHECKOUT-0003)"
+      )
+    else:
+      m_line = m_lines[0] if isinstance(m_lines[0], dict) else {}
+      if m_line.get("quantity") != expected_matching_qty:
+        problems.append(
+          f"{where} on matching quantity_unit update: expected quantity "
+          f"{expected_matching_qty} when asserted machine identity "
+          f"{auth_identity!r} matches authoritative basis, got "
+          f"{m_line.get('quantity')!r} (CHECKOUT-0003)"
+        )
+    m_errors = [
+      m
+      for m in (matching_checkout.get("messages") or [])
+      if isinstance(m, dict) and m.get("type") == "error"
+    ]
+    if m_errors:
+      problems.append(
+        f"{where} on matching quantity_unit update: unexpected error messages "
+        f"for matching machine identity {auth_identity!r} with alternate "
+        f"display_text: {m_errors!r} (CHECKOUT-0003)"
+      )
+
+  # 2. Incompatible machine identity MUST be rejected with recoverable error
+  #    and leave the line at its previous authoritative state.
+  if not isinstance(mismatch_checkout, dict):
+    problems.append(
+      f"{where} on mismatched quantity_unit update: expected JSON object, got "
+      f"{type(mismatch_checkout).__name__} (CHECKOUT-0003, CHECKOUT-0005)"
+    )
+    return problems
+
+  mm_lines = mismatch_checkout.get("line_items") or []
+  if not isinstance(mm_lines, list) or not mm_lines:
+    problems.append(
+      f"{where} on mismatched quantity_unit update: line MUST remain at its "
+      f"previous authoritative state on an update, but line_items is empty "
+      f"(CHECKOUT-0005)"
+    )
+  else:
+    mm_line = mm_lines[0] if isinstance(mm_lines[0], dict) else {}
+    if mm_line.get("quantity") != expected_matching_qty:
+      problems.append(
+        f"{where} on mismatched quantity_unit update: Business MUST reject the "
+        f"request's effect on the line and leave quantity at "
+        f"{expected_matching_qty}, got {mm_line.get('quantity')!r} "
+        f"(CHECKOUT-0003, CHECKOUT-0005)"
+      )
+    mm_item = mm_line.get("item") if isinstance(mm_line, dict) else None
+    mm_identity = quantity_unit_machine_identity(
+      mm_item.get("quantity_unit") if isinstance(mm_item, dict) else None
+    )
+    if mm_identity != auth_identity:
+      problems.append(
+        f"{where} on mismatched quantity_unit update: authoritative "
+        f"quantity_unit identity changed from {auth_identity!r} to "
+        f"{mm_identity!r} (CHECKOUT-0005)"
+      )
+
+  messages = mismatch_checkout.get("messages")
+  if not isinstance(messages, list) or not messages:
+    problems.append(
+      f"{where} on mismatched quantity_unit update: expected recoverable error "
+      f"in messages[] naming the authoritative basis, got {messages!r} "
+      f"(CHECKOUT-0005)"
+    )
+    return problems
+
+  recoverable_errors = [
+    m
+    for m in messages
+    if isinstance(m, dict)
+    and m.get("type") == "error"
+    and m.get("severity") == "recoverable"
+    and isinstance(m.get("content"), str)
+    and bool(m.get("content", "").strip())
+  ]
+  if not recoverable_errors:
+    problems.append(
+      f"{where} on mismatched quantity_unit update: expected at least one "
+      f"messages[] entry with type=='error', severity=='recoverable', and "
+      f"non-empty content, got {messages!r} (CHECKOUT-0005)"
+    )
+
+  return problems
+
+
+def line_pricing_basis_unit_price_problems(
+  line: Any, currency: Any, where: str = "line_item"
+) -> list[str]:
+  """Return problems for `CHECKOUT-0019` on a line with distinct pricing basis.
+
+  Checks:
+  - `REQ-SHOPPING-CHECKOUT-0019`: on authoritative responses the Business MUST
+    include `item.unit_price` on every cart, checkout, and order line whose
+    pricing basis differs from its sale basis.
+  """
+  if not isinstance(line, dict):
+    return [
+      f"{where}: expected a JSON object, got {type(line).__name__} "
+      f"(CHECKOUT-0019)"
+    ]
+  item = line.get("item")
+  if not isinstance(item, dict):
+    return [
+      f"{where}.item: expected a JSON object, got {item!r} (CHECKOUT-0019)"
+    ]
+  unit_price = item.get("unit_price")
+  if not isinstance(unit_price, dict):
+    return [
+      f"{where}.item.unit_price: MUST be included when pricing basis differs "
+      f"from sale basis, got {unit_price!r} (CHECKOUT-0019)"
+    ]
+
+  problems = [
+    f"{e} (CHECKOUT-0019)"
+    for e in unit_price_problems(
+      unit_price,
+      {"amount": item.get("price"), "currency": currency},
+      where=f"{where}.item.unit_price",
+    )
+  ]
+
+  sale_identity = quantity_unit_machine_identity(item.get("quantity_unit"))
+  pricing_identity = quantity_unit_machine_identity(unit_price.get("measure"))
+  if (
+    sale_identity is not None
+    and pricing_identity is not None
+    and pricing_identity == sale_identity
+  ):
+    problems.append(
+      f"{where}.item.unit_price: expected pricing basis {pricing_identity!r} "
+      f"to differ from sale basis {sale_identity!r} for unit_price_item_sku "
+      f"(CHECKOUT-0019)"
+    )
+
+  return problems
+
+
+def order_measurement_settlement_problems(
+  order_body: Any, where: str = "order"
+) -> list[str]:
+  """Return problems for `ORDER-0006` and `ORDER-0007` on settlement.
+
+  Checks:
+  - `REQ-SHOPPING-ORDER-0006`: when the price settles against an actual
+    measurement, the adjustment MUST carry the settled `measure`.
+  - `REQ-SHOPPING-ORDER-0007`: its unit identity MUST match the pricing basis
+    (no conversion), and a pure price settlement uses `quantity: 0` so the
+    count is untouched.
+  """
+  if not isinstance(order_body, dict):
+    return [
+      f"{where}: expected a JSON object, got {type(order_body).__name__} "
+      f"(ORDER-0006, ORDER-0007)"
+    ]
+
+  order_lines = order_body.get("line_items")
+  if not isinstance(order_lines, list) or not order_lines:
+    return [
+      f"{where}.line_items: expected non-empty list, got {order_lines!r} "
+      f"(ORDER-0006, ORDER-0007)"
+    ]
+  lines_by_id = {
+    li.get("id"): li
+    for li in order_lines
+    if isinstance(li, dict) and isinstance(li.get("id"), str)
+  }
+
+  adjustments = order_body.get("adjustments")
+  if not isinstance(adjustments, list) or not adjustments:
+    return [
+      f"{where}.adjustments: expected at least one measurement settlement "
+      f"adjustment, got {adjustments!r} (ORDER-0006, ORDER-0007)"
+    ]
+
+  problems: list[str] = []
+  settled_entries: list[tuple[int, int, dict[str, Any], dict[str, Any]]] = []
+  for adj_idx, adj in enumerate(adjustments):
+    if not isinstance(adj, dict):
+      continue
+    adj_lines = adj.get("line_items")
+    if not isinstance(adj_lines, list):
+      continue
+    for li_idx, adj_li in enumerate(adj_lines):
+      if isinstance(adj_li, dict) and adj_li.get("measure") is not None:
+        settled_entries.append((adj_idx, li_idx, adj, adj_li))
+
+  if not settled_entries:
+    problems.append(
+      f"{where}.adjustments: no adjustment line_items[] entry carries a "
+      f"settled 'measure' when settling against an actual measurement, got "
+      f"{adjustments!r} (ORDER-0006)"
+    )
+    return problems
+
+  for adj_idx, li_idx, adj, adj_li in settled_entries:
+    prefix = f"{where}.adjustments[{adj_idx}].line_items[{li_idx}]"
+    measure = adj_li.get("measure")
+    if not isinstance(measure, dict):
+      problems.append(
+        f"{prefix}.measure: expected a JSON object, got {measure!r} "
+        f"(ORDER-0006)"
+      )
+      continue
+
+    m_val = measure.get("value")
+    if not _is_int(m_val) or m_val < 0:
+      problems.append(
+        f"{prefix}.measure.value: must be a non-negative integer, got "
+        f"{m_val!r} (ORDER-0006)"
+      )
+    m_display = measure.get("display_text")
+    if not isinstance(m_display, str) or not m_display.strip():
+      problems.append(
+        f"{prefix}.measure.display_text: must be a non-empty string, got "
+        f"{m_display!r} (ORDER-0006)"
+      )
+    settled_identity = quantity_unit_machine_identity(measure)
+    if settled_identity is None:
+      problems.append(
+        f"{prefix}.measure: invalid unit or scale in {measure!r} "
+        f"(ORDER-0006, ORDER-0007)"
+      )
+
+    line_id = adj_li.get("id")
+    order_li = lines_by_id.get(line_id)
+    if not isinstance(order_li, dict):
+      problems.append(
+        f"{prefix}.id: references unknown order line {line_id!r} (ORDER-0007)"
+      )
+      continue
+
+    item = order_li.get("item") or {}
+    unit_price = item.get("unit_price") if isinstance(item, dict) else None
+    up_measure = (
+      unit_price.get("measure") if isinstance(unit_price, dict) else None
+    )
+    pricing_identity = (
+      quantity_unit_machine_identity(up_measure)
+      if isinstance(up_measure, dict)
+      else None
+    )
+    if pricing_identity is None:
+      problems.append(
+        f"{where}.line_items[id={line_id!r}].item.unit_price.measure: "
+        f"missing or invalid pricing basis for measurement settlement, got "
+        f"{unit_price!r} (ORDER-0007)"
+      )
+    elif settled_identity is not None and settled_identity != pricing_identity:
+      problems.append(
+        f"{prefix}.measure: unit identity {settled_identity!r} MUST match "
+        f"the line's pricing basis {pricing_identity!r} (no conversion) "
+        f"(ORDER-0007)"
+      )
+
+    qty_obj = order_li.get("quantity")
+    is_pure_price_settlement = adj.get("type") == "price_adjustment" or (
+      isinstance(qty_obj, dict)
+      and qty_obj.get("original") is not None
+      and qty_obj.get("total") == qty_obj.get("original")
+    )
+    if is_pure_price_settlement:
+      if adj_li.get("quantity") != 0:
+        problems.append(
+          f"{prefix}.quantity: pure price settlement MUST use quantity: 0 so "
+          f"the count is untouched, got {adj_li.get('quantity')!r} "
+          f"(ORDER-0007)"
+        )
+      if (
+        isinstance(qty_obj, dict)
+        and qty_obj.get("original") is not None
+        and qty_obj.get("total") != qty_obj.get("original")
+      ):
+        problems.append(
+          f"{where}.line_items[id={line_id!r}].quantity: pure price settlement "
+          f"MUST leave count untouched (total == original), got {qty_obj!r} "
+          f"(ORDER-0007)"
+        )
+
+  return problems
+
+
 class UnifiedUpdate(CheckoutUpdateRequest):
   """Client-side unified update model to support extensions."""
 
@@ -1983,6 +2396,8 @@ class DynamicFixtureContext:
     "async_completion_item_sku": "get_async_completion_item_sku",
     "escalation_item_sku": "get_escalation_item_sku",
     "action_item_sku": "get_action_item_sku",
+    "measured_item_sku": "get_measured_item_sku",
+    "settlement_item_sku": "get_settlement_item_sku",
   }
 
   def __init__(
@@ -2413,6 +2828,20 @@ class DynamicFixtureContext:
   def get_action_item_sku(self) -> str | None:
     """Get an item SKU that surfaces an outstanding Action."""
     val = self._get_test_fixture("action_item_sku")
+    if isinstance(val, str) and val.strip():
+      return val
+    return None
+
+  def get_measured_item_sku(self) -> str | None:
+    """Get an item SKU whose sale basis differs from the default ('C62', 0)."""
+    val = self._get_test_fixture("measured_item_sku")
+    if isinstance(val, str) and val.strip():
+      return val
+    return None
+
+  def get_settlement_item_sku(self) -> str | None:
+    """Get an item SKU whose order carries a measurement settlement."""
+    val = self._get_test_fixture("settlement_item_sku")
     if isinstance(val, str) and val.strip():
       return val
     return None
@@ -3408,6 +3837,64 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     self.assertFalse(
       problems,
       f"{where} violates Action-blocked Complete Checkout rules:\n  "
+      + "\n  ".join(problems),
+    )
+
+  def assert_non_default_quantity_unit(
+    self, line: Any, where: str = "line_item"
+  ) -> None:
+    """Assert `line` includes a non-default `item.quantity_unit`."""
+    problems = non_default_quantity_unit_problems(line, where=where)
+    self.assertFalse(
+      problems,
+      f"{where} violates non-default quantity_unit rules:\n  "
+      + "\n  ".join(problems),
+    )
+
+  def assert_quantity_unit_comparison(
+    self,
+    before_line: Any,
+    matching_checkout: Any,
+    mismatch_checkout: Any,
+    *,
+    expected_matching_qty: int = 2,
+    where: str = "checkout",
+  ) -> None:
+    """Assert `quantity_unit` machine-identity comparison and rejection."""
+    problems = quantity_unit_comparison_problems(
+      before_line,
+      matching_checkout,
+      mismatch_checkout,
+      expected_matching_qty=expected_matching_qty,
+      where=where,
+    )
+    self.assertFalse(
+      problems,
+      f"{where} violates quantity_unit machine-identity rules:\n  "
+      + "\n  ".join(problems),
+    )
+
+  def assert_line_pricing_basis_unit_price(
+    self, line: Any, currency: Any, where: str = "line_item"
+  ) -> None:
+    """Assert `line` includes `item.unit_price` when pricing basis differs."""
+    problems = line_pricing_basis_unit_price_problems(
+      line, currency, where=where
+    )
+    self.assertFalse(
+      problems,
+      f"{where} violates line pricing-basis unit_price rules:\n  "
+      + "\n  ".join(problems),
+    )
+
+  def assert_order_measurement_settlement(
+    self, order_body: Any, where: str = "order"
+  ) -> None:
+    """Assert `order_body` records a valid measurement settlement adjustment."""
+    problems = order_measurement_settlement_problems(order_body, where=where)
+    self.assertFalse(
+      problems,
+      f"{where} violates measurement settlement adjustment rules:\n  "
       + "\n  ".join(problems),
     )
 

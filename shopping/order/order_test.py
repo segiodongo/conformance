@@ -496,6 +496,27 @@ class OrderTest(ShoppingIntegrationTestBase):
     self.assertEqual(updated_order.adjustments[0].totals[0].amount, -500)
     self.assertEqual(updated_order.adjustments[0].type, "refund")
 
+  @spec_assert(
+    "REQ-SHOPPING-ORDER-0006",  # settlement adjustment carries settled measure
+    "REQ-SHOPPING-ORDER-0007",  # unit identity matches pricing basis, qty 0
+  )
+  def test_measurement_price_settlement_adjustment_carries_settled_measure(
+    self,
+  ) -> None:
+    """Measurement settlement carries `measure` matching pricing basis."""
+    sku = self.require_trigger("settlement_item_sku")
+    checkout_data = self.create_checkout_session(item_id=sku)
+    complete_data = self.complete_checkout_session(checkout_data["id"])
+    order_id = complete_data["order"]["id"]
+
+    resp = self.client.get(
+      self.get_order_url(order_id), headers=self.get_headers()
+    )
+    self.assert_response_status(resp, 200)
+    self.assert_order_measurement_settlement(
+      resp.json(), where=f"GET /orders/{order_id} ({sku!r})"
+    )
+
 
 if __name__ == "__main__":
   absltest.main()

@@ -503,7 +503,7 @@ class CatalogLookupTest(ShoppingIntegrationTestBase):
     )
 
     checkout_data = self.create_checkout_session(
-      sku=sku, select_fulfillment=False
+      item_id=sku, select_fulfillment=False
     )
     lines = checkout_data.get("line_items") or []
     self.assertTrue(lines, f"checkout has no line_items: {checkout_data}")
