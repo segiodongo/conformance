@@ -1533,7 +1533,7 @@ class RunnerTest(unittest.TestCase):
     self.assertEqual(code, 0, output)
     self.assertIn("Requirements report: ", output)
     self.assertEqual(written, ["matrix.html", "matrix.json", "matrix.md"])
-    self.assertEqual(len(data["tests"]), 5)
+    self.assertEqual(len(data["tests"]), 7)
     self.assertEqual(data["markers"]["unmarked"], 0)
 
   def test_unwritable_directory_stops_the_run(self):

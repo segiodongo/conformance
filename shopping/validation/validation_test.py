@@ -289,13 +289,15 @@ class ValidationTest(ShoppingIntegrationTestBase):
       item=item_update,
       quantity=quantity,
     )
-    payment_update = payment_update_request.PaymentUpdateRequest(
-      instruments=checkout_obj.payment.instruments,
-      handlers=[
-        h.model_dump(mode="json", exclude_none=True)
-        for h in checkout_obj.payment.instruments
-      ],
-    )
+    payment_update = None
+    if checkout_obj.payment is not None:
+      payment_update = payment_update_request.PaymentUpdateRequest(
+        instruments=checkout_obj.payment.instruments,
+        handlers=[
+          h.model_dump(mode="json", exclude_none=True)
+          for h in checkout_obj.payment.instruments
+        ],
+      )
     update_payload = checkout_update_req.CheckoutUpdateRequest(
       id=checkout_obj.id,
       currency=checkout_obj.currency,
@@ -561,6 +563,85 @@ class ValidationTest(ShoppingIntegrationTestBase):
       response,
       accepted_codes={"out_of_stock", "item_unavailable"},
       error_4xx_substring="stock",
+    )
+
+  @spec_assert("REQ-SHOPPING-CHECKOUT-0044")
+  def test_message_paths_are_rfc9535_jsonpath(self) -> None:
+    """Every `messages[].path` must be an RFC 9535 JSONPath relative to root."""
+    created = self.create_checkout_session(select_fulfillment=False)
+    checkout_obj = checkout.Checkout(**created)
+    qty_resp = self._request_line_quantity(
+      checkout_obj, self._EXCESSIVE_QUANTITY
+    )
+    out_of_stock_item = self.conformance_config.get(
+      "out_of_stock_item",
+      {"id": "out_of_stock_item_1", "title": "Out of Stock Item"},
+    )
+    oos_payload = self.create_checkout_payload(item_id=out_of_stock_item["id"])
+    oos_resp = self.client.post(
+      self.get_shopping_url("/checkout-sessions"),
+      json=oos_payload.model_dump(
+        mode="json", by_alias=True, exclude_none=True
+      ),
+      headers=self.get_headers(),
+    )
+
+    samples: list[tuple[str, dict]] = [("create", created)]
+    for label, resp in (
+      ("excessive_quantity", qty_resp),
+      ("out_of_stock", oos_resp),
+    ):
+      try:
+        parsed = resp.json()
+      except ValueError:
+        continue
+      if isinstance(parsed, dict):
+        samples.append((label, parsed))
+
+    checked = 0
+    for label, body in samples:
+      messages = body.get("messages")
+      if not isinstance(messages, list):
+        continue
+      for idx, msg in enumerate(messages):
+        if isinstance(msg, dict) and msg.get("path") is not None:
+          checked += 1
+          self.assert_rfc9535_jsonpath(
+            msg["path"],
+            body,
+            where=f"{label}.messages[{idx}].path",
+          )
+
+    if checked == 0:
+      self.skip_not_exercised(
+        "server returned no messages[] entry with a 'path' field across "
+        "create, out-of-stock, and excessive-quantity responses"
+      )
+
+  @spec_assert("REQ-SHOPPING-CHECKOUT-0083")
+  def test_disclosure_item_emits_disclosure_warning(self) -> None:
+    """Items requiring component disclosures set `presentation: disclosure`."""
+    disclosure_sku = self.require_trigger("disclosure_item_sku")
+    body = self.create_checkout_session(
+      item_id=disclosure_sku, select_fulfillment=False
+    )
+    self.assert_disclosure_warning(
+      body,
+      require_policy_link=False,
+      where="POST /checkout-sessions",
+    )
+
+  @spec_assert("REQ-SHOPPING-CHECKOUT-0086")
+  def test_policy_disclosure_code_matches_policy_type(self) -> None:
+    """Policy disclosures set `code` equal to the structured `policy.type`."""
+    disclosure_sku = self.require_trigger("disclosure_item_sku")
+    body = self.create_checkout_session(
+      item_id=disclosure_sku, select_fulfillment=False
+    )
+    self.assert_disclosure_warning(
+      body,
+      require_policy_link=True,
+      where="POST /checkout-sessions",
     )
 
 

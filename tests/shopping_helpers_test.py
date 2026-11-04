@@ -865,5 +865,185 @@ class FulfillmentSelectionAndDescriptionHelpersTest(unittest.TestCase):
     self.assertTrue(any("FULFILLMENT-0021" in p for p in problems))
 
 
+class TotalsMessagesAndLinksHelpersTest(unittest.TestCase):
+  """W9 helpers: totals, JSONPath, continue_url, and disclosure."""
+
+  def test_unknown_total_type_problems(self) -> None:
+    """Unknown total types require non-empty display_text and int amount."""
+    valid_totals = [
+      {"type": "subtotal", "amount": 3500},
+      {
+        "type": "bottle_deposit",
+        "display_text": "CA CRV Deposit",
+        "amount": 100,
+      },
+      {"type": "total", "amount": 3600},
+    ]
+    self.assertEqual(base.unknown_total_type_problems(valid_totals), [])
+
+    missing_display = [
+      {"type": "subtotal", "amount": 3500},
+      {"type": "bottle_deposit", "amount": 100},
+      {"type": "total", "amount": 3600},
+    ]
+    problems = base.unknown_total_type_problems(missing_display)
+    self.assertTrue(any("CHECKOUT-0132" in p for p in problems))
+
+    only_well_known = [
+      {"type": "subtotal", "amount": 3500},
+      {"type": "total", "amount": 3500},
+    ]
+    problems = base.unknown_total_type_problems(only_well_known)
+    self.assertTrue(any("CHECKOUT-0145" in p for p in problems))
+
+  def test_total_sub_lines_problems(self) -> None:
+    """Sub-lines sum must equal parent entry amount (CHECKOUT-0148)."""
+    valid_totals = [
+      {"type": "subtotal", "amount": 5750},
+      {
+        "type": "tax",
+        "display_text": "Tax",
+        "amount": 797,
+        "lines": [
+          {"display_text": "Federal Tax", "amount": 332},
+          {"display_text": "State Tax", "amount": 465},
+        ],
+      },
+      {"type": "total", "amount": 6547},
+    ]
+    self.assertEqual(base.total_sub_lines_problems(valid_totals), [])
+
+    mismatched_totals = [
+      {
+        "type": "tax",
+        "display_text": "Tax",
+        "amount": 800,
+        "lines": [
+          {"display_text": "Federal Tax", "amount": 332},
+          {"display_text": "State Tax", "amount": 465},
+        ],
+      }
+    ]
+    problems = base.total_sub_lines_problems(mismatched_totals)
+    self.assertTrue(any("CHECKOUT-0148" in p for p in problems))
+
+  def test_rfc9535_jsonpath_problems(self) -> None:
+    """Valid RFC 9535 JSONPath strings pass; invalid or wrapped paths fail."""
+    body = {
+      "id": "chk_1",
+      "buyer": {"email": ""},
+      "line_items": [{"id": "li_1", "quantity": 1}],
+      "actions": {"com.example.identity.student_verification": [{}]},
+    }
+    for valid_path in (
+      "$",
+      "$.buyer.email",
+      "$.line_items[0].quantity",
+      "$.actions['com.example.identity.student_verification'][0]",
+      '$["line_items"][-1].item.id',
+      "$.line_items[*].quantity",
+      "$.line_items[0:2]",
+      "$.line_items[?@.quantity > 1]",
+      "$..id",
+    ):
+      with self.subTest(path=valid_path):
+        self.assertEqual(base.rfc9535_jsonpath_problems(valid_path, body), [])
+
+    for invalid_path in (
+      "",
+      "buyer.email",
+      "/line_items/0/quantity",
+      "$.line_items[]",
+      "$.line_items[0",
+      "$.line_items.",
+      " $.buyer.email",
+      "$.checkout.buyer.email",
+    ):
+      with self.subTest(path=invalid_path):
+        problems = base.rfc9535_jsonpath_problems(invalid_path, body)
+        self.assertTrue(
+          any("CHECKOUT-0044" in p for p in problems),
+          msg=f"Expected CHECKOUT-0044 failure for {invalid_path!r}",
+        )
+
+  def test_absolute_https_url_problems(self) -> None:
+    """Only absolute https:// URLs pass CHECKOUT-0094."""
+    self.assertEqual(
+      base.absolute_https_url_problems(
+        "https://business.example.com/checkout-sessions/chk_123"
+      ),
+      [],
+    )
+    for bad_url in (
+      "",
+      "http://business.example.com/checkout-sessions/chk_123",
+      "/checkout-sessions/chk_123",
+      "https:///missing-host",
+      "https://business.example.com/checkout sessions/chk_123",
+    ):
+      with self.subTest(url=bad_url):
+        problems = base.absolute_https_url_problems(bad_url)
+        self.assertTrue(any("CHECKOUT-0094" in p for p in problems))
+
+  def test_disclosure_warning_problems(self) -> None:
+    """Disclosure warnings check presentation, path, and policy type link."""
+    body_with_policy = {
+      "id": "chk_1",
+      "line_items": [{"id": "li_1"}],
+      "policies": [
+        {
+          "type": "dev.ucp.shopping.policy.return",
+          "description": {"plain": "Final sale item."},
+          "applies_to": ["$.line_items[0]"],
+        }
+      ],
+      "messages": [
+        {
+          "type": "warning",
+          "code": "dev.ucp.shopping.policy.return",
+          "path": "$.line_items[0]",
+          "presentation": "disclosure",
+          "content": "This engraved item is final sale.",
+        }
+      ],
+    }
+    self.assertEqual(
+      base.disclosure_warning_problems(
+        body_with_policy, require_policy_link=False
+      ),
+      [],
+    )
+    self.assertEqual(
+      base.disclosure_warning_problems(
+        body_with_policy, require_policy_link=True
+      ),
+      [],
+    )
+
+    mismatched_policy = {
+      "id": "chk_1",
+      "line_items": [{"id": "li_1"}],
+      "policies": [
+        {
+          "type": "dev.ucp.shopping.policy.return",
+          "description": {"plain": "Final sale item."},
+        }
+      ],
+      "messages": [
+        {
+          "type": "warning",
+          "code": "wrong_code",
+          "path": "$.line_items[0]",
+          "presentation": "disclosure",
+          "content": "This engraved item is final sale.",
+        }
+      ],
+    }
+    problems = base.disclosure_warning_problems(
+      mismatched_policy, require_policy_link=True
+    )
+    self.assertTrue(any("CHECKOUT-0086" in p for p in problems))
+
+
 if __name__ == "__main__":
   unittest.main()

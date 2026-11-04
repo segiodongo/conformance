@@ -33,7 +33,7 @@ directly and do not presume a client uses the SDK's coercing model.
 
 from absl.testing import absltest
 from framework.decorators import no_rule, requires_capability, spec_assert
-from shopping.base import ShoppingIntegrationTestBase
+from shopping.base import ShoppingIntegrationTestBase, WELL_KNOWN_TOTAL_TYPES
 from ucp_sdk.models.schemas.shopping import checkout as checkout
 
 try:
@@ -214,6 +214,52 @@ class TotalsTest(ShoppingIntegrationTestBase):
         0,
         f"A '{entry.get('type')}' totals entry must be negative: {entry}.",
       )
+
+  @spec_assert(
+    "REQ-SHOPPING-CHECKOUT-0132",
+    "REQ-SHOPPING-CHECKOUT-0145",
+  )
+  def test_unknown_total_types_include_display_text(self):
+    """Unknown `totals[].type` entries must include non-empty `display_text`."""
+    custom_sku = self.fixture_ctx.get_custom_total_item_sku()
+    if custom_sku is not None:
+      checkout_json = self.create_checkout_session(
+        item_id=custom_sku, select_fulfillment=True
+      )
+      totals = checkout_json.get("totals")
+      self.assert_unknown_total_types(totals, where="checkout.totals")
+      return
+
+    totals = self._create_checkout_totals()
+    has_unknown = any(
+      isinstance(t, dict)
+      and isinstance(t.get("type"), str)
+      and t.get("type") not in WELL_KNOWN_TOTAL_TYPES
+      for t in totals
+    )
+    if not has_unknown:
+      self.require_trigger("custom_total_item_sku")
+    self.assert_unknown_total_types(totals, where="checkout.totals")
+
+  @spec_assert("REQ-SHOPPING-CHECKOUT-0148")
+  def test_sub_lines_sum_equals_parent_amount(self):
+    """`sum(lines[].amount)` must equal the parent `totals[]` entry amount."""
+    lines_sku = self.fixture_ctx.get_total_lines_item_sku()
+    if lines_sku is not None:
+      checkout_json = self.create_checkout_session(
+        item_id=lines_sku, select_fulfillment=True
+      )
+      totals = checkout_json.get("totals")
+      self.assert_total_sub_lines(totals, where="checkout.totals")
+      return
+
+    totals = self._create_checkout_totals()
+    has_sub_lines = any(
+      isinstance(t, dict) and t.get("lines") is not None for t in totals
+    )
+    if not has_sub_lines:
+      self.require_trigger("total_lines_item_sku")
+    self.assert_total_sub_lines(totals, where="checkout.totals")
 
 
 if __name__ == "__main__":

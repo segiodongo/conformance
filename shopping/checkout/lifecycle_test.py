@@ -778,6 +778,30 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
       msg="Checkout with unverified eligibility claim must not persist order",
     )
 
+  @spec_assert("REQ-SHOPPING-CHECKOUT-0094")
+  def test_continue_url_is_absolute_https_url(self):
+    """When present, `continue_url` must be an absolute HTTPS URL."""
+    incomplete = self.create_checkout_session(select_fulfillment=False)
+    ready = self.create_checkout_session(
+      buyer=self.DEFAULT_BUYER, select_fulfillment=True
+    )
+    checked = 0
+    for label, body in (
+      ("create (incomplete)", incomplete),
+      ("create (ready)", ready),
+    ):
+      continue_url = body.get("continue_url")
+      if continue_url is not None:
+        checked += 1
+        self.assert_absolute_https_url(
+          continue_url, where=f"{label}.continue_url"
+        )
+    if checked == 0:
+      self.skip_not_exercised(
+        "checkout responses in non-terminal states omitted optional "
+        "continue_url"
+      )
+
 
 if __name__ == "__main__":
   absltest.main()

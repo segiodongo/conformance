@@ -102,6 +102,9 @@ class TriggerTest(unittest.TestCase):
           "fulfills_to": {"location": "store_downtown_01"},
           "conflicting_location": "store_airport_99",
         },
+        "custom_total_item_sku": "custom_fee_bouquet",
+        "total_lines_item_sku": "split_tax_bouquet",
+        "disclosure_item_sku": "allergen_bouquet",
       }
     )
     context = DynamicFixtureContext(merged)
@@ -140,6 +143,9 @@ class TriggerTest(unittest.TestCase):
           "unserviceable_destination_id": "   ",
           "pickup_location_id": 42,
           "catalog_fulfills_to": {"item_id": "roses", "fulfills_to": {}},
+          "custom_total_item_sku": "   ",
+          "total_lines_item_sku": 123,
+          "disclosure_item_sku": "",
         }
       }
     )
@@ -157,6 +163,9 @@ class TriggerTest(unittest.TestCase):
       "unserviceable_destination_id",
       "pickup_location_id",
       "catalog_fulfills_to",
+      "custom_total_item_sku",
+      "total_lines_item_sku",
+      "disclosure_item_sku",
     ):
       with self.subTest(key=key):
         self.assertIsNone(context.trigger(key))

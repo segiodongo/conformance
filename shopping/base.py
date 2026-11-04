@@ -26,7 +26,9 @@ import json
 import logging
 import math
 from pathlib import Path
+import re
 from typing import Any, TypedDict
+import urllib.parse
 import uuid
 from framework.base_test import (
   BaseIntegrationTest,
@@ -661,6 +663,514 @@ def option_description_problems(
   return problems
 
 
+WELL_KNOWN_TOTAL_TYPES = frozenset(
+  {
+    "subtotal",
+    "discount",
+    "items_discount",
+    "fulfillment",
+    "tax",
+    "fee",
+    "total",
+  }
+)
+
+_JSONPATH_IDENT_RE = re.compile(
+  r"^[A-Za-z_\u0080-\uFFFF][A-Za-z0-9_\u0080-\uFFFF]*"
+)
+_JSONPATH_INT_RE = re.compile(r"^(?:0|-?[1-9][0-9]*)$")
+_JSONPATH_SLICE_RE = re.compile(
+  r"^(?:0|-?[1-9][0-9]*)?:(?:0|-?[1-9][0-9]*)?(?::(?:0|-?[1-9][0-9]*)?)?$"
+)
+_WRAPPER_ROOT_KEYS = frozenset(
+  {"response", "data", "body", "checkout", "result"}
+)
+
+
+def unknown_total_type_problems(
+  totals: Any, *, where: str = "totals"
+) -> list[str]:
+  """Return every problem with unknown `totals[]` types in `totals`.
+
+  checkout/index.md (Entities > Total):
+    - CHECKOUT-0132: Well-known types have default display labels as fallback;
+      unknown types MUST include `display_text`.
+    - CHECKOUT-0145: Unknown types MUST include `display_text` (schema-enforced)
+      and the sign on the amount is self-describing.
+  """
+  if not isinstance(totals, list):
+    return [f"{where}: totals is not a list ({totals!r})"]
+
+  problems: list[str] = []
+  unknown_entries: list[tuple[int, dict[str, Any]]] = []
+  for idx, entry in enumerate(totals):
+    if not isinstance(entry, dict):
+      problems.append(f"{where}[{idx}]: entry is not a dict ({entry!r})")
+      continue
+    entry_type = entry.get("type")
+    if not isinstance(entry_type, str) or not entry_type.strip():
+      problems.append(
+        f"{where}[{idx}].type: expected non-empty string, got {entry_type!r}"
+      )
+      continue
+    if entry_type not in WELL_KNOWN_TOTAL_TYPES:
+      unknown_entries.append((idx, entry))
+
+  if not unknown_entries:
+    problems.append(
+      f"{where}: expected at least one unknown totals[].type entry outside "
+      f"{sorted(WELL_KNOWN_TOTAL_TYPES)} (CHECKOUT-0132, CHECKOUT-0145)"
+    )
+    return problems
+
+  for idx, entry in unknown_entries:
+    entry_type = entry.get("type")
+    display_text = entry.get("display_text")
+    if not isinstance(display_text, str) or not display_text.strip():
+      problems.append(
+        f"{where}[{idx}].display_text: unknown total type {entry_type!r} must "
+        f"include non-empty display_text, got {display_text!r} "
+        "(CHECKOUT-0132, CHECKOUT-0145)"
+      )
+    if not _is_int(entry.get("amount")):
+      problems.append(
+        f"{where}[{idx}].amount: unknown total type {entry_type!r} must carry "
+        f"an integer amount, got {entry.get('amount')!r} (CHECKOUT-0145)"
+      )
+
+  return problems
+
+
+def total_sub_lines_problems(
+  totals: Any, *, where: str = "totals"
+) -> list[str]:
+  """Return every problem with `totals[].lines[]` breakdowns in `totals`.
+
+  checkout/index.md (Entities > Total > Sub-Lines):
+    - CHECKOUT-0148: Invariant: `sum(lines[].amount)` MUST equal the parent
+      entry's `amount`.
+  """
+  if not isinstance(totals, list):
+    return [f"{where}: totals is not a list ({totals!r})"]
+
+  problems: list[str] = []
+  entries_with_lines: list[tuple[int, dict[str, Any]]] = []
+  for idx, entry in enumerate(totals):
+    if isinstance(entry, dict) and entry.get("lines") is not None:
+      entries_with_lines.append((idx, entry))
+
+  if not entries_with_lines:
+    return [
+      f"{where}: expected at least one totals[] entry with a lines[] breakdown "
+      "(CHECKOUT-0148)"
+    ]
+
+  for idx, entry in entries_with_lines:
+    parent_amount = entry.get("amount")
+    if not _is_int(parent_amount):
+      problems.append(
+        f"{where}[{idx}].amount: expected integer parent amount, got "
+        f"{parent_amount!r}"
+      )
+    lines = entry.get("lines")
+    if not isinstance(lines, list) or not lines:
+      problems.append(
+        f"{where}[{idx}].lines: expected non-empty list, got {lines!r} "
+        "(CHECKOUT-0148)"
+      )
+      continue
+
+    line_amounts: list[int] = []
+    for sub_idx, sub in enumerate(lines):
+      if not isinstance(sub, dict):
+        problems.append(
+          f"{where}[{idx}].lines[{sub_idx}]: expected dict, got {sub!r}"
+        )
+        continue
+      sub_text = sub.get("display_text")
+      if not isinstance(sub_text, str) or not sub_text.strip():
+        problems.append(
+          f"{where}[{idx}].lines[{sub_idx}].display_text: expected non-empty "
+          f"string, got {sub_text!r}"
+        )
+      sub_amount = sub.get("amount")
+      if not _is_int(sub_amount):
+        problems.append(
+          f"{where}[{idx}].lines[{sub_idx}].amount: expected integer, got "
+          f"{sub_amount!r}"
+        )
+      else:
+        line_amounts.append(sub_amount)
+
+    if _is_int(parent_amount) and len(line_amounts) == len(lines):
+      sub_sum = sum(line_amounts)
+      if sub_sum != parent_amount:
+        problems.append(
+          f"{where}[{idx}].lines: sum(lines[].amount) == {sub_sum} does not "
+          f"equal parent amount {parent_amount} (CHECKOUT-0148)"
+        )
+
+  return problems
+
+
+def _consume_quoted_literal(text: str, pos: int) -> tuple[int, str | None]:
+  """Consume a single- or double-quoted RFC 9535 string literal at `pos`."""
+  quote = text[pos]
+  i = pos + 1
+  chars: list[str] = []
+  while i < len(text):
+    ch = text[i]
+    if ch == "\\":
+      if i + 1 >= len(text):
+        return -1, None
+      chars.append(text[i + 1])
+      i += 2
+      continue
+    if ch == quote:
+      return i + 1, "".join(chars)
+    if ord(ch) < 0x20:
+      return -1, None
+    chars.append(ch)
+    i += 1
+  return -1, None
+
+
+def _parse_bracket_segment(
+  text: str, pos: int
+) -> tuple[int, str | None, str | None]:
+  """Parse a `[...]` segment starting at `pos` (`text[pos] == '['`).
+
+  Returns `(next_pos, first_member_name_if_single, error_reason)`.
+  """
+  n = len(text)
+  i = pos + 1
+  first_member: str | None = None
+  selector_count = 0
+
+  while True:
+    while i < n and text[i] in " \t\n\r":
+      i += 1
+    if i >= n:
+      return -1, None, "unclosed '[' in JSONPath expression"
+    if text[i] == "]" and selector_count == 0:
+      return -1, None, "empty bracket segment '[]' is not valid RFC 9535"
+
+    selector_count += 1
+    ch = text[i]
+    if ch in ("'", '"'):
+      next_i, literal = _consume_quoted_literal(text, i)
+      if next_i < 0 or literal is None:
+        return -1, None, "unterminated or invalid string literal in '[...]'"
+      first_member = literal if selector_count == 1 else None
+      i = next_i
+    elif ch == "*":
+      first_member = None
+      i += 1
+    elif ch == "?":
+      first_member = None
+      i += 1
+      depth_paren = 0
+      depth_brack = 0
+      start_expr = i
+      while i < n:
+        c = text[i]
+        if c in ("'", '"'):
+          next_i, _ = _consume_quoted_literal(text, i)
+          if next_i < 0:
+            return -1, None, "unterminated string literal in filter selector"
+          i = next_i
+          continue
+        if c == "(":
+          depth_paren += 1
+        elif c == ")":
+          depth_paren -= 1
+          if depth_paren < 0:
+            return -1, None, "unbalanced ')' in filter selector"
+        elif c == "[":
+          depth_brack += 1
+        elif c == "]":
+          if depth_brack == 0 and depth_paren == 0:
+            break
+          depth_brack -= 1
+          if depth_brack < 0:
+            return -1, None, "unbalanced ']' in filter selector"
+        elif c == "," and depth_brack == 0 and depth_paren == 0:
+          break
+        i += 1
+      expr = text[start_expr:i].strip()
+      if not expr or depth_paren != 0 or depth_brack != 0:
+        return -1, None, "invalid or unbalanced filter selector in '[...]'"
+      if "@" not in expr and "$" not in expr:
+        return (
+          -1,
+          None,
+          "filter selector must reference '@' or '$' per RFC 9535",
+        )
+    else:
+      first_member = None
+      start_tok = i
+      while i < n and text[i] not in ",] \t\n\r":
+        i += 1
+      token = text[start_tok:i]
+      if not token:
+        return -1, None, f"unexpected character {text[i]!r} in '[...]'"
+      if ":" in token:
+        if not _JSONPATH_SLICE_RE.match(token):
+          return -1, None, f"invalid slice selector {token!r} in '[...]'"
+      elif not _JSONPATH_INT_RE.match(token):
+        return -1, None, f"invalid selector {token!r} in '[...]'"
+
+    while i < n and text[i] in " \t\n\r":
+      i += 1
+    if i >= n:
+      return -1, None, "unclosed '[' in JSONPath expression"
+    if text[i] == ",":
+      i += 1
+      continue
+    if text[i] == "]":
+      return i + 1, first_member, None
+    return -1, None, f"unexpected character {text[i]!r} inside '[...]'"
+
+
+def rfc9535_jsonpath_problems(
+  path_value: Any,
+  response_body: dict[str, Any] | None = None,
+  *,
+  where: str = "messages[].path",
+) -> list[str]:
+  """Return every problem with a `messages[].path` value under CHECKOUT-0044.
+
+  checkout/index.md (Error Handling > The `path` Field):
+    - CHECKOUT-0044: `path` MUST be an RFC 9535 JSONPath expression relative to
+      the root of the UCP response object.
+  """
+  if not isinstance(path_value, str) or not path_value:
+    return [
+      f"{where}: expected non-empty RFC 9535 JSONPath string, got "
+      f"{path_value!r} (CHECKOUT-0044)"
+    ]
+  if path_value != path_value.strip():
+    return [
+      f"{where}: JSONPath must not have leading or trailing whitespace, got "
+      f"{path_value!r} (CHECKOUT-0044)"
+    ]
+  if not path_value.startswith("$"):
+    return [
+      f"{where}: RFC 9535 JSONPath must start with root identifier '$', got "
+      f"{path_value!r} (CHECKOUT-0044)"
+    ]
+
+  i = 1
+  n = len(path_value)
+  first_root_member: str | None = None
+  segment_index = 0
+
+  while i < n:
+    segment_index += 1
+    if path_value.startswith("..", i):
+      i += 2
+      if i >= n:
+        return [
+          f"{where}: trailing '..' in JSONPath {path_value!r} (CHECKOUT-0044)"
+        ]
+      if path_value[i] == "*":
+        i += 1
+      elif path_value[i] == "[":
+        next_i, _, err = _parse_bracket_segment(path_value, i)
+        if next_i < 0:
+          return [f"{where}: {err} in {path_value!r} (CHECKOUT-0044)"]
+        i = next_i
+      else:
+        m = _JSONPATH_IDENT_RE.match(path_value[i:])
+        if not m:
+          return [
+            f"{where}: invalid descendant segment at offset {i} in "
+            f"{path_value!r} (CHECKOUT-0044)"
+          ]
+        i += len(m.group(0))
+    elif path_value[i] == ".":
+      i += 1
+      if i >= n:
+        return [
+          f"{where}: trailing '.' in JSONPath {path_value!r} (CHECKOUT-0044)"
+        ]
+      if path_value[i] == "*":
+        i += 1
+      else:
+        m = _JSONPATH_IDENT_RE.match(path_value[i:])
+        if not m:
+          return [
+            f"{where}: invalid member-name shorthand at offset {i} in "
+            f"{path_value!r} (CHECKOUT-0044)"
+          ]
+        ident = m.group(0)
+        if segment_index == 1:
+          first_root_member = ident
+        i += len(ident)
+    elif path_value[i] == "[":
+      next_i, member, err = _parse_bracket_segment(path_value, i)
+      if next_i < 0:
+        return [f"{where}: {err} in {path_value!r} (CHECKOUT-0044)"]
+      if segment_index == 1 and member is not None:
+        first_root_member = member
+      i = next_i
+    else:
+      return [
+        f"{where}: unexpected character {path_value[i]!r} at offset {i} in "
+        f"{path_value!r} (CHECKOUT-0044)"
+      ]
+
+  if (
+    first_root_member in _WRAPPER_ROOT_KEYS
+    and isinstance(response_body, dict)
+    and first_root_member not in response_body
+  ):
+    return [
+      f"{where}: path {path_value!r} wraps the UCP response object in "
+      f"{first_root_member!r} instead of being relative to the root of the "
+      "UCP response object (CHECKOUT-0044)"
+    ]
+
+  return []
+
+
+def absolute_https_url_problems(
+  url_value: Any, *, where: str = "continue_url"
+) -> list[str]:
+  """Return every problem with an absolute HTTPS URL under CHECKOUT-0094.
+
+  checkout/index.md (Continue URL > Format):
+    - CHECKOUT-0094: The `continue_url` MUST be an absolute HTTPS URL.
+  """
+  if not isinstance(url_value, str) or not url_value.strip():
+    return [
+      f"{where}: expected non-empty absolute HTTPS URL string, got "
+      f"{url_value!r} (CHECKOUT-0094)"
+    ]
+  if any(ch.isspace() for ch in url_value):
+    return [
+      f"{where}: URL must not contain whitespace, got {url_value!r} "
+      "(CHECKOUT-0094)"
+    ]
+  parsed = urllib.parse.urlsplit(url_value)
+  problems: list[str] = []
+  if parsed.scheme.lower() != "https":
+    problems.append(
+      f"{where}: URL scheme must be 'https', got {parsed.scheme!r} in "
+      f"{url_value!r} (CHECKOUT-0094)"
+    )
+  if not parsed.netloc:
+    problems.append(
+      f"{where}: URL must be absolute with a host (netloc), got {url_value!r} "
+      "(CHECKOUT-0094)"
+    )
+  return problems
+
+
+def disclosure_warning_problems(
+  body: Any,
+  *,
+  require_policy_link: bool = False,
+  where: str = "checkout",
+) -> list[str]:
+  """Return every problem with disclosure warnings in `body`.
+
+  checkout/index.md (Warning Presentation > `disclosure`):
+    - CHECKOUT-0083: MUST set `presentation: "disclosure"` when the warning
+      content must be displayed alongside a specific component and must not be
+      hidden or auto-dismissed.
+    - CHECKOUT-0086: When the disclosure renders a structured `policies[]`
+      entry, the `code` MUST equal that policy's `type` to link the two.
+  """
+  if not isinstance(body, dict):
+    return [f"{where}: response body is not a dict ({body!r})"]
+
+  messages = body.get("messages")
+  if not isinstance(messages, list) or not messages:
+    return [
+      f"{where}.messages: expected non-empty messages[] with a disclosure "
+      f"warning, got {messages!r} (CHECKOUT-0083)"
+    ]
+
+  disclosures: list[tuple[int, dict[str, Any]]] = []
+  for idx, msg in enumerate(messages):
+    if (
+      isinstance(msg, dict)
+      and msg.get("type") == "warning"
+      and msg.get("presentation") == "disclosure"
+    ):
+      disclosures.append((idx, msg))
+
+  if not disclosures:
+    return [
+      f"{where}.messages: expected at least one warning with "
+      f"presentation == 'disclosure', got {messages!r} (CHECKOUT-0083)"
+    ]
+
+  problems: list[str] = []
+  for idx, msg in disclosures:
+    content = msg.get("content")
+    if not isinstance(content, str) or not content.strip():
+      problems.append(
+        f"{where}.messages[{idx}].content: disclosure warning must have "
+        f"non-empty content, got {content!r} (CHECKOUT-0083)"
+      )
+    path_val = msg.get("path")
+    if not isinstance(path_val, str) or not path_val.strip():
+      problems.append(
+        f"{where}.messages[{idx}].path: component-anchored disclosure must "
+        f"set a non-empty path, got {path_val!r} (CHECKOUT-0083)"
+      )
+    else:
+      problems.extend(
+        rfc9535_jsonpath_problems(
+          path_val, body, where=f"{where}.messages[{idx}].path"
+        )
+      )
+
+  if require_policy_link:
+    policies = body.get("policies")
+    if not isinstance(policies, list) or not policies:
+      problems.append(
+        f"{where}.policies: expected non-empty policies[] to link with "
+        f"disclosure warning, got {policies!r} (CHECKOUT-0086)"
+      )
+      return problems
+
+    policy_types: set[str] = set()
+    for p_idx, pol in enumerate(policies):
+      if not isinstance(pol, dict):
+        problems.append(
+          f"{where}.policies[{p_idx}]: expected dict, got {pol!r} "
+          "(CHECKOUT-0086)"
+        )
+        continue
+      pol_type = pol.get("type")
+      if not isinstance(pol_type, str) or not pol_type.strip():
+        problems.append(
+          f"{where}.policies[{p_idx}].type: expected non-empty string, got "
+          f"{pol_type!r} (CHECKOUT-0086)"
+        )
+      else:
+        policy_types.add(pol_type)
+
+    if policy_types:
+      matched = [
+        msg
+        for _, msg in disclosures
+        if isinstance(msg.get("code"), str) and msg.get("code") in policy_types
+      ]
+      if not matched:
+        disclosure_codes = [msg.get("code") for _, msg in disclosures]
+        problems.append(
+          f"{where}.messages: no disclosure warning has code matching a "
+          f"policies[].type in {sorted(policy_types)} (disclosure codes: "
+          f"{disclosure_codes!r}) (CHECKOUT-0086)"
+        )
+
+  return problems
+
+
 def _without_empties(value: Any) -> Any:
   """Return a JSON value with its null and empty members left out.
 
@@ -951,6 +1461,9 @@ class DynamicFixtureContext:
     "unserviceable_destination_id": "get_unserviceable_destination_id",
     "pickup_location_id": "get_pickup_location_id",
     "catalog_fulfills_to": "get_catalog_fulfills_to",
+    "custom_total_item_sku": "get_custom_total_item_sku",
+    "total_lines_item_sku": "get_total_lines_item_sku",
+    "disclosure_item_sku": "get_disclosure_item_sku",
   }
 
   def __init__(
@@ -1342,6 +1855,27 @@ class DynamicFixtureContext:
       fulfills_to=fulfills_to,
       conflicting_location=conflicting,
     )
+
+  def get_custom_total_item_sku(self) -> str | None:
+    """Get an item SKU whose checkout `totals[]` includes a custom type."""
+    val = self._get_test_fixture("custom_total_item_sku")
+    if isinstance(val, str) and val.strip():
+      return val
+    return None
+
+  def get_total_lines_item_sku(self) -> str | None:
+    """Get an item SKU whose checkout `totals[]` includes `lines[]`."""
+    val = self._get_test_fixture("total_lines_item_sku")
+    if isinstance(val, str) and val.strip():
+      return val
+    return None
+
+  def get_disclosure_item_sku(self) -> str | None:
+    """Get an item SKU that triggers a disclosure warning in Checkout."""
+    val = self._get_test_fixture("disclosure_item_sku")
+    if isinstance(val, str) and val.strip():
+      return val
+    return None
 
   def get_non_existent_id(self) -> str:
     """Get an identifier the server under test does not sell."""
@@ -2169,6 +2703,63 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
       problems,
       f"{where} violates fulfillment option description rules:\n  "
       + "\n  ".join(problems),
+    )
+
+  def assert_unknown_total_types(
+    self, totals: Any, where: str = "totals"
+  ) -> None:
+    """Assert unknown `totals[].type` entries include `display_text`."""
+    problems = unknown_total_type_problems(totals, where=where)
+    self.assertFalse(
+      problems,
+      f"{where} violates unknown total type rules:\n  " + "\n  ".join(problems),
+    )
+
+  def assert_total_sub_lines(self, totals: Any, where: str = "totals") -> None:
+    """Assert `sum(lines[].amount) == amount` on `totals[]` entries."""
+    problems = total_sub_lines_problems(totals, where=where)
+    self.assertFalse(
+      problems,
+      f"{where} violates totals[].lines[] rules:\n  " + "\n  ".join(problems),
+    )
+
+  def assert_rfc9535_jsonpath(
+    self,
+    path_value: Any,
+    response_body: dict[str, Any] | None = None,
+    where: str = "messages[].path",
+  ) -> None:
+    """Assert `path_value` is a valid RFC 9535 JSONPath relative to root."""
+    problems = rfc9535_jsonpath_problems(path_value, response_body, where=where)
+    self.assertFalse(
+      problems,
+      f"{where} violates RFC 9535 JSONPath rules:\n  " + "\n  ".join(problems),
+    )
+
+  def assert_absolute_https_url(
+    self, url_value: Any, where: str = "continue_url"
+  ) -> None:
+    """Assert `url_value` is an absolute HTTPS URL."""
+    problems = absolute_https_url_problems(url_value, where=where)
+    self.assertFalse(
+      problems,
+      f"{where} violates absolute HTTPS URL rules:\n  " + "\n  ".join(problems),
+    )
+
+  def assert_disclosure_warning(
+    self,
+    body: Any,
+    *,
+    require_policy_link: bool = False,
+    where: str = "checkout",
+  ) -> None:
+    """Assert `body` includes a compliant disclosure warning."""
+    problems = disclosure_warning_problems(
+      body, require_policy_link=require_policy_link, where=where
+    )
+    self.assertFalse(
+      problems,
+      f"{where} violates disclosure warning rules:\n  " + "\n  ".join(problems),
     )
 
   # ── cart capability (cart.md, cart/rest.md) ──────────────────────────────
