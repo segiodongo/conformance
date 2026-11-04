@@ -1235,6 +1235,185 @@ def snapshot_differences(
   return []
 
 
+def complete_in_progress_problems(
+  body: Any, where: str = "complete response"
+) -> list[str]:
+  """Return every problem with a `complete_in_progress` response.
+
+  checkout/index.md (Status Values > `complete_in_progress`):
+    - CHECKOUT-0021: The response MUST NOT contain `order`.
+  """
+  if not isinstance(body, dict):
+    return [f"{where}: response body is not a dict ({body!r})"]
+
+  problems: list[str] = []
+  status = body.get("status")
+  if status != "complete_in_progress":
+    problems.append(
+      f"{where}.status: expected 'complete_in_progress', got {status!r} "
+      "(CHECKOUT-0021)"
+    )
+  if body.get("order") is not None:
+    problems.append(
+      f"{where}.order: complete_in_progress response MUST NOT contain "
+      f"'order', got {body.get('order')!r} (CHECKOUT-0021)"
+    )
+  return problems
+
+
+def update_during_complete_in_progress_problems(
+  before_checkout: Any,
+  after_checkout: Any,
+  where: str = "update response",
+) -> list[str]:
+  """Return every problem with a rejected Update during `complete_in_progress`.
+
+  checkout/index.md (Actions > Accepted completion) and checkout/rest.md:
+    - CHECKOUT-0028 / CHECKOUT-0245: If the Business receives a new Update
+      Checkout request in `complete_in_progress`, it MUST leave the Checkout
+      unchanged and return the current Checkout with a recoverable error
+      Message.
+  """
+  if not isinstance(before_checkout, dict):
+    return [f"{where}: before_checkout is not a dict ({before_checkout!r})"]
+  if not isinstance(after_checkout, dict):
+    return [f"{where}: after_checkout is not a dict ({after_checkout!r})"]
+
+  problems: list[str] = []
+  if before_checkout.get("status") != "complete_in_progress":
+    problems.append(
+      f"{where}: prior checkout status must be 'complete_in_progress', got "
+      f"{before_checkout.get('status')!r} (CHECKOUT-0028, CHECKOUT-0245)"
+    )
+  if after_checkout.get("status") != "complete_in_progress":
+    problems.append(
+      f"{where}.status: rejected update must return current Checkout in "
+      f"'complete_in_progress', got {after_checkout.get('status')!r} "
+      "(CHECKOUT-0028, CHECKOUT-0245)"
+    )
+  if after_checkout.get("order") is not None:
+    problems.append(
+      f"{where}.order: complete_in_progress response MUST NOT contain "
+      f"'order', got {after_checkout.get('order')!r} (CHECKOUT-0021)"
+    )
+
+  for field_name in (
+    "id",
+    "currency",
+    "line_items",
+    "totals",
+    "buyer",
+    "fulfillment",
+    "discounts",
+    "context",
+  ):
+    diffs = snapshot_differences(
+      before_checkout.get(field_name),
+      after_checkout.get(field_name),
+      path=f"{where}.{field_name}",
+      reference="prior complete_in_progress checkout",
+    )
+    if diffs:
+      for diff in diffs:
+        problems.append(f"{diff} (CHECKOUT-0028, CHECKOUT-0245)")
+
+  messages = after_checkout.get("messages")
+  if not isinstance(messages, list) or not messages:
+    problems.append(
+      f"{where}.messages: expected recoverable error Message when Update "
+      f"Checkout is received during complete_in_progress, got {messages!r} "
+      "(CHECKOUT-0028, CHECKOUT-0245)"
+    )
+    return problems
+
+  recoverable_errors = [
+    m
+    for m in messages
+    if isinstance(m, dict)
+    and m.get("type") == "error"
+    and m.get("severity") == "recoverable"
+    and isinstance(m.get("content"), str)
+    and bool(m.get("content", "").strip())
+  ]
+  if not recoverable_errors:
+    problems.append(
+      f"{where}.messages: expected at least one error message with "
+      f"severity == 'recoverable' and non-empty content, got {messages!r} "
+      "(CHECKOUT-0028, CHECKOUT-0245)"
+    )
+  return problems
+
+
+def requires_escalation_problems(
+  body: Any,
+  *,
+  check_continue_url: bool = True,
+  check_buyer_message: bool = True,
+  where: str = "checkout",
+) -> list[str]:
+  """Return every problem with a `requires_escalation` checkout response.
+
+  checkout/index.md (Continue URL > Availability, Guidelines > Business):
+    - CHECKOUT-0091 / CHECKOUT-0107: MUST provide `continue_url` when returning
+      `status` = `requires_escalation`.
+    - CHECKOUT-0108: MUST include at least one message with `severity` of
+      `requires_buyer_input` or `requires_buyer_review` when returning
+      `status` = `requires_escalation`.
+  """
+  if not isinstance(body, dict):
+    return [f"{where}: response body is not a dict ({body!r})"]
+
+  problems: list[str] = []
+  status = body.get("status")
+  if status != "requires_escalation":
+    problems.append(
+      f"{where}.status: expected 'requires_escalation', got {status!r} "
+      "(CHECKOUT-0091, CHECKOUT-0107, CHECKOUT-0108)"
+    )
+
+  if check_continue_url:
+    continue_url = body.get("continue_url")
+    if not isinstance(continue_url, str) or not continue_url.strip():
+      problems.append(
+        f"{where}.continue_url: MUST provide 'continue_url' when status == "
+        f"'requires_escalation', got {continue_url!r} "
+        "(CHECKOUT-0091, CHECKOUT-0107)"
+      )
+    else:
+      url_problems = absolute_https_url_problems(
+        continue_url, where=f"{where}.continue_url"
+      )
+      for prob in url_problems:
+        problems.append(f"{prob} (CHECKOUT-0091, CHECKOUT-0107)")
+
+  if check_buyer_message:
+    messages = body.get("messages")
+    if not isinstance(messages, list) or not messages:
+      problems.append(
+        f"{where}.messages: MUST include at least one message with severity "
+        f"'requires_buyer_input' or 'requires_buyer_review' when status == "
+        f"'requires_escalation', got {messages!r} (CHECKOUT-0108)"
+      )
+    else:
+      buyer_msgs = [
+        m
+        for m in messages
+        if isinstance(m, dict)
+        and m.get("severity")
+        in ("requires_buyer_input", "requires_buyer_review")
+        and isinstance(m.get("content"), str)
+        and bool(m.get("content", "").strip())
+      ]
+      if not buyer_msgs:
+        problems.append(
+          f"{where}.messages: expected at least one message with severity "
+          f"'requires_buyer_input' or 'requires_buyer_review' and non-empty "
+          f"content, got {messages!r} (CHECKOUT-0108)"
+        )
+
+  return problems
+
+
 class UnifiedUpdate(CheckoutUpdateRequest):
   """Client-side unified update model to support extensions."""
 
@@ -1464,6 +1643,8 @@ class DynamicFixtureContext:
     "custom_total_item_sku": "get_custom_total_item_sku",
     "total_lines_item_sku": "get_total_lines_item_sku",
     "disclosure_item_sku": "get_disclosure_item_sku",
+    "async_completion_item_sku": "get_async_completion_item_sku",
+    "escalation_item_sku": "get_escalation_item_sku",
   }
 
   def __init__(
@@ -1873,6 +2054,20 @@ class DynamicFixtureContext:
   def get_disclosure_item_sku(self) -> str | None:
     """Get an item SKU that triggers a disclosure warning in Checkout."""
     val = self._get_test_fixture("disclosure_item_sku")
+    if isinstance(val, str) and val.strip():
+      return val
+    return None
+
+  def get_async_completion_item_sku(self) -> str | None:
+    """Get an item SKU whose checkout completes asynchronously."""
+    val = self._get_test_fixture("async_completion_item_sku")
+    if isinstance(val, str) and val.strip():
+      return val
+    return None
+
+  def get_escalation_item_sku(self) -> str | None:
+    """Get an item SKU whose checkout returns `status: requires_escalation`."""
+    val = self._get_test_fixture("escalation_item_sku")
     if isinstance(val, str) and val.strip():
       return val
     return None
@@ -2760,6 +2955,54 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     self.assertFalse(
       problems,
       f"{where} violates disclosure warning rules:\n  " + "\n  ".join(problems),
+    )
+
+  def assert_complete_in_progress(
+    self, body: Any, where: str = "complete response"
+  ) -> None:
+    """Assert `body` has `status: complete_in_progress` and no `order`."""
+    problems = complete_in_progress_problems(body, where=where)
+    self.assertFalse(
+      problems,
+      f"{where} violates complete_in_progress rules:\n  "
+      + "\n  ".join(problems),
+    )
+
+  def assert_update_during_complete_in_progress(
+    self,
+    before_checkout: Any,
+    after_checkout: Any,
+    where: str = "update response",
+  ) -> None:
+    """Assert Update during `complete_in_progress` leaves checkout intact."""
+    problems = update_during_complete_in_progress_problems(
+      before_checkout, after_checkout, where=where
+    )
+    self.assertFalse(
+      problems,
+      f"{where} violates complete_in_progress update rules:\n  "
+      + "\n  ".join(problems),
+    )
+
+  def assert_requires_escalation(
+    self,
+    body: Any,
+    *,
+    check_continue_url: bool = True,
+    check_buyer_message: bool = True,
+    where: str = "checkout",
+  ) -> None:
+    """Assert `body` satisfies `requires_escalation` rules."""
+    problems = requires_escalation_problems(
+      body,
+      check_continue_url=check_continue_url,
+      check_buyer_message=check_buyer_message,
+      where=where,
+    )
+    self.assertFalse(
+      problems,
+      f"{where} violates requires_escalation rules:\n  "
+      + "\n  ".join(problems),
     )
 
   # ── cart capability (cart.md, cart/rest.md) ──────────────────────────────

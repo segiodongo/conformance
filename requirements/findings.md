@@ -1,29 +1,29 @@
 # Findings from linking the tests to the catalog (demo)
 
-> **Demo only, not for merge.** These findings come from giving each of the 117
+> **Demo only, not for merge.** These findings come from giving each of the 121
 > shopping tests a marker against the catalog at `f2626c28` (see
 > [Linking tests to rules](README.md#linking-tests-to-rules)). Rule IDs are the
 > demo's stable IDs without the `REQ-SHOPPING-` prefix. They aren't official.
 
 ## Summary
 
-- **Markers:** 69 tests cite rules, 24 are `no_rule`, 16 are `scenario`, 6
+- **Markers:** 73 tests cite rules, 24 are `no_rule`, 16 are `scenario`, 6
   are `outside_catalog` and 2 are `older_version`.
-- **Rules cited:** 79, all testable: 70 MUST, 6 MUST NOT and 3 SHOULD.
-- **Coverage:** the tests cite 76 of the 104 testable MUST and MUST NOT rules
-  (73%): catalog 18 of 18, discount 4 of 4, order 14 of 17, fulfillment 13 of
-  16, cart 6 of 8 and checkout 21 of 37. Buyer consent has none.
-- **Depth:** all 76 are checked in full (see
+- **Rules cited:** 85, all testable: 75 MUST, 7 MUST NOT and 3 SHOULD.
+- **Coverage:** the tests cite 82 of the 104 testable MUST and MUST NOT rules
+  (79%): catalog 18 of 18, discount 4 of 4, order 14 of 17, fulfillment 13 of
+  16, cart 6 of 8 and checkout 27 of 37. Buyer consent has none.
+- **Depth:** all 82 are checked in full (see
   [Claims reviewed](#claims-reviewed)). ORDER-0022 is cited in part by the
   envelope test and in full by the test that verifies the signature value,
-  so the coverage report counts 76 of the 104 (73%) as fully checked and
+  so the coverage report counts 82 of the 104 (79%) as fully checked and
   none only in part.
 - **Sample server:** against `samples` at `360adbc`, with the marker check
-  on, 81 of the 117 shopping tests pass, 1 fails (Get Order answers an
+  on, 81 of the 121 shopping tests pass, 1 fails (Get Order answers an
   unauthenticated request; see [Sample server findings](#sample-server-findings)),
-  9 don't apply (the server implements 2026-04-08, which doesn't state the
+  11 don't apply (the server implements 2026-04-08, which doesn't state the
   rules they cite), 14 skip because the sample doesn't advertise the catalog
-  capabilities, 7 skip because no trigger is declared, 2 skip as not
+  capabilities, 9 skip because no trigger is declared, 2 skip as not
   exercised (the sample emits no `options[].description` and omits
   `continue_url` on `incomplete` and `ready_for_complete` checkouts), and
   the 3 TLS tests skip: the sample is reached over `http://` on localhost, so
@@ -70,6 +70,8 @@ rule in part. CHECKOUT-0142 stays fully checked through `TotalsTest`.
 | CHECKOUT-0010       | MUST     | `ValidationTest.test_quantity_revision_is_explained`                                                                                                                                                                             | Full    | See [Rule scope](#rule-scope). Any `messages[]` entry about the line or its quantity counts as the explanation. Skips when the server rejects or accepts the quantity instead of revising it.                                                                                                                                              |
 | CHECKOUT-0011       | MUST NOT | `ValidationTest.test_quantity_revision_is_explained`                                                                                                                                                                             | Full    | See [Rule scope](#rule-scope). A lowered quantity without such a message fails.                                                                                                                                                                                                                                                            |
 | CHECKOUT-0016       | MUST     | `BusinessLogicTest.test_totals_calculation_on_create`, `BusinessLogicTest.test_totals_recalculation_on_update`                                                                                                                   | Full    | Each line's `subtotal` is checked as `price × quantity × 10^-scale` from the line's own values: exact at scale 0, within one minor unit when the item carries a `quantity_unit` scale.                                                                                                                                                     |
+| CHECKOUT-0021       | MUST NOT | `CheckoutLifecycleTest.test_complete_in_progress_omits_order`                                                                                                                                                                    | Full    | Completing a checkout with `async_completion_item_sku` returns `status: "complete_in_progress"` with `order` omitted (or `null`).                                                                                                                                                                                                          |
+| CHECKOUT-0028       | MUST     | `CheckoutLifecycleTest.test_update_rejected_during_complete_in_progress`                                                                                                                                                         | Full    | Sending `PUT /checkout-sessions/{id}` while `status: "complete_in_progress"` leaves the Checkout state (`status`, `line_items`, `totals`, `buyer`) unchanged and returns a `messages[]` entry with `type: "error"` and `severity: "recoverable"`.                                                                                          |
 | CHECKOUT-0044       | MUST     | `ValidationTest.test_message_paths_are_rfc9535_jsonpath`                                                                                                                                                                         | Full    | Every `messages[].path` emitted across checkout creation and recoverable error/warning responses is checked as an RFC 9535 JSONPath expression rooted at `$` relative to the UCP response object; skips as not exercised when no response includes `messages[].path`.                                                                      |
 | CHECKOUT-0047       | MUST     | `CheckoutLifecycleTest.test_accepted_eligibility_claim_resolved_by_rescission_before_complete`, `CheckoutLifecycleTest.test_unverified_eligibility_claim_rejected_at_completion`                                                 | Full    | Covers both resolution paths before completion may succeed: rescinding `context.eligibility: []` removes the provisional discount and allows completion, and an accepted claim that remains unverified at completion fails to complete.                                                                                                    |
 | CHECKOUT-0048       | MUST NOT | `CheckoutLifecycleTest.test_unrecognized_eligibility_claim_does_not_block_checkout`                                                                                                                                              | Full    | Sending an unrecognized reverse-domain claim in `context.eligibility` on Create and Update adds no error message, keeps any `eligibility_not_accepted` message as `info` or `warning`, does not degrade checkout `status`, and completes the checkout.                                                                                     |
@@ -78,9 +80,13 @@ rule in part. CHECKOUT-0142 stays fully checked through `TotalsTest`.
 | CHECKOUT-0053       | MUST     | `CheckoutLifecycleTest.test_unverified_eligibility_claim_rejected_at_completion`                                                                                                                                                 | Full    | The `eligibility_invalid` error entry carries `severity: "recoverable"`.                                                                                                                                                                                                                                                                   |
 | CHECKOUT-0083       | MUST     | `ValidationTest.test_disclosure_item_emits_disclosure_warning`                                                                                                                                                                   | Full    | A checkout with `disclosure_item_sku` emits at least one `messages[]` warning with `presentation: "disclosure"`, non-empty `content`, and an RFC 9535 JSONPath `path` pointing to the subject component.                                                                                                                                   |
 | CHECKOUT-0086       | MUST     | `ValidationTest.test_policy_disclosure_code_matches_policy_type`                                                                                                                                                                 | Full    | When a `presentation: "disclosure"` warning renders a structured `policies[]` entry on a checkout with `disclosure_item_sku`, its `code` equals that policy's `type`.                                                                                                                                                                      |
+| CHECKOUT-0091       | MUST     | `CheckoutLifecycleTest.test_requires_escalation_includes_continue_url`                                                                                                                                                           | Full    | A checkout with `escalation_item_sku` that transitions to `status: "requires_escalation"` provides a valid absolute `https://` `continue_url`.                                                                                                                                                                                             |
 | CHECKOUT-0094       | MUST     | `CheckoutLifecycleTest.test_continue_url_is_absolute_https_url`                                                                                                                                                                  | Full    | Whenever `continue_url` is returned on a checkout response, it parses as an absolute `https://` URL with a non-empty host; skips as not exercised when no response includes `continue_url`.                                                                                                                                                |
+| CHECKOUT-0107       | MUST     | `CheckoutLifecycleTest.test_requires_escalation_includes_continue_url`                                                                                                                                                           | Full    | The same rule as CHECKOUT-0091; see [A rule stated twice](#a-rule-stated-twice).                                                                                                                                                                                                                                                           |
+| CHECKOUT-0108       | MUST     | `CheckoutLifecycleTest.test_requires_escalation_includes_buyer_severity_message`                                                                                                                                                 | Full    | A `status: "requires_escalation"` checkout includes at least one `messages[]` entry with `severity` in `{"requires_buyer_input", "requires_buyer_review"}` and non-empty `content`.                                                                                                                                                        |
 | CHECKOUT-0241       | MUST     | `ShoppingProtocolTest.test_response_bodies_are_strict_json`                                                                                                                                                                      | Full    | As CART-0062, over Create, Get, Update, Complete and Cancel Checkout, the error for an unknown session and the error for a malformed body.                                                                                                                                                                                                 |
 | CHECKOUT-0242       | MUST     | `ShoppingProtocolTest.test_endpoints_are_served_over_tls_1_3`                                                                                                                                                                    | Full    | As CART-0063.                                                                                                                                                                                                                                                                                                                              |
+| CHECKOUT-0245       | MUST     | `CheckoutLifecycleTest.test_update_rejected_during_complete_in_progress`                                                                                                                                                         | Full    | The same rule as CHECKOUT-0028; see [A rule stated twice](#a-rule-stated-twice).                                                                                                                                                                                                                                                           |
 | CHECKOUT-0105       | SHOULD   | `ValidationTest`: `test_out_of_stock`, `test_update_inventory_validation`, `test_product_not_found`, `test_payment_failure`, `test_complete_without_fulfillment`, `test_structured_error_messages`                               | Full    | "Accurate" is checked as naming the cause: a 4xx whose body mentions it, or a standard error code.                                                                                                                                                                                                                                         |
 | CHECKOUT-0119       | SHOULD   | `CheckoutLifecycleTest.test_cannot_cancel_completed_checkout`                                                                                                                                                                    | Partial | Asserts only a status other than 200: an error returned in band with HTTP 200 would fail, and the error's content isn't checked.                                                                                                                                                                                                           |
 | CHECKOUT-0120       | SHOULD   | `CheckoutLifecycleTest.test_cancel_checkout`                                                                                                                                                                                     | Full    |                                                                                                                                                                                                                                                                                                                                            |
@@ -90,7 +96,7 @@ rule in part. CHECKOUT-0142 stays fully checked through `TotalsTest`.
 | CHECKOUT-0142       | MUST     | `TotalsTest.test_discount_entry_is_negative`                                                                                                                                                                                     | Full    | Checks `discount` and `items_discount` entries; skips when there are none.                                                                                                                                                                                                                                                                 |
 | CHECKOUT-0142       | MUST     | `DiscountSemanticsTest.test_discount_total_is_negative`                                                                                                                                                                          | Partial | Checks only the `discount` entry.                                                                                                                                                                                                                                                                                                          |
 | CHECKOUT-0143       | MUST     | `TotalsTest.test_additive_entries_non_negative`                                                                                                                                                                                  | Full    |                                                                                                                                                                                                                                                                                                                                            |
-| CHECKOUT-0145       | MUST     | `TotalsTest.test_unknown_total_types_include_display_text`                                                                                                                                                                       | Full    | Each unknown `totals[]` entry on a checkout with `custom_total_item_sku` carries a non-empty `display_text` and an integer `amount`.                                                                                                                                                                                                       |
+| CHECKOUT-0145       | MUST     | `TotalsTest.test_unknown_total_types_include_display_text`                                                                                                                                                                       | Full    | Each unknown `totals[]` entry on a checkout with `custom_total_item_sku` carries a non-empty `display_text` and an integer `amount`; see [A rule stated twice](#a-rule-stated-twice).                                                                                                                                                      |
 | CHECKOUT-0148       | MUST     | `TotalsTest.test_sub_lines_sum_equals_parent_amount`                                                                                                                                                                             | Full    | Every `totals[]` entry with a non-empty `lines[]` array has `sum(lines[].amount)` equal to the parent entry's `amount` (checked on a default checkout first, falling back to `total_lines_item_sku`).                                                                                                                                      |
 | DISCOUNT-0003       | MUST     | `CartTest.test_cart_discount_codes_carry_forward_to_checkout`                                                                                                                                                                    | Full    | The checkout must name the code: in `discounts.codes`, as an applied discount, or in a `messages[]` rejection. Skips when the discount extension doesn't extend both cart and checkout, or when the code wasn't applied to the cart.                                                                                                       |
 | DISCOUNT-0006       | MUST     | `DiscountSemanticsTest.test_pricing_eligibility_claim_surfaces_provisional_discount`                                                                                                                                             | Full    | A checkout with `pricing_eligibility_claim` in `context.eligibility` surfaces a provisional discount in `discounts.applied`, a negative `discount`/`items_discount` entry in `totals[]`, and a lower checkout total than the baseline without the claim.                                                                                   |
@@ -169,9 +175,24 @@ Guidelines) both require retries to keep the original `Webhook-Id` and
 `Webhook-Timestamp`. The retry test cites both, so neither shows as uncovered.
 Likewise ORDER-0035 (REST binding, Transport Security) and ORDER-0039 (REST
 binding, Conformance) both require HTTPS with TLS 1.3 as the minimum; the
-order TLS test cites both. And ORDER-0009 (Get Order, Authorization) and
+order TLS test cites both. ORDER-0009 (Get Order, Authorization) and
 ORDER-0015 (Operations, Guidelines) both require authenticating requests to
-order data; the authentication test cites both.
+order data; the authentication test cites both. And in `checkout/`:
+
+- CHECKOUT-0028 (`checkout/index.md`, Accepted completion) and CHECKOUT-0245
+  (`checkout/rest.md`, Update Checkout) both require leaving the Checkout
+  unchanged and returning the current Checkout with a recoverable error
+  `Message` when an Update Checkout request arrives during
+  `complete_in_progress`; `test_update_rejected_during_complete_in_progress`
+  cites both.
+- CHECKOUT-0091 (`checkout/index.md`, Continue URL > Availability) and
+  CHECKOUT-0107 (`checkout/index.md`, Guidelines > Business) both require
+  providing `continue_url` when returning `status` = `requires_escalation`;
+  `test_requires_escalation_includes_continue_url` cites both.
+- CHECKOUT-0132 (`checkout/index.md`, Display Text) and CHECKOUT-0145
+  (`checkout/index.md`, Totals Invariants) both require unknown `totals[]`
+  types to include `display_text`; `test_unknown_total_types_include_display_text`
+  cites both.
 
 ### Rule scope
 
@@ -284,14 +305,26 @@ add them, and change the counts above.
   pricing, and unverifiable claims use fixture triggers because accepting
   eligibility claims is optional for businesses (`CHECKOUT-0046`,
   `DISCOUNT-0006`).
+- **Completion states (async and escalation):** `CheckoutLifecycleTest`
+  covers the 6 testable MUST and MUST NOT rules for `complete_in_progress`
+  (`CHECKOUT-0021, -0028, -0245`) and `requires_escalation`
+  (`CHECKOUT-0091, -0107, -0108`) using `async_completion_item_sku` and
+  `escalation_item_sku`. `CHECKOUT-0091/-0107` (`since: 2026-01-11`) and
+  `CHECKOUT-0108` (`since: 2026-04-08`) are split into separate test methods
+  so version gating applies accurately across earlier releases.
 - **Needs fixtures:** these skip without the matching `test_fixtures.json`
   entries: known customers with and without saved addresses, a
   free-shipping threshold and item, dynamic fulfillment destinations, a
   second or fixed-amount discount code, the catalog triggers (a
   multi-variant product, a product with selectable options, a `unit_price`
   item whose pricing basis differs from its sale basis, and the search
-  endpoint's default page size), and the eligibility triggers (an accepted
-  claim, a pricing claim, and an unverifiable claim).
+  endpoint's default page size), the eligibility triggers (an accepted
+  claim, a pricing claim, and an unverifiable claim), the fulfillment
+  destination triggers (`unserviceable_destination_id`, `pickup_location_id`,
+  `catalog_fulfills_to`), the totals and disclosure triggers
+  (`custom_total_item_sku`, `total_lines_item_sku`, `disclosure_item_sku`),
+  and the completion-state triggers (`async_completion_item_sku`,
+  `escalation_item_sku`).
 - **Needs the sample server:**
   - `PUT /orders/{id}`, which neither the draft nor any release defines:
     `test_order_update`, `test_order_adjustments`,
@@ -324,6 +357,6 @@ of the tests that apply to its version:
 
 ## Coverage gaps
 
-44 testable MUST and MUST NOT rules have no test: checkout 23, fulfillment 12,
-buyer consent 4, order 3 and cart 2. Catalog (18 of 18) and discount (4 of 4)
+22 testable MUST and MUST NOT rules have no test: checkout 10, buyer consent
+4, fulfillment 3, order 3 and cart 2. Catalog (18 of 18) and discount (4 of 4)
 have all of theirs covered. Each remaining rule is a candidate for a new test.

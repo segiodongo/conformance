@@ -1045,5 +1045,149 @@ class TotalsMessagesAndLinksHelpersTest(unittest.TestCase):
     self.assertTrue(any("CHECKOUT-0086" in p for p in problems))
 
 
+class CompletionStatesHelpersTest(unittest.TestCase):
+  """W10 helpers: complete_in_progress and requires_escalation states."""
+
+  def test_complete_in_progress_problems(self) -> None:
+    """complete_in_progress must omit order (CHECKOUT-0021)."""
+    valid_body = {
+      "id": "chk_async_1",
+      "status": "complete_in_progress",
+      "line_items": [{"id": "li_1", "quantity": 1}],
+    }
+    self.assertEqual(base.complete_in_progress_problems(valid_body), [])
+
+    with_order = {
+      "id": "chk_async_1",
+      "status": "complete_in_progress",
+      "order": {"id": "ord_premature"},
+    }
+    problems = base.complete_in_progress_problems(with_order)
+    self.assertTrue(any("CHECKOUT-0021" in p for p in problems))
+
+    wrong_status = {
+      "id": "chk_async_1",
+      "status": "completed",
+      "order": {"id": "ord_1"},
+    }
+    self.assertTrue(base.complete_in_progress_problems(wrong_status))
+
+  def test_update_during_complete_in_progress_problems(self) -> None:
+    """Update during complete_in_progress preserves state & emits error."""
+    before = {
+      "id": "chk_async_1",
+      "status": "complete_in_progress",
+      "currency": "USD",
+      "line_items": [
+        {"id": "li_1", "item": {"id": "async_sku"}, "quantity": 1}
+      ],
+      "totals": [{"type": "total", "amount": 3500}],
+    }
+    valid_after = {
+      "id": "chk_async_1",
+      "status": "complete_in_progress",
+      "currency": "USD",
+      "line_items": [
+        {"id": "li_1", "item": {"id": "async_sku"}, "quantity": 1}
+      ],
+      "totals": [{"type": "total", "amount": 3500}],
+      "messages": [
+        {
+          "type": "error",
+          "code": "completion_in_progress",
+          "severity": "recoverable",
+          "content": "Cannot update checkout while completion is in progress.",
+        }
+      ],
+    }
+    self.assertEqual(
+      base.update_during_complete_in_progress_problems(before, valid_after),
+      [],
+    )
+
+    mutated_and_no_message = {
+      "id": "chk_async_1",
+      "status": "complete_in_progress",
+      "currency": "USD",
+      "line_items": [
+        {"id": "li_1", "item": {"id": "async_sku"}, "quantity": 2}
+      ],
+      "totals": [{"type": "total", "amount": 7000}],
+      "messages": [],
+    }
+    problems = base.update_during_complete_in_progress_problems(
+      before, mutated_and_no_message
+    )
+    self.assertTrue(any("CHECKOUT-0028" in p for p in problems))
+    self.assertTrue(any("CHECKOUT-0245" in p for p in problems))
+
+  def test_requires_escalation_problems(self) -> None:
+    """requires_escalation checks continue_url and buyer severity message."""
+    valid_body = {
+      "id": "chk_esc_1",
+      "status": "requires_escalation",
+      "continue_url": "https://merchant.example.com/checkout/chk_esc_1",
+      "messages": [
+        {
+          "type": "error",
+          "code": "age_verification_required",
+          "severity": "requires_buyer_input",
+          "content": "Buyer must verify age on merchant checkout.",
+        }
+      ],
+    }
+    self.assertEqual(
+      base.requires_escalation_problems(
+        valid_body, check_continue_url=True, check_buyer_message=True
+      ),
+      [],
+    )
+
+    review_severity_body = {
+      "id": "chk_esc_2",
+      "status": "requires_escalation",
+      "continue_url": "https://merchant.example.com/checkout/chk_esc_2",
+      "messages": [
+        {
+          "type": "error",
+          "code": "high_value_review",
+          "severity": "requires_buyer_review",
+          "content": "Buyer must review order terms.",
+        }
+      ],
+    }
+    self.assertEqual(
+      base.requires_escalation_problems(
+        review_severity_body,
+        check_continue_url=True,
+        check_buyer_message=True,
+      ),
+      [],
+    )
+
+    missing_both = {
+      "id": "chk_esc_3",
+      "status": "requires_escalation",
+      "messages": [
+        {
+          "type": "error",
+          "code": "recoverable_only",
+          "severity": "recoverable",
+          "content": "Recoverable error only.",
+        }
+      ],
+    }
+    url_problems = base.requires_escalation_problems(
+      missing_both, check_continue_url=True, check_buyer_message=False
+    )
+    self.assertTrue(any("CHECKOUT-0091" in p for p in url_problems))
+    self.assertTrue(any("CHECKOUT-0107" in p for p in url_problems))
+
+    msg_problems = base.requires_escalation_problems(
+      missing_both, check_continue_url=False, check_buyer_message=True
+    )
+    self.assertTrue(any("CHECKOUT-0108" in p for p in msg_problems))
+
+
 if __name__ == "__main__":
   unittest.main()

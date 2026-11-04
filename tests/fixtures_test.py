@@ -105,6 +105,8 @@ class TriggerTest(unittest.TestCase):
         "custom_total_item_sku": "custom_fee_bouquet",
         "total_lines_item_sku": "split_tax_bouquet",
         "disclosure_item_sku": "allergen_bouquet",
+        "async_completion_item_sku": "async_order_bouquet",
+        "escalation_item_sku": "age_restricted_bouquet",
       }
     )
     context = DynamicFixtureContext(merged)
@@ -146,6 +148,8 @@ class TriggerTest(unittest.TestCase):
           "custom_total_item_sku": "   ",
           "total_lines_item_sku": 123,
           "disclosure_item_sku": "",
+          "async_completion_item_sku": "   ",
+          "escalation_item_sku": 999,
         }
       }
     )
@@ -166,6 +170,8 @@ class TriggerTest(unittest.TestCase):
       "custom_total_item_sku",
       "total_lines_item_sku",
       "disclosure_item_sku",
+      "async_completion_item_sku",
+      "escalation_item_sku",
     ):
       with self.subTest(key=key):
         self.assertIsNone(context.trigger(key))

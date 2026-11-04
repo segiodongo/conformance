@@ -142,13 +142,15 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
       quantity=2,
     )
 
-    payment_update = payment_update_request.PaymentUpdateRequest(
-      instruments=checkout_obj.payment.instruments,
-      handlers=[
-        h.model_dump(mode="json", exclude_none=True)
-        for h in checkout_obj.payment.instruments
-      ],
-    )
+    payment_update = None
+    if checkout_obj.payment is not None:
+      payment_update = payment_update_request.PaymentUpdateRequest(
+        instruments=checkout_obj.payment.instruments,
+        handlers=[
+          h.model_dump(mode="json", exclude_none=True)
+          for h in checkout_obj.payment.instruments
+        ],
+      )
 
     buyer_update = buyer_update_request.BuyerUpdateRequest(
       email="update-checkout-buyer@example.com",
@@ -399,13 +401,15 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
       item=item_update,
       quantity=2,
     )
-    payment_update = payment_update_request.PaymentUpdateRequest(
-      instruments=checkout_obj.payment.instruments,
-      handlers=[
-        h.model_dump(mode="json", exclude_none=True)
-        for h in checkout_obj.payment.instruments
-      ],
-    )
+    payment_update = None
+    if checkout_obj.payment is not None:
+      payment_update = payment_update_request.PaymentUpdateRequest(
+        instruments=checkout_obj.payment.instruments,
+        handlers=[
+          h.model_dump(mode="json", exclude_none=True)
+          for h in checkout_obj.payment.instruments
+        ],
+      )
     update_payload = checkout_update_req.CheckoutUpdateRequest(
       id=checkout_id,
       currency=checkout_obj.currency,
@@ -520,13 +524,15 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
       item=item_update,
       quantity=2,
     )
-    payment_update = payment_update_request.PaymentUpdateRequest(
-      instruments=checkout_obj.payment.instruments,
-      handlers=[
-        h.model_dump(mode="json", exclude_none=True)
-        for h in checkout_obj.payment.instruments
-      ],
-    )
+    payment_update = None
+    if checkout_obj.payment is not None:
+      payment_update = payment_update_request.PaymentUpdateRequest(
+        instruments=checkout_obj.payment.instruments,
+        handlers=[
+          h.model_dump(mode="json", exclude_none=True)
+          for h in checkout_obj.payment.instruments
+        ],
+      )
     update_payload = checkout_update_req.CheckoutUpdateRequest(
       id=checkout_id,
       currency=checkout_obj.currency,
@@ -801,6 +807,129 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
         "checkout responses in non-terminal states omitted optional "
         "continue_url"
       )
+
+  def _reach_requires_escalation(self, sku: str) -> dict:
+    """Create or complete a checkout for `sku` into `requires_escalation`."""
+    created = self.create_checkout_session(
+      sku=sku,
+      buyer=self.DEFAULT_BUYER,
+      select_fulfillment=True,
+    )
+    if created.get("status") == "requires_escalation":
+      return created
+    resp = self.attempt_complete_checkout(created["id"])
+    try:
+      body = resp.json()
+    except ValueError:
+      self.fail(
+        f"POST complete for escalation_item_sku {sku!r} returned non-JSON "
+        f"(HTTP {resp.status_code})"
+      )
+    return body
+
+  @spec_assert(
+    "REQ-SHOPPING-CHECKOUT-0021",  # complete_in_progress MUST NOT contain order
+  )
+  def test_complete_in_progress_omits_order(self):
+    """A `complete_in_progress` response must not contain `order`."""
+    sku = self.require_trigger("async_completion_item_sku")
+    created = self.create_checkout_session(
+      sku=sku,
+      buyer=self.DEFAULT_BUYER,
+      select_fulfillment=True,
+    )
+    resp = self.attempt_complete_checkout(created["id"])
+    self.assertIn(
+      resp.status_code,
+      (200, 201, 202),
+      msg=(
+        f"Expected 200/201/202 for async completion of {sku!r}, got "
+        f"HTTP {resp.status_code}: {resp.text}"
+      ),
+    )
+    self.assert_complete_in_progress(
+      resp.json(), where="POST complete response"
+    )
+
+  @spec_assert(
+    "REQ-SHOPPING-CHECKOUT-0028",  # Update during complete_in_progress rejected
+    "REQ-SHOPPING-CHECKOUT-0245",  # REST Update during complete_in_progress
+  )
+  def test_update_rejected_during_complete_in_progress(self):
+    """Update during `complete_in_progress` leaves Checkout unchanged."""
+    sku = self.require_trigger("async_completion_item_sku")
+    created = self.create_checkout_session(
+      sku=sku,
+      buyer=self.DEFAULT_BUYER,
+      select_fulfillment=True,
+    )
+    complete_resp = self.attempt_complete_checkout(created["id"])
+    self.assertIn(
+      complete_resp.status_code,
+      (200, 201, 202),
+      msg=(
+        f"Expected 200/201/202 for async completion of {sku!r}, got "
+        f"HTTP {complete_resp.status_code}: {complete_resp.text}"
+      ),
+    )
+    in_progress = complete_resp.json()
+    self.assert_complete_in_progress(
+      in_progress, where="POST complete response"
+    )
+
+    in_progress_obj = checkout.Checkout(**in_progress)
+    mutated_line = line_item_update_request.LineItemUpdateRequest(
+      id=in_progress_obj.line_items[0].id,
+      item=item_update_request.ItemUpdateRequest(
+        id=in_progress_obj.line_items[0].item.id
+      ),
+      quantity=in_progress_obj.line_items[0].quantity + 1,
+    )
+    payload = self.checkout_update_payload(
+      in_progress_obj,
+      line_items=[mutated_line],
+      buyer={"email": "mutated-during-complete@example.com"},
+    )
+    update_resp = self.client.put(
+      self.get_shopping_url(f"/checkout-sessions/{in_progress['id']}"),
+      json=payload,
+      headers=self.get_headers(),
+    )
+    self.assert_response_status(update_resp, 200)
+    self.assert_update_during_complete_in_progress(
+      in_progress,
+      update_resp.json(),
+      where="PUT checkout during complete_in_progress",
+    )
+
+  @spec_assert(
+    "REQ-SHOPPING-CHECKOUT-0091",  # MUST provide continue_url on escalation
+    "REQ-SHOPPING-CHECKOUT-0107",  # Guidelines: MUST provide continue_url
+  )
+  def test_requires_escalation_includes_continue_url(self):
+    """A `requires_escalation` checkout must provide `continue_url`."""
+    sku = self.require_trigger("escalation_item_sku")
+    escalated = self._reach_requires_escalation(sku)
+    self.assert_requires_escalation(
+      escalated,
+      check_continue_url=True,
+      check_buyer_message=False,
+      where="requires_escalation checkout",
+    )
+
+  @spec_assert(
+    "REQ-SHOPPING-CHECKOUT-0108",  # requires_buyer_input / review severity
+  )
+  def test_requires_escalation_includes_buyer_severity_message(self):
+    """A `requires_escalation` checkout must carry a buyer-severity message."""
+    sku = self.require_trigger("escalation_item_sku")
+    escalated = self._reach_requires_escalation(sku)
+    self.assert_requires_escalation(
+      escalated,
+      check_continue_url=False,
+      check_buyer_message=True,
+      where="requires_escalation checkout",
+    )
 
 
 if __name__ == "__main__":
