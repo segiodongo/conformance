@@ -5528,8 +5528,14 @@
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
-        "testable": true,
-        "testable_reason": "aimed at the business",
+        "testable": false,
+        "testable_reason": "reviewed: out-of-band side effect (email delivery); not observable in UCP HTTP responses",
+        "review": {
+          "verdict": "rule",
+          "actor": "BUSINESS",
+          "testable": false,
+          "reason": "out-of-band side effect (email delivery); not observable in UCP HTTP responses"
+        },
         "since": "2026-01-11",
         "releases": [
           {
@@ -5658,8 +5664,14 @@
         "capability_source": "bullet",
         "keyword_style": "bold",
         "transport": "core",
-        "testable": true,
-        "testable_reason": "aimed at the business",
+        "testable": false,
+        "testable_reason": "reviewed: architectural principle (deterministic server logic rather than generative computation); observable wire invariants are covered by the totals, line-pricing, and idempotency rules",
+        "review": {
+          "verdict": "rule",
+          "actor": "BUSINESS",
+          "testable": false,
+          "reason": "architectural principle (deterministic server logic rather than generative computation); observable wire invariants are covered by the totals, line-pricing, and idempotency rules"
+        },
         "since": "2026-01-11",
         "releases": [
           {

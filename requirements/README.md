@@ -15,7 +15,7 @@
 | `catalog/history.json`           | The releases read, the rules only older releases state, and rules that left the pages |
 | `catalog/extraction_report.json` | The extractor's diagnostics for the run                                               |
 | `releases.json`                  | The releases the history is read from, at pinned commits, and where their pages were  |
-| `review.json`                    | A person's decisions on 199 rules the automatic pass couldn't settle                  |
+| `review.json`                    | A person's decisions on 204 rules the automatic pass couldn't settle                  |
 | `findings.md`                    | What linking the 133 shopping tests to the catalog found: claims, spec and test gaps  |
 | `tools/build_catalog.py`         | Regenerates the `catalog/` folder from the inputs below                               |
 | `tools/suggest_rules.py`         | Suggests rules for each test, in a worksheet under `reports/`, which isn't committed  |
@@ -306,17 +306,17 @@ The report covers the tests the run selects, with `--suite` and `-k`.
 
 - 510 rules extracted: 395 bold and 115 found through capitals. The review
   found 3 aren't rules, leaving 507.
-- 217 are testable by this suite, 104 of them MUST or MUST NOT.
+- 211 are testable by this suite, 98 of them MUST or MUST NOT.
 
 | Capability                        | Rules | Testable | Testable MUST |
 | --------------------------------- | ----: | -------: | ------------: |
-| `dev.ucp.shopping.checkout`       |   250 |       78 |            37 |
+| `dev.ucp.shopping.checkout`       |   250 |       76 |            35 |
 | `dev.ucp.shopping.cart`           |    65 |       21 |             8 |
 | `dev.ucp.shopping.catalog.lookup` |    61 |       38 |            16 |
 | `dev.ucp.shopping.catalog.search` |    55 |       30 |            11 |
-| `dev.ucp.shopping.fulfillment`    |    55 |       37 |            16 |
+| `dev.ucp.shopping.fulfillment`    |    55 |       34 |            13 |
 | `dev.ucp.shopping.order`          |    40 |       24 |            17 |
-| `dev.ucp.shopping.buyer_consent`  |    17 |        5 |             4 |
+| `dev.ucp.shopping.buyer_consent`  |    17 |        4 |             3 |
 | `dev.ucp.shopping.discount`       |     9 |        7 |             4 |
 
 The 46 rules on the shared catalog pages count under both catalog
@@ -330,11 +330,11 @@ included.
 
 | Version      | Shopping rules | Testable MUST stated | Pinned testable MUST first stated |
 | ------------ | -------------: | -------------------: | --------------------------------: |
-| `2026-01-11` |            140 |                   22 |                                16 |
-| `2026-01-23` |            150 |                   23 |                                 1 |
-| `2026-04-08` |            379 |                   64 |                                44 |
-| `2026-08-25` |            512 |                  102 |                                41 |
-| draft        |            507 |                  104 |                                 2 |
+| `2026-01-11` |            140 |                   18 |                                12 |
+| `2026-01-23` |            150 |                   19 |                                 1 |
+| `2026-04-08` |            379 |                   60 |                                44 |
+| `2026-08-25` |            512 |                   96 |                                39 |
+| draft        |            507 |                   98 |                                 2 |
 
 - **Removed rules:** 22, of which 8 are testable MUST rules that the review
   hasn't looked at yet. Among them are the webhook rules of the first two

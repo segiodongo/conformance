@@ -1466,7 +1466,7 @@ class RepositoryReportTest(unittest.TestCase):
     )
     self.assertEqual(
       (built.total.rules, built.total.testable, built.total.testable_must),
-      (507, 217, 104),
+      (507, 211, 98),
     )
     self.assertEqual(built.not_rules, 3)
     self.assertTrue(built.spec_commit.startswith("f2626c28"))
@@ -1479,11 +1479,11 @@ class RepositoryReportTest(unittest.TestCase):
       data = json.loads((out / report.JSON_FILE).read_text())
       markdown = (out / report.MARKDOWN_FILE).read_text()
       page = (out / report.HTML_FILE).read_text()
-    self.assertIn("507 rules, 217 testable", text)
+    self.assertIn("507 rules, 211 testable", text)
     self.assertIn("(matrix.json, matrix.md, matrix.html)", text)
     self.assertEqual(data["tests"], [])
     self.assertIn("- **Findings:** [findings.md](", markdown)
-    self.assertIn('<div class="big">0 / 104</div>', page)
+    self.assertIn('<div class="big">0 / 98</div>', page)
 
   def test_by_release(self):
     """Test the testable MUST rules each version states."""
@@ -1491,11 +1491,11 @@ class RepositoryReportTest(unittest.TestCase):
     self.assertEqual(
       [(row.version, row.testable_must) for row in built.versions],
       [
-        ("2026-01-11", 22),
-        ("2026-01-23", 23),
-        ("2026-04-08", 64),
-        ("2026-08-25", 102),
-        ("draft", 104),
+        ("2026-01-11", 18),
+        ("2026-01-23", 19),
+        ("2026-04-08", 60),
+        ("2026-08-25", 96),
+        ("draft", 98),
       ],
     )
     self.assertEqual(

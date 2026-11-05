@@ -1020,6 +1020,26 @@
     },
     {
       "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "30d3516026",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0104",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": false,
+      "reason": "out-of-band side effect (email delivery); not observable in UCP HTTP responses"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
+      "text_digest": "adbf81349f",
+      "id_at_review": "REQ-SHOPPING-CHECKOUT-0106",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": false,
+      "reason": "architectural principle (deterministic server logic rather than generative computation); observable wire invariants are covered by the totals, line-pricing, and idempotency rules"
+    },
+    {
+      "file": "docs/specification/shopping/checkout/index.md",
       "text_digest": "0c5c2c4998",
       "id_at_review": "REQ-SHOPPING-CHECKOUT-0117",
       "groups": "B",
@@ -1437,8 +1457,8 @@
       "groups": "A",
       "verdict": "rule",
       "actor": "BUSINESS",
-      "testable": true,
-      "reason": "the advertisement is visible; its completeness can't be verified"
+      "testable": false,
+      "reason": "completeness against a business's internal consent catalog is not observable over the wire beyond advertising buyer.consent and ignoring unadvertised keys (BUYER-CONSENT-0010)"
     },
     {
       "file": "docs/specification/shopping/extensions/buyer-consent.md",
@@ -1680,6 +1700,36 @@
       "actor": "BUSINESS",
       "testable": true,
       "reason": "response content"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/fulfillment.md",
+      "text_digest": "3c15b23155",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-0020",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": false,
+      "reason": "subjective copywriting quality ('sufficient for buyer decision'); non-empty distinct titles are checked by FULFILLMENT-0018"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/fulfillment.md",
+      "text_digest": "d8d326773b",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-0025",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "BUSINESS",
+      "testable": false,
+      "reason": "natural-language prose requirement ('standalone sentence explaining what, when, and where'); not machine-verifiable across locales"
+    },
+    {
+      "file": "docs/specification/shopping/extensions/fulfillment.md",
+      "text_digest": "676047abce",
+      "id_at_review": "REQ-SHOPPING-FULFILLMENT-0030",
+      "groups": "B",
+      "verdict": "rule",
+      "actor": "PLATFORM",
+      "testable": false,
+      "reason": "'they' refers to 'Platforms' in the first half of the sentence"
     },
     {
       "file": "docs/specification/shopping/extensions/fulfillment.md",

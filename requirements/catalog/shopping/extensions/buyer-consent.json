@@ -295,13 +295,13 @@
         "capability_source": "path",
         "keyword_style": "capitals",
         "transport": "core",
-        "testable": true,
-        "testable_reason": "reviewed: the advertisement is visible; its completeness can't be verified",
+        "testable": false,
+        "testable_reason": "reviewed: completeness against a business's internal consent catalog is not observable over the wire beyond advertising buyer.consent and ignoring unadvertised keys (BUYER-CONSENT-0010)",
         "review": {
           "verdict": "rule",
           "actor": "BUSINESS",
-          "testable": true,
-          "reason": "the advertisement is visible; its completeness can't be verified"
+          "testable": false,
+          "reason": "completeness against a business's internal consent catalog is not observable over the wire beyond advertising buyer.consent and ignoring unadvertised keys (BUYER-CONSENT-0010)"
         },
         "since": "2026-08-25",
         "releases": [

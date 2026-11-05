@@ -10,13 +10,13 @@
 - **Markers:** 85 tests cite rules, 24 are `no_rule`, 16 are `scenario`, 6
   are `outside_catalog` and 2 are `older_version`.
 - **Rules cited:** 101, all testable: 90 MUST, 8 MUST NOT and 3 SHOULD.
-- **Coverage:** the tests cite 98 of the 104 testable MUST and MUST NOT rules
-  (94%): catalog 18 of 18, order 17 of 17, cart 8 of 8, discount 4 of 4,
-  checkout 35 of 37, fulfillment 13 of 16 and buyer consent 3 of 4.
+- **Coverage:** the tests cite all 98 of the 98 testable MUST and MUST NOT
+  rules (100%): checkout 35 of 35, catalog 18 of 18, order 17 of 17,
+  fulfillment 13 of 13, cart 8 of 8, discount 4 of 4 and buyer consent 3 of 3.
 - **Depth:** all 98 are checked in full (see
   [Claims reviewed](#claims-reviewed)). ORDER-0022 is cited in part by the
   envelope test and in full by the test that verifies the signature value,
-  so the coverage report counts 98 of the 104 (94%) as fully checked and
+  so the coverage report counts 98 of the 98 (100%) as fully checked and
   none only in part.
 - **Sample server:** against `samples` at `360adbc`, with the marker check
   on, 81 of the 133 shopping tests pass, 1 fails (Get Order answers an
@@ -425,7 +425,14 @@ of the tests that apply to its version:
 
 ## Coverage gaps
 
-6 testable MUST and MUST NOT rules have no test: checkout 2, fulfillment 3
-and buyer consent 1. Catalog (18 of 18), order (17 of 17), cart (8 of 8) and
-discount (4 of 4) have all of theirs covered. Each remaining rule is a
-candidate for specification clarification or `review.json` reclassification.
+All 98 testable MUST and MUST NOT rules across the 8 shopping capabilities
+(`checkout` 35/35, `catalog.lookup` 16/16, `catalog.search` 11/11, `order`
+17/17, `fulfillment` 13/13, `cart` 8/8, `discount` 4/4, `buyer_consent` 3/3)
+are fully checked by a test (100%). Six rules extracted as business `MUST`
+were reviewed in `review.json` as not testable by a black-box HTTP client
+(`CHECKOUT-0104` out-of-band confirmation email, `CHECKOUT-0106` internal
+determinism guideline, `FULFILLMENT-0020` subjective `options[].title`
+copywriting quality, `FULFILLMENT-0025` natural-language sentence structure on
+`available_methods[].description`, `FULFILLMENT-0030` platform-targeted
+pronoun _"they"_, and `BUYER-CONSENT-0005` internal consent catalog
+completeness beyond `BUYER-CONSENT-0010`).

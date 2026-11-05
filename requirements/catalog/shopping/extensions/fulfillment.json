@@ -1046,8 +1046,14 @@
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
-        "testable": true,
-        "testable_reason": "aimed at the business",
+        "testable": false,
+        "testable_reason": "reviewed: subjective copywriting quality ('sufficient for buyer decision'); non-empty distinct titles are checked by FULFILLMENT-0018",
+        "review": {
+          "verdict": "rule",
+          "actor": "BUSINESS",
+          "testable": false,
+          "reason": "subjective copywriting quality ('sufficient for buyer decision'); non-empty distinct titles are checked by FULFILLMENT-0018"
+        },
         "since": "2026-01-11",
         "releases": [
           {
@@ -1379,8 +1385,14 @@
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
-        "testable": true,
-        "testable_reason": "aimed at the business",
+        "testable": false,
+        "testable_reason": "reviewed: natural-language prose requirement ('standalone sentence explaining what, when, and where'); not machine-verifiable across locales",
+        "review": {
+          "verdict": "rule",
+          "actor": "BUSINESS",
+          "testable": false,
+          "reason": "natural-language prose requirement ('standalone sentence explaining what, when, and where'); not machine-verifiable across locales"
+        },
         "since": "2026-01-11",
         "releases": [
           {
@@ -1667,8 +1679,14 @@
         "capability_source": "path",
         "keyword_style": "bold",
         "transport": "core",
-        "testable": true,
-        "testable_reason": "aimed at the business",
+        "testable": false,
+        "testable_reason": "reviewed: 'they' refers to 'Platforms' in the first half of the sentence",
+        "review": {
+          "verdict": "rule",
+          "actor": "PLATFORM",
+          "testable": false,
+          "reason": "'they' refers to 'Platforms' in the first half of the sentence"
+        },
         "since": "2026-08-25",
         "releases": [
           {

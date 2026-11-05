@@ -20,8 +20,8 @@
       "extended_by": [],
       "schema": "source/schemas/shopping/buyer_consent.json",
       "rules": 17,
-      "testable_rules": 5,
-      "testable_must": 4,
+      "testable_rules": 4,
+      "testable_must": 3,
       "pages": [
         {
           "file": "docs/specification/shopping/extensions/buyer-consent.md",
@@ -149,8 +149,8 @@
       ],
       "schema": "source/schemas/shopping/checkout.json",
       "rules": 250,
-      "testable_rules": 78,
-      "testable_must": 37,
+      "testable_rules": 76,
+      "testable_must": 35,
       "pages": [
         {
           "file": "docs/specification/shopping/checkout/a2a.md",
@@ -204,8 +204,8 @@
       "extended_by": [],
       "schema": "source/schemas/shopping/fulfillment.json",
       "rules": 55,
-      "testable_rules": 37,
-      "testable_must": 16,
+      "testable_rules": 34,
+      "testable_must": 13,
       "pages": [
         {
           "file": "docs/specification/shopping/extensions/fulfillment.md",
