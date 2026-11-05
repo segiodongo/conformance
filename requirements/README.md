@@ -16,7 +16,7 @@
 | `catalog/extraction_report.json` | The extractor's diagnostics for the run                                               |
 | `releases.json`                  | The releases the history is read from, at pinned commits, and where their pages were  |
 | `review.json`                    | A person's decisions on 199 rules the automatic pass couldn't settle                  |
-| `findings.md`                    | What linking the 63 shopping tests to the catalog found: claims, spec and test gaps   |
+| `findings.md`                    | What linking the 133 shopping tests to the catalog found: claims, spec and test gaps  |
 | `tools/build_catalog.py`         | Regenerates the `catalog/` folder from the inputs below                               |
 | `tools/suggest_rules.py`         | Suggests rules for each test, in a worksheet under `reports/`, which isn't committed  |
 
@@ -245,7 +245,7 @@ directory. With `--dry-run`, the report reads only the catalog and the tests'
 markers, so it needs no server, and it says which rules have a test:
 
 ```bash
-uv run ucp-conformance --suite=shopping --dry-run \
+uv run --no-sources ucp-conformance --suite=shopping --dry-run \
   --requirements_report=requirements/reports
 ```
 
@@ -254,7 +254,7 @@ then runs the tests, then writes the report with each test's outcome and
 each rule's result:
 
 ```bash
-uv run ucp-conformance --suite=shopping --server_url=http://localhost:8182 \
+uv run --no-sources ucp-conformance --suite=shopping --server_url=http://localhost:8182 \
   --requirements_report=requirements/reports
 ```
 

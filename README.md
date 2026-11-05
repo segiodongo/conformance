@@ -18,6 +18,59 @@
 
 This suite contains language-agnostic integration tests that run against a running UCP Merchant Server instance. It verifies the server's adherence to the [Universal Commerce Protocol (UCP) specification](https://github.com/Universal-Commerce-Protocol/ucp).
 
+## Quickstart: Running the Suite & Requirements Coverage Report (`demo/shopping-requirements`)
+
+### 1. Clone & install dependencies
+
+Requires Python >= 3.10 and [`uv`](https://docs.astral.sh/uv/).
+
+```bash
+git clone -b demo/shopping-requirements https://github.com/segiodongo/conformance.git
+cd conformance
+
+# Install dependencies from PyPI (--no-sources skips the local ../python-sdk path override)
+UV_DEFAULT_INDEX=https://pypi.org/simple uv sync --no-sources
+```
+
+### 2. Verify setup (dry-run coverage report, no server required)
+
+```bash
+uv run --no-sources ucp-conformance \
+  --suite=shopping \
+  --dry-run \
+  --requirements_check=strict \
+  --requirements_report=requirements/reports
+```
+
+### 3. Run against your local UCP server
+
+Start your local server (for example on `http://localhost:8182`) with its `/.well-known/ucp` discovery endpoint reachable, then run:
+
+```bash
+uv run --no-sources ucp-conformance \
+  --suite=shopping \
+  --server_url=http://localhost:8182 \
+  --requirements_check=strict \
+  --requirements_report=requirements/reports
+```
+
+Useful optional flags:
+
+- `--conformance_input=path/to/conformance_input.json` and `--fixture_config=path/to/test_fixtures.json` — point the runner at your store's SKUs and test triggers (see [shopping/fixtures/README.md](shopping/fixtures/README.md) for all trigger keys).
+- `--discovery_url=http://localhost:8182/custom/.well-known/ucp` — if your discovery document is served at a non-default path.
+- `--auth_header="Authorization: Bearer <TOKEN>"` — if your server requires an API key or bearer token header.
+- `--simulation_secret=<SECRET>` — if your server implements `/testing/simulate-shipping/{id}` for order webhook tests.
+- `-k "<filter>"` — run a subset of tests (e.g. `-k "Catalog"`, `-k "CartTest"`, `-k "Fulfillment"`, `-k "Order"`).
+- `-v --verbose_http` — print full HTTP request/response bodies to debug failures.
+
+### 4. View the generated HTML & Markdown coverage reports
+
+The run writes three report files into `requirements/reports/` (see [requirements/README.md](requirements/README.md) and [requirements/findings.md](requirements/findings.md) for full details):
+
+- `requirements/reports/matrix.html` — standalone interactive HTML report (`open requirements/reports/matrix.html`)
+- `requirements/reports/matrix.md` — Markdown summary and per-capability coverage/result tables
+- `requirements/reports/matrix.json` — machine-readable results per rule and per test
+
 ## Architecture
 
 The test suite follows a 4-tier modular architecture per UCP RFC #520:
