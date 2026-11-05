@@ -246,7 +246,8 @@ markers, so it needs no server, and it says which rules have a test:
 
 ```bash
 uv run --no-sources ucp-conformance --suite=shopping --dry-run \
-  --requirements_report=requirements/reports
+  --requirements_report=requirements/reports && \
+  open requirements/reports/matrix.html
 ```
 
 Without `--dry-run`, the runner first checks that it can write the report,
@@ -255,7 +256,8 @@ each rule's result:
 
 ```bash
 uv run --no-sources ucp-conformance --suite=shopping --server_url=http://localhost:8182 \
-  --requirements_report=requirements/reports
+  --requirements_report=requirements/reports ; \
+  open requirements/reports/matrix.html
 ```
 
 It writes the same report three ways:

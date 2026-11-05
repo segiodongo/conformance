@@ -39,19 +39,21 @@ uv run --no-sources ucp-conformance \
   --suite=shopping \
   --dry-run \
   --requirements_check=strict \
-  --requirements_report=requirements/reports
+  --requirements_report=requirements/reports && \
+  open requirements/reports/matrix.html
 ```
 
 ### 3. Run against your local UCP server
 
-Start your local server (for example on `http://localhost:8182`) with its `/.well-known/ucp` discovery endpoint reachable, then run:
+Start your local server (for example on `http://localhost:8182`) with its `/.well-known/ucp` discovery endpoint reachable, then run (`;` ensures the HTML report opens in your browser even if a test fails):
 
 ```bash
 uv run --no-sources ucp-conformance \
   --suite=shopping \
   --server_url=http://localhost:8182 \
   --requirements_check=strict \
-  --requirements_report=requirements/reports
+  --requirements_report=requirements/reports ; \
+  open requirements/reports/matrix.html
 ```
 
 Useful optional flags:
