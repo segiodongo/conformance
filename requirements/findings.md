@@ -301,8 +301,6 @@ add them, and change the counts above.
 - **Doesn't check rejection messages:** no test checks the `messages[]` entry
   for a rejected code (`discount_code_invalid`, with the `warning` type that
   DISCOUNT-0005 recommends).
-- **Assumes no tax or fees:** `test_fulfillment_flow` expects the total to be
-  exactly the price plus the shipping option.
 - **Duplicate:** `test_structured_error_messages` sends the same request and
   makes the same assertions as `test_out_of_stock`.
 - **Signatures, both ways:** the suite now signs every request it sends

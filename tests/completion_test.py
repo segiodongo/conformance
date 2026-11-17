@@ -359,6 +359,27 @@ class CompletionAgainstStrictStoreTest(unittest.TestCase):
     self.assertIn("missing_buyer_info", logged)
 
 
+class TotalsWithTaxTest(unittest.TestCase):
+  """The totals checks hold for a business that charges tax."""
+
+  def test_fulfillment_entry_and_formula_hold_with_tax(self):
+    """Fulfillment entry == option cost; the entries sum to the total."""
+    store = strict_store.StrictStore(needs_buyer=False, tax=10560)
+    probe = make_probe(store)
+
+    created = probe.create_checkout_session()
+    checkout_obj = base.f_models.Checkout(**created)
+
+    totals = {t.type: t.amount for t in checkout_obj.totals}
+    self.assertEqual(totals["fulfillment"], 599)
+    self.assertEqual(totals["tax"], 10560)
+    self.assertEqual(totals["total"], 105000 + 599 + 10560)
+    # What test_fulfillment_flow asserts now; price + shipping would be
+    # 105599 and fail here.
+    probe.assert_totals_consistent(checkout_obj, 105000)
+    self.assertNotEqual(totals["total"], 105000 + 599)
+
+
 class ExplainsTest(unittest.TestCase):
   """`explains` matches a message by path, code or wording."""
 
