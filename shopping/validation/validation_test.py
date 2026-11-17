@@ -481,7 +481,11 @@ class ValidationTest(ShoppingIntegrationTestBase):
     error_code.json; checkout-rest.md "Error Responses": business
     outcomes return HTTP 200 with the UCP envelope and messages[]).
     """
-    response_json = self.create_checkout_session(handlers=[])
+    # With a buyer, so that a business which needs one to place an order
+    # gets as far as the payment and reports that, not the missing buyer.
+    response_json = self.create_checkout_session(
+      handlers=[], buyer=self.DEFAULT_BUYER
+    )
     checkout_id = checkout.Checkout(**response_json).id
 
     # Use the helper to get valid structure, but request the failing instrument

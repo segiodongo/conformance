@@ -67,11 +67,6 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
   - POST /checkout-sessions/{id}/cancel
   """
 
-  DEFAULT_BUYER = {
-    "email": "conformance-test-buyer@example.com",
-    "name": "Conformance Test Buyer",
-  }
-
   @no_rule(
     "checkout/index.md, Operations: Create Checkout 'Initiates a new "
     "checkout session'; the response's id is schema-required, with no "
@@ -164,8 +159,8 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
         id="dest_2",
         address_country="US",
         postal_code="90210",
-        locality="Beverly Hills",
-        region="CA",
+        address_locality="Beverly Hills",
+        address_region="CA",
         street_address="456 Elm St",
       )
     )
