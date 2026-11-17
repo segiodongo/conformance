@@ -17,11 +17,15 @@
 from absl.testing import absltest
 from framework.decorators import (
   no_rule,
-  partly,
   requires_capability,
   spec_assert,
 )
-from shopping.base import ShoppingIntegrationTestBase, get_valid_payment_payload
+from shopping.base import (
+  error_messages,
+  get_valid_payment_payload,
+  placed_order,
+  ShoppingIntegrationTestBase,
+)
 from ucp_sdk.models.schemas.shopping import (
   checkout_update_request as checkout_update_req,
 )
@@ -311,26 +315,65 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
     )
 
   def _cancel_checkout(self, checkout_id):
-    """Cancel a checkout."""
+    """Cancel a checkout and check that it is canceled."""
     response = self.client.post(
       self.get_shopping_url(f"/checkout-sessions/{checkout_id}/cancel"),
       headers=self.get_headers(),
     )
     self.assert_response_status(response, 200)
+    status = response.json().get("status")
+    self.assertEqual(
+      status,
+      "canceled",
+      f"Cancel Checkout answered 200 with status {status!r}, not"
+      " 'canceled'; the test needs a canceled session",
+    )
     return response
+
+  # Words a refusal on a terminal session may use, in a message or a 4xx
+  # body, besides the codes a business may choose for it.
+  TERMINAL_WORDS = (
+    "cancel",
+    "complete",
+    "closed",
+    "immutable",
+    "not allowed",
+    "not found",
+    "state",
+    "status",
+    "modifiable",
+    "modified",
+    "expired",
+  )
+  TERMINAL_CODES = frozenset(
+    {
+      "invalid_parameter",
+      "invalid_state",
+      "not_allowed",
+      "not_found",
+      "conflict",
+      "already_completed",
+      "already_canceled",
+      "checkout_completed",
+      "checkout_canceled",
+    }
+  )
 
   @no_rule(
     "accepts the error REQ-SHOPPING-CHECKOUT-0119 recommends or an "
     "idempotent 200, so it cannot fail on that rule; it only rules out "
-    "server errors"
+    "server errors and answers that are neither"
   )
   def test_repeated_cancel(self):
     """Test repeated cancellation behavior.
 
     Given a checkout session that has already been canceled,
     When another cancel request is sent,
-    Then the server should return a client error, as recommended by the spec,
-    or return the same canceled resource as an idempotent success.
+    Then the server returns the same canceled checkout as an idempotent
+    success, or refuses: with a 4xx, or in-band with an Error Response or
+    the canceled checkout carrying an error message (checkout/index.md,
+    Error Handling; the REST binding's "business outcomes" are HTTP 200
+    with messages).
     """
     response_json = self.create_checkout_session()
     checkout_id = checkout.Checkout(**response_json).id
@@ -342,8 +385,15 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
       headers=self.get_headers(),
     )
 
-    if response.status_code == 200:
-      repeated_checkout = checkout.Checkout(**response.json())
+    self.assertLess(
+      response.status_code,
+      500,
+      msg="Repeated cancellation must not produce a server error.",
+    )
+    body = response.json() if response.status_code == 200 else {}
+    if body.get("id") is not None and not error_messages(body):
+      # Idempotent success: the same canceled checkout again.
+      repeated_checkout = checkout.Checkout(**body)
       self.assertEqual(
         repeated_checkout.id,
         checkout_id,
@@ -358,16 +408,13 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
         ),
       )
       return
-
-    self.assertGreaterEqual(
-      response.status_code,
-      400,
-      msg="Repeated cancellation must return 200 or a client error.",
-    )
-    self.assertLess(
-      response.status_code,
-      500,
-      msg="Repeated cancellation must not produce a server error.",
+    self.assert_business_error(
+      response,
+      about="cancelling a canceled session",
+      paths=("$.status",),
+      codes=self.TERMINAL_CODES,
+      words=self.TERMINAL_WORDS,
+      terminal="canceled",
     )
 
   @no_rule(
@@ -379,7 +426,8 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
 
     Given a canceled checkout session,
     When an update request is sent,
-    Then the server should reject it with a non-200 status (likely 409).
+    Then the server refuses it: with a 4xx, or in-band with an Error
+    Response or the unchanged canceled checkout carrying an error message.
     """
     response_json = self.create_checkout_session()
     checkout_obj = checkout.Checkout(**response_json)
@@ -388,41 +436,24 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
     self._cancel_checkout(checkout_id)
 
     # Try Update
-    item_update = item_update_request.ItemUpdateRequest(
-      id=checkout_obj.line_items[0].item.id,
-    )
-    line_item_update = line_item_update_request.LineItemUpdateRequest(
-      id=checkout_obj.line_items[0].id,
-      item=item_update,
-      quantity=2,
-    )
-    payment_update = None
-    if checkout_obj.payment is not None:
-      payment_update = payment_update_request.PaymentUpdateRequest(
-        instruments=checkout_obj.payment.instruments,
-        handlers=[
-          h.model_dump(mode="json", exclude_none=True)
-          for h in checkout_obj.payment.instruments
-        ],
-      )
-    update_payload = checkout_update_req.CheckoutUpdateRequest(
-      id=checkout_id,
-      currency=checkout_obj.currency,
-      line_items=[line_item_update],
-      payment=payment_update,
-    )
-
     response = self.client.put(
       self.get_shopping_url(f"/checkout-sessions/{checkout_id}"),
-      json=update_payload.model_dump(
-        mode="json", by_alias=True, exclude_none=True
+      json=self.checkout_update_payload(
+        checkout_obj,
+        line_items=[
+          {"id": li.id, "item": {"id": li.item.id}, "quantity": 2}
+          for li in checkout_obj.line_items
+        ],
       ),
       headers=self.get_headers(),
     )
-    self.assertNotEqual(
-      response.status_code,
-      200,
-      msg="Should not be able to update a canceled checkout.",
+    self.assert_business_error(
+      response,
+      about="updating a canceled session",
+      paths=("$.status",),
+      codes=self.TERMINAL_CODES,
+      words=self.TERMINAL_WORDS,
+      terminal="canceled",
     )
 
   @no_rule(
@@ -435,7 +466,8 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
 
     Given a canceled checkout session,
     When a complete request is sent,
-    Then the server should reject it with a non-200 status.
+    Then the server refuses it: with a 4xx, or in-band with an Error
+    Response or the unchanged canceled checkout carrying an error message.
     """
     response_json = self.create_checkout_session(buyer=self.DEFAULT_BUYER)
     checkout_id = checkout.Checkout(**response_json).id
@@ -443,26 +475,23 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
     self._cancel_checkout(checkout_id)
 
     # Try Complete
-    response = self.client.post(
-      self.get_shopping_url(f"/checkout-sessions/{checkout_id}/complete"),
-      json=get_valid_payment_payload(),
-      headers=self.get_headers(),
-    )
-    self.assertNotEqual(
-      response.status_code,
-      200,
-      msg="Should not be able to complete a canceled checkout.",
+    response = self.attempt_complete_checkout(checkout_id)
+    self.assert_business_error(
+      response,
+      about="completing a canceled session",
+      paths=("$.status",),
+      codes=self.TERMINAL_CODES,
+      words=self.TERMINAL_WORDS,
+      terminal="canceled",
     )
 
   def _complete_checkout(self, checkout_id):
-    """Complete a checkout."""
-    response = self.client.post(
-      self.get_shopping_url(f"/checkout-sessions/{checkout_id}/complete"),
-      json=get_valid_payment_payload(),
-      headers=self.get_headers(),
-    )
-    self.assert_response_status(response, 200)
-    return response
+    """Complete a checkout and return the completed checkout.
+
+    The shared helper checks that an order was placed, so the tests below
+    really act on a completed session.
+    """
+    return self.complete_checkout_session(checkout_id)
 
   @no_rule(
     "checkout/index.md, Business guidelines: a completed session 'is "
@@ -471,26 +500,35 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
   def test_complete_is_idempotent(self):
     """Tests that completing an already completed checkout behaves correctly.
 
-    # Note: checkout_service.py raises CheckoutNotModifiableError (409) if
-    # status is COMPLETED. Idempotency is handled by the idempotency key
-    # check BEFORE the status check. If we use a different key (which
-    # default get_headers does), it should fail.
+    A second Complete Checkout with a new idempotency key either returns
+    the same completed checkout and order again (the session is immutable,
+    nothing new is placed), or is refused: with a 4xx, or in-band with an
+    Error Response or the completed checkout carrying an error message.
     """
     response_json = self.create_checkout_session(buyer=self.DEFAULT_BUYER)
     checkout_id = checkout.Checkout(**response_json).id
 
-    self._complete_checkout(checkout_id)
+    completed = self._complete_checkout(checkout_id)
 
     # Try Complete again (new idempotency key)
-    response = self.client.post(
-      self.get_shopping_url(f"/checkout-sessions/{checkout_id}/complete"),
-      json=get_valid_payment_payload(),
-      headers=self.get_headers(),
-    )
-    self.assertNotEqual(
-      response.status_code,
-      200,
-      msg="Should not be able to complete an already completed checkout.",
+    response = self.attempt_complete_checkout(checkout_id)
+    body = response.json() if response.status_code == 200 else {}
+    again = placed_order(body)
+    if again is not None and not error_messages(body):
+      self.assertEqual(
+        again["id"],
+        completed["order"]["id"],
+        "A second completion placed another order; a completed session is"
+        " immutable",
+      )
+      return
+    self.assert_business_error(
+      response,
+      about="completing a completed session again",
+      paths=("$.status",),
+      codes=self.TERMINAL_CODES,
+      words=self.TERMINAL_WORDS,
+      terminal="completed",
     )
 
   @no_rule(
@@ -502,7 +540,8 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
 
     Given a completed checkout session,
     When an update request is sent,
-    Then the server should reject it with a non-200 status.
+    Then the server refuses it: with a 4xx, or in-band with an Error
+    Response or the unchanged completed checkout carrying an error message.
     """
     response_json = self.create_checkout_session(buyer=self.DEFAULT_BUYER)
     checkout_obj = checkout.Checkout(**response_json)
@@ -511,56 +550,38 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
     self._complete_checkout(checkout_id)
 
     # Try Update
-    item_update = item_update_request.ItemUpdateRequest(
-      id=checkout_obj.line_items[0].item.id,
-    )
-    line_item_update = line_item_update_request.LineItemUpdateRequest(
-      id=checkout_obj.line_items[0].id,
-      item=item_update,
-      quantity=2,
-    )
-    payment_update = None
-    if checkout_obj.payment is not None:
-      payment_update = payment_update_request.PaymentUpdateRequest(
-        instruments=checkout_obj.payment.instruments,
-        handlers=[
-          h.model_dump(mode="json", exclude_none=True)
-          for h in checkout_obj.payment.instruments
-        ],
-      )
-    update_payload = checkout_update_req.CheckoutUpdateRequest(
-      id=checkout_id,
-      currency=checkout_obj.currency,
-      line_items=[line_item_update],
-      payment=payment_update,
-    )
-
     response = self.client.put(
       self.get_shopping_url(f"/checkout-sessions/{checkout_id}"),
-      json=update_payload.model_dump(
-        mode="json", by_alias=True, exclude_none=True
+      json=self.checkout_update_payload(
+        checkout_obj,
+        line_items=[
+          {"id": li.id, "item": {"id": li.item.id}, "quantity": 2}
+          for li in checkout_obj.line_items
+        ],
       ),
       headers=self.get_headers(),
     )
-    self.assertNotEqual(
-      response.status_code,
-      200,
-      msg="Should not be able to update a completed checkout.",
+    self.assert_business_error(
+      response,
+      about="updating a completed session",
+      paths=("$.status",),
+      codes=self.TERMINAL_CODES,
+      words=self.TERMINAL_WORDS,
+      terminal="completed",
     )
 
   @spec_assert(
-    partly(
-      "REQ-SHOPPING-CHECKOUT-0119",  # cancel after completion SHOULD fail
-      "only a status other than 200, so an in-band error fails and the "
-      "error's content isn't checked",
-    ),
+    "REQ-SHOPPING-CHECKOUT-0119",  # cancel after completion SHOULD fail
   )
   def test_cannot_cancel_completed_checkout(self):
     """Test that a completed checkout cannot be canceled.
 
     Given a completed checkout session,
     When a cancel request is sent,
-    Then the server should reject it with a non-200 status.
+    Then the server fails it with an error indicating the operation is
+    not allowed (checkout/index.md, Cancel Checkout): a 4xx, or in-band an
+    Error Response or the unchanged completed checkout carrying the error
+    message. The spec names no status code for it.
     """
     response_json = self.create_checkout_session(buyer=self.DEFAULT_BUYER)
     checkout_id = checkout.Checkout(**response_json).id
@@ -572,10 +593,13 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
       self.get_shopping_url(f"/checkout-sessions/{checkout_id}/cancel"),
       headers=self.get_headers(),
     )
-    self.assertNotEqual(
-      response.status_code,
-      200,
-      msg="Should not be able to cancel a completed checkout.",
+    self.assert_business_error(
+      response,
+      about="cancelling a completed session",
+      paths=("$.status",),
+      codes=self.TERMINAL_CODES,
+      words=self.TERMINAL_WORDS,
+      terminal="completed",
     )
 
   @spec_assert("REQ-SHOPPING-CHECKOUT-0048")
