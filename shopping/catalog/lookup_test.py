@@ -300,17 +300,23 @@ class CatalogLookupTest(ShoppingIntegrationTestBase):
     "REQ-SHOPPING-CATALOG-LOOKUP-0010",
   )
   def test_batch_exceeding_limit_rejected_with_request_too_large(self):
-    """Test that /catalog/lookup rejects oversized batches with HTTP 400."""
-    limit = self.fixture_ctx.get_catalog_max_batch_size()
+    """Test that /catalog/lookup rejects oversized batches with HTTP 400.
+
+    CATALOG-LOOKUP-0009 says businesses SHOULD accept at least 1,000 IDs per
+    request — a floor, not a ceiling — and CATALOG-LOOKUP-0010 binds "requests
+    exceeding their limit". Without a declared `catalog_max_batch_size` trigger,
+    the runner does not know what limit (if any) the server enforces.
+    """
+    limit = self.require_trigger("catalog_max_batch_size")
     oversized = [f"item_{index}" for index in range(limit + 1)]
 
     response = self.catalog_lookup(oversized)
     self.assertEqual(
       response.status_code,
       400,
-      f"/catalog/lookup with {len(oversized)} IDs (limit {limit}) returned "
-      f"HTTP {response.status_code}, expected HTTP 400 request_too_large "
-      f"(CATALOG-LOOKUP-0010): {response.text[:300]}",
+      f"/catalog/lookup with {len(oversized)} IDs (declared limit {limit}) "
+      f"returned HTTP {response.status_code}, expected HTTP 400 "
+      f"request_too_large (CATALOG-LOOKUP-0010): {response.text[:300]}",
     )
     body = response.json()
     self.assertTrue(

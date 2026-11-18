@@ -68,7 +68,7 @@ rule in part. CHECKOUT-0142 stays fully checked through `TotalsTest`.
 | CATALOG-LOOKUP-0004 | MUST     | `CatalogLookupTest.test_duplicate_identifiers_are_deduplicated`                                                                                                                                                                  | Full    | `[sku, sku, sku]` returns the product once and lists `sku` once in `variants[].inputs`.                                                                                                                                                                                                                                                    |
 | CATALOG-LOOKUP-0006 | MUST     | `CatalogLookupTest.test_lookup_returns_product_once_for_multiple_identifiers`                                                                                                                                                    | Full    | Requesting `[product_id, variant_id]` in one `/catalog/lookup` call returns `product_id` once in `products[]`.                                                                                                                                                                                                                             |
 | CATALOG-LOOKUP-0007 | MUST NOT | `CatalogLookupTest.test_lookup_variants_all_carry_inputs_correlation`                                                                                                                                                            | Full    | Every variant in `products[].variants[]` has a non-empty `inputs[]` array whose entries correlate to the requested IDs with `exact` or `featured`.                                                                                                                                                                                         |
-| CATALOG-LOOKUP-0010 | MUST     | `CatalogLookupTest.test_batch_exceeding_limit_rejected_with_request_too_large`                                                                                                                                                   | Full    | A batch of `catalog_max_batch_size + 1` IDs (1001 by default) is rejected with HTTP 400 and error code `request_too_large`.                                                                                                                                                                                                                |
+| CATALOG-LOOKUP-0010 | MUST     | `CatalogLookupTest.test_batch_exceeding_limit_rejected_with_request_too_large`                                                                                                                                                   | Full    | A batch of `catalog_max_batch_size + 1` IDs is rejected with HTTP 400 and error code `request_too_large` (requires the `catalog_max_batch_size` trigger; `CATALOG-LOOKUP-0009`'s 1,000 is a recommended floor, not a ceiling).                                                                                                             |
 | CATALOG-LOOKUP-0012 | MUST     | `CatalogLookupTest.test_get_product_by_variant_id_places_variant_first`                                                                                                                                                          | Full    | `/catalog/product` called with `variant_id` returns `variants[0].id == variant_id`.                                                                                                                                                                                                                                                        |
 | CATALOG-LOOKUP-0014 | MUST     | `CatalogLookupTest.test_get_product_includes_effective_selected_options`                                                                                                                                                         | Full    | `/catalog/product` on `catalog_product_with_options` includes `product.selected` both when `selected` is omitted (matching `variants[0].options`) and when `selected` is sent.                                                                                                                                                             |
 | CATALOG-SEARCH-0003 | MUST     | `CatalogSearchTest.test_empty_search_request_is_rejected`                                                                                                                                                                        | Full    | `/catalog/search` with `{}` and with context-only `{"context": ...}` is rejected (HTTP 400 or `ucp.status: "error"`).                                                                                                                                                                                                                      |
@@ -321,9 +321,11 @@ add them, and change the counts above.
   `shopping/catalog/search_test.py` cover the 18 testable MUST and MUST NOT
   rules in `catalog/` (16 for lookup, 2 for search, including the 7 shared
   `unit_price` rules `CATALOG-0003..0009, 0011` and the two REST endpoint
-  rules `CATALOG-0045, 0046`). `CATALOG-LOOKUP-0010` probes the batch limit by
-  sending `catalog_max_batch_size + 1` identifiers (default 1000 per the
-  specification) and checking for HTTP 400 `request_too_large`.
+  rules `CATALOG-0045, 0046`). `CATALOG-LOOKUP-0010` probes the server's
+  declared batch limit by sending `catalog_max_batch_size + 1` identifiers
+  and checking for HTTP 400 `request_too_large` (skipping when
+  `catalog_max_batch_size` is undeclared, since `CATALOG-LOOKUP-0009`'s 1,000
+  is a recommended floor rather than a ceiling).
 - **Eligibility and provisional discounts:** `CheckoutLifecycleTest` and
   `DiscountSemanticsTest` cover the 8 testable MUST and MUST NOT rules for
   `context.eligibility` and provisional discounts (`CHECKOUT-0047, -0048,
@@ -380,17 +382,18 @@ transport)` on REST-only servers).
   free-shipping threshold and item, dynamic fulfillment destinations, a
   second or fixed-amount discount code, the catalog triggers (a
   multi-variant product, a product with selectable options, a `unit_price`
-  item whose pricing basis differs from its sale basis, and the search
-  endpoint's default page size), the eligibility triggers (an accepted
-  claim, a pricing claim, and an unverifiable claim), the fulfillment
-  destination triggers (`unserviceable_destination_id`, `pickup_location_id`,
-  `catalog_fulfills_to`), the totals and disclosure triggers
-  (`custom_total_item_sku`, `total_lines_item_sku`, `disclosure_item_sku`),
-  the completion-state triggers (`async_completion_item_sku`,
-  `escalation_item_sku`), the Action trigger (`action_item_sku`), the
-  quantity-unit triggers (`measured_item_sku`, `settlement_item_sku`), the
-  buyer-consent dependency trigger (`consent_with_dependency`), and the
-  order-edit trigger (`edited_order_item_sku`).
+  item whose pricing basis differs from its sale basis, the lookup endpoint's
+  batch limit, and the search endpoint's default page size), the eligibility
+  triggers (an accepted claim, a pricing claim, and an unverifiable claim), the
+  fulfillment destination triggers (`unserviceable_destination_id`,
+  `pickup_location_id`, `catalog_fulfills_to`), the totals and disclosure
+  triggers (`custom_total_item_sku`, `total_lines_item_sku`,
+  `disclosure_item_sku`), the completion-state triggers
+  (`async_completion_item_sku`, `escalation_item_sku`), the Action trigger
+  (`action_item_sku`), the quantity-unit triggers (`measured_item_sku`,
+  `settlement_item_sku`), the buyer-consent dependency trigger
+  (`consent_with_dependency`), and the order-edit trigger
+  (`edited_order_item_sku`).
 - **Needs the sample server:**
   - `PUT /orders/{id}`, which neither the draft nor any release defines:
     `test_order_update`, `test_order_adjustments`,

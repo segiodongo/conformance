@@ -2944,6 +2944,7 @@ class DynamicFixtureContext:
     "catalog_product_with_options": "get_catalog_product_with_options",
     "catalog_variant": "get_catalog_variant",
     "unit_price_item_sku": "get_unit_price_item_sku",
+    "catalog_max_batch_size": "get_catalog_max_batch_size",
     "catalog_search_default_page_size": "get_catalog_search_default_page_size",
     "accepted_eligibility_claim": "get_accepted_eligibility_claim",
     "pricing_eligibility_claim": "get_pricing_eligibility_claim",
@@ -3450,12 +3451,12 @@ class DynamicFixtureContext:
         return str(entry["id"])
     return "non_existent_id_99999"
 
-  def get_catalog_max_batch_size(self, default: int = 1000) -> int:
-    """Get the maximum batch size for `/catalog/lookup`, defaulting to 1000."""
+  def get_catalog_max_batch_size(self) -> int | None:
+    """Get the server's batch limit for `/catalog/lookup`, or None if unset."""
     val = self._get_test_fixture("catalog_max_batch_size")
     if _is_int(val) and val >= 1:
       return val
-    return default
+    return None
 
   def get_catalog_search_query(self) -> str:
     """Get a search query string that matches items in the server's catalog."""
