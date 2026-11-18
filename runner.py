@@ -34,11 +34,14 @@ from framework.discovery import (
   resolve_discovery_url,
 )
 from framework.outcomes import (
+  ERROR,
+  FAILED,
+  NOT_APPLICABLE,
+  PASSED,
   SKIP_CATEGORIES,
   SKIP_LABELS,
+  SKIPPED,
   RecordingResult,
-  is_not_applicable,
-  skip_category,
 )
 from framework.platform import PlatformProfile
 from framework.requirements import CatalogError
@@ -613,28 +616,21 @@ def main(argv: list[str] | None = None) -> int:
   )
   result = runner.run(test_suite)
 
-  # testsRun counts skipped tests too, so take them out of the passes. A
-  # skip that says the test doesn't apply to the server's version is
-  # reported apart from the other skips, which are broken down by category.
-  not_applicable = sum(
-    1 for _, reason in result.skipped if is_not_applicable(reason)
-  )
+  # One outcome per test (a test with two failing subtests is one failure),
+  # the same count the requirements report uses; unittest's own
+  # `failures` list has one entry per failing subtest. A skip that says the
+  # test doesn't apply to the server's version is reported apart from the
+  # other skips, which are broken down by category.
+  outcomes = list(result.outcomes.values())
+  counts = collections.Counter(outcome.status for outcome in outcomes)
   categories = collections.Counter(
-    skip_category(reason)[0]
-    for _, reason in result.skipped
-    if not is_not_applicable(reason)
-  )
-  passed = (
-    result.testsRun
-    - len(result.failures)
-    - len(result.errors)
-    - len(result.skipped)
+    outcome.category for outcome in outcomes if outcome.status == SKIPPED
   )
   sys.stdout.write("\n" + "=" * 70 + "\n")
   sys.stdout.write("CONFORMANCE TEST SUMMARY\n")
   sys.stdout.write(f"Total Executed: {result.testsRun}\n")
-  sys.stdout.write(f"Passed: {passed}\n")
-  sys.stdout.write(f"Skipped: {len(result.skipped) - not_applicable}\n")
+  sys.stdout.write(f"Passed: {counts[PASSED]}\n")
+  sys.stdout.write(f"Skipped: {counts[SKIPPED]}\n")
   if categories:
     by_reason = ", ".join(
       f"{SKIP_LABELS[category]} {categories[category]}"
@@ -642,10 +638,10 @@ def main(argv: list[str] | None = None) -> int:
       if categories[category]
     )
     sys.stdout.write(f"  by reason: {by_reason}\n")
-  if not_applicable:
-    sys.stdout.write(f"Not applicable: {not_applicable}\n")
-  sys.stdout.write(f"Failures: {len(result.failures)}\n")
-  sys.stdout.write(f"Errors: {len(result.errors)}\n")
+  if counts[NOT_APPLICABLE]:
+    sys.stdout.write(f"Not applicable: {counts[NOT_APPLICABLE]}\n")
+  sys.stdout.write(f"Failures: {counts[FAILED]}\n")
+  sys.stdout.write(f"Errors: {counts[ERROR]}\n")
   sys.stdout.write("=" * 70 + "\n")
 
   if args.requirements_report:

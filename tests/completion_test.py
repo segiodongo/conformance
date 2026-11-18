@@ -26,6 +26,7 @@ import json
 import unittest
 from unittest import mock
 
+from framework import base_test
 from shopping import base
 from tests import strict_store
 
@@ -357,6 +358,102 @@ class CompletionAgainstStrictStoreTest(unittest.TestCase):
 
     logged = " ".join(str(call) for call in warning.call_args_list)
     self.assertIn("missing_buyer_info", logged)
+
+
+class HttpExchangeTest(unittest.TestCase):
+  """Rendering of requests and responses for logs and failure reports."""
+
+  def test_request_shows_identifying_headers_and_redacts_credentials(self):
+    """UCP-Agent and the request IDs show; Authorization does not."""
+    request = base.httpx.Request(
+      "POST",
+      "https://store.example/ucp/checkout-sessions",
+      headers={
+        "UCP-Agent": 'profile="https://p.example/profile"',
+        "Idempotency-Key": "k-1",
+        "Authorization": "Bearer secret-token",
+        "Signature": "sig1=:abc:",
+        "Content-Type": "application/json",
+      },
+      json={"line_items": [{"item": {"id": "sku"}, "quantity": 1}]},
+    )
+    text = base_test.describe_request(request)
+    self.assertIn("> POST https://store.example/ucp/checkout-sessions", text)
+    self.assertIn('profile="https://p.example/profile"', text)
+    self.assertIn("k-1", text)
+    self.assertIn("authorization: <redacted>", text.lower())
+    self.assertNotIn("secret-token", text)
+    self.assertNotIn("sig1=:abc:", text)
+    self.assertIn('"quantity": 1', text)  # pretty-printed JSON body
+
+  def test_response_and_exchange(self):
+    """A response renders status, content type and body; bodies clip."""
+    request = base.httpx.Request("GET", "https://store.example/ucp/x")
+    response = base.httpx.Response(
+      200, json={"status": "incomplete"}, request=request
+    )
+    text = base_test.describe_response(response)
+    self.assertIn("< 200 for GET https://store.example/ucp/x", text)
+    self.assertIn("application/json", text)
+    self.assertIn('"status": "incomplete"', text)
+    exchange = base_test.describe_exchange(response)
+    self.assertTrue(exchange.startswith("> GET"))
+    self.assertEqual(base_test.describe_exchange(None), "")
+
+    long_body = "x" * (base_test.BODY_LIMIT + 10)
+    clipped = base_test.describe_response(
+      base.httpx.Response(200, text=long_body, request=request)
+    )
+    self.assertIn("(10 more characters)", clipped)
+
+  def test_client_hooks_record_the_last_response_and_log(self):
+    """The hooks keep the last response and log both sides when verbose."""
+    store = strict_store.StrictStore()
+    probe = make_probe(store)
+    probe._verbose_http = True
+    probe._last_response = None
+    probe.client = base.httpx.Client(
+      transport=base.httpx.MockTransport(store.handle),
+      event_hooks={
+        "request": [probe._note_request],
+        "response": [probe._note_response],
+      },
+    )
+
+    with mock.patch.object(base_test.logging, "info") as info:
+      created = probe.create_checkout_session(select_fulfillment=False)
+
+    self.assertEqual(probe._last_response.status_code, 201)
+    exchange = probe.describe_last_exchange()
+    self.assertIn(
+      "> POST https://store.example/ucp/checkout-sessions", exchange
+    )
+    self.assertIn(f'"id": "{created["id"]}"', exchange)
+    logged = " ".join(str(call) for call in info.call_args_list)
+    self.assertIn("HTTP request", logged)
+    self.assertIn("HTTP response", logged)
+
+  def test_hooks_are_quiet_without_the_flag(self):
+    """Without --verbose_http nothing is logged, but the response is kept."""
+    store = strict_store.StrictStore()
+    probe = make_probe(store)
+    probe._verbose_http = False
+    probe._last_response = None
+    probe.client = base.httpx.Client(
+      transport=base.httpx.MockTransport(store.handle),
+      event_hooks={
+        "request": [probe._note_request],
+        "response": [probe._note_response],
+      },
+    )
+
+    with mock.patch.object(base_test.logging, "info") as info:
+      probe.create_checkout_session(select_fulfillment=False)
+
+    self.assertFalse(
+      [c for c in info.call_args_list if "HTTP" in str(c)],
+    )
+    self.assertIsNotNone(probe._last_response)
 
 
 class TotalsWithTaxTest(unittest.TestCase):

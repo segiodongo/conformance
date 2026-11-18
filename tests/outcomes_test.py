@@ -301,6 +301,61 @@ class RecordingResultTest(unittest.TestCase):
     )
 
 
+class LastExchangeTest(unittest.TestCase):
+  """A failure or error ends with the test's last HTTP exchange."""
+
+  def test_attached_to_failures_errors_and_subtests(self):
+    """The exchange follows the traceback in failures and errors."""
+
+    class Case(unittest.TestCase):
+      def describe_last_exchange(self):
+        return '> POST /x\n< 200 for POST /x\n{"status": "incomplete"}'
+
+      def test_fails(self):
+        self.fail("no order")
+
+      def test_errors(self):
+        raise KeyError("order")
+
+      def test_subtest_fails(self):
+        with self.subTest(part=1):
+          self.fail("part one")
+
+    result = run(Case)
+
+    self.assertEqual(len(result.failures), 2)
+    self.assertEqual(len(result.errors), 1)
+    for _, formatted in result.failures + result.errors:
+      self.assertIn("Last HTTP exchange:", formatted)
+      self.assertIn('{"status": "incomplete"}', formatted)
+    # The traceback itself is still there, before the exchange.
+    _, failure_text = result.failures[0]
+    self.assertLess(
+      failure_text.index("AssertionError"),
+      failure_text.index("Last HTTP exchange:"),
+    )
+
+  def test_left_alone_without_an_exchange(self):
+    """No method, or nothing recorded, leaves the traceback as it is."""
+
+    class Plain(unittest.TestCase):
+      def test_fails(self):
+        self.fail("plain")
+
+    class Empty(unittest.TestCase):
+      def describe_last_exchange(self):
+        return ""
+
+      def test_fails(self):
+        self.fail("empty")
+
+    result = run(Plain, Empty)
+
+    self.assertEqual(len(result.failures), 2)
+    for _, formatted in result.failures:
+      self.assertNotIn("Last HTTP exchange:", formatted)
+
+
 class SkipReasonTest(unittest.TestCase):
   """Tests for building and reading categorised skip reasons."""
 

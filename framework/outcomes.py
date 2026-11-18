@@ -158,13 +158,15 @@ class RecordingResult(unittest.TextTestResult):
     self._record(test, Outcome(PASSED))
 
   def addFailure(self, test, err):  # noqa: N802
-    """Record a failed assertion."""
+    """Record a failed assertion, with the test's last HTTP exchange."""
     super().addFailure(test, err)
+    self._attach_exchange(test, self.failures)
     self._record(test, Outcome(FAILED, _message(err)))
 
   def addError(self, test, err):  # noqa: N802
-    """Record an error."""
+    """Record an error, with the test's last HTTP exchange."""
     super().addError(test, err)
+    self._attach_exchange(test, self.errors)
     self._record(test, Outcome(ERROR, _message(err, with_type=True)))
 
   def addSkip(self, test, reason):  # noqa: N802
@@ -195,11 +197,31 @@ class RecordingResult(unittest.TextTestResult):
       return
     where = subtest.id().removeprefix(test.id()).strip()
     if issubclass(err[0], test.failureException):
+      self._attach_exchange(test, self.failures)
       outcome = Outcome(FAILED, _shorten(f"{where}: {_message(err)}"))
     else:
+      self._attach_exchange(test, self.errors)
       detail = _message(err, with_type=True)
       outcome = Outcome(ERROR, _shorten(f"{where}: {detail}"))
     self._record(test, outcome)
+
+  @staticmethod
+  def _attach_exchange(test: object, entries: list) -> None:
+    """Append the test's last HTTP exchange to the entry just recorded.
+
+    `entries` is unittest's `failures` or `errors` list of
+    `(test, formatted traceback)` pairs; the text is what `printErrors`
+    shows under FAIL: or ERROR:. A test without `describe_last_exchange`
+    (a fixture holder, a unit test) is left alone.
+    """
+    describe = getattr(test, "describe_last_exchange", None)
+    if not callable(describe) or not entries:
+      return
+    exchange = describe()
+    if not exchange:
+      return
+    holder, formatted = entries[-1]
+    entries[-1] = (holder, f"{formatted}\nLast HTTP exchange:\n{exchange}\n")
 
   def outcomes_for(self, test_ids: Iterable[str]) -> dict[str, Outcome]:
     """Return the outcome of each of the given tests.

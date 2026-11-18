@@ -63,7 +63,7 @@ Useful optional flags:
 - `--auth_header="Authorization: Bearer <TOKEN>"` — if your server requires an API key or bearer token header.
 - `--simulation_secret=<SECRET>` — if your server implements `/testing/simulate-shipping/{id}` for order webhook tests.
 - `-k "<filter>"` — run a subset of tests (e.g. `-k "Catalog"`, `-k "CartTest"`, `-k "Fulfillment"`, `-k "Order"`).
-- `-v --verbose_http` — print full HTTP request/response bodies to debug failures.
+- `--verbose_http` — log every HTTP request and response the suite sends, with the request headers that identify it and both bodies (JSON pretty-printed, cut at 4 KB; credentials redacted). With or without it, a failing or erroring test ends its report with its last request and response.
 
 ### 4. View the generated HTML & Markdown coverage reports
 
