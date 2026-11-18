@@ -162,6 +162,12 @@ For example, a totals test that checks one rule fully and another in part:
 )
 ```
 
+Outcomes are recorded per test method, so when a test fails or hits an error,
+every rule its `@spec_assert` marker cites is affected, even if `unittest`
+stopped at an earlier assertion. Prefer one rule per test where the assertions
+are separable, and share one method only when the rules check the same
+exchange.
+
 `framework/requirements.py` looks rules up in the catalog. Before any test
 runs, the runner checks every shopping test's marker against it, and so does
 pytest:
@@ -276,10 +282,11 @@ The Markdown and HTML pages hold:
 - **By release:** for each release and the draft, the testable MUST and MUST
   NOT rules it states, removed rules included, and how many a test checks;
 - **Results,** after a run: for each capability, how many of its testable
-  rules with a test passed, failed, weren't run or don't apply to the
-  server's version; the upgrade list; then the rules that failed, the rules
-  whose tests didn't run, broken down by reason, and the rules the server's
-  version doesn't state, with their tests' messages;
+  rules with a test passed, failed, hit an error, weren't run or don't apply
+  to the server's version; the upgrade list; then the rules that failed, the
+  rules whose tests hit an error, the rules whose tests didn't run, broken
+  down by reason, and the rules the server's version doesn't state, with
+  their tests' messages;
 - **A section per capability:** the rules a test checks fully, then those
   checked only in part, each test with its gap, with their results after a
   run; then the testable MUST and MUST NOT rules without a test, which is the
@@ -293,9 +300,13 @@ A rule counts as covered when a `spec_assert` marker cites it as fully
 checked. A rule cited only with `partly` counts as checked in part, not
 covered, and in `matrix.json` each rule's `coverage` is `full`, `partial` or
 `none`. After a run, a rule passed when at least one of the tests that cite
-it passed and none failed; it failed when any of them failed or hit an
-error; and it wasn't run when they were all skipped or didn't run. A rule
-the version the server implements doesn't state is not applicable instead
+it passed and none failed or hit an error; it failed when any of them failed
+an assertion; it hit an error (`error` in `matrix.json`) when none failed and
+one raised an unexpected exception before checking it; and it wasn't run when
+they were all skipped or didn't run. Because outcomes are recorded per test
+method, a failure or error in a test that cites more than one rule applies to
+every rule it cites unless another test for the rule failed an assertion. A
+rule the version the server implements doesn't state is not applicable instead
 (see [Rules the server's version doesn't state](#rules-the-servers-version-doesnt-state)).
 Tests that check the rule only in part count here too, so a pass shows only
 what their assertions check. `findings.md` explains each partial claim.

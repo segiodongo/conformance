@@ -718,10 +718,12 @@ class PartialClaimTest(unittest.TestCase):
       {
         "passed": 1,
         "failed": 2,
+        "error": 0,
         "not_run": 0,
         "not_applicable": 0,
         "must_passed": 1,
         "must_failed": 2,
+        "must_error": 0,
         "must_not_run": 0,
         "must_not_applicable": 0,
       },
@@ -919,10 +921,12 @@ class ResultsTest(unittest.TestCase):
       {
         "passed": 2,
         "failed": 2,
+        "error": 0,
         "not_run": 1,
         "not_applicable": 0,
         "must_passed": 1,
         "must_failed": 2,
+        "must_error": 0,
         "must_not_run": 1,
         "must_not_applicable": 0,
       },
@@ -933,10 +937,12 @@ class ResultsTest(unittest.TestCase):
       {
         "passed": 2,
         "failed": 1,
+        "error": 0,
         "not_run": 0,
         "not_applicable": 0,
         "must_passed": 1,
         "must_failed": 1,
+        "must_error": 0,
         "must_not_run": 0,
         "must_not_applicable": 0,
       },
@@ -960,10 +966,12 @@ class ResultsTest(unittest.TestCase):
         "results": {
           "passed": 2,
           "failed": 2,
+          "error": 0,
           "not_run": 1,
           "not_applicable": 0,
           "must_passed": 1,
           "must_failed": 2,
+          "must_error": 0,
           "must_not_run": 1,
           "must_not_applicable": 0,
         },
@@ -1004,10 +1012,12 @@ class ResultsTest(unittest.TestCase):
       {
         "passed": 0,
         "failed": 0,
+        "error": 0,
         "not_run": 1,
         "not_applicable": 0,
         "must_passed": 0,
         "must_failed": 0,
+        "must_error": 0,
         "must_not_run": 1,
         "must_not_applicable": 0,
       },
@@ -1048,11 +1058,12 @@ class ResultsTest(unittest.TestCase):
       "run, by reason: other reason 1.** Test outcomes: 3 passed, 1 failed, "
       "1 error, 2 skipped, 0 not applicable, 1 not run.",
       "## Results",
-      "| cart | 1 | 0 | 0 | 1 | 0 | 1 | 0 | 0 | 1 | 0 |",
-      "| checkout | 3 | 2 | 1 | 0 | 0 | 2 | 1 | 1 | 0 | 0 |",
-      "| **All rules, each counted once** | 5 | 2 | 2 | 1 | 0 | 4 | 1 | 2 "
-      "| 1 | 0 |",
+      "| cart | 1 | 0 | 0 | 0 | 1 | 0 | 1 | 0 | 0 | 0 | 1 | 0 |",
+      "| checkout | 3 | 2 | 1 | 0 | 0 | 0 | 2 | 1 | 1 | 0 | 0 | 0 |",
+      "| **All rules, each counted once** | 5 | 2 | 2 | 0 | 1 | 0 | 4 | 1 "
+      "| 2 | 0 | 1 | 0 |",
       "### Rules that failed: 2",
+      "### Rules whose tests hit an error: 0",
       "`ExampleTest.test_b` **failed**: total 5 \\| expected \\*6\\* \\<b\\>",
       "### Rules whose tests didn't run: 1",
       "`ExampleTest.test_g` skipped: no cart capability",
@@ -1161,10 +1172,12 @@ class NotApplicableTest(unittest.TestCase):
       {
         "passed": 1,
         "failed": 0,
+        "error": 0,
         "not_run": 0,
         "not_applicable": 1,
         "must_passed": 1,
         "must_failed": 0,
+        "must_error": 0,
         "must_not_run": 0,
         "must_not_applicable": 1,
       },
@@ -1214,7 +1227,7 @@ class NotApplicableTest(unittest.TestCase):
       "failed and 0 weren't run. 1 more rule with a test doesn't apply to "
       "the version the server implements.** Test outcomes: 2 passed, 0 "
       "failed, 0 errors, 0 skipped, 1 not applicable, 0 not run.",
-      "| checkout | 2 | 1 | 0 | 0 | 1 | 2 | 1 | 0 | 0 | 1 |",
+      "| checkout | 2 | 1 | 0 | 0 | 0 | 1 | 2 | 1 | 0 | 0 | 0 | 1 |",
       "### Rules the version the server implements doesn't state: 1",
       "| CHECKOUT-0002 | MUST NOT | The business MUST NOT do "
       "REQ-SHOPPING-CHECKOUT-0002. | `ExampleTest.test_both` passed<br>"
@@ -1249,11 +1262,135 @@ class NotApplicableTest(unittest.TestCase):
   def test_json(self):
     """Test the result and the counts in matrix.json."""
     data = report.to_json(self.report)
-    self.assertEqual(data["format"], 4)
+    self.assertEqual(data["format"], 5)
     rules = {entry["id"]: entry["result"] for entry in data["rules"]}
     self.assertEqual(rules["REQ-SHOPPING-CHECKOUT-0002"], "not_applicable")
     self.assertEqual(data["run"]["tests"]["not_applicable"], 1)
     self.assertEqual(data["run"]["results"]["must_not_applicable"], 1)
+
+
+# A run exercising rule-level `error` vs `failed`:
+# - CART-0001 has only an errored test -> `error`.
+# - CATALOG-0001 has both a failed test and an errored test -> `failed`.
+# - CHECKOUT-0001 has both a passing test and an errored test -> `error`.
+# - CHECKOUT-0002 has a passing test -> `passed`.
+# - CHECKOUT-0003 (SHOULD) has a skipped test -> `not_run`.
+ERROR_TESTS = (
+  loaded("test_err_only", cites("REQ-SHOPPING-CART-0001")),
+  loaded("test_fail_and_err_1", cites("REQ-SHOPPING-CATALOG-0001")),
+  loaded("test_fail_and_err_2", cites("REQ-SHOPPING-CATALOG-0001")),
+  loaded(
+    "test_pass_and_err_1",
+    cites("REQ-SHOPPING-CHECKOUT-0001", "REQ-SHOPPING-CHECKOUT-0002"),
+  ),
+  loaded("test_pass_and_err_2", cites("REQ-SHOPPING-CHECKOUT-0001")),
+  loaded("test_skip_should", cites("REQ-SHOPPING-CHECKOUT-0003")),
+)
+ERROR_OUTCOMES = {
+  full_id("test_err_only"): Outcome(ERROR, "KeyError: 'buyer'"),
+  full_id("test_fail_and_err_1"): Outcome(FAILED, "status 500"),
+  full_id("test_fail_and_err_2"): Outcome(ERROR, "TimeoutError"),
+  full_id("test_pass_and_err_1"): Outcome(PASSED),
+  full_id("test_pass_and_err_2"): Outcome(ERROR, "ValueError: bad json"),
+  full_id("test_skip_should"): Outcome(
+    SKIPPED, "the server emits no allocations[]", "not_exercised"
+  ),
+}
+
+
+class ErrorResultTest(unittest.TestCase):
+  """Tests for rule-level `error` results, separate from `failed`."""
+
+  def setUp(self):
+    """Build the report for the run with errored tests."""
+    super().setUp()
+    self.report = report.build(CATALOG, ERROR_TESTS, ERROR_OUTCOMES, TARGET)
+
+  def test_precedence_and_counts(self):
+    """Test `FAILED` > `ERROR` > `PASSED` > `NOT_RUN`, and upgrade_list."""
+    self.assertEqual(
+      {rule.id: self.report.result(rule.id) for rule in self.report.rules},
+      {
+        "REQ-SHOPPING-CART-0001": ERROR,
+        "REQ-SHOPPING-CATALOG-0001": FAILED,
+        "REQ-SHOPPING-CHECKOUT-0001": ERROR,
+        "REQ-SHOPPING-CHECKOUT-0002": PASSED,
+        "REQ-SHOPPING-CHECKOUT-0003": NOT_RUN,
+        "REQ-SHOPPING-CHECKOUT-0004": report.NO_TEST,
+        "REQ-SHOPPING-OTHER-0001": report.NO_TEST,
+      },
+    )
+    self.assertEqual(
+      report.results(self.report, self.report.rules),
+      {
+        "passed": 1,
+        "failed": 1,
+        "error": 2,
+        "not_run": 1,
+        "not_applicable": 0,
+        "must_passed": 1,
+        "must_failed": 1,
+        "must_error": 2,
+        "must_not_run": 0,
+        "must_not_applicable": 0,
+      },
+    )
+    # Rules whose tests crashed without an assertion failure stay off the
+    # server's upgrade list; they are listed in their own section instead.
+    self.assertEqual(
+      [rule.id for rule in report.upgrade_list(self.report)],
+      ["REQ-SHOPPING-CATALOG-0001"],
+    )
+
+  def test_summary_markdown_html_and_json(self):
+    """Test non-zero `must_error` rendering across all report formats."""
+    self.assertIn(
+      "  results against http://localhost:8182: 1 of the 4 testable MUST and "
+      "MUST NOT rules with a test passed, 1 failed, 2 hit an error, "
+      "0 weren't run\n",
+      report.summary(self.report, []),
+    )
+
+    text = report.to_markdown(self.report)
+    for expected in (
+      "**Of the 4 testable MUST and MUST NOT rules with a test, 1 passed, 1 "
+      "failed, 2 hit an error and 0 weren't run.**",
+      "| checkout | 3 | 1 | 0 | 1 | 1 | 0 | 2 | 1 | 0 | 1 | 0 | 0 |",
+      "### Rules whose tests hit an error: 2",
+      "| CART-0001 | MUST | The business MUST do REQ-SHOPPING-CART-0001. | "
+      "`ExampleTest.test_err_only` **error**: KeyError: 'buyer' |",
+      "| CHECKOUT-0001 | MUST | **error** | The business MUST do "
+      "REQ-SHOPPING-CHECKOUT-0001. | `ExampleTest.test_pass_and_err_1` "
+      "passed<br>`ExampleTest.test_pass_and_err_2` **error** |",
+      "Of those 2, 1 passed, 0 failed, 1 hit an error and 0 weren't run.",
+      "a failure or error in a test that cites more than one rule applies to "
+      "every rule it cites",
+    ):
+      self.assertIn(expected, text)
+
+    page = report.to_html(self.report)
+    for expected in (
+      '<div class="big">1 / 4</div>testable MUST and MUST NOT rules with a '
+      "test passed: 1 failed, 2 error, 0 not run",
+      '<span class="stack"><span class="pass" style="width: 25%"></span>'
+      '<span class="fail" style="width: 25%"></span>'
+      '<span class="err" style="width: 50%"></span></span>',
+      '<td class="result"><span class="r-error">error</span></td>',
+      "<h3>Rules whose tests hit an error: 2</h3>",
+    ):
+      self.assertIn(expected, page)
+    balance = TagBalance()
+    balance.feed(page)
+    self.assertEqual((balance.open, balance.mismatched), ([], []))
+
+    data = report.to_json(self.report)
+    self.assertEqual(data["format"], 5)
+    self.assertEqual(data["run"]["results"]["error"], 2)
+    self.assertEqual(data["run"]["results"]["must_error"], 2)
+    rules = {entry["id"]: entry["result"] for entry in data["rules"]}
+    self.assertEqual(rules["REQ-SHOPPING-CART-0001"], "error")
+    self.assertEqual(rules["REQ-SHOPPING-CATALOG-0001"], "failed")
+    self.assertEqual(rules["REQ-SHOPPING-CHECKOUT-0001"], "error")
 
 
 # A run where every rule but one wasn't run, each for a different reason.
