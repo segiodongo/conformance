@@ -4242,8 +4242,17 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
         f"{describe_messages(errors)}",
       )
       return
+    if isinstance(data, dict) and ("code" in data or "content" in data):
+      self.assertTrue(
+        explains(data, paths=paths, codes=codes, words=words),
+        f"Expected the 4xx error to be about {about}; got:\n"
+        f"{describe_messages([data])}",
+      )
+      return
     text = (
-      str(data.get("detail")) if isinstance(data, dict) else response.text
+      str(data.get("detail"))
+      if isinstance(data, dict) and "detail" in data
+      else response.text
     ).casefold()
     self.assertTrue(
       any(word.casefold() in text for word in words),

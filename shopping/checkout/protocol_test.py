@@ -22,7 +22,11 @@ to a server advertising the shopping vertical.
 import uuid
 
 from absl.testing import absltest
-from framework.base_test import DEFAULT_UCP_VERSION
+from framework.agent_profile_server import AgentProfileServer
+from framework.base_test import (
+  DEFAULT_UCP_VERSION,
+  unsupported_version_profile_url,
+)
 from framework.decorators import (
   outside_catalog,
   requires_capability,
@@ -30,6 +34,7 @@ from framework.decorators import (
 )
 from shopping.base import (
   ShoppingIntegrationTestBase,
+  error_messages,
   get_valid_payment_payload,
   rest_entry,
 )
@@ -123,17 +128,25 @@ class ShoppingProtocolTest(ShoppingIntegrationTestBase):
     self.assertIsNotNone(shopping_service.get("endpoint"))
 
   @outside_catalog(
-    "overview/index.md, Request-Time Validation: a request with an "
-    "unsupported version MUST get a version_unsupported error"
+    "overview/index.md, Request-Time Validation: the platform declares its "
+    "protocol version through the `version` field of the profile the request "
+    "references; a request whose profile declares a version the business "
+    "does not support MUST get a version_unsupported error"
   )
   def test_version_negotiation(self):
-    """Test protocol version negotiation via headers.
+    """Test protocol version negotiation through the agent profile.
 
     Given a checkout creation request,
-    When the request includes a 'UCP-Agent' header with a compatible version,
-    then the request succeeds (200/201).
-    When the request includes a 'UCP-Agent' header with an incompatible
-    version, then the request fails with 422 Unprocessable Content.
+    When the UCP-Agent header references the suite's profile, which declares
+    the version the server advertises, then the request succeeds (200/201).
+    When it references a profile that declares a version no business
+    implements (2099-01-01), then the business refuses the request with a
+    `version_unsupported` error (overview/index.md, Error Codes: 422 over
+    REST; an in-band Error Response carrying the code is accepted too).
+
+    The UCP-Agent header carries only `profile="<uri>"` (checkout/rest.md,
+    Specific Header Requirements, RFC 8941 dictionary); the spec defines no
+    `version` parameter on it.
     """
     ucp_data = self._discovery_profile()
     shopping_service = self._shopping_service(ucp_data)
@@ -149,42 +162,47 @@ class ShoppingProtocolTest(ShoppingIntegrationTestBase):
     checkout_sessions_url = (
       f"{str(shopping_service.get('endpoint')).rstrip('/')}/checkout-sessions"
     )
-
-    create_payload = self.create_checkout_payload()
-
-    # 1. Compatible Version — use the version the server itself advertises in
-    # discovery, so the test stays correct across spec releases instead of
-    # pinning a literal that goes stale.
-    advertised = ucp_data.get("version")
-    advertised_version = (
-      advertised.get("root", "")
-      if isinstance(advertised, dict)
-      else str(advertised)
+    body = self.create_checkout_payload().model_dump(
+      mode="json", by_alias=True, exclude_none=True
     )
-    self.assertTrue(
-      advertised_version, "Discovery profile must advertise a UCP version"
-    )
-    headers = self.get_headers()
-    headers["UCP-Agent"] = f'profile="..."; version="{advertised_version}"'
+
+    # 1. Compatible version: the suite's profile declares the release the
+    # server under test targets (conformance input `ucp_version`).
     response = self.client.post(
-      checkout_sessions_url,
-      json=create_payload.model_dump(
-        mode="json", by_alias=True, exclude_none=True
-      ),
-      headers=headers,
+      checkout_sessions_url, json=body, headers=self.get_headers()
     )
     self.assert_response_status(response, [200, 201])
 
-    # 2. Incompatible Version
-    headers["UCP-Agent"] = 'profile="..."; version="2099-01-01"'
+    # 2. Incompatible version: a profile the suite serves that declares a
+    # version no business implements yet.
+    future_profile = unsupported_version_profile_url()
+    if future_profile is None:
+      self.skip_environment(
+        "the incompatible-version check needs the suite's profile server;"
+        " --agent_profile_url names a profile served elsewhere"
+      )
     response = self.client.post(
       checkout_sessions_url,
-      json=create_payload.model_dump(
-        mode="json", by_alias=True, exclude_none=True
-      ),
-      headers=headers,
+      json=body,
+      headers=self.get_headers(custom_profile_url=future_profile),
     )
-    self.assert_response_status(response, 422)
+    answered = response.json() if response.status_code in (200, 201) else {}
+    self.assertTrue(
+      response.status_code >= 400 or error_messages(answered),
+      "A request whose profile declares an unsupported version"
+      f" ({AgentProfileServer.UNSUPPORTED_VERSION}) was accepted with"
+      f" {response.status_code}; overview/index.md, Request-Time Validation:"
+      " the business MUST return a version_unsupported error (422 over"
+      " REST). The version comes from the profile the UCP-Agent header"
+      " references, not from a header parameter.",
+    )
+    self.assert_business_error(
+      response,
+      about="the platform's unsupported protocol version"
+      f" ({AgentProfileServer.UNSUPPORTED_VERSION})",
+      codes={"version_unsupported"},
+      words=("version",),
+    )
 
   # ── checkout/rest.md, Protocol Fundamentals ─────────────────────────────
   @spec_assert(

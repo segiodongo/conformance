@@ -403,7 +403,7 @@ transport)` on REST-only servers).
 
 ## Sample server findings
 
-`Universal-Commerce-Protocol/samples` at `360adbc`, which passes all but one
+`Universal-Commerce-Protocol/samples` at `360adbc`, which passes all but two
 of the tests that apply to its version:
 
 - It adds `PUT /orders/{id}` and `POST /testing/simulate-shipping/{id}`,
@@ -420,6 +420,11 @@ of the tests that apply to its version:
   ORDER-0009 and ORDER-0015 (Get Order MUST authenticate before answering).
   It does require the `Idempotency-Key` and `Request-Id` headers on Get
   Order, which the binding doesn't ask of a GET.
+- It reads the platform's protocol version from a non-standard `version=`
+  parameter on the `UCP-Agent` header rather than from the `version` field of
+  the profile the header references (`overview/index.md`, Request-Time
+  Validation), so it accepts a request whose profile declares `2099-01-01`
+  and fails `test_version_negotiation`.
 
 ## Coverage gaps
 

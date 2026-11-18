@@ -38,6 +38,12 @@ class AgentProfileServer:
 
   PROFILE_PATH = "/profiles/agent.json"
   LEGACY_PROFILE_PATH = "/profiles/shopping-agent.json"
+  # The same profile declaring a protocol version no business implements
+  # yet, for the incompatible-version check (overview/index.md, Request-Time
+  # Validation: the platform declares its version through the profile the
+  # request references).
+  UNSUPPORTED_VERSION_PROFILE_PATH = "/profiles/agent-unsupported-version.json"
+  UNSUPPORTED_VERSION = "2099-01-01"
 
   def __init__(
     self,
@@ -93,15 +99,20 @@ class AgentProfileServer:
     self._server: uvicorn.Server | None = None
     self._thread: threading.Thread | None = None
 
-  def render_profile(self) -> dict[str, Any]:
-    """Return the profile, with its placeholders filled in."""
+  def render_profile(self, version: str | None = None) -> dict[str, Any]:
+    """Return the profile, with its placeholders filled in.
+
+    Args:
+      version: The protocol version to declare; the server's own by default.
+
+    """
     content = self._profile_template
     if self.webhook_base_url:
       content = content.replace(
         "http://localhost:{webhook_port}", self.webhook_base_url.rstrip("/")
       )
     content = content.replace("{webhook_port}", str(self.webhook_port))
-    content = content.replace("{ucp_version}", self.ucp_version)
+    content = content.replace("{ucp_version}", version or self.ucp_version)
     profile = json.loads(content)
     if self.keys:
       profile["keys"] = self.keys
@@ -112,9 +123,17 @@ class AgentProfileServer:
     async def _respond_profile() -> JSONResponse:
       return JSONResponse(content=self.render_profile())
 
+    async def _respond_unsupported_version_profile() -> JSONResponse:
+      return JSONResponse(
+        content=self.render_profile(version=self.UNSUPPORTED_VERSION)
+      )
+
     self.app.get(self.PROFILE_PATH, response_model=None)(_respond_profile)
     self.app.get(self.LEGACY_PROFILE_PATH, response_model=None)(
       _respond_profile
+    )
+    self.app.get(self.UNSUPPORTED_VERSION_PROFILE_PATH, response_model=None)(
+      _respond_unsupported_version_profile
     )
 
     @self.app.get("/healthz")

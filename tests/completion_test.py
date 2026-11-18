@@ -537,7 +537,13 @@ class AssertBusinessErrorTest(unittest.TestCase):
     self.probe.assert_business_error(_response(422, body), **self.kwargs)
 
   def test_4xx_with_detail_or_text(self):
-    """A legacy 4xx body passes when its text mentions the problem."""
+    """A flat UCP 4xx or legacy detail/text body passes when it matches."""
+    self.probe.assert_business_error(
+      _response(422, {"code": "version_unsupported", "content": "No."}),
+      about="unsupported version",
+      codes={"version_unsupported"},
+      words=("version",),
+    )
     self.probe.assert_business_error(
       _response(400, {"detail": "Payment was declined"}), **self.kwargs
     )

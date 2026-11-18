@@ -26,7 +26,12 @@ from unittest import mock
 from absl.testing import flagsaver
 import runner
 from framework.agent_profile_server import AgentProfileServer
-from framework.base_test import agent_profile_url, flag_value, is_local_url
+from framework.base_test import (
+  agent_profile_url,
+  flag_value,
+  is_local_url,
+  unsupported_version_profile_url,
+)
 from framework.discovery import resolve_discovery_url
 from shopping.base import (
   DEFAULT_SHOPPING_FIXTURES,
@@ -404,6 +409,48 @@ class PublicAddressTest(unittest.TestCase):
       self.assertEqual(
         agent_profile_url(), "https://agent.example/profiles/agent.json"
       )
+
+  def test_unsupported_version_profile(self):
+    """Test the unsupported-version profile URL and rendered version."""
+    server = AgentProfileServer(
+      port=0, webhook_port=8284, ucp_version="2026-08-25"
+    )
+    compatible = server.render_profile()
+    unsupported = server.render_profile(
+      version=AgentProfileServer.UNSUPPORTED_VERSION
+    )
+    self.assertEqual(compatible["ucp"]["version"], "2026-08-25")
+    self.assertEqual(
+      unsupported["ucp"]["version"], AgentProfileServer.UNSUPPORTED_VERSION
+    )
+
+    with (
+      flagsaver.flagsaver(agent_profile_url=None),
+      mock.patch.dict(os.environ),
+    ):
+      os.environ.pop("FLAGS_agent_profile_url", None)
+      self.assertRegex(
+        unsupported_version_profile_url() or "",
+        r"^http://localhost:\d+/profiles/agent-unsupported-version\.json$",
+      )
+    with flagsaver.flagsaver(
+      agent_profile_url="https://agent.example/profiles/agent.json"
+    ):
+      self.assertEqual(
+        unsupported_version_profile_url(),
+        "https://agent.example/profiles/agent-unsupported-version.json",
+      )
+    with flagsaver.flagsaver(
+      agent_profile_url="https://agent.example/profiles/shopping-agent.json"
+    ):
+      self.assertEqual(
+        unsupported_version_profile_url(),
+        "https://agent.example/profiles/agent-unsupported-version.json",
+      )
+    with flagsaver.flagsaver(
+      agent_profile_url="https://external.example/.well-known/ucp"
+    ):
+      self.assertIsNone(unsupported_version_profile_url())
 
   def test_runner_notes_for_a_remote_server(self):
     """Test the runner's notes about addresses a remote server lacks."""

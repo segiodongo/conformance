@@ -229,6 +229,26 @@ def agent_profile_url() -> str:
   )
 
 
+def unsupported_version_profile_url() -> str | None:
+  """Return the URL of the suite's profile that declares an unsupported version.
+
+  It is the agent profile URL with the profile's path swapped, so it stays
+  reachable through whatever address `--agent_profile_url` gave for the
+  suite's profile server. None when that URL does not end in the suite's
+  profile path, that is, when the profile comes from somewhere else.
+  """
+  url = agent_profile_url()
+  for path in (
+    AgentProfileServer.PROFILE_PATH,
+    AgentProfileServer.LEGACY_PROFILE_PATH,
+  ):
+    if url.endswith(path):
+      return (
+        url[: -len(path)] + AgentProfileServer.UNSUPPORTED_VERSION_PROFILE_PATH
+      )
+  return None
+
+
 # How much of a body a log line or a failure report shows.
 BODY_LIMIT = 4096
 # Headers worth showing with a request; credentials are never shown.
