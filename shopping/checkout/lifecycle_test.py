@@ -15,6 +15,7 @@
 """Checkout Lifecycle tests for the UCP SDK Server."""
 
 from absl.testing import absltest
+from framework.base_test import is_local_http_url
 from framework.decorators import (
   no_rule,
   requires_capability,
@@ -805,12 +806,23 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
 
   @spec_assert("REQ-SHOPPING-CHECKOUT-0094")
   def test_continue_url_is_absolute_https_url(self):
-    """When present, `continue_url` must be an absolute HTTPS URL."""
+    """When present, `continue_url` must be an absolute HTTPS URL.
+
+    A server on this machine that is reached over plain HTTP builds its
+    `continue_url` from that address, so the URL is `http://localhost...`
+    by the run's arrangement, as its endpoints are. Such a URL is checked
+    for everything but its scheme, and the test then skips as an
+    environment limit, the way the TLS tests do, instead of failing or
+    passing a rule it could not check. An `http://` URL on any other host,
+    or from a server reached over HTTPS, fails as before.
+    """
+    local_http = self.reached_over_local_http()
     incomplete = self.create_checkout_session(select_fulfillment=False)
     ready = self.create_checkout_session(
       buyer=self.DEFAULT_BUYER, select_fulfillment=True
     )
     checked = 0
+    plaintext = []
     for label, body in (
       ("create (incomplete)", incomplete),
       ("create (ready)", ready),
@@ -819,12 +831,23 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
       if continue_url is not None:
         checked += 1
         self.assert_absolute_https_url(
-          continue_url, where=f"{label}.continue_url"
+          continue_url,
+          where=f"{label}.continue_url",
+          local_http_ok=local_http,
         )
+        if local_http and is_local_http_url(continue_url):
+          plaintext.append(continue_url)
     if checked == 0:
       self.skip_not_exercised(
         "checkout responses in non-terminal states omitted optional "
         "continue_url"
+      )
+    if plaintext:
+      self.skip_environment(
+        f"the server is reached over http on a local address ({self.base_url}"
+        f") and its continue_url is on one too ({plaintext[0]}), so the "
+        "HTTPS the URL MUST use can't be checked; serve the server over "
+        "HTTPS (or test a deployed instance) to check it"
       )
 
   def _reach_requires_escalation(self, sku: str) -> dict:
@@ -935,11 +958,15 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
     """A `requires_escalation` checkout must provide `continue_url`."""
     sku = self.require_trigger("escalation_item_sku")
     escalated = self._reach_requires_escalation(sku)
+    # The rules are about providing the URL. Its HTTPS scheme is
+    # CHECKOUT-0094's, which a server reached over plain HTTP on this
+    # machine cannot show (see test_continue_url_is_absolute_https_url).
     self.assert_requires_escalation(
       escalated,
       check_continue_url=True,
       check_buyer_message=False,
       where="requires_escalation checkout",
+      local_http_ok=self.reached_over_local_http(),
     )
 
   @spec_assert(

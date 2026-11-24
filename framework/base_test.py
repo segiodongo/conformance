@@ -55,6 +55,7 @@ __all__ = [
   "FLAGS",
   "agent_profile_url",
   "flag_value",
+  "is_local_http_url",
   "is_local_url",
   "merged_headers",
 ]
@@ -240,6 +241,15 @@ def is_local_url(url: str) -> bool:
   """Return whether a URL is on this machine, so it can reach localhost."""
   host = urlsplit(url).hostname or ""
   return host in _LOCAL_HOSTS or host.endswith(".localhost")
+
+
+def is_local_http_url(url: str) -> bool:
+  """Return whether a URL is plain HTTP on this machine.
+
+  A server under test on this machine is reached over plaintext by
+  arrangement, and a URL it builds from its own address is plaintext too.
+  """
+  return urlsplit(url).scheme.lower() == "http" and is_local_url(url)
 
 
 def agent_profile_url() -> str:
@@ -614,6 +624,15 @@ class BaseIntegrationTest(absltest.TestCase):
 
     """
     self.skipTest(f"{NOT_APPLICABLE_PREFIX} {why}")
+
+  def reached_over_local_http(self) -> bool:
+    """Return whether the server under test is on this machine, in plaintext.
+
+    Such a server is reached over `http://localhost` by the run's own
+    arrangement. What it then cannot show, such as TLS or an `https://` URL
+    built from its own address, is an environment limit, not its failure.
+    """
+    return is_local_http_url(self.base_url)
 
   def skip_unless_webhooks_reachable(self) -> None:
     """Skip if the server can't reach the mock webhook server.

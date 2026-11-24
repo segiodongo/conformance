@@ -43,7 +43,11 @@ what the spec allows. This store does otherwise:
   keeps the order events it would deliver in ``StrictStore.deliveries``;
 * it takes discount codes when given some, allocates each discount to the
   line items and so reports it as an ``items_discount`` total, as
-  discount.md has it, where the sample server reports ``discount``.
+  discount.md has it, where the sample server reports ``discount``;
+* it returns a ``continue_url`` when given the address to build it from,
+  which the sample server leaves out of a checkout that isn't escalated,
+  and hands a checkout for an item it is told about to the buyer
+  (``requires_escalation``).
 
 It serves ``httpx`` through a ``MockTransport``, so a test drives the suite's
 own helpers against it without a socket. ``StrictStore.requests`` keeps
@@ -180,6 +184,8 @@ class StrictStore:
     discount_total: str = "items_discount",
     automatic_discount: int = 0,
     discount_fault: str | None = None,
+    continue_url: str | None = None,
+    escalation_items: frozenset[str] | set[str] = frozenset(),
   ) -> None:
     """Configure the store.
 
@@ -238,6 +244,13 @@ class StrictStore:
         code's discount total carries a positive amount. "case_sensitive":
         a code in another case isn't matched. "unpriced": a code is listed
         as applied and takes nothing off the totals.
+      continue_url: What the store builds a checkout's `continue_url`
+        from: the checkout's id is added to it, and the URL is returned on
+        every checkout that isn't completed or canceled. None for a store
+        that returns no `continue_url`.
+      escalation_items: Items the store won't sell without the buyer: a
+        checkout for one, with nothing else missing, is
+        `requires_escalation`, with a message for the buyer.
 
     """
     self.needs_buyer = needs_buyer
@@ -259,6 +272,8 @@ class StrictStore:
     self.discount_total = discount_total
     self.automatic_discount = automatic_discount
     self.discount_fault = discount_fault
+    self.continue_url = continue_url
+    self.escalation_items = frozenset(escalation_items)
     self.checkouts: dict[str, dict[str, Any]] = {}
     self.orders: dict[str, dict[str, Any]] = {}
     self.requests: list[httpx.Request] = []
@@ -737,6 +752,19 @@ class StrictStore:
     checkout["totals"] = totals
     checkout["messages"] = problems
     checkout["status"] = "incomplete" if problems else "ready_for_complete"
+    if not problems and any(
+      li["item"]["id"] in self.escalation_items for li in checkout["line_items"]
+    ):
+      # Nothing the platform can supply is missing; the rest is the buyer's.
+      checkout["status"] = "requires_escalation"
+      checkout["messages"] = [
+        {
+          "type": "error",
+          "code": "buyer_confirmation_required",
+          "content": "The buyer has to confirm this purchase with the store.",
+          "severity": "requires_buyer_input",
+        }
+      ]
 
   def _discounts(
     self, checkout: dict[str, Any]
@@ -802,11 +830,12 @@ class StrictStore:
 
   # -- response shapes ------------------------------------------------------
 
-  @staticmethod
-  def _view(checkout: dict[str, Any]) -> dict[str, Any]:
+  def _view(self, checkout: dict[str, Any]) -> dict[str, Any]:
     view = {k: v for k, v in checkout.items() if not k.startswith("_")}
     if view.get("buyer") is None:
       view.pop("buyer", None)
+    if self.continue_url and view["status"] not in ("completed", "canceled"):
+      view["continue_url"] = f"{self.continue_url}/{view['id']}"
     return view
 
   @staticmethod

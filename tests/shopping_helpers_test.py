@@ -985,6 +985,42 @@ class TotalsMessagesAndLinksHelpersTest(unittest.TestCase):
         problems = base.absolute_https_url_problems(bad_url)
         self.assertTrue(any("CHECKOUT-0094" in p for p in problems))
 
+  def test_absolute_https_url_problems_on_local_http(self) -> None:
+    """Plain HTTP on a local address passes only when the caller says so."""
+    local_urls = (
+      "http://localhost:8182/checkout/chk_123",
+      "http://127.0.0.1:8182/checkout/chk_123",
+      "http://[::1]:8182/checkout/chk_123",
+      "HTTP://shop.localhost/checkout/chk_123",
+    )
+    for url in local_urls:
+      with self.subTest(url=url):
+        self.assertEqual(
+          base.absolute_https_url_problems(url, local_http_ok=True), []
+        )
+        problems = base.absolute_https_url_problems(url)
+        self.assertEqual(len(problems), 1)
+        self.assertIn("URL scheme must be 'https'", problems[0])
+    # The flag lets the scheme of a local URL pass, and nothing else.
+    for bad_url in (
+      "",
+      "http://business.example.com/checkout/chk_123",
+      "http://localhost.example.com/checkout/chk_123",
+      "ftp://localhost/checkout/chk_123",
+      "/checkout/chk_123",
+      "http:///checkout/chk_123",
+      "http://localhost:8182/checkout sessions/chk_123",
+    ):
+      with self.subTest(url=bad_url):
+        problems = base.absolute_https_url_problems(bad_url, local_http_ok=True)
+        self.assertTrue(any("CHECKOUT-0094" in p for p in problems))
+    self.assertEqual(
+      base.absolute_https_url_problems(
+        "https://localhost:8443/checkout/chk_123", local_http_ok=True
+      ),
+      [],
+    )
+
   def test_disclosure_warning_problems(self) -> None:
     """Disclosure warnings check presentation, path, and policy type link."""
     body_with_policy = {
@@ -1187,6 +1223,34 @@ class CompletionStatesHelpersTest(unittest.TestCase):
       missing_both, check_continue_url=False, check_buyer_message=True
     )
     self.assertTrue(any("CHECKOUT-0108" in p for p in msg_problems))
+
+  def test_requires_escalation_problems_on_local_http(self) -> None:
+    """A local plain-HTTP continue_url is provided, if the caller allows it."""
+    body = {
+      "id": "chk_esc_4",
+      "status": "requires_escalation",
+      "continue_url": "http://localhost:8182/checkout/chk_esc_4",
+    }
+    self.assertEqual(
+      base.requires_escalation_problems(
+        body, check_buyer_message=False, local_http_ok=True
+      ),
+      [],
+    )
+    problems = base.requires_escalation_problems(
+      body, check_buyer_message=False
+    )
+    self.assertEqual(len(problems), 1)
+    self.assertIn("URL scheme must be 'https'", problems[0])
+    self.assertIn("(CHECKOUT-0091, CHECKOUT-0107)", problems[0])
+    # A missing continue_url is missing whatever the run's address.
+    self.assertTrue(
+      base.requires_escalation_problems(
+        {"id": "chk_esc_5", "status": "requires_escalation"},
+        check_buyer_message=False,
+        local_http_ok=True,
+      )
+    )
 
 
 class ActionsHelpersTest(unittest.TestCase):

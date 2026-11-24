@@ -35,6 +35,7 @@ from framework.base_test import (
   FLAGS,
   BaseIntegrationTest,
   flag_value,
+  is_local_http_url,
   merged_headers,
 )
 from framework.decorators import requires_capability
@@ -1078,12 +1079,22 @@ def rfc9535_jsonpath_problems(
 
 
 def absolute_https_url_problems(
-  url_value: Any, *, where: str = "continue_url"
+  url_value: Any, *, where: str = "continue_url", local_http_ok: bool = False
 ) -> list[str]:
   """Return every problem with an absolute HTTPS URL under CHECKOUT-0094.
 
   checkout/index.md (Continue URL > Format):
     - CHECKOUT-0094: The `continue_url` MUST be an absolute HTTPS URL.
+
+  Args:
+    url_value: The URL as the server returned it.
+    where: What carried it, for the messages.
+    local_http_ok: Let the scheme of an `http://` URL on a local address
+      pass. For a run against a server that is itself reached over plain
+      HTTP on this machine: it builds the URL from its own address, which
+      is the run's arrangement and not the server's choice. Everything else
+      stays a problem, an `http://` URL on any other host included.
+
   """
   if not isinstance(url_value, str) or not url_value.strip():
     return [
@@ -1097,7 +1108,9 @@ def absolute_https_url_problems(
     ]
   parsed = urllib.parse.urlsplit(url_value)
   problems: list[str] = []
-  if parsed.scheme.lower() != "https":
+  if parsed.scheme.lower() != "https" and not (
+    local_http_ok and is_local_http_url(url_value)
+  ):
     problems.append(
       f"{where}: URL scheme must be 'https', got {parsed.scheme!r} in "
       f"{url_value!r} (CHECKOUT-0094)"
@@ -1393,6 +1406,7 @@ def requires_escalation_problems(
   check_continue_url: bool = True,
   check_buyer_message: bool = True,
   where: str = "checkout",
+  local_http_ok: bool = False,
 ) -> list[str]:
   """Return every problem with a `requires_escalation` checkout response.
 
@@ -1402,6 +1416,10 @@ def requires_escalation_problems(
     - CHECKOUT-0108: MUST include at least one message with `severity` of
       `requires_buyer_input` or `requires_buyer_review` when returning
       `status` = `requires_escalation`.
+
+  The `continue_url` provided has to be a usable one, so its format is
+  checked too; `local_http_ok` lets a plain-HTTP URL on a local address
+  pass, as `absolute_https_url_problems` describes.
   """
   if not isinstance(body, dict):
     return [f"{where}: response body is not a dict ({body!r})"]
@@ -1424,7 +1442,9 @@ def requires_escalation_problems(
       )
     else:
       url_problems = absolute_https_url_problems(
-        continue_url, where=f"{where}.continue_url"
+        continue_url,
+        where=f"{where}.continue_url",
+        local_http_ok=local_http_ok,
       )
       for prob in url_problems:
         problems.append(f"{prob} (CHECKOUT-0091, CHECKOUT-0107)")
@@ -5268,10 +5288,19 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     )
 
   def assert_absolute_https_url(
-    self, url_value: Any, where: str = "continue_url"
+    self,
+    url_value: Any,
+    where: str = "continue_url",
+    local_http_ok: bool = False,
   ) -> None:
-    """Assert `url_value` is an absolute HTTPS URL."""
-    problems = absolute_https_url_problems(url_value, where=where)
+    """Assert `url_value` is an absolute HTTPS URL.
+
+    With `local_http_ok`, a plain-HTTP URL on a local address passes (see
+    `absolute_https_url_problems`).
+    """
+    problems = absolute_https_url_problems(
+      url_value, where=where, local_http_ok=local_http_ok
+    )
     self.assertFalse(
       problems,
       f"{where} violates absolute HTTPS URL rules:\n  " + "\n  ".join(problems),
@@ -5327,6 +5356,7 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     check_continue_url: bool = True,
     check_buyer_message: bool = True,
     where: str = "checkout",
+    local_http_ok: bool = False,
   ) -> None:
     """Assert `body` satisfies `requires_escalation` rules."""
     problems = requires_escalation_problems(
@@ -5334,6 +5364,7 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
       check_continue_url=check_continue_url,
       check_buyer_message=check_buyer_message,
       where=where,
+      local_http_ok=local_http_ok,
     )
     self.assertFalse(
       problems,
