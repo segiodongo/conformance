@@ -29,7 +29,7 @@ from absl.testing import absltest
 from framework import signatures, transport
 from framework.agent_profile_server import AgentProfileServer
 from framework.constants import DEFAULT_UCP_VERSION
-from framework.decorators import spec_marker
+from framework.decorators import VERSION_RE, spec_marker
 from framework.discovery import (
   UcpProfile,
   fetch_server_profile,
@@ -43,7 +43,7 @@ from framework.outcomes import (
   skip_reason,
 )
 from framework.requirements import Catalog, CatalogError, load_catalog
-from framework.versions import applicability
+from framework.versions import advertised_version, applicability
 import httpx
 
 # Re-exported so suites can keep importing the default release from the base
@@ -335,6 +335,12 @@ class BaseIntegrationTest(absltest.TestCase):
 
   server_profile: UcpProfile | None = None
 
+  # Headers that make the test's requests user-authenticated, such as
+  # `Authorization: Bearer <token>`. None for a test that acts for no
+  # particular user; a test that acts for one sets them (see
+  # `get_headers`), and they ride on every request it sends from then on.
+  user_headers: dict[str, str] | None = None
+
   # Conformance input used when --conformance_input is not given. A vertical's
   # base class points this at its bundled sample fixture. It is resolved here,
   # before the agent profile server starts, so the agent advertises the
@@ -485,6 +491,32 @@ class BaseIntegrationTest(absltest.TestCase):
     if not result.applies:
       self.skipTest(result.skip_reason)
 
+  def server_implements(self, release: str, *capabilities: str) -> bool:
+    """Return whether the server implements a release, or a later one.
+
+    For behaviour a release introduced on a page the catalog doesn't cover,
+    where no rule carries the version and `spec_assert` can't decide. The
+    version compared is the one the server advertises for the first of the
+    capabilities it offers, else its profile's own. A server that advertises
+    no version, or one that isn't a release date, is taken to implement the
+    current specification, as `framework.versions` takes it. When the
+    server's profile is not known no version check applies, here as there.
+
+    Args:
+      release: A release date, such as "2026-08-25".
+      *capabilities: The capabilities the behaviour belongs to.
+
+    Returns:
+      True when the server's version is `release` or later.
+
+    """
+    if self.server_profile is None:
+      return False
+    advertised = advertised_version(self.server_profile, capabilities)
+    if not advertised or not VERSION_RE.match(advertised):
+      return True
+    return advertised >= release
+
   def _start_agent_server(self) -> None:
     agent_port = FLAGS.mock_agent_port if FLAGS.is_parsed() else 8285
     webhook_port = FLAGS.mock_webhook_port if FLAGS.is_parsed() else 8284
@@ -557,7 +589,9 @@ class BaseIntegrationTest(absltest.TestCase):
     """Generate standard UCP transport headers.
 
     The RFC 9421 signature headers are added by the client when it sends
-    the request. The configured --auth_header, if any, rides along here.
+    the request. The configured --auth_header, if any, rides along here,
+    and so do the test's `user_headers`, which come last: on a request made
+    for a user, the user's credential replaces a header of the same name.
     """
     profile_url = custom_profile_url or agent_profile_url()
     headers = {
@@ -570,19 +604,30 @@ class BaseIntegrationTest(absltest.TestCase):
     credential = auth_header()
     if credential:
       headers[credential[0]] = credential[1]
+    if self.user_headers:
+      # Header names are case-insensitive: drop what the user's replace.
+      replaced = {name.lower() for name in self.user_headers}
+      headers = {
+        name: value
+        for name, value in headers.items()
+        if name.lower() not in replaced
+      }
+      headers.update(self.user_headers)
     return headers
 
   def credential_free_headers(self) -> dict[str, str]:
     """Return the transport headers with every credential left out.
 
     What remains names the platform (UCP-Agent) and the request
-    (Idempotency-Key, Request-Id, Content-Type); nothing authenticates it.
+    (Idempotency-Key, Request-Id, Content-Type); nothing authenticates it,
+    neither the platform nor a user the test acts for.
     Send the request with ``auth=None`` so the client adds no signature.
     """
     credential = auth_header()
     dropped = {"request-signature", "authorization", "x-api-key"}
     if credential:
       dropped.add(credential[0].lower())
+    dropped.update(name.lower() for name in self.user_headers or {})
     return {
       name: value
       for name, value in self.get_headers().items()

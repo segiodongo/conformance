@@ -29,6 +29,7 @@ from shopping import base
 from shopping.order import order_test
 from shopping.validation import invalid_input_test
 from tests import strict_store
+from tests.strict_store import wired
 
 # The address `test_order_update` sends comes from the sample's CSV data.
 FLOWER_SHOP = Path(base.__file__).resolve().parent / "fixtures" / "flower_shop"
@@ -41,26 +42,6 @@ PUT_TESTS = (
   (invalid_input_test.InvalidInputTest, "test_invalid_adjustment_status"),
   (invalid_input_test.InvalidInputTest, "test_malformed_adjustment_payload"),
 )
-
-
-def wired(
-  case: type[base.ShoppingIntegrationTestBase],
-  method: str,
-  store: strict_store.StrictStore,
-) -> base.ShoppingIntegrationTestBase:
-  """Return a suite test whose requests land in `store`.
-
-  The test's `setUp` is not run: it would look for a server. The caller
-  calls the test method itself.
-  """
-  test = case(method)
-  test.client = store.client()
-  test._shopping_service_endpoint = strict_store.ENDPOINT
-  test.conformance_config = {}
-  test.fixture_ctx = base.DynamicFixtureContext({})
-  # The completion poll waits for real time otherwise.
-  test.COMPLETION_POLL_SECONDS = 0
-  return test
 
 
 def order_requests(store: strict_store.StrictStore) -> list[str]:

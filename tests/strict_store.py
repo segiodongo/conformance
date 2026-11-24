@@ -29,7 +29,11 @@ what the spec allows. This store does otherwise:
 * it builds the fulfillment options itself from the destination the
   platform sends, and reports an unknown ``selected_option_id`` as an error;
 * it serves Get Order and, like the spec, defines no way to edit an order:
-  ``PUT /orders/{id}`` is answered 405.
+  ``PUT /orders/{id}`` is answered 405;
+* it offers a buyer it knows their saved addresses as destinations only on
+  a request that carries that buyer's bearer token, as identity linking
+  requires of a business from 2026-08-25 (the sample server goes by the
+  buyer's email alone, which ``stored_state="email"`` reproduces).
 
 It serves ``httpx`` through a ``MockTransport``, so a test drives the suite's
 own helpers against it without a socket. ``StrictStore.requests`` keeps
@@ -43,6 +47,7 @@ import json
 from typing import Any
 
 import httpx
+from shopping import base
 
 ENDPOINT = "https://store.example/ucp"
 
@@ -70,6 +75,36 @@ def _error(code: str, path: str, content: str) -> dict[str, Any]:
   }
 
 
+def wired(
+  case: type[base.ShoppingIntegrationTestBase],
+  method: str,
+  store: StrictStore,
+  fixtures: dict[str, Any] | None = None,
+) -> base.ShoppingIntegrationTestBase:
+  """Return a suite test whose requests land in `store`.
+
+  The test's `setUp` is not run: it would look for a server. The caller
+  calls the test method itself.
+
+  Args:
+    case: The suite's test class.
+    method: The name of the test method the instance is for.
+    store: The scripted store that answers its requests.
+    fixtures: What `test_fixtures` declares, such as a `known_customer`.
+
+  """
+  test = case(method)
+  test.client = store.client()
+  test._shopping_service_endpoint = ENDPOINT
+  test.conformance_config = {}
+  test.fixture_ctx = base.DynamicFixtureContext(
+    {"test_fixtures": fixtures or {}}
+  )
+  # The completion poll waits for real time otherwise.
+  test.COMPLETION_POLL_SECONDS = 0
+  return test
+
+
 class StrictStore:
   """The scripted store; see the module docstring for its postures."""
 
@@ -81,6 +116,8 @@ class StrictStore:
     async_completion: bool = False,
     order_get: int = 200,
     order_put: int = 405,
+    customers: dict[str, dict[str, Any]] | None = None,
+    stored_state: str = "authenticated",
   ) -> None:
     """Configure the store.
 
@@ -96,6 +133,13 @@ class StrictStore:
         told otherwise, since the spec defines only Get Order; with 200 the
         store keeps the body and returns it, as the sample server's own
         endpoint does.
+      customers: The buyers the store knows, by email, each as
+        `{"token": ..., "addresses": [...]}`: the bearer token that
+        authenticates the buyer and the addresses the store keeps for them.
+      stored_state: When the store answers from what it keeps for a buyer.
+        "authenticated": only on a request with `Authorization: Bearer`
+        and the buyer's token. "email": on any request that names the
+        buyer's email, as the sample server does.
 
     """
     self.needs_buyer = needs_buyer
@@ -103,11 +147,15 @@ class StrictStore:
     self.async_completion = async_completion
     self.order_get = order_get
     self.order_put = order_put
+    self.customers = customers or {}
+    self.stored_state = stored_state
     self.checkouts: dict[str, dict[str, Any]] = {}
     self.orders: dict[str, dict[str, Any]] = {}
     self.requests: list[httpx.Request] = []
     self._pending: set[str] = set()
     self._counter = 0
+    # The Authorization header of the request being answered.
+    self._authorization: str | None = None
 
   # -- httpx plumbing -------------------------------------------------------
 
@@ -118,6 +166,7 @@ class StrictStore:
   def handle(self, request: httpx.Request) -> httpx.Response:
     """Route one request."""
     self.requests.append(request)
+    self._authorization = request.headers.get("authorization")
     path = request.url.path
     body = json.loads(request.content) if request.content else {}
     prefix = httpx.URL(ENDPOINT).path
@@ -311,10 +360,13 @@ class StrictStore:
       checkout.pop("fulfillment", None)
       return
     sent = fulfillment["methods"][0]
-    destinations = [
-      {**d, "id": d.get("id") or self._new_id("dest")}
-      for d in sent.get("destinations", [])
-    ]
+    destinations = self._with_stored_addresses(
+      checkout,
+      [
+        {**d, "id": d.get("id") or self._new_id("dest")}
+        for d in sent.get("destinations", [])
+      ],
+    )
     selected_destination = sent.get("selected_destination_id")
     if selected_destination not in {d["id"] for d in destinations}:
       selected_destination = None
@@ -359,6 +411,51 @@ class StrictStore:
       ]
     }
     checkout["_fulfillment_problems"] = problems
+
+  def _stored_addresses(self, checkout: dict[str, Any]) -> list[dict[str, Any]]:
+    """Return the addresses kept for the checkout's buyer, when it may.
+
+    The buyer is known by the email on the checkout. In the "authenticated"
+    posture the request must carry the buyer's bearer token as well: stored
+    user state goes to a user-authenticated request only.
+    """
+    email = (checkout.get("buyer") or {}).get("email")
+    customer = self.customers.get(email)
+    if customer is None:
+      return []
+    if (
+      self.stored_state == "authenticated"
+      and self._authorization != f"Bearer {customer['token']}"
+    ):
+      return []
+    return customer.get("addresses", [])
+
+  def _with_stored_addresses(
+    self, checkout: dict[str, Any], destinations: list[dict[str, Any]]
+  ) -> list[dict[str, Any]]:
+    """Add the buyer's stored addresses to the destinations the platform sent.
+
+    Each stored address has a stable id of the store's own. A destination
+    the platform sent with the content of a stored address comes back under
+    that id, once.
+    """
+    stored = {
+      f"addr_{index}": address
+      for index, address in enumerate(self._stored_addresses(checkout), 1)
+    }
+    merged = []
+    for destination in destinations:
+      for stored_id, address in stored.items():
+        if all(destination.get(k) == v for k, v in address.items()):
+          destination = {**destination, "id": stored_id}
+      merged.append(destination)
+    present = {d["id"] for d in merged}
+    merged.extend(
+      {"id": stored_id, "type": "shipping_address", **address}
+      for stored_id, address in stored.items()
+      if stored_id not in present
+    )
+    return merged
 
   def _settle(self, checkout: dict[str, Any]) -> None:
     """Recompute messages, totals and status from the checkout's state."""

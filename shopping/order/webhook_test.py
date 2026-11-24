@@ -207,13 +207,14 @@ class WebhookTest(ShoppingIntegrationTestBase):
     )
 
   @scenario(
-    "the store offers its known customer's stored addresses (fixtures) as "
-    "destinations, and the order event's expectation carries the one "
-    "selected; no rule requires either"
+    "the store offers its known, user-authenticated customer's stored "
+    "addresses (fixtures) as destinations, and the order event's "
+    "expectation carries the one selected; no rule requires either"
   )
   def test_webhook_order_address_known_customer(self) -> None:
     """Test that webhook contains correct address for known customer/address."""
     customer = self.require_trigger("known_customer")
+    self.act_as(customer)
     if not customer.get("addresses"):
       self.skip_no_trigger("known_customer with stored addresses")
     buyer_info = {
@@ -333,6 +334,8 @@ class WebhookTest(ShoppingIntegrationTestBase):
   def test_webhook_order_address_new_address(self) -> None:
     """Test that webhook contains correct address when a new one is provided."""
     customer = self.require_trigger("known_customer")
+    # The address is the platform's own, so nothing stored is expected back.
+    self.act_as(customer, expects_stored_state=False)
     buyer_info = {
       "fullName": customer.get("full_name", ""),
       "email": customer["email"],

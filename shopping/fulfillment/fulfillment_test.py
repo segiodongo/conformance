@@ -304,8 +304,8 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
     )
 
   @scenario(
-    "an unknown buyer gets no saved addresses filled in; filling in saved "
-    "addresses by buyer email is a store feature no rule covers"
+    "an unknown buyer gets no saved addresses filled in; filling in a "
+    "buyer's saved addresses is a store feature no rule requires"
   )
   def test_unknown_customer_no_address(self) -> None:
     """Test that an unknown customer gets no automatic address injection."""
@@ -342,11 +342,13 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
 
   @scenario(
     "a known buyer with no saved addresses gets none filled in; filling in "
-    "saved addresses is a store feature no rule covers"
+    "a user-authenticated buyer's saved addresses is a store feature no "
+    "rule requires"
   )
   def test_known_customer_no_address(self) -> None:
     """Test that a known customer with no stored address gets no injection."""
     customer = self.require_trigger("known_customer_without_address")
+    self.act_as(customer, key="known_customer_without_address")
     response_json = self.create_checkout_session(
       buyer=self._build_buyer_payload(customer),
       select_fulfillment=False,
@@ -372,12 +374,13 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
     self.assertTrue(destinations is None or len(destinations) == 0)
 
   @scenario(
-    "a known buyer's saved addresses are filled in as destinations; filling "
-    "in saved addresses is a store feature no rule covers"
+    "a known, user-authenticated buyer's saved addresses are filled in as "
+    "destinations; filling them in is a store feature no rule requires"
   )
   def test_known_customer_one_address(self) -> None:
     """Test that a known customer's stored addresses get injected."""
     customer = self.require_trigger("known_customer")
+    self.act_as(customer)
     if not customer.get("addresses"):
       self.skip_no_trigger("known_customer with stored addresses")
     stored_addresses = customer["addresses"]
@@ -420,6 +423,7 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
   def test_known_customer_multiple_addresses_selection(self) -> None:
     """Test selecting between multiple addresses for a known customer."""
     customer = self.require_trigger("known_customer")
+    self.act_as(customer)
     stored_addresses = customer.get("addresses", [])
     if len(stored_addresses) < 2:
       self.skip_no_trigger("known_customer with at least two stored addresses")
@@ -505,6 +509,8 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
   def test_known_customer_new_address(self) -> None:
     """Test that providing a new address works for a known customer."""
     customer = self.require_trigger("known_customer")
+    # The address is the platform's own, so nothing stored is expected back.
+    self.act_as(customer, expects_stored_state=False)
 
     response_json = self.create_checkout_session(
       buyer=self._build_buyer_payload(customer)
@@ -582,8 +588,9 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
     )
 
   @scenario(
-    "resubmitted saved-address content comes back under its existing ID, "
-    "a store feature (address de-duplication) that no rule covers"
+    "a user-authenticated buyer's resubmitted saved-address content comes "
+    "back under its existing ID, a store feature (address de-duplication) "
+    "that no rule covers"
   )
   def test_known_user_existing_address_reuse(self) -> None:
     """Test that an existing address is reused (same ID returned).
@@ -593,6 +600,7 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
     Then the server should reuse the existing address ID.
     """
     customer = self.require_trigger("known_customer")
+    self.act_as(customer)
     if not customer.get("addresses"):
       self.skip_no_trigger("known_customer with stored addresses")
     stored_address = customer["addresses"][0]

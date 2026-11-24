@@ -2862,11 +2862,16 @@ class AddressFixture(TypedDict, total=False):
 
 
 class CustomerFixture(TypedDict, total=False):
-  """A buyer the server under test knows, with any stored addresses."""
+  """A buyer the server under test knows, with any stored addresses.
+
+  `headers`, when declared, are the credentials that make a request
+  user-authenticated for this buyer, such as `Authorization: Bearer ...`.
+  """
 
   full_name: str
   email: str
   addresses: list[AddressFixture]
+  headers: dict[str, str]
 
 
 class DynamicFulfillmentCaseFixture(TypedDict):
@@ -3191,23 +3196,42 @@ class DynamicFixtureContext:
       val = self._fallback_config.get("test_fixtures", {}).get(key)
     return val
 
+  @staticmethod
+  def _customer_fixture(val: Any) -> CustomerFixture | None:
+    """Read a customer fixture; None when it is absent or malformed.
+
+    A customer needs an `email`. Its optional `headers` must be an object
+    of header names and string values.
+    """
+    if not isinstance(val, dict) or not val.get("email"):
+      return None
+    headers = val.get("headers")
+    if headers is not None and not (
+      isinstance(headers, dict)
+      and all(
+        isinstance(name, str)
+        and name.strip()
+        and isinstance(value, str)
+        and value
+        for name, value in headers.items()
+      )
+    ):
+      return None
+    return CustomerFixture(val)
+
   def get_known_customer(self) -> CustomerFixture | None:
     """Get a buyer the server knows and stores addresses for, if configured.
 
     Returns None when the server under test declares no such customer, in
     which case the stored-address tests skip.
     """
-    val = self._get_test_fixture("known_customer")
-    if isinstance(val, dict) and val.get("email"):
-      return CustomerFixture(val)
-    return None
+    return self._customer_fixture(self._get_test_fixture("known_customer"))
 
   def get_known_customer_without_address(self) -> CustomerFixture | None:
     """Get a buyer the server knows but has no stored addresses for."""
-    val = self._get_test_fixture("known_customer_without_address")
-    if isinstance(val, dict) and val.get("email"):
-      return CustomerFixture(val)
-    return None
+    return self._customer_fixture(
+      self._get_test_fixture("known_customer_without_address")
+    )
 
   def get_free_shipping_min_subtotal(self) -> int | None:
     """Get the subtotal threshold for free shipping in minor units.
@@ -3747,6 +3771,60 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     if value is None:
       self.skip_no_trigger(name)
     return value
+
+  # The first release whose identity-linking page says a business MUST NOT
+  # return stored user-specific state unless the request is
+  # user-authenticated and authorized (common/identity-linking/index.md,
+  # Business-Populated Response Values). The catalog doesn't cover that
+  # page, so the release is named here instead of read from a rule.
+  STORED_STATE_NEEDS_USER_AUTH_SINCE = "2026-08-25"
+
+  def act_as(
+    self,
+    customer: CustomerFixture,
+    *,
+    key: str = "known_customer",
+    expects_stored_state: bool = True,
+  ) -> None:
+    """Make the test's requests, from here on, as a known customer.
+
+    The customer's `headers`, when the fixtures declare any, are what makes
+    a request user-authenticated (`Authorization: Bearer ...`, say).
+    `get_headers` adds them to every request the test sends afterwards,
+    the helpers' own included.
+
+    Without them a request names the buyer by email and nothing more. Up to
+    2026-04-08 no rule speaks of that, and the sample server fills in a
+    buyer's saved addresses from the email alone. From 2026-08-25 a
+    business MUST NOT return stored user-specific state unless the request
+    is user-authenticated, so a test that expects that state back cannot
+    ask it of an email: against such a server it skips, naming what the
+    fixtures lack.
+
+    Args:
+      customer: The `known_customer` or `known_customer_without_address`
+        fixture.
+      key: The fixture key the customer came from, for the skip reason.
+      expects_stored_state: Whether the test expects the business to
+        recognize the customer and answer from what it stores for them.
+        False for a test that only needs a buyer the business knows.
+
+    """
+    headers = dict(customer.get("headers") or {})
+    if (
+      not headers
+      and expects_stored_state
+      and self.server_implements(
+        self.STORED_STATE_NEEDS_USER_AUTH_SINCE, "dev.ucp.shopping.checkout"
+      )
+    ):
+      self.skip_no_trigger(
+        f"{key} with headers that authenticate the user (from "
+        f"{self.STORED_STATE_NEEDS_USER_AUTH_SINCE} a business MUST NOT "
+        "return stored user state to a request that is not "
+        "user-authenticated)"
+      )
+    self.user_headers = headers or None
 
   def assert_line_totals(self, checkout_data: dict[str, Any]) -> None:
     """Assert every line's total is `price × quantity × 10^-scale`.

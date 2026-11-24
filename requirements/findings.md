@@ -258,6 +258,24 @@ The components a webhook signature must cover changed with ucp#659 (merged
 its advertised version states, so a 2026-04-08 server isn't failed for
 leaving them out, and a draft server is.
 
+One more page outside the catalog bears on the known-customer tests.
+`common/identity-linking/index.md` (Business-Populated Response Values) says,
+from 2026-08-25, that a business MUST NOT return stored user-specific state
+unless the request is user-authenticated and authorized for the operation;
+the checkout page repeats it without a keyword. Up to 2026-04-08 neither
+page says so, and the sample server fills in a buyer's saved addresses from
+the email alone. The known-customer tests send the credentials the
+`known_customer` fixture declares in `headers`. Against a server of
+2026-08-25 or later, the five that expect the buyer's stored addresses back
+skip without those credentials, as `no trigger declared`, rather than ask an
+email for what the release forbids: `test_known_customer_no_address`,
+`test_known_customer_one_address`,
+`test_known_customer_multiple_addresses_selection`,
+`test_known_user_existing_address_reuse` and
+`test_webhook_order_address_known_customer`. FULFILLMENT-0015 is cited by
+the third of them alone, so a business that follows the identity rule has
+that rule checked only once it declares the credentials.
+
 ### Rules rendered by a macro
 
 The shopping REST pages render their shared header requirements with the
@@ -394,7 +412,8 @@ add them, and change the counts above.
   strings (skipping as `capability not advertised: dev.ucp.shopping (embedded
 transport)` on REST-only servers).
 - **Needs fixtures:** these skip without the matching `test_fixtures.json`
-  entries: known customers with and without saved addresses, a
+  entries: known customers with and without saved addresses (and, against a
+  server of 2026-08-25 or later, the `headers` that authenticate them), a
   free-shipping threshold and item, dynamic fulfillment destinations, a
   second or fixed-amount discount code, the catalog triggers (a
   multi-variant product, a product with selectable options, a `unit_price`

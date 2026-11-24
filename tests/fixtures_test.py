@@ -202,6 +202,44 @@ class TriggerTest(unittest.TestCase):
         self.assertIsNotNone(DynamicFixtureContext.TRIGGERS.get(key))
         self.assertIsNone(context.trigger(key))
 
+  def test_customer_headers(self):
+    """Test that a customer's optional headers are read, or the key refused.
+
+    The headers are the credentials sent for the customer: an object of
+    header names and string values. Anything else makes the key malformed,
+    so that a mistake there reads as "no trigger declared" instead of
+    sending the request without the credential.
+    """
+    headers = {"Authorization": "Bearer token", "X-User": "u1"}
+    for key in ("known_customer", "known_customer_without_address"):
+      for declared in (headers, {}):
+        with self.subTest(key=key, headers=declared):
+          context = DynamicFixtureContext(
+            {
+              "test_fixtures": {
+                key: {"email": "known@example.com", "headers": declared}
+              }
+            }
+          )
+          self.assertEqual(context.trigger(key)["headers"], declared)
+      for malformed in (
+        ["Authorization: Bearer token"],
+        "Bearer token",
+        {"Authorization": 123},
+        {"Authorization": None},
+        {"Authorization": ""},
+        {" ": "Bearer token"},
+      ):
+        with self.subTest(key=key, headers=malformed):
+          context = DynamicFixtureContext(
+            {
+              "test_fixtures": {
+                key: {"email": "known@example.com", "headers": malformed}
+              }
+            }
+          )
+          self.assertIsNone(context.trigger(key))
+
   def test_fallback_config(self):
     """Test that a trigger declared only in the fallback is found."""
     context = DynamicFixtureContext(
