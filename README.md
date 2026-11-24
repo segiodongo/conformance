@@ -61,7 +61,7 @@ Useful optional flags:
 - `--conformance_input=path/to/conformance_input.json` and `--fixture_config=path/to/test_fixtures.json` — point the runner at your store's SKUs and test triggers (see [shopping/fixtures/README.md](shopping/fixtures/README.md) for all trigger keys).
 - `--discovery_url=http://localhost:8182/custom/.well-known/ucp` — if your discovery document is served at a non-default path.
 - `--auth_header="Authorization: Bearer <TOKEN>"` — if your server requires an API key or bearer token header.
-- `--simulation_secret=<SECRET>` — if your server implements `/testing/simulate-shipping/{id}` for order webhook tests.
+- `--simulation_secret=<SECRET>` — the secret that replaces `{simulation_secret}` in your fixtures' `order_update_request`, the request that makes your server update an order for the order webhook tests (the sample server's is `/testing/simulate-shipping/{id}` with a `Simulation-Secret` header; see [shopping/fixtures/README.md](shopping/fixtures/README.md)).
 - `-k "<filter>"` — run a subset of tests (e.g. `-k "Catalog"`, `-k "CartTest"`, `-k "Fulfillment"`, `-k "Order"`).
 - `--verbose_http` — log every HTTP request and response the suite sends, with the request headers that identify it and both bodies (JSON pretty-printed, cut at 4 KB; credentials redacted). With or without it, a failing or erroring test ends its report with its last request and response.
 

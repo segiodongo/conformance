@@ -19,7 +19,7 @@ import functools
 import json
 import logging
 import os
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import NoReturn
 from urllib.parse import urlsplit
@@ -56,6 +56,7 @@ __all__ = [
   "agent_profile_url",
   "flag_value",
   "is_local_url",
+  "merged_headers",
 ]
 
 FLAGS = flags.FLAGS
@@ -83,7 +84,9 @@ _define_flag(
   flags.DEFINE_string,
   "simulation_secret",
   os.getenv("SIMULATION_SECRET", str(uuid.uuid4())),
-  "Secret for simulation endpoints",
+  "Secret that replaces {simulation_secret} in the request the fixtures "
+  "declare for updating an order (order_update_request), such as the "
+  "sample server's simulation secret",
 )
 _define_flag(
   flags.DEFINE_integer,
@@ -210,6 +213,24 @@ def auth_header() -> tuple[str, str] | None:
       f"--auth_header must look like 'Name: value', got {value!r}"
     )
   return name.strip(), content.strip()
+
+
+def merged_headers(
+  headers: Mapping[str, str], extra: Mapping[str, str]
+) -> dict[str, str]:
+  """Return headers with more added, each replacing one of the same name.
+
+  Header names are case-insensitive, so `authorization` in `extra` takes
+  the place of an `Authorization` already there instead of riding beside it.
+  """
+  replaced = {name.lower() for name in extra}
+  merged = {
+    name: value
+    for name, value in headers.items()
+    if name.lower() not in replaced
+  }
+  merged.update(extra)
+  return merged
 
 
 _LOCAL_HOSTS = frozenset({"localhost", "127.0.0.1", "::1", "0.0.0.0"})
@@ -633,14 +654,7 @@ class BaseIntegrationTest(absltest.TestCase):
     if credential:
       headers[credential[0]] = credential[1]
     if self.user_headers:
-      # Header names are case-insensitive: drop what the user's replace.
-      replaced = {name.lower() for name in self.user_headers}
-      headers = {
-        name: value
-        for name, value in headers.items()
-        if name.lower() not in replaced
-      }
-      headers.update(self.user_headers)
+      headers = merged_headers(headers, self.user_headers)
     return headers
 
   def credential_free_headers(self) -> dict[str, str]:

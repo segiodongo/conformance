@@ -20,6 +20,7 @@ This module adds everything specific to the shopping vertical: fixtures,
 checkout payload builders and the checkout/order helpers the tests call.
 """
 
+from collections.abc import Callable
 import csv
 from fractions import Fraction
 import json
@@ -31,8 +32,10 @@ import time
 from typing import Any, TypedDict
 import urllib.parse
 from framework.base_test import (
+  FLAGS,
   BaseIntegrationTest,
   flag_value,
+  merged_headers,
 )
 from framework.decorators import requires_capability
 from framework.outcomes import CAPABILITY, skip_reason
@@ -2925,6 +2928,124 @@ class ConsentWithDependencyFixture(TypedDict, total=False):
   missing_buyer_field: str
 
 
+class OrderUpdateRequestFixture(TypedDict, total=False):
+  """A request that makes the server under test update a completed order.
+
+  `url` is a full URL, or a path on the server's own address; `method` is
+  POST unless given. `headers` are sent with the suite's usual ones, and a
+  `body` is sent as JSON. The placeholders `{order_id}` and
+  `{simulation_secret}` are filled in wherever they appear in the three.
+  """
+
+  method: str
+  url: str
+  headers: dict[str, str]
+  body: Any
+
+
+# The methods an `order_update_request` may name.
+ORDER_UPDATE_METHODS = frozenset({"POST", "PUT", "PATCH", "DELETE", "GET"})
+# What the suite fills in an `order_update_request`: the order to update,
+# and the secret given with --simulation_secret.
+ORDER_ID_PLACEHOLDER = "{order_id}"
+SIMULATION_SECRET_PLACEHOLDER = "{simulation_secret}"
+
+
+def _is_header_map(value: Any) -> bool:
+  """Return whether a fixture value is an object of header names and values."""
+  return isinstance(value, dict) and all(
+    isinstance(name, str)
+    and name.strip()
+    and isinstance(content, str)
+    and content
+    for name, content in value.items()
+  )
+
+
+def _strings(value: Any) -> list[str]:
+  """Return the strings of a JSON value: itself, or its members' values."""
+  if isinstance(value, str):
+    return [value]
+  if isinstance(value, dict):
+    value = list(value.values())
+  if isinstance(value, list):
+    return [text for member in value for text in _strings(member)]
+  return []
+
+
+def _filled(value: Any, replacements: dict[str, str]) -> Any:
+  """Return a JSON value with the placeholders in its strings replaced."""
+  if isinstance(value, str):
+    for placeholder, replacement in replacements.items():
+      value = value.replace(placeholder, replacement)
+    return value
+  if isinstance(value, dict):
+    return {key: _filled(member, replacements) for key, member in value.items()}
+  if isinstance(value, list):
+    return [_filled(member, replacements) for member in value]
+  return value
+
+
+def uses_simulation_secret(declared: OrderUpdateRequestFixture) -> bool:
+  """Return whether an order update request carries `{simulation_secret}`."""
+  return any(
+    SIMULATION_SECRET_PLACEHOLDER in text
+    for text in _strings(
+      [declared.get("url"), declared.get("headers"), declared.get("body")]
+    )
+  )
+
+
+def describe_order_update_request(declared: OrderUpdateRequestFixture) -> str:
+  """Return a declared order update request as `METHOD url`, unfilled.
+
+  The placeholders stay as declared, so a skip or failure message that
+  quotes the request never shows the secret.
+  """
+  return f"{declared.get('method', 'POST')} {declared['url']}"
+
+
+def fill_order_update_request(
+  declared: OrderUpdateRequestFixture, order_id: str, secret: str | None
+) -> OrderUpdateRequestFixture:
+  """Return a declared order update request, filled in for one order.
+
+  The placeholders are replaced as plain text in the URL, the header
+  values and the strings of the body.
+
+  Args:
+    declared: The fixtures' `order_update_request`.
+    order_id: What `{order_id}` becomes.
+    secret: What `{simulation_secret}` becomes. None builds the request
+      without its secret: a header whose value carries the placeholder is
+      left out, and anywhere else the placeholder becomes nothing.
+
+  Returns:
+    The request to send: `method`, `url`, `headers`, and `body` when one
+    is declared.
+
+  """
+  headers = dict(declared.get("headers") or {})
+  if secret is None:
+    headers = {
+      name: content
+      for name, content in headers.items()
+      if SIMULATION_SECRET_PLACEHOLDER not in content
+    }
+  replacements = {
+    ORDER_ID_PLACEHOLDER: order_id,
+    SIMULATION_SECRET_PLACEHOLDER: secret or "",
+  }
+  filled = OrderUpdateRequestFixture(
+    method=declared.get("method", "POST"),
+    url=_filled(declared["url"], replacements),
+    headers=_filled(headers, replacements),
+  )
+  if "body" in declared:
+    filled["body"] = _filled(declared["body"], replacements)
+  return filled
+
+
 class DynamicFixtureContext:
   """Context for loading dynamic test fixtures from configuration.
 
@@ -2959,14 +3080,17 @@ class DynamicFixtureContext:
     "catalog_fulfills_to": "get_catalog_fulfills_to",
     "custom_total_item_sku": "get_custom_total_item_sku",
     "total_lines_item_sku": "get_total_lines_item_sku",
+    "total_lines_destination": "get_total_lines_destination",
     "disclosure_item_sku": "get_disclosure_item_sku",
     "async_completion_item_sku": "get_async_completion_item_sku",
+    "async_completion_instrument_id": "get_async_completion_instrument_id",
     "escalation_item_sku": "get_escalation_item_sku",
     "action_item_sku": "get_action_item_sku",
     "measured_item_sku": "get_measured_item_sku",
     "settlement_item_sku": "get_settlement_item_sku",
     "consent_with_dependency": "get_consent_with_dependency",
     "edited_order_item_sku": "get_edited_order_item_sku",
+    "order_update_request": "get_order_update_request",
   }
 
   def __init__(
@@ -3206,16 +3330,7 @@ class DynamicFixtureContext:
     if not isinstance(val, dict) or not val.get("email"):
       return None
     headers = val.get("headers")
-    if headers is not None and not (
-      isinstance(headers, dict)
-      and all(
-        isinstance(name, str)
-        and name.strip()
-        and isinstance(value, str)
-        and value
-        for name, value in headers.items()
-      )
-    ):
+    if headers is not None and not _is_header_map(headers):
       return None
     return CustomerFixture(val)
 
@@ -3392,6 +3507,26 @@ class DynamicFixtureContext:
       return val
     return None
 
+  def get_total_lines_destination(self) -> AddressFixture | None:
+    """Get a destination for which checkout `totals[]` includes `lines[]`.
+
+    Where an order ships decides, for one, which taxes apply, so a business
+    that itemizes a total may do it by destination rather than by item.
+    The address uses response-schema field names, each a string, and names
+    its `address_country` at least.
+    """
+    val = self._get_test_fixture("total_lines_destination")
+    if not isinstance(val, dict):
+      return None
+    if not all(
+      isinstance(field, str) and isinstance(content, str) and content.strip()
+      for field, content in val.items()
+    ):
+      return None
+    if not val.get("address_country"):
+      return None
+    return AddressFixture(val)
+
   def get_disclosure_item_sku(self) -> str | None:
     """Get an item SKU that triggers a disclosure warning in Checkout."""
     val = self._get_test_fixture("disclosure_item_sku")
@@ -3402,6 +3537,18 @@ class DynamicFixtureContext:
   def get_async_completion_item_sku(self) -> str | None:
     """Get an item SKU whose checkout completes asynchronously."""
     val = self._get_test_fixture("async_completion_item_sku")
+    if isinstance(val, str) and val.strip():
+      return val
+    return None
+
+  def get_async_completion_instrument_id(self) -> str | None:
+    """Get a payment instrument whose use completes asynchronously.
+
+    The `id` of a row in the test data's `payment_instruments.csv`: an
+    instrument the business takes time over at completion, such as a card
+    that needs the buyer's authentication.
+    """
+    val = self._get_test_fixture("async_completion_instrument_id")
     if isinstance(val, str) and val.strip():
       return val
     return None
@@ -3466,6 +3613,43 @@ class DynamicFixtureContext:
     if isinstance(val, str) and val.strip():
       return val
     return None
+
+  def get_order_update_request(self) -> OrderUpdateRequestFixture | None:
+    """Get the request that makes the server update a completed order.
+
+    A business updates an order by its own means, a shipment or a refund,
+    and the specification defines no operation for it. A server that can be
+    asked to declares the request here: a `url` (a full http or https URL,
+    or a path on the server's own address) and optionally a `method` (POST
+    when absent), `headers` and a JSON `body`.
+
+    Returns:
+      The request, its method in upper case and its placeholders as
+      declared, or None when the key is absent or malformed.
+
+    """
+    val = self._get_test_fixture("order_update_request")
+    if not isinstance(val, dict):
+      return None
+    url = val.get("url")
+    if not isinstance(url, str) or not url.startswith(
+      ("/", "http://", "https://")
+    ):
+      return None
+    method = val.get("method", "POST")
+    if (
+      not isinstance(method, str) or method.upper() not in ORDER_UPDATE_METHODS
+    ):
+      return None
+    headers = val.get("headers")
+    if headers is not None and not _is_header_map(headers):
+      return None
+    request = OrderUpdateRequestFixture(
+      method=method.upper(), url=url, headers=dict(headers or {})
+    )
+    if val.get("body") is not None:
+      request["body"] = val["body"]
+    return request
 
   def get_non_existent_id(self) -> str:
     """Get an identifier the server under test does not sell."""
@@ -3727,9 +3911,10 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     The spec defines only Get Order (order/index.md, Operations); editing
     an order with PUT is the sample server's own endpoint. A business
     without it answers 404 or 405, which fails nothing the spec states, so
-    the test skips as "no trigger declared", the way the tests that need
-    the /testing/simulate-shipping hook do. Any other answer is returned
-    for the test to judge.
+    the test skips as "no trigger declared", the way a test that needs an
+    order update does when the server lacks the request the fixtures
+    declare for it (see `request_order_update`). Any other answer is
+    returned for the test to judge.
 
     Args:
       order_id: The order to edit. The test has read it with Get Order, so
@@ -3751,6 +3936,170 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
       )
     return response
 
+  def get_order(self, order_id: str) -> dict[str, Any]:
+    """Return an order as Get Order answers it now."""
+    response = self.client.get(
+      self.get_order_url(order_id), headers=self.get_headers()
+    )
+    self.assert_response_status(response, 200)
+    return response.json()
+
+  def send_order_update_request(
+    self, order_id: str, secret: str | None
+  ) -> httpx.Response:
+    """Send the fixtures' `order_update_request` for an order.
+
+    The request goes out with the suite's usual headers and the declared
+    ones, which replace any of the same name. The answer comes back as it
+    is, for a test of the request itself; `request_order_update` is the
+    call for a test that needs the order updated.
+
+    Args:
+      order_id: What `{order_id}` becomes.
+      secret: What `{simulation_secret}` becomes: `FLAGS.simulation_secret`
+        for the request as the fixtures mean it, another value for a wrong
+        secret, or None for the request without its secret (see
+        `fill_order_update_request`).
+
+    Returns:
+      The server's response, whatever its status.
+
+    """
+    declared = self.require_trigger("order_update_request")
+    request = fill_order_update_request(declared, order_id, secret)
+    content = {"json": request["body"]} if "body" in request else {}
+    return self.client.request(
+      request["method"],
+      request["url"],
+      headers=merged_headers(self.get_headers(), request["headers"]),
+      **content,
+    )
+
+  def request_order_update(self, order_id: str) -> httpx.Response:
+    """Ask the business to update an order, or skip where it can't be asked.
+
+    A business updates an order by its own means, a shipment or a refund;
+    the specification defines no operation for it, so the fixtures declare
+    the request that makes the server under test do it (the sample
+    server's is its /testing/simulate-shipping hook). Without one the test
+    skips as "no trigger declared", and so it does when the server answers
+    the declared request with 404 or 405: the request is another server's.
+    A 401 or 403 is the run's own credential refused, the secret given
+    with --simulation_secret or a header the fixtures declare, and skips
+    as an environment problem. Any other answer outside 2xx fails the test.
+
+    Args:
+      order_id: The order to update.
+
+    Returns:
+      The server's 2xx response.
+
+    """
+    declared = self.require_trigger("order_update_request")
+    sent = describe_order_update_request(declared)
+    response = self.send_order_update_request(order_id, FLAGS.simulation_secret)
+    status = response.status_code
+    if status in (404, 405):
+      self.skip_no_trigger(
+        "an order_update_request the server has an endpoint for (it "
+        f"answered {sent} with {status})"
+      )
+    if status in (401, 403):
+      if uses_simulation_secret(declared):
+        self.skip_environment(
+          f"the simulation secret was rejected ({sent} -> {status}); pass "
+          "--simulation_secret matching the server under test"
+        )
+      self.skip_environment(
+        f"the server refused the order_update_request ({sent} -> {status}); "
+        "check the credentials its headers declare in test_fixtures"
+      )
+    self.assertTrue(
+      response.is_success,
+      f"The order_update_request failed: {sent} answered {status}, not a "
+      f"2xx. Response: {response.text}",
+    )
+    return response
+
+  # How long an order update's delivery is waited for: the receiver is read
+  # every tenth of a second, for up to five seconds.
+  ORDER_UPDATE_POLLS = 50
+  ORDER_UPDATE_POLL_SECONDS = 0.1
+
+  def trigger_order_update(
+    self, order_id: str, deliveries: Callable[[], list[dict[str, Any]]]
+  ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Have the business update an order, and wait for the update's delivery.
+
+    Reads the order, sends the fixtures' request (`request_order_update`),
+    and waits for a delivery that shows the order changed: one that arrives
+    after the request and carries an order that differs from the order as
+    it was.
+
+    What the update is, a shipment or a refund, is the business's own
+    affair; the tests ask only that the order changed. A request that
+    changes nothing, in what Get Order returns or in a delivery, has
+    updated nothing, so the test skips, naming the trigger. An order that
+    Get Order shows changed, with no delivery that shows it, fails the test
+    (order/index.md, Events: Businesses MUST send the full order entity on
+    updates).
+
+    Args:
+      order_id: The order to update. Its "Order created" delivery has
+        arrived.
+      deliveries: Returns the deliveries the test's receiver holds for the
+        order, in the order they arrived.
+
+    Returns:
+      The order as Get Order returned it before the request, and the
+      deliveries after the request that show it changed, at least one.
+
+    """
+    before = self.get_order(order_id)
+    seen = len(deliveries())
+    response = self.request_order_update(order_id)
+
+    def updates() -> list[dict[str, Any]]:
+      return [
+        delivery
+        for delivery in deliveries()[seen:]
+        if snapshot_differences(before, delivery.get("payload"))
+      ]
+
+    for _ in range(self.ORDER_UPDATE_POLLS):
+      if updates():
+        break
+      time.sleep(self.ORDER_UPDATE_POLL_SECONDS)
+    found = updates()
+    if found:
+      return before, found
+
+    sent = describe_order_update_request(
+      self.require_trigger("order_update_request")
+    )
+    changes = snapshot_differences(
+      before, self.get_order(order_id), reference="the order as it was"
+    )
+    if not changes:
+      self.skip_no_trigger(
+        f"an order_update_request that changes the order ({sent} answered "
+        f"{response.status_code}, and afterwards Get Order returned the "
+        "order as it was and no delivery showed a change)"
+      )
+    followed = len(deliveries()) - seen
+    self.fail(
+      "No order-event webhook showed the order's update (order/index.md, "
+      "Events: Businesses MUST send the full order entity on updates). "
+      f"After {sent}, Get Order returns a changed order:\n  "
+      + "\n  ".join(changes)
+      + (
+        f"\nThe deliveries that followed ({followed}) carry the order as "
+        "it was."
+        if followed
+        else "\nNo delivery followed."
+      )
+    )
+
   def require_trigger(self, name: str) -> Any:
     """Return what the fixtures declare for a trigger, or skip the test.
 
@@ -3771,6 +4120,53 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     if value is None:
       self.skip_no_trigger(name)
     return value
+
+  def require_any_trigger(self, *names: str) -> tuple[str, Any]:
+    """Return the first of several triggers the fixtures declare, or skip.
+
+    For a situation more than one trigger can produce: a completion that
+    stays in progress because of the item bought, or because of the payment
+    instrument used. A server declares whichever is how it works. The skip
+    reads "no trigger declared: <first> or <second>".
+
+    Args:
+      *names: Keys of `DynamicFixtureContext.TRIGGERS`, in the order to
+        look for them; any one gives the test what it needs.
+
+    Returns:
+      The first declared key and its value, as its getter reads it.
+
+    """
+    declared = {name: self.fixture_ctx.trigger(name) for name in names}
+    for name, value in declared.items():
+      if value is not None:
+        return name, value
+    self.skip_no_trigger(" or ".join(names))
+
+  def payment_with_instrument(
+    self, instrument_id: str, key: str
+  ) -> dict[str, Any]:
+    """Return a completion payload that pays with a declared instrument.
+
+    The instrument is a row of the test data's `payment_instruments.csv`.
+    `get_valid_payment_payload` pays with a default card when the row is
+    missing, which would run the test on an instrument the fixtures never
+    named, so a missing row skips the test instead.
+
+    Args:
+      instrument_id: The `id` of the row.
+      key: The fixture key that named it, for the skip reason.
+
+    """
+    if not any(
+      row.get("id") == instrument_id
+      for row in shopping_test_data.payment_instruments
+    ):
+      self.skip_no_trigger(
+        f"{key} naming a row of payment_instruments.csv (no row has the id "
+        f"{instrument_id!r})"
+      )
+    return get_valid_payment_payload(instrument_id=instrument_id)
 
   # The first release whose identity-linking page says a business MUST NOT
   # return stored user-specific state unless the request is
@@ -3887,11 +4283,7 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
       The order as Get Order returned it.
 
     """
-    response = self.client.get(
-      self.get_order_url(order_id), headers=self.get_headers()
-    )
-    self.assert_response_status(response, 200)
-    authoritative = response.json()
+    authoritative = self.get_order(order_id)
     differences = snapshot_differences(authoritative, actual)
     self.assertFalse(
       differences,
@@ -4041,6 +4433,7 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     buyer: dict[str, Any] | None = None,
     include_fulfillment: bool = True,
     context: dict[str, Any] | None = None,
+    destination: dict[str, Any] | None = None,
   ) -> checkout_create_request.CheckoutCreateRequest:
     """Create a valid checkout creation payload.
 
@@ -4048,6 +4441,12 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     the payment handlers, and optionally a buyer, a shipping destination and
     a context. `currency` is accepted for compatibility and not sent; the
     business sets the checkout's currency.
+
+    The destination is the fixtures' default one unless `destination` gives
+    another, in response-schema field names. That one goes out as it is
+    declared, with no field defaulted or renamed: a test passes it because
+    of what the business does for that very address, such as the taxes it
+    itemizes there.
     """
     del currency  # Not a Create Checkout input; the business decides it.
     ctx = getattr(self, "fixture_ctx", None) or DynamicFixtureContext(
@@ -4081,13 +4480,25 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     )
 
     fulfillment = None
-    if include_fulfillment:
+    if include_fulfillment and destination is not None:
+      fulfillment = {
+        "methods": [
+          {
+            "type": "shipping",
+            "destinations": [
+              {"type": "shipping_address", **destination, "id": "dest_1"}
+            ],
+            "selected_destination_id": "dest_1",
+          }
+        ]
+      }
+    elif include_fulfillment:
       # A destination with the spec's field names (fulfillment.md,
       # Destinations). The business builds the method's groups and options
       # from it; ensure_fulfillment_ready then selects the first option it
       # offers, so no option id is guessed here.
       dest_data = ctx.get_test_destination()
-      destination = (
+      default_destination = (
         shipping_destination_create_request.ShippingDestinationCreateRequest(
           id="dest_1",
           type="shipping_address",
@@ -4109,7 +4520,7 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
       )
       method = fulfillment_method_create_request.FulfillmentMethodCreateRequest(
         type="shipping",
-        destinations=[destination],
+        destinations=[default_destination],
         selected_destination_id="dest_1",
       )
       fulfillment = {
@@ -4139,8 +4550,15 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     select_fulfillment: bool = True,
     headers: dict[str, str] | None = None,
     context: dict[str, Any] | None = None,
+    destination: dict[str, Any] | None = None,
   ) -> Any:
-    """Create a checkout session and return the response JSON."""
+    """Create a checkout session and return the response JSON.
+
+    With `select_fulfillment`, the checkout ships to the fixtures' default
+    destination, or to `destination` when one is given (see
+    `create_checkout_payload`), and the first fulfillment option the
+    business offers for it is selected.
+    """
     create_payload = self.create_checkout_payload(
       quantity=quantity,
       item_id=item_id,
@@ -4149,6 +4567,7 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
       buyer=buyer,
       include_fulfillment=select_fulfillment,
       context=context,
+      destination=destination,
     )
 
     request_headers = self.get_headers()

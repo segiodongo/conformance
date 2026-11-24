@@ -33,7 +33,14 @@ what the spec allows. This store does otherwise:
 * it offers a buyer it knows their saved addresses as destinations only on
   a request that carries that buyer's bearer token, as identity linking
   requires of a business from 2026-08-25 (the sample server goes by the
-  buyer's email alone, which ``stored_state="email"`` reproduces).
+  buyer's email alone, which ``stored_state="email"`` reproduces);
+* it comes to the situations the sample server ties to an item by other
+  means, when told to: a completion stays in progress because of the
+  payment token used, and the tax is itemized because of where the order
+  ships;
+* it updates an order through an admin route of its own,
+  ``POST /admin/orders/{id}/update`` with an ``X-Admin-Secret`` header, and
+  keeps the order events it would deliver in ``StrictStore.deliveries``.
 
 It serves ``httpx`` through a ``MockTransport``, so a test drives the suite's
 own helpers against it without a socket. ``StrictStore.requests`` keeps
@@ -42,14 +49,23 @@ every request, for assertions on what the suite sent.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 import copy
 import json
 from typing import Any
+import unittest
 
+from framework.outcomes import skip_category
 import httpx
 from shopping import base
 
-ENDPOINT = "https://store.example/ucp"
+ORIGIN = "https://store.example"
+ENDPOINT = f"{ORIGIN}/ucp"
+# The request that updates an order, as a fixture file would declare it.
+ORDER_UPDATE_REQUEST = {
+  "url": "/admin/orders/{order_id}/update",
+  "headers": {"X-Admin-Secret": "{simulation_secret}"},
+}
 
 _OPTIONS = [
   {
@@ -100,9 +116,40 @@ def wired(
   test.fixture_ctx = base.DynamicFixtureContext(
     {"test_fixtures": fixtures or {}}
   )
-  # The completion poll waits for real time otherwise.
+  # The polls for a completion and for an order update wait for real time
+  # otherwise.
   test.COMPLETION_POLL_SECONDS = 0
+  test.ORDER_UPDATE_POLL_SECONDS = 0
   return test
+
+
+def skipped(
+  function: Callable[..., Any], *arguments: Any, **options: Any
+) -> tuple[str, str]:
+  """Call what must skip the test; return the skip's category and detail."""
+  try:
+    function(*arguments, **options)
+  except unittest.SkipTest as skip:
+    return skip_category(str(skip))
+  raise AssertionError("the call did not skip the test")
+
+
+def failure(
+  function: Callable[..., Any], *arguments: Any, **options: Any
+) -> str:
+  """Call what must fail the test; return the failure's message.
+
+  A skip is not a failure. `assertRaises(AssertionError)` lets a
+  `SkipTest` through, which then skips the unit test instead of failing it;
+  here it is an error of its own.
+  """
+  try:
+    function(*arguments, **options)
+  except unittest.SkipTest as skip:
+    raise RuntimeError(f"the call skipped the test: {skip}") from skip
+  except AssertionError as failed:
+    return str(failed)
+  raise AssertionError("the call did not fail the test")
 
 
 class StrictStore:
@@ -118,6 +165,14 @@ class StrictStore:
     order_put: int = 405,
     customers: dict[str, dict[str, Any]] | None = None,
     stored_state: str = "authenticated",
+    async_tokens: frozenset[str] | set[str] = frozenset(),
+    tax_lines_by_item: dict[str, list[tuple[str, int]]] | None = None,
+    tax_lines_by_country: dict[str, list[tuple[str, int]]] | None = None,
+    tax_lines_off_by: int = 0,
+    order_update: str | None = None,
+    update_secret: str | None = "admin-secret",
+    update_refusal: int = 403,
+    update_delivery: str = "full",
   ) -> None:
     """Configure the store.
 
@@ -140,6 +195,28 @@ class StrictStore:
         "authenticated": only on a request with `Authorization: Bearer`
         and the buyer's token. "email": on any request that names the
         buyer's email, as the sample server does.
+      async_tokens: Payment tokens the store takes time over: a completion
+        that pays with one is answered `complete_in_progress`, and an
+        update that arrives meanwhile is refused with a recoverable error.
+      tax_lines_by_item: For an item id, the tax its checkout carries, as
+        `(display_text, amount)` sub-lines of one `tax` total.
+      tax_lines_by_country: The same for the `address_country` of the
+        selected destination.
+      tax_lines_off_by: Added to the itemized tax total's `amount`, for a
+        store whose sub-lines don't add up to it.
+      order_update: What `POST /admin/orders/{id}/update` does to an order.
+        None: the store has no such route (404). "ship": a `shipped`
+        fulfillment event is added. "refund": an adjustment is added, and
+        nothing ships. "nothing": the request is accepted and the order
+        stays as it was.
+      update_secret: The `X-Admin-Secret` the route takes. None for a
+        store that takes any caller.
+      update_refusal: The status it answers without that secret: 403, 401,
+        or 404 for a store that reveals nothing to other callers.
+      update_delivery: The order event the store delivers after an update.
+        "full": the order as it now is. "stale": the order as it was.
+        "delta": the order's id and the member that changed. "none": no
+        delivery at all.
 
     """
     self.needs_buyer = needs_buyer
@@ -149,9 +226,19 @@ class StrictStore:
     self.order_put = order_put
     self.customers = customers or {}
     self.stored_state = stored_state
+    self.async_tokens = frozenset(async_tokens)
+    self.tax_lines_by_item = tax_lines_by_item or {}
+    self.tax_lines_by_country = tax_lines_by_country or {}
+    self.tax_lines_off_by = tax_lines_off_by
+    self.order_update = order_update
+    self.update_secret = update_secret
+    self.update_refusal = update_refusal
+    self.update_delivery = update_delivery
     self.checkouts: dict[str, dict[str, Any]] = {}
     self.orders: dict[str, dict[str, Any]] = {}
     self.requests: list[httpx.Request] = []
+    # The order events the store delivers, as a webhook receiver holds them.
+    self.deliveries: list[dict[str, Any]] = []
     self._pending: set[str] = set()
     self._counter = 0
     # The Authorization header of the request being answered.
@@ -160,8 +247,14 @@ class StrictStore:
   # -- httpx plumbing -------------------------------------------------------
 
   def client(self) -> httpx.Client:
-    """Return a client whose every request lands in this store."""
-    return httpx.Client(transport=httpx.MockTransport(self.handle))
+    """Return a client whose every request lands in this store.
+
+    A path without a host is on the store's own address, as a path is on
+    --server_url in a run.
+    """
+    return httpx.Client(
+      base_url=ORIGIN, transport=httpx.MockTransport(self.handle)
+    )
 
   def handle(self, request: httpx.Request) -> httpx.Response:
     """Route one request."""
@@ -169,6 +262,13 @@ class StrictStore:
     self._authorization = request.headers.get("authorization")
     path = request.url.path
     body = json.loads(request.content) if request.content else {}
+    admin = path.strip("/").split("/")
+    if len(admin) == 4 and admin[:2] == ["admin", "orders"]:
+      if admin[3] != "update" or self.order_update is None:
+        return httpx.Response(404, json={"detail": f"no route {path}"})
+      if request.method != "POST":
+        return httpx.Response(405, json={"detail": "Method Not Allowed"})
+      return self._update_order(admin[2], request.headers)
     prefix = httpx.URL(ENDPOINT).path
     assert path.startswith(prefix), path
     route = path[len(prefix) :].strip("/").split("/")
@@ -220,6 +320,61 @@ class StrictStore:
     self.orders[order_id] = copy.deepcopy(body)
     return httpx.Response(200, json=body)
 
+  def _update_order(
+    self, order_id: str, headers: httpx.Headers
+  ) -> httpx.Response:
+    """Answer the admin route: update the order, then deliver the event."""
+    if (
+      self.update_secret is not None
+      and headers.get("x-admin-secret") != self.update_secret
+    ):
+      return httpx.Response(self.update_refusal, json={"detail": "Refused"})
+    order = self.orders.get(order_id)
+    if order is None:
+      return httpx.Response(404, json={"detail": "Order not found"})
+    before = copy.deepcopy(order)
+    changed = None
+    if self.order_update == "ship":
+      changed = "fulfillment"
+      order["fulfillment"]["events"].append(
+        {
+          "id": self._new_id("evt"),
+          "occurred_at": "2026-11-18T10:00:00Z",
+          "type": "shipped",
+          "line_items": [
+            {"id": li["id"], "quantity": li["quantity"]["total"]}
+            for li in order["line_items"]
+          ],
+        }
+      )
+      for li in order["line_items"]:
+        li["quantity"]["fulfilled"] = li["quantity"]["total"]
+        li["status"] = "fulfilled"
+    elif self.order_update == "refund":
+      changed = "adjustments"
+      order["adjustments"] = [
+        {
+          "id": self._new_id("adj"),
+          "type": "refund",
+          "occurred_at": "2026-11-18T10:00:00Z",
+          "status": "completed",
+          "totals": [{"type": "total", "amount": -100}],
+        }
+      ]
+    if self.update_delivery == "full":
+      self._deliver(order)
+    elif self.update_delivery == "stale":
+      self._deliver(before)
+    elif self.update_delivery == "delta" and changed:
+      self._deliver({"id": order_id, changed: order[changed]})
+    return httpx.Response(200, json={"status": "accepted"})
+
+  def _deliver(self, order: dict[str, Any]) -> None:
+    """Keep an order event the way the suite's webhook receiver does."""
+    self.deliveries.append(
+      {"payload": copy.deepcopy(order), "headers": {}, "response_status": 200}
+    )
+
   def _create(self, body: dict[str, Any]) -> httpx.Response:
     checkout: dict[str, Any] = {
       "ucp": {"version": "2026-08-25"},
@@ -263,6 +418,18 @@ class StrictStore:
         "$.status",
         f"Cannot update {checkout['status']} checkout: {checkout['id']}",
       )
+    if checkout["status"] == "complete_in_progress":
+      # An accepted completion is under way: the checkout as it is, with a
+      # recoverable error (checkout/index.md, Accepted completion).
+      view = self._view(checkout)
+      view["messages"] = [
+        _error(
+          "checkout_in_progress",
+          "$.status",
+          "The checkout is being completed and cannot be updated now.",
+        )
+      ]
+      return httpx.Response(200, json=view)
     if "buyer" in body:
       checkout["buyer"] = dict(body["buyer"]) if body["buyer"] else None
     if body.get("line_items"):
@@ -307,7 +474,7 @@ class StrictStore:
         _error("payment_declined", "$.payment", "The card was declined.")
       ]
       return httpx.Response(200, json=self._view(checkout))
-    if self.async_completion:
+    if self.async_completion or token in self.async_tokens:
       checkout["status"] = "complete_in_progress"
       self._pending.add(checkout["id"])
       return httpx.Response(200, json=self._view(checkout))
@@ -351,6 +518,7 @@ class StrictStore:
       "currency": checkout["currency"],
       "totals": copy.deepcopy(checkout["totals"]),
     }
+    self._deliver(self.orders[order_id])
 
   def _apply_fulfillment(
     self, checkout: dict[str, Any], fulfillment: dict[str, Any] | None
@@ -499,14 +667,44 @@ class StrictStore:
       {"type": "subtotal", "amount": subtotal},
       {"type": "fulfillment", "amount": shipping},
     ]
-    if self.tax:
-      totals.append({"type": "tax", "amount": self.tax})
-    totals.append(
-      {"type": "total", "amount": subtotal + shipping + (self.tax or 0)}
-    )
+    tax = self.tax or 0
+    tax_lines = self._tax_lines(checkout)
+    if tax_lines:
+      tax = sum(amount for _, amount in tax_lines) + self.tax_lines_off_by
+      totals.append(
+        {
+          "type": "tax",
+          "amount": tax,
+          "lines": [
+            {"display_text": text, "amount": amount}
+            for text, amount in tax_lines
+          ],
+        }
+      )
+    elif tax:
+      totals.append({"type": "tax", "amount": tax})
+    totals.append({"type": "total", "amount": subtotal + shipping + tax})
     checkout["totals"] = totals
     checkout["messages"] = problems
     checkout["status"] = "incomplete" if problems else "ready_for_complete"
+
+  def _tax_lines(self, checkout: dict[str, Any]) -> list[tuple[str, int]]:
+    """Return the tax sub-lines of a checkout: by item, else by destination."""
+    for li in checkout["line_items"]:
+      if li["item"]["id"] in self.tax_lines_by_item:
+        return self.tax_lines_by_item[li["item"]["id"]]
+    method = (checkout.get("fulfillment") or {}).get("methods", [None])[0]
+    if method is None:
+      return []
+    selected = next(
+      (
+        d
+        for d in method["destinations"]
+        if d["id"] == method.get("selected_destination_id")
+      ),
+      {},
+    )
+    return self.tax_lines_by_country.get(selected.get("address_country"), [])
 
   # -- response shapes ------------------------------------------------------
 

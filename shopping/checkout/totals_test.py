@@ -243,11 +243,27 @@ class TotalsTest(ShoppingIntegrationTestBase):
 
   @spec_assert("REQ-SHOPPING-CHECKOUT-0148")
   def test_sub_lines_sum_equals_parent_amount(self):
-    """`sum(lines[].amount)` must equal the parent `totals[]` entry amount."""
+    """`sum(lines[].amount)` must equal the parent `totals[]` entry amount.
+
+    A business itemizes a total for its own reasons: the item bought
+    (`total_lines_item_sku`), or where the order ships
+    (`total_lines_destination`), as with a tax each jurisdiction adds to.
+    The checkout is made the way the fixtures declare, the item first; with
+    neither declared, a default checkout is checked if it has a breakdown.
+    """
     lines_sku = self.fixture_ctx.get_total_lines_item_sku()
     if lines_sku is not None:
       checkout_json = self.create_checkout_session(
         item_id=lines_sku, select_fulfillment=True
+      )
+      totals = checkout_json.get("totals")
+      self.assert_total_sub_lines(totals, where="checkout.totals")
+      return
+
+    destination = self.fixture_ctx.get_total_lines_destination()
+    if destination is not None:
+      checkout_json = self.create_checkout_session(
+        destination=destination, select_fulfillment=True
       )
       totals = checkout_json.get("totals")
       self.assert_total_sub_lines(totals, where="checkout.totals")
@@ -258,7 +274,9 @@ class TotalsTest(ShoppingIntegrationTestBase):
       isinstance(t, dict) and t.get("lines") is not None for t in totals
     )
     if not has_sub_lines:
-      self.require_trigger("total_lines_item_sku")
+      self.require_any_trigger(
+        "total_lines_item_sku", "total_lines_destination"
+      )
     self.assert_total_sub_lines(totals, where="checkout.totals")
 
 

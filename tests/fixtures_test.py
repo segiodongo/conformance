@@ -76,6 +76,14 @@ class TriggerTest(unittest.TestCase):
       context.trigger("known_customer")["email"], "john.doe@example.com"
     )
     self.assertEqual(context.trigger("free_shipping_min_subtotal"), 10000)
+    self.assertEqual(
+      context.trigger("order_update_request"),
+      {
+        "method": "POST",
+        "url": "/testing/simulate-shipping/{order_id}",
+        "headers": {"Simulation-Secret": "{simulation_secret}"},
+      },
+    )
 
   def test_all_registered_triggers_parse_valid_shapes(self):
     """Test that every registered trigger returns a value when well-formed."""
@@ -105,8 +113,14 @@ class TriggerTest(unittest.TestCase):
         },
         "custom_total_item_sku": "custom_fee_bouquet",
         "total_lines_item_sku": "split_tax_bouquet",
+        "total_lines_destination": {
+          "address_region": "QC",
+          "postal_code": "H2Y 1C6",
+          "address_country": "CA",
+        },
         "disclosure_item_sku": "allergen_bouquet",
         "async_completion_item_sku": "async_order_bouquet",
+        "async_completion_instrument_id": "instr_needs_authentication",
         "escalation_item_sku": "age_restricted_bouquet",
         "action_item_sku": "warranty_registration_bouquet",
         "measured_item_sku": "olive_oil_kg",
@@ -158,8 +172,10 @@ class TriggerTest(unittest.TestCase):
           "catalog_fulfills_to": {"item_id": "roses", "fulfills_to": {}},
           "custom_total_item_sku": "   ",
           "total_lines_item_sku": 123,
+          "total_lines_destination": {"country": "CA"},
           "disclosure_item_sku": "",
           "async_completion_item_sku": "   ",
+          "async_completion_instrument_id": 7,
           "escalation_item_sku": 999,
           "action_item_sku": "",
           "measured_item_sku": "   ",
@@ -169,6 +185,7 @@ class TriggerTest(unittest.TestCase):
             "missing_buyer_field": "phone_number",
           },
           "edited_order_item_sku": "   ",
+          "order_update_request": {"method": "POST"},
         }
       }
     )
@@ -189,18 +206,126 @@ class TriggerTest(unittest.TestCase):
       "catalog_fulfills_to",
       "custom_total_item_sku",
       "total_lines_item_sku",
+      "total_lines_destination",
       "disclosure_item_sku",
       "async_completion_item_sku",
+      "async_completion_instrument_id",
       "escalation_item_sku",
       "action_item_sku",
       "measured_item_sku",
       "settlement_item_sku",
       "consent_with_dependency",
       "edited_order_item_sku",
+      "order_update_request",
     ):
       with self.subTest(key=key):
         self.assertIsNotNone(DynamicFixtureContext.TRIGGERS.get(key))
         self.assertIsNone(context.trigger(key))
+
+  def test_every_trigger_has_a_malformed_case(self):
+    """Test that the malformed-shape test above leaves no trigger out.
+
+    The getters of the two discount codes and the two free-shipping keys
+    read whatever is declared; every other getter refuses a shape it cannot
+    use, and a new trigger's getter is expected to as well.
+    """
+    source = Path(__file__).read_text(encoding="utf-8")
+    listed = source.split("def test_malformed_triggers_are_none")[1].split(
+      "def test_every_trigger_has_a_malformed_case"
+    )[0]
+    unchecked = {
+      key for key in DynamicFixtureContext.TRIGGERS if f'"{key}"' not in listed
+    }
+    self.assertEqual(
+      unchecked,
+      {
+        "valid_discount_code_2",
+        "valid_fixed_discount_code",
+        "free_shipping_min_subtotal",
+        "free_shipping_item_sku",
+      },
+    )
+
+  def test_total_lines_destination(self):
+    """Test that the destination is an address that names its country."""
+    address = {
+      "street_address": "275 Rue Notre-Dame E",
+      "address_locality": "Montreal",
+      "address_region": "QC",
+      "postal_code": "H2Y 1C6",
+      "address_country": "CA",
+    }
+    for declared in (address, {"address_country": "CA"}):
+      with self.subTest(declared=declared):
+        context = DynamicFixtureContext(
+          {"test_fixtures": {"total_lines_destination": declared}}
+        )
+        self.assertEqual(context.trigger("total_lines_destination"), declared)
+    for malformed in (
+      {},
+      "CA",
+      ["CA"],
+      {"address_region": "QC"},
+      {"address_country": ""},
+      {"address_country": "CA", "postal_code": 12345},
+      {"address_country": "CA", "address_region": None},
+    ):
+      with self.subTest(malformed=malformed):
+        context = DynamicFixtureContext(
+          {"test_fixtures": {"total_lines_destination": malformed}}
+        )
+        self.assertIsNone(context.trigger("total_lines_destination"))
+
+  def test_order_update_request(self):
+    """Test how the request that updates an order is read, or refused.
+
+    Only the `url` is needed. The method is POST unless given and comes
+    back in upper case; the headers default to none; a body stays out
+    unless declared. The placeholders are left for the test to fill in.
+    """
+
+    def read(declared):
+      return DynamicFixtureContext(
+        {"test_fixtures": {"order_update_request": declared}}
+      ).trigger("order_update_request")
+
+    self.assertEqual(
+      read({"url": "/admin/orders/{order_id}/ship"}),
+      {"method": "POST", "url": "/admin/orders/{order_id}/ship", "headers": {}},
+    )
+    self.assertEqual(
+      read(
+        {
+          "method": "patch",
+          "url": "https://admin.example/orders/{order_id}",
+          "headers": {"Authorization": "Bearer {simulation_secret}"},
+          "body": {"status": "shipped", "tags": ["{order_id}"]},
+        }
+      ),
+      {
+        "method": "PATCH",
+        "url": "https://admin.example/orders/{order_id}",
+        "headers": {"Authorization": "Bearer {simulation_secret}"},
+        "body": {"status": "shipped", "tags": ["{order_id}"]},
+      },
+    )
+    self.assertNotIn("body", read({"url": "/ship", "body": None}))
+    for malformed in (
+      "/testing/simulate-shipping/{order_id}",
+      {},
+      {"method": "POST"},
+      {"url": ""},
+      {"url": 7},
+      {"url": "testing/simulate-shipping/{order_id}"},
+      {"url": "ftp://store.example/orders/{order_id}"},
+      {"url": "/ship", "method": "SHIP"},
+      {"url": "/ship", "method": 1},
+      {"url": "/ship", "headers": ["Simulation-Secret: x"]},
+      {"url": "/ship", "headers": {"Simulation-Secret": 1}},
+      {"url": "/ship", "headers": {"": "x"}},
+    ):
+      with self.subTest(malformed=malformed):
+        self.assertIsNone(read(malformed))
 
   def test_customer_headers(self):
     """Test that a customer's optional headers are read, or the key refused.
@@ -336,14 +461,20 @@ class ReadmeTest(unittest.TestCase):
         self.assertIn(f"| `{key}`", text)
 
   def test_tests_ask_only_for_registered_triggers(self):
-    """Test that every require_trigger call in the suites names a trigger."""
+    """Test that every require_trigger call in the suites names a trigger.
+
+    So does every name given to require_any_trigger, which takes several.
+    """
     asked = set()
+    either = set()
     for path in (ROOT / "shopping").rglob("*_test.py"):
-      asked.update(
-        re.findall(r'require_trigger\("([^"]+)"\)', path.read_text("utf-8"))
-      )
+      source = path.read_text("utf-8")
+      asked.update(re.findall(r'require_trigger\("([^"]+)"\)', source))
+      for names in re.findall(r"require_any_trigger\(([^)]*)\)", source):
+        either.update(re.findall(r'"([^"]+)"', names))
     self.assertTrue(asked)
-    self.assertLessEqual(asked, set(DynamicFixtureContext.TRIGGERS))
+    self.assertTrue(either)
+    self.assertLessEqual(asked | either, set(DynamicFixtureContext.TRIGGERS))
 
   def test_readme_names_existing_tests(self):
     """Test that the tests the trigger table names exist."""

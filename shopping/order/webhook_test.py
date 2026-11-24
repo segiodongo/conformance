@@ -110,19 +110,19 @@ class WebhookTest(ShoppingIntegrationTestBase):
     ),
     partly(
       "REQ-SHOPPING-ORDER-0024",  # MUST send the full entity on updates
-      "that an update delivery reflects the shipment, not that it carries "
-      "the full entity",
+      "that a delivery follows an update and shows the order changed, not "
+      "that it carries the full entity",
     ),
   )
   def test_webhook_event_stream(self) -> None:
-    """Test that completing and then shipping an order each notify.
+    """Test that completing and then updating an order each notify.
 
     Given a mock webhook server is running,
     When a checkout is completed with a webhook_url (via Agent Profile),
     Then the server should deliver the "Order created" event.
-    When the order is subsequently shipped,
-    Then the server should deliver an update whose order snapshot reflects
-    the shipment.
+    When the order is subsequently updated (shipped, say),
+    Then the server should deliver an update whose order snapshot shows
+    the order changed.
     """
     # 1. Create checkout (webhook URL passed via UCP-Agent header)
     checkout_data = self.create_checkout_session(headers=self.get_headers())
@@ -134,9 +134,9 @@ class WebhookTest(ShoppingIntegrationTestBase):
     complete_response = self.complete_checkout_session(checkout_id)
     order_id = complete_response["order"]["id"]
 
-    # 3. Observe the "Order created" delivery before shipping. Checking it
+    # 3. Observe the "Order created" delivery before the update. Checking it
     # here, rather than counting deliveries at the end, is what stops a
-    # Business that only announces the shipment from satisfying the count
+    # Business that only announces the update from satisfying the count
     # (order.md: MUST send the "Order created" event on completion).
     for _ in range(50):
       if self._deliveries_for(order_id):
@@ -147,64 +147,26 @@ class WebhookTest(ShoppingIntegrationTestBase):
       "no order-event webhook delivered for the completed order",
     )
 
-    # 4. Trigger Shipping. The hook is the sample server's; a business
-    # without it has not failed anything the "Order created" check above
-    # did not already cover, so the test skips the shipment part as
+    # 4. Have the business update the order, with the request the fixtures
+    # declare for it (the sample server's ships the order). A business that
+    # declares none has not failed anything the "Order created" check above
+    # did not already cover, so the test skips the update part as
     # test_update_event_is_full_order_entity does.
-    headers = self.get_headers()
-    headers["Simulation-Secret"] = FLAGS.simulation_secret
-    ship_response = self.client.post(
-      f"/testing/simulate-shipping/{order_id}",
-      headers=headers,
+    #
+    # The update is observable in the order snapshot itself, which is what
+    # order.md requires the Business to send, not a header label: each
+    # delivery returned here arrived after the request and carries an order
+    # that differs from the order as it was. What changed is the business's
+    # own affair, and whether the delivery is the full entity is for
+    # test_update_event_is_full_order_entity to check.
+    _, updates = self.trigger_order_update(
+      order_id, lambda: self._deliveries_for(order_id)
     )
-    if ship_response.status_code == 403:
-      self.skip_environment(
-        "the simulation secret was rejected (/testing/simulate-shipping -> "
-        "403); pass --simulation_secret matching the server under test"
-      )
-    if ship_response.status_code in (404, 405):
-      self.skip_no_trigger(
-        "a /testing/simulate-shipping/{order_id} hook that advances the "
-        f"order (the server answered {ship_response.status_code})"
-      )
-    self.assert_response_status(ship_response, 200)
+    self.assertTrue(updates, "no delivery showed the order's update")
 
-    # 5. Verify Webhook Events
-    # Poll for the update delivery to arrive (up to 5 seconds)
-    for _ in range(50):
-      if len(self._deliveries_for(order_id)) >= 2:
-        break
-      time.sleep(0.1)
-
-    deliveries = self._deliveries_for(order_id)
-    self.assertGreaterEqual(
-      len(deliveries),
-      2,
-      f"Expected at least 2 deliveries for order {order_id}, "
-      f"got {len(deliveries)}",
-    )
-
-    # Every delivery belongs to this checkout.
-    for delivery in deliveries:
+    # 5. Every delivery belongs to this checkout.
+    for delivery in self._deliveries_for(order_id):
       self.assertEqual(delivery["payload"].get("checkout_id"), checkout_id)
-
-    # The shipment is observable in the order snapshot itself, which is what
-    # order.md requires the Business to send — not a header label.
-    shipped_delivery = next(
-      (
-        d
-        for d in deliveries
-        if any(
-          fe.get("type") == "shipped"
-          for fe in (d["payload"].get("fulfillment") or {}).get("events") or []
-        )
-      ),
-      None,
-    )
-    self.assertIsNotNone(
-      shipped_delivery,
-      "no delivery reflected the shipped state in the order data",
-    )
 
   @scenario(
     "the store offers its known, user-authenticated customer's stored "

@@ -95,3 +95,8 @@ behaviour
 coloured
 uncited
 unwritable
+longrepr
+makereport
+runtest
+tryfirst
+wasxfail

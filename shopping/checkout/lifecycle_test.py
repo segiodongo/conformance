@@ -846,28 +846,49 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
       )
     return body
 
+  def _complete_asynchronously(self) -> dict:
+    """Complete a checkout the way the fixtures say stays in progress.
+
+    A business takes time over a completion for its own reasons: the item
+    bought (`async_completion_item_sku`), or the payment instrument used
+    (`async_completion_instrument_id`), such as a card that needs the
+    buyer's authentication. Whichever the fixtures declare is used, the
+    item first.
+
+    Returns:
+      The Complete Checkout response body, after its HTTP status is checked.
+
+    """
+    key, value = self.require_any_trigger(
+      "async_completion_item_sku", "async_completion_instrument_id"
+    )
+    if key == "async_completion_item_sku":
+      item_id, payment = value, None
+    else:
+      item_id, payment = None, self.payment_with_instrument(value, key)
+    created = self.create_checkout_session(
+      item_id=item_id,
+      buyer=self.DEFAULT_BUYER,
+      select_fulfillment=True,
+    )
+    resp = self.attempt_complete_checkout(created["id"], payment)
+    self.assertIn(
+      resp.status_code,
+      (200, 201, 202),
+      msg=(
+        f"Expected 200/201/202 for async completion with {key} {value!r}, "
+        f"got HTTP {resp.status_code}: {resp.text}"
+      ),
+    )
+    return resp.json()
+
   @spec_assert(
     "REQ-SHOPPING-CHECKOUT-0021",  # complete_in_progress MUST NOT contain order
   )
   def test_complete_in_progress_omits_order(self):
     """A `complete_in_progress` response must not contain `order`."""
-    sku = self.require_trigger("async_completion_item_sku")
-    created = self.create_checkout_session(
-      item_id=sku,
-      buyer=self.DEFAULT_BUYER,
-      select_fulfillment=True,
-    )
-    resp = self.attempt_complete_checkout(created["id"])
-    self.assertIn(
-      resp.status_code,
-      (200, 201, 202),
-      msg=(
-        f"Expected 200/201/202 for async completion of {sku!r}, got "
-        f"HTTP {resp.status_code}: {resp.text}"
-      ),
-    )
     self.assert_complete_in_progress(
-      resp.json(), where="POST complete response"
+      self._complete_asynchronously(), where="POST complete response"
     )
 
   @spec_assert(
@@ -876,22 +897,7 @@ class CheckoutLifecycleTest(ShoppingIntegrationTestBase):
   )
   def test_update_rejected_during_complete_in_progress(self):
     """Update during `complete_in_progress` leaves Checkout unchanged."""
-    sku = self.require_trigger("async_completion_item_sku")
-    created = self.create_checkout_session(
-      item_id=sku,
-      buyer=self.DEFAULT_BUYER,
-      select_fulfillment=True,
-    )
-    complete_resp = self.attempt_complete_checkout(created["id"])
-    self.assertIn(
-      complete_resp.status_code,
-      (200, 201, 202),
-      msg=(
-        f"Expected 200/201/202 for async completion of {sku!r}, got "
-        f"HTTP {complete_resp.status_code}: {complete_resp.text}"
-      ),
-    )
-    in_progress = complete_resp.json()
+    in_progress = self._complete_asynchronously()
     self.assert_complete_in_progress(
       in_progress, where="POST complete response"
     )

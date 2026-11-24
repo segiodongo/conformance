@@ -81,7 +81,7 @@ rule in part. CHECKOUT-0142 stays fully checked through `TotalsTest`.
 | CHECKOUT-0015       | MUST     | `BusinessLogicTest.test_measured_item_echoes_non_default_quantity_unit`                                                                                                                                                          | Full    | A checkout created with `measured_item_sku` (omitting `quantity_unit` in the request) echoes `item.quantity_unit` on the line with a valid machine identity differing from the default `("C62", 0)`.                                                                                                                                       |
 | CHECKOUT-0016       | MUST     | `BusinessLogicTest.test_totals_calculation_on_create`, `BusinessLogicTest.test_totals_recalculation_on_update`                                                                                                                   | Full    | Each line's `subtotal` is checked as `price × quantity × 10^-scale` from the line's own values: exact at scale 0, within one minor unit when the item carries a `quantity_unit` scale.                                                                                                                                                     |
 | CHECKOUT-0019       | MUST     | `BusinessLogicTest.test_line_item_includes_unit_price_when_pricing_basis_differs`                                                                                                                                                | Full    | A checkout created with `unit_price_item_sku` includes `item.unit_price` on the line whose pricing-basis unit identity (`unit_price.measure`) differs from the line's sale-basis unit identity (`item.quantity_unit`).                                                                                                                     |
-| CHECKOUT-0021       | MUST NOT | `CheckoutLifecycleTest.test_complete_in_progress_omits_order`                                                                                                                                                                    | Full    | Completing a checkout with `async_completion_item_sku` returns `status: "complete_in_progress"` with `order` omitted (or `null`).                                                                                                                                                                                                          |
+| CHECKOUT-0021       | MUST NOT | `CheckoutLifecycleTest.test_complete_in_progress_omits_order`                                                                                                                                                                    | Full    | Completing a checkout the way the fixtures say stays in progress (`async_completion_item_sku`, or paying with `async_completion_instrument_id`) returns `status: "complete_in_progress"` with `order` omitted (or `null`).                                                                                                                 |
 | CHECKOUT-0023       | MUST     | `CheckoutLifecycleTest.test_action_prevents_complete_with_occurrence_path`                                                                                                                                                       | Full    | Attempting Complete Checkout while an Action for `action_item_sku` is unsatisfied returns the current Checkout with `status: "incomplete"` and an error `Message` with `severity: "recoverable"` whose `path` selects the exact Action occurrence in `actions` (for example `$.actions['<type>'][0]`).                                     |
 | CHECKOUT-0028       | MUST     | `CheckoutLifecycleTest.test_update_rejected_during_complete_in_progress`                                                                                                                                                         | Full    | Sending `PUT /checkout-sessions/{id}` while `status: "complete_in_progress"` leaves the Checkout state (`status`, `line_items`, `totals`, `buyer`) unchanged and returns a `messages[]` entry with `type: "error"` and `severity: "recoverable"`.                                                                                          |
 | CHECKOUT-0032       | MUST     | `CheckoutLifecycleTest.test_action_requiring_input_surfaced_before_complete`                                                                                                                                                     | Full    | A checkout with `action_item_sku` surfaces the Action requiring input in `actions` with `status: "incomplete"` prior to accepting Complete Checkout, and Complete Checkout neither accepts completion nor introduces unsurfaced Action types.                                                                                              |
@@ -111,7 +111,7 @@ rule in part. CHECKOUT-0142 stays fully checked through `TotalsTest`.
 | CHECKOUT-0142       | MUST     | `DiscountSemanticsTest.test_discount_total_is_negative`                                                                                                                                                                          | Partial | Checks only the `discount` entry.                                                                                                                                                                                                                                                                                                          |
 | CHECKOUT-0143       | MUST     | `TotalsTest.test_additive_entries_non_negative`                                                                                                                                                                                  | Full    |                                                                                                                                                                                                                                                                                                                                            |
 | CHECKOUT-0145       | MUST     | `TotalsTest.test_unknown_total_types_include_display_text`                                                                                                                                                                       | Full    | Each unknown `totals[]` entry on a checkout with `custom_total_item_sku` carries a non-empty `display_text` and an integer `amount`; see [A rule stated twice](#a-rule-stated-twice).                                                                                                                                                      |
-| CHECKOUT-0148       | MUST     | `TotalsTest.test_sub_lines_sum_equals_parent_amount`                                                                                                                                                                             | Full    | Every `totals[]` entry with a non-empty `lines[]` array has `sum(lines[].amount)` equal to the parent entry's `amount` (checked on a default checkout first, falling back to `total_lines_item_sku`).                                                                                                                                      |
+| CHECKOUT-0148       | MUST     | `TotalsTest.test_sub_lines_sum_equals_parent_amount`                                                                                                                                                                             | Full    | Every `totals[]` entry with a non-empty `lines[]` array has `sum(lines[].amount)` equal to the parent entry's `amount` (on a checkout for `total_lines_item_sku` or shipped to `total_lines_destination` when declared, else on a default checkout that has a breakdown).                                                                  |
 | CHECKOUT-0152       | MUST     | `ShoppingProtocolTest.test_embedded_checkout_response_includes_config_delegate`                                                                                                                                                  | Full    | When the business advertises an `embedded` transport entry on `dev.ucp.shopping`, Checkout responses include that embedded binding in `ucp.services['dev.ucp.shopping']` with `config.delegate` as an array of strings.                                                                                                                    |
 | DISCOUNT-0003       | MUST     | `CartTest.test_cart_discount_codes_carry_forward_to_checkout`                                                                                                                                                                    | Full    | The checkout must name the code: in `discounts.codes`, as an applied discount, or in a `messages[]` rejection. Skips when the discount extension doesn't extend both cart and checkout, or when the code wasn't applied to the cart.                                                                                                       |
 | DISCOUNT-0006       | MUST     | `DiscountSemanticsTest.test_pricing_eligibility_claim_surfaces_provisional_discount`                                                                                                                                             | Full    | A checkout with `pricing_eligibility_claim` in `context.eligibility` surfaces a provisional discount in `discounts.applied`, a negative `discount`/`items_discount` entry in `totals[]`, and a lower checkout total than the baseline without the claim.                                                                                   |
@@ -141,7 +141,7 @@ rule in part. CHECKOUT-0142 stays fully checked through `TotalsTest`.
 | ORDER-0021          | MUST     | `WebhookStructureTest.test_signed_delivery_carries_required_headers_and_digest`                                                                                                                                                  | Full    |                                                                                                                                                                                                                                                                                                                                            |
 | ORDER-0022          | MUST     | `WebhookStructureTest.test_signed_delivery_carries_required_headers_and_digest`, `WebhookStructureTest.test_delivery_signature_verifies_against_business_keys`                                                                   | Full    | The envelope test is cited in part (headers, shape, digest); the verification test checks the signature per signatures.md in full. Unsigned deliveries fail both.                                                                                                                                                                          |
 | ORDER-0023          | MUST     | `WebhookStructureTest.test_order_created_event_is_full_order_entity`                                                                                                                                                             | Full    | The delivery validates against the order schema and matches Get Order member for member.                                                                                                                                                                                                                                                   |
-| ORDER-0024          | MUST     | `WebhookStructureTest.test_update_event_is_full_order_entity`                                                                                                                                                                    | Full    | The same comparison on the latest delivery after the order ships. The update comes from a `/testing/simulate-shipping` hook, so elsewhere the test skips, naming the trigger.                                                                                                                                                              |
+| ORDER-0024          | MUST     | `WebhookStructureTest.test_update_event_is_full_order_entity`                                                                                                                                                                    | Full    | The same comparison on the latest delivery that shows the order changed after an update. The update comes from the fixtures' `order_update_request` (the sample's ships the order); without one the test skips, naming the trigger.                                                                                                        |
 | ORDER-0025          | MUST     | `WebhookStructureTest.test_transient_failure_retries_preserve_event_identity`                                                                                                                                                    | Full    |                                                                                                                                                                                                                                                                                                                                            |
 | ORDER-0034          | MUST     | `OrderTest.test_response_bodies_are_strict_json`                                                                                                                                                                                 | Full    | As CART-0062, over Get Order and the error for an unknown order.                                                                                                                                                                                                                                                                           |
 | ORDER-0035          | MUST     | `OrderTest.test_endpoints_are_served_over_tls_1_3`                                                                                                                                                                               | Full    | As CART-0063.                                                                                                                                                                                                                                                                                                                              |
@@ -356,6 +356,23 @@ add them, and change the counts above.
   `test_webhook_order_address_known_customer` and
   `test_webhook_order_address_new_address` wait for their own order's
   delivery rather than for the first delivery of any kind.
+- **Triggers that aren't an item:** three situations could be reached only
+  the sample server's way. A completion that stays in progress and a total
+  with a `lines[]` breakdown each needed an item SKU, though a business more
+  often comes to them through the payment (a card that needs the buyer's
+  authentication) and the destination (a tax each jurisdiction adds to). An
+  order update needed the sample's `/testing/simulate-shipping` hook, whose
+  path and header were written into three test files. Each now has a trigger
+  of its own kind: `async_completion_instrument_id` and
+  `total_lines_destination` beside the SKU keys, either of which runs the
+  test, and `order_update_request`, the request a server declares for
+  updating an order. The flower-shop fixtures declare the sample's hook, so
+  its run is unchanged, and a server that declares no request is no longer
+  probed at `/testing/...`. The update tests no longer look for a `shipped`
+  event. They read the order with Get Order, send the request, and wait for
+  a delivery that carries a changed order, so any update serves; a request
+  that changes nothing skips, naming the trigger, and an order that changed
+  with no delivery to show it fails.
 - **Catalog suite:** `shopping/catalog/lookup_test.py` and
   `shopping/catalog/search_test.py` cover the 18 testable MUST and MUST NOT
   rules in `catalog/` (16 for lookup, 2 for search, including the 7 shared
@@ -376,8 +393,9 @@ add them, and change the counts above.
 - **Completion states (async and escalation):** `CheckoutLifecycleTest`
   covers the 6 testable MUST and MUST NOT rules for `complete_in_progress`
   (`CHECKOUT-0021, -0028, -0245`) and `requires_escalation`
-  (`CHECKOUT-0091, -0107, -0108`) using `async_completion_item_sku` and
-  `escalation_item_sku`. `CHECKOUT-0091/-0107` (`since: 2026-01-11`) and
+  (`CHECKOUT-0091, -0107, -0108`) using `async_completion_item_sku` or
+  `async_completion_instrument_id`, and `escalation_item_sku`.
+  `CHECKOUT-0091/-0107` (`since: 2026-01-11`) and
   `CHECKOUT-0108` (`since: 2026-04-08`) are split into separate test methods
   so version gating applies accurately across earlier releases.
 - **Actions (Cart and Checkout):** `CartTest` and `CheckoutLifecycleTest`
@@ -427,13 +445,16 @@ transport)` on REST-only servers).
   triggers (an accepted claim, a pricing claim, and an unverifiable claim), the
   fulfillment destination triggers (`unserviceable_destination_id`,
   `pickup_location_id`, `catalog_fulfills_to`), the totals and disclosure
-  triggers (`custom_total_item_sku`, `total_lines_item_sku`,
-  `disclosure_item_sku`), the completion-state triggers
-  (`async_completion_item_sku`, `escalation_item_sku`), the Action trigger
-  (`action_item_sku`), the quantity-unit triggers (`measured_item_sku`,
-  `settlement_item_sku`), the buyer-consent dependency trigger
-  (`consent_with_dependency`), and the order-edit trigger
-  (`edited_order_item_sku`).
+  triggers (`custom_total_item_sku`, `total_lines_item_sku` or
+  `total_lines_destination`, `disclosure_item_sku`), the completion-state
+  triggers (`async_completion_item_sku` or `async_completion_instrument_id`,
+  `escalation_item_sku`), the Action trigger (`action_item_sku`), the
+  quantity-unit triggers (`measured_item_sku`, `settlement_item_sku`), the
+  buyer-consent dependency trigger (`consent_with_dependency`), the
+  order-edit trigger (`edited_order_item_sku`), and the request that makes
+  the server update an order (`order_update_request`), which
+  `test_webhook_event_stream`, `test_update_event_is_full_order_entity` and
+  the three `test_simulation_endpoint_*` tests send.
 - **Needs the sample server:**
   - `PUT /orders/{id}`, which neither the draft nor any release defines:
     `test_order_update`, `test_order_adjustments`,
@@ -441,9 +462,6 @@ transport)` on REST-only servers).
     all marked `scenario`. Each reads the order with Get Order first and
     skips, naming the endpoint as the trigger it lacks, when the server
     answers the `PUT` with 404 or 405.
-  - `POST /testing/simulate-shipping/{id}`:
-    `test_update_event_is_full_order_entity` skips without it, naming the
-    hook as the trigger it lacks.
   - The failing payment instrument `instr_fail`: `test_payment_failure`.
 
 ## Sample server findings
@@ -452,7 +470,8 @@ transport)` on REST-only servers).
 of the tests that apply to its version:
 
 - It adds `PUT /orders/{id}` and `POST /testing/simulate-shipping/{id}`,
-  which the specification doesn't define.
+  which the specification doesn't define. The flower-shop fixtures declare
+  the second as their `order_update_request`.
 - It answers business outcomes such as an out-of-stock item with a 4xx (409,
   or 400 for a quantity beyond its stock), where `checkout/rest.md`
   describes HTTP 200 with `messages`. It rejects rather than revises a

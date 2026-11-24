@@ -36,8 +36,10 @@ webhooks beyond "an event arrives" (which webhook_test.py already covers):
     over the rebuilt signature base (``framework.signatures``).
 
 A server that sends unsigned deliveries fails both signature tests
-(order.md: payloads MUST be signed). The update-event test skips, naming the
-trigger, when the server exposes no /testing/simulate-shipping path.
+(order.md: payloads MUST be signed). The update-event test needs the server
+to update an order, which the specification defines no operation for; it
+sends the request the fixtures declare (`order_update_request`) and skips,
+naming the trigger, without one.
 """
 
 import base64
@@ -321,46 +323,19 @@ class WebhookStructureTest(ShoppingIntegrationTestBase):
   def test_update_event_is_full_order_entity(self) -> None:
     """An update delivery is the full current-state snapshot, not a delta.
 
-    After the order ships, the latest delivery reflects the shipment and is,
-    member for member, the snapshot Get Order returns. (The first delivery
-    predates the shipment, so it is the "Order created" test's to compare.)
+    The order is updated with the request the fixtures declare for it (the
+    sample server's ships the order). The latest delivery that shows the
+    order changed is then, member for member, the snapshot Get Order
+    returns. (The first delivery predates the update, so it is the "Order
+    created" test's to compare.) What the update is does not matter here:
+    the rule is about the entity an update delivery carries.
     """
     checkout_id, order_id, _ = self._place_order()
-    headers = self.get_headers()
-    headers["Simulation-Secret"] = FLAGS.simulation_secret
-    ship_response = self.client.post(
-      f"/testing/simulate-shipping/{order_id}",
-      headers=headers,
-    )
-    if ship_response.status_code == 403:
-      self.skip_environment(
-        "the simulation secret was rejected (/testing/simulate-shipping -> "
-        "403); pass --simulation_secret matching the server under test"
-      )
-    if ship_response.status_code in (404, 405):
-      self.skip_no_trigger(
-        "a /testing/simulate-shipping/{order_id} hook that advances the "
-        f"order (the server answered {ship_response.status_code})"
-      )
-    self.assert_response_status(ship_response, 200)
-    events = self._wait_for_events(order_id, 2)
-    self.assertGreaterEqual(
-      len(events),
-      2,
-      "no update webhook delivered after the order shipped "
-      "(order.md: MUST send full order entity on updates)",
-    )
-    update = events[-1]["payload"]
-    self.assertTrue(
-      any(
-        fe.get("type") == "shipped"
-        for fe in (update.get("fulfillment") or {}).get("events") or []
-      ),
-      "the latest delivery does not reflect the shipped state in its "
-      "snapshot (order.md: updates carry the full current-state entity)",
+    _, updates = self.trigger_order_update(
+      order_id, lambda: self._events_for(order_id)
     )
     self._assert_full_order_entity(
-      update, checkout_id, order_id, "the update delivery"
+      updates[-1]["payload"], checkout_id, order_id, "the update delivery"
     )
 
   # ── order.md "Webhook Signature Verification" ───────────────────────────

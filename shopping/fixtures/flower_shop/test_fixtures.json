@@ -58,6 +58,13 @@
         },
         "expected_option_id": "exp-ship-intl"
       }
+    },
+    "order_update_request": {
+      "method": "POST",
+      "url": "/testing/simulate-shipping/{order_id}",
+      "headers": {
+        "Simulation-Secret": "{simulation_secret}"
+      }
     }
   },
   "shipping_locations": {

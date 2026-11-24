@@ -46,20 +46,37 @@ run them, declare the key.
 | `pickup_location_id`               | Business Location ID the server advertises for `pickup` and accepts as `selected_destination_id` in Checkout                                                                                                                             | `structure_test.test_pickup_location_id_returns_business_location`                                                                                                                                                                                                                                                                                                                                           |
 | `catalog_fulfills_to`              | `{"item_id": "<id>", "fulfills_to": {...}, "conflicting_location": "<loc_id>"}`: a catalog item ID, a `filters.fulfills_to` filter object, and a conflicting `context.location` ID                                                       | `structure_test.test_catalog_fulfills_to_takes_precedence_over_context_location`                                                                                                                                                                                                                                                                                                                             |
 | `custom_total_item_sku`            | The SKU or item ID of an item whose checkout `totals[]` includes a custom (non-well-known) `type`                                                                                                                                        | `totals_test.test_unknown_total_types_include_display_text`                                                                                                                                                                                                                                                                                                                                                  |
-| `total_lines_item_sku`             | The SKU or item ID of an item whose checkout `totals[]` includes a top-level entry with a `lines[]` breakdown                                                                                                                            | `totals_test.test_sub_lines_sum_equals_parent_amount`                                                                                                                                                                                                                                                                                                                                                        |
+| `total_lines_item_sku`             | The SKU or item ID of an item whose checkout `totals[]` includes a top-level entry with a `lines[]` breakdown                                                                                                                            | `totals_test.test_sub_lines_sum_equals_parent_amount` (either this key or `total_lines_destination`)                                                                                                                                                                                                                                                                                                         |
+| `total_lines_destination`          | An address, in response-schema field names with at least `address_country`, for which the checkout's `totals[]` includes a top-level entry with a `lines[]` breakdown, such as a tax itemized by jurisdiction                            | `totals_test.test_sub_lines_sum_equals_parent_amount` (either this key or `total_lines_item_sku`)                                                                                                                                                                                                                                                                                                            |
 | `disclosure_item_sku`              | The SKU or item ID of an item that requires a component-anchored disclosure warning in checkout `messages[]` (and a linked `policies[]` entry from `2026-08-25`)                                                                         | `validation_test.test_disclosure_item_emits_disclosure_warning`, `validation_test.test_policy_disclosure_code_matches_policy_type`                                                                                                                                                                                                                                                                           |
-| `async_completion_item_sku`        | The SKU or item ID of an item whose checkout completion returns `status: "complete_in_progress"` (HTTP 202)                                                                                                                              | `lifecycle_test.test_complete_in_progress_omits_order`, `lifecycle_test.test_update_rejected_during_complete_in_progress`                                                                                                                                                                                                                                                                                    |
+| `async_completion_item_sku`        | The SKU or item ID of an item whose checkout completion returns `status: "complete_in_progress"` (HTTP 202)                                                                                                                              | `lifecycle_test.test_complete_in_progress_omits_order`, `lifecycle_test.test_update_rejected_during_complete_in_progress` (either this key or `async_completion_instrument_id`)                                                                                                                                                                                                                              |
+| `async_completion_instrument_id`   | The `id` of a row in the test data's `payment_instruments.csv`: an instrument whose use at completion returns `status: "complete_in_progress"`, such as a card that needs the buyer's authentication                                     | `lifecycle_test.test_complete_in_progress_omits_order`, `lifecycle_test.test_update_rejected_during_complete_in_progress` (either this key or `async_completion_item_sku`)                                                                                                                                                                                                                                   |
 | `escalation_item_sku`              | The SKU or item ID of an item whose checkout transitions to `status: "requires_escalation"`                                                                                                                                              | `lifecycle_test.test_requires_escalation_includes_continue_url`, `lifecycle_test.test_requires_escalation_includes_buyer_severity_message`                                                                                                                                                                                                                                                                   |
 | `action_item_sku`                  | The SKU or item ID of an item whose presence in a cart or checkout surfaces an outstanding Action in `actions`                                                                                                                           | `cart_test.test_outstanding_action_does_not_block_unrelated_cart_update`, `lifecycle_test.test_action_requiring_input_surfaced_before_complete`, `lifecycle_test.test_action_prevents_complete_with_occurrence_path`                                                                                                                                                                                         |
 | `measured_item_sku`                | The SKU or item ID of an item whose sale basis (`quantity_unit`) differs from the default `("C62", 0)`                                                                                                                                   | `business_logic_test.test_measured_item_echoes_non_default_quantity_unit` (and preferred by `business_logic_test.test_quantity_unit_machine_identity_comparison_and_mismatch_rejection`)                                                                                                                                                                                                                     |
 | `settlement_item_sku`              | The SKU or item ID of a count-sold, measure-priced item whose completed order records a measurement price-settlement adjustment in `adjustments[]`                                                                                       | `order_test.test_measurement_price_settlement_adjustment_carries_settled_measure`                                                                                                                                                                                                                                                                                                                            |
 | `consent_with_dependency`          | `{"purpose": "<purpose_id>", "segment": "<optional_segment_id>", "missing_buyer_field": "<buyer_field>"}`: an advertised consent purpose/segment that requires a buyer field (`phone_number`) on checkout completion                     | `business_logic_test.test_consent_unmet_dependency_blocks_completion_with_error`                                                                                                                                                                                                                                                                                                                             |
 | `edited_order_item_sku`            | An item SKU whose completed order undergoes a post-order edit or alteration (for example quantity reduction/removal to `total: 0, status: "removed"`, quantity change `total != original`, or an added exchange line item)               | `order_test.test_edited_order_retains_all_historical_line_items`                                                                                                                                                                                                                                                                                                                                             |
+| `order_update_request`             | `{"method", "url", "headers": {...}, "body"}`: a request that makes the server update a completed order, such as by shipping it, with `{order_id}` and `{simulation_secret}` filled in (see below)                                       | `webhook_test.test_webhook_event_stream`, `webhook_structure_test.test_update_event_is_full_order_entity`; with `{simulation_secret}` in it: `simulation_url_security_test.test_simulation_endpoint_missing_header`, `simulation_url_security_test.test_simulation_endpoint_incorrect_secret`, `simulation_url_security_test.test_simulation_endpoint_correct_secret`                                        |
 
 A test that needs more of a declared trigger than its presence, such as a
 `known_customer` with two stored addresses, checks that itself and skips
 with the key and the shape it needs: `no trigger declared: known_customer
 with at least two stored addresses`.
+
+Two situations have two triggers each, because businesses come to them in
+different ways: a completion that stays in progress
+(`async_completion_item_sku`, `async_completion_instrument_id`) and a total
+with a `lines[]` breakdown (`total_lines_item_sku`,
+`total_lines_destination`). Declare whichever is how the server works. A
+test that can use either asks with `self.require_any_trigger(...)`, uses the
+first one declared, and without any skips naming them all: `no trigger
+declared: async_completion_item_sku or async_completion_instrument_id`. The
+instrument is looked up in the test data, and an `id` no row has skips the
+test rather than pay with the default card (`no trigger declared:
+async_completion_instrument_id naming a row of payment_instruments.csv
+...`). The destination goes on the checkout as it is declared, with no field
+defaulted or renamed.
 
 A known customer's `headers` are the credentials that make a request
 user-authenticated for that buyer: an object of header names and values,
@@ -85,19 +102,47 @@ each (`get_known_customer` and so on); a getter returns `None` for a key
 that is absent or malformed, which is what makes `require_trigger` skip. A
 new trigger is one entry there, one getter, and a row in this table.
 
-Two triggers are endpoints rather than keys. Both are the sample server's
-own; the specification describes neither.
+`order_update_request` is how the suite gets an order updated. A business
+updates an order by its own means, a shipment or a refund, and the
+specification defines no operation for it, so the server declares the request
+that makes it happen. The sample server's is a hook that ships the order:
 
-`POST /testing/simulate-shipping/{order_id}`, with the `Simulation-Secret`
-header set to `--simulation_secret`, advances a completed order to shipped so
-that the webhook tests can observe an order update
-(`webhook_test.test_webhook_event_stream`,
-`webhook_structure_test.test_update_event_is_full_order_entity`) and the
-`simulation_url_security_test` tests can check its access control. A server
-without the hook answers 404 or 405 and those tests skip with `no trigger
-declared: a /testing/simulate-shipping/{order_id} hook ...`; a 403 to the
-configured secret skips them as an environment problem (`pass
---simulation_secret matching the server under test`).
+```json
+{
+  "test_fixtures": {
+    "order_update_request": {
+      "method": "POST",
+      "url": "/testing/simulate-shipping/{order_id}",
+      "headers": { "Simulation-Secret": "{simulation_secret}" }
+    }
+  }
+}
+```
+
+`url` is a full URL, or a path on `--server_url`. `method` is `POST` unless
+given. `headers` go out with the suite's usual request headers and replace
+any of the same name, and a `body`, when declared, is sent as JSON.
+`{order_id}` becomes the order's ID and `{simulation_secret}` the value of
+`--simulation_secret`, wherever they appear in the URL, the header values or
+the strings of the body, so the secret itself stays out of the file.
+
+The request need not ship the order. `webhook_test.test_webhook_event_stream`
+and `webhook_structure_test.test_update_event_is_full_order_entity` ask only
+that the order changes: they read it with Get Order, send the request, and
+wait for a delivery that carries a changed order. They skip with `no trigger
+declared: order_update_request` without the key, with `no trigger declared:
+an order_update_request the server has an endpoint for ...` when the server
+answers the request 404 or 405 (as any server but the sample answers the
+request above), and with `no trigger declared: an order_update_request that
+changes the order ...` when neither Get Order nor a delivery shows a change.
+A 401 or 403 is the run's own credential refused and skips them as an
+environment problem (`pass --simulation_secret matching the server under
+test`). The three `simulation_url_security_test` tests check that a request
+which carries `{simulation_secret}` is refused, with 401 or 403, without the
+right secret; a request that carries none gives them nothing to check.
+
+One more trigger is an endpoint rather than a key, and the sample server's
+own; the specification doesn't describe it.
 
 `PUT /orders/{id}` edits an order; the specification defines only `GET
 /orders/{id}`. Four tests send it after reading the order with Get Order:

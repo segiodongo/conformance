@@ -12,111 +12,106 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""Tests for the access controls on the order simulation endpoint.
+"""Tests for the access control on the request that updates an order.
 
-`/testing/simulate-shipping/{order_id}` is the hook a merchant exposes so the
-suite can advance an order; it is not part of the UCP specification, which is
-why these tests live with the shopping order suite rather than in `core/`.
+The specification defines no operation that updates an order, so a server
+that lets the suite ask for one declares the request in its fixtures
+(`order_update_request`; see `shopping/fixtures/README.md`). The sample
+server's is its `/testing/simulate-shipping/{order_id}` hook, which takes
+the secret given with --simulation_secret in a `Simulation-Secret` header.
+Such a request is a test harness of the implementation under test, not part
+of the UCP specification, which is why these tests live with the shopping
+order suite rather than in `core/`.
 """
 
 from absl.testing import absltest
-from framework.base_test import FLAGS
 from framework.decorators import requires_capability, scenario
-from shopping.base import ShoppingIntegrationTestBase
+import httpx
+from shopping.base import (
+  SIMULATION_SECRET_PLACEHOLDER,
+  ShoppingIntegrationTestBase,
+  describe_order_update_request,
+  uses_simulation_secret,
+)
 
 
 @requires_capability("dev.ucp.shopping.order")
 class SecurityTest(ShoppingIntegrationTestBase):
   """Tests for security controls.
 
-  The hook is the sample server's own. A business without it has nothing
-  to show here, so each test skips as "no trigger" when the hook is absent
-  (404 or 405 to the configured secret) and as an environment problem when
-  the configured secret is rejected (403), instead of counting three
+  The request is the server's own, and these tests are about the secret it
+  takes. A business that declares no `order_update_request`, or one that
+  carries no `{simulation_secret}`, has nothing to show here, so each test
+  skips as "no trigger". So does a server that answers the declared request
+  with 404 or 405, which doesn't have it; one that refuses the configured
+  secret skips as an environment problem. None of that counts three
   failures against a store that never had the hook.
   """
 
-  def _simulate_shipping(self, order_id: str, headers: dict) -> object:
-    return self.client.post(
-      f"/testing/simulate-shipping/{order_id}", headers=headers
-    )
-
-  def _with_secret(self, secret: str) -> dict:
-    headers = self.get_headers()
-    headers["Simulation-Secret"] = secret
-    return headers
-
-  def _skip_without_hook(self, order_id: str) -> None:
-    """Skip when the hook is absent or the configured secret is rejected.
-
-    Probes with the configured secret; a 200 also advances the order, so
-    the tests that expect a refusal call this only after their own
-    request came back as if the hook did not exist.
-    """
-    probe = self._simulate_shipping(
-      order_id, self._with_secret(FLAGS.simulation_secret)
-    )
-    if probe.status_code in (404, 405):
+  def _order_to_update(self) -> str:
+    """Return a completed order, where the declared request takes a secret."""
+    declared = self.require_trigger("order_update_request")
+    if not uses_simulation_secret(declared):
       self.skip_no_trigger(
-        "a /testing/simulate-shipping/{order_id} hook that advances the "
-        f"order (the server answered {probe.status_code})"
+        f"an order_update_request that carries {SIMULATION_SECRET_PLACEHOLDER}"
+        ", the secret these tests leave out or get wrong"
       )
-    if probe.status_code == 403:
-      self.skip_environment(
-        "the simulation secret was rejected (/testing/simulate-shipping -> "
-        "403); pass --simulation_secret matching the server under test"
-      )
+    return self.create_completed_order()
 
-  def _assert_refused(self, order_id: str, response) -> None:
-    """Assert the hook refused a request without the right secret."""
+  def _assert_refused(self, order_id: str, response: httpx.Response) -> None:
+    """Assert the server refused a request without the right secret."""
     if response.status_code in (404, 405):
-      # Either no hook at all, or a hook that reveals nothing to an
-      # unauthenticated caller; the probe tells which.
-      self._skip_without_hook(order_id)
+      # Either the server has no such endpoint, or one that reveals
+      # nothing to a caller without the secret. The request as declared
+      # tells which: it skips the test unless the server answers it.
+      self.request_order_update(order_id)
       return
-    self.assert_response_status(response, 403)
+    sent = describe_order_update_request(
+      self.require_trigger("order_update_request")
+    )
+    self.assertIn(
+      response.status_code,
+      (401, 403),
+      msg=(
+        f"{sent} was not refused without the right secret: the server "
+        f"answered {response.status_code}, not 401 or 403. Response: "
+        f"{response.text}"
+      ),
+    )
 
   @scenario(
-    "the store's /testing/simulate-shipping hook and its Simulation-Secret, "
-    "a test harness of the implementation under test that no specification "
-    "page describes"
+    "the store's own request for updating an order (order_update_request "
+    "in the fixtures) and the secret it takes, a test harness of the "
+    "implementation under test that no specification page describes"
   )
   def test_simulation_endpoint_missing_header(self):
-    """Test access without the secret header is refused (403)."""
-    order_id = self.create_completed_order()
-    response = self._simulate_shipping(
-      order_id,
-      self.get_headers(),  # Standard headers only
-    )
+    """Test access without the secret is refused (401 or 403)."""
+    order_id = self._order_to_update()
+    response = self.send_order_update_request(order_id, None)
     self._assert_refused(order_id, response)
 
   @scenario(
-    "the store's /testing/simulate-shipping hook and its Simulation-Secret, "
-    "a test harness of the implementation under test that no specification "
-    "page describes"
+    "the store's own request for updating an order (order_update_request "
+    "in the fixtures) and the secret it takes, a test harness of the "
+    "implementation under test that no specification page describes"
   )
   def test_simulation_endpoint_incorrect_secret(self):
-    """Test access with an incorrect secret is refused (403)."""
-    order_id = self.create_completed_order()
-    response = self._simulate_shipping(
-      order_id, self._with_secret("for-sure-incorrect-secret")
+    """Test access with an incorrect secret is refused (401 or 403)."""
+    order_id = self._order_to_update()
+    response = self.send_order_update_request(
+      order_id, "for-sure-incorrect-secret"
     )
     self._assert_refused(order_id, response)
 
   @scenario(
-    "the store's /testing/simulate-shipping hook and its Simulation-Secret, "
-    "a test harness of the implementation under test that no specification "
-    "page describes"
+    "the store's own request for updating an order (order_update_request "
+    "in the fixtures) and the secret it takes, a test harness of the "
+    "implementation under test that no specification page describes"
   )
   def test_simulation_endpoint_correct_secret(self):
-    """Test access with the correct secret returns 200."""
-    order_id = self.create_completed_order()
-    response = self._simulate_shipping(
-      order_id, self._with_secret(FLAGS.simulation_secret)
-    )
-    if response.status_code in (403, 404, 405):
-      self._skip_without_hook(order_id)
-    self.assert_response_status(response, 200)
+    """Test access with the correct secret is granted (2xx)."""
+    order_id = self._order_to_update()
+    self.request_order_update(order_id)
 
 
 if __name__ == "__main__":

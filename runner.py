@@ -364,7 +364,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
   parser.add_argument(
     "--simulation_secret",
     default=os.environ.get("SIMULATION_SECRET", ""),
-    help="Secret for calling simulation endpoints.",
+    help="Secret that replaces {simulation_secret} in the fixtures' "
+    "order_update_request, the request that makes the server update an "
+    "order (the sample server's simulation secret).",
   )
   parser.add_argument(
     "--conformance_input",
