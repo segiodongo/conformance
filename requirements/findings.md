@@ -1,13 +1,13 @@
 # Findings from linking the tests to the catalog (demo)
 
-> **Demo only, not for merge.** These findings come from giving each of the 133
+> **Demo only, not for merge.** These findings come from giving each of the 134
 > shopping tests a marker against the catalog at `f2626c28` (see
 > [Linking tests to rules](README.md#linking-tests-to-rules)). Rule IDs are the
 > demo's stable IDs without the `REQ-SHOPPING-` prefix. They aren't official.
 
 ## Summary
 
-- **Markers:** 85 tests cite rules, 24 are `no_rule`, 16 are `scenario`, 6
+- **Markers:** 85 tests cite rules, 24 are `no_rule`, 16 are `scenario`, 7
   are `outside_catalog` and 2 are `older_version`.
 - **Rules cited:** 101, all testable: 90 MUST, 8 MUST NOT and 3 SHOULD.
 - **Coverage:** the tests cite all 98 of the 98 testable MUST and MUST NOT
@@ -19,10 +19,11 @@
   so the coverage report counts 98 of the 98 (100%) as fully checked and
   none only in part.
 - **Sample server:** against `samples` at `360adbc`, with the marker check
-  on, 81 of the 133 shopping tests pass, 1 fails (Get Order answers an
-  unauthenticated request; see [Sample server findings](#sample-server-findings)),
-  20 don't apply (the server implements 2026-04-08, which doesn't state the
-  rules they cite), 16 skip because the sample doesn't advertise the catalog
+  on, 80 of the 134 shopping tests pass, 2 fail (Get Order answers an
+  unauthenticated request, and the version check reads a header parameter
+  rather than the profile; see [Sample server findings](#sample-server-findings)),
+  21 don't apply (the server implements 2026-04-08, which doesn't state the
+  rules they check), 16 skip because the sample doesn't advertise the catalog
   capabilities (14) or the embedded transport on `dev.ucp.shopping` (2), 10
   skip because no trigger is declared, 2 skip as not
   exercised (the sample emits no `options[].description` and omits
@@ -275,6 +276,10 @@ email for what the release forbids: `test_known_customer_no_address`,
 `test_webhook_order_address_known_customer`. FULFILLMENT-0015 is cited by
 the third of them alone, so a business that follows the identity rule has
 that rule checked only once it declares the credentials.
+`test_saved_addresses_need_a_user_authenticated_request` checks the
+identity rule itself: it names a known customer by email on requests that
+carry no user credentials, and fails if any of the customer's stored
+addresses comes back. It doesn't apply to a server of an earlier release.
 
 ### Rules rendered by a macro
 

@@ -39,6 +39,7 @@ from framework.outcomes import (
   CAPABILITY,
   ENVIRONMENT,
   NO_TRIGGER,
+  NOT_APPLICABLE_PREFIX,
   NOT_EXERCISED,
   skip_reason,
 )
@@ -491,6 +492,16 @@ class BaseIntegrationTest(absltest.TestCase):
     if not result.applies:
       self.skipTest(result.skip_reason)
 
+  def advertised_release(self, *capabilities: str) -> str | None:
+    """Return the version the server advertises for the capabilities.
+
+    The version of the first of them it offers, else its profile's own;
+    None when it advertises none, or when its profile is not known.
+    """
+    if self.server_profile is None:
+      return None
+    return advertised_version(self.server_profile, capabilities)
+
   def server_implements(self, release: str, *capabilities: str) -> bool:
     """Return whether the server implements a release, or a later one.
 
@@ -512,7 +523,7 @@ class BaseIntegrationTest(absltest.TestCase):
     """
     if self.server_profile is None:
       return False
-    advertised = advertised_version(self.server_profile, capabilities)
+    advertised = self.advertised_release(*capabilities)
     if not advertised or not VERSION_RE.match(advertised):
       return True
     return advertised >= release
@@ -565,6 +576,23 @@ class BaseIntegrationTest(absltest.TestCase):
 
     """
     self.skipTest(skip_reason(NOT_EXERCISED, what))
+
+  def skip_not_applicable(self, why: str) -> NoReturn:
+    """Skip because the server's version doesn't state what the test checks.
+
+    A `spec_assert` test is skipped this way before it starts, from the
+    rules it cites. This is for a test of a rule on a page the catalog
+    doesn't cover, which has to decide for itself (see
+    `server_implements`). The runner records it as not applicable, an
+    outcome that never counts against the server.
+
+    Args:
+      why: The version the server implements and what it doesn't state,
+        such as "the server implements 2026-04-08, which doesn't state the
+        rule (introduced in 2026-08-25)".
+
+    """
+    self.skipTest(f"{NOT_APPLICABLE_PREFIX} {why}")
 
   def skip_unless_webhooks_reachable(self) -> None:
     """Skip if the server can't reach the mock webhook server.

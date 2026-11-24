@@ -28,7 +28,7 @@ import unittest
 
 from absl.testing import flagsaver
 from framework.discovery import UcpProfile
-from framework.outcomes import NO_TRIGGER, skip_category
+from framework.outcomes import NO_TRIGGER, is_not_applicable, skip_category
 from shopping.fulfillment import fulfillment_test
 from tests.strict_store import StrictStore, wired
 
@@ -191,6 +191,80 @@ class KnownCustomerSuiteTestsTest(unittest.TestCase):
     getattr(test, method)()
 
     self.assertEqual(authorizations(store), {"Bearer ada-token"})
+
+
+class StoredStateWithoutCredentialsTest(unittest.TestCase):
+  """The test of the rule itself: an email alone brings nothing back."""
+
+  METHOD = "test_saved_addresses_need_a_user_authenticated_request"
+
+  def test_a_store_that_follows_the_rule_passes(self):
+    """Declared or not, the customer's credentials are not sent."""
+    for credentials in (True, False):
+      with self.subTest(credentials=credentials):
+        store = StrictStore(customers=CUSTOMERS)
+        test = fulfillment(
+          self.METHOD,
+          store,
+          fixtures(credentials=credentials),
+          "2026-08-25",
+        )
+
+        getattr(test, self.METHOD)()
+
+        self.assertEqual(authorizations(store), {None})
+        self.assertGreaterEqual(len(store.requests), 2)
+
+  def test_a_store_that_answers_an_email_fails(self):
+    """The failure names the addresses that came back, and the rule."""
+    store = StrictStore(customers=CUSTOMERS, stored_state="email")
+    test = fulfillment(
+      self.METHOD, store, fixtures(credentials=True), "2026-08-25"
+    )
+
+    with self.assertRaises(AssertionError) as failed:
+      getattr(test, self.METHOD)()
+
+    message = str(failed.exception)
+    self.assertIn("1 First St", message)
+    self.assertIn("2 Second Ave", message)
+    self.assertIn("MUST NOT return stored user-specific state", message)
+
+  def test_an_older_release_is_not_applicable(self):
+    """Before 2026-08-25 the rule isn't stated, and nothing is sent."""
+    for version in ("2026-04-08", "2026-01-23"):
+      with self.subTest(version=version):
+        store = StrictStore(customers=CUSTOMERS, stored_state="email")
+        test = fulfillment(
+          self.METHOD, store, fixtures(credentials=False), version
+        )
+
+        with self.assertRaises(unittest.SkipTest) as skipped:
+          getattr(test, self.METHOD)()
+
+        reason = str(skipped.exception)
+        self.assertTrue(is_not_applicable(reason), reason)
+        self.assertIn(f"the server implements {version}", reason)
+        self.assertIn("introduced in 2026-08-25", reason)
+        self.assertEqual(store.requests, [])
+
+  def test_it_needs_a_customer_with_stored_addresses(self):
+    """No customer, or one without addresses, is a missing trigger."""
+    without_addresses = fixtures(credentials=True)
+    without_addresses["known_customer"]["addresses"] = []
+    for declared, needed in (
+      ({}, "known_customer"),
+      (without_addresses, "known_customer with stored addresses"),
+    ):
+      with self.subTest(needed=needed):
+        test = fulfillment(self.METHOD, StrictStore(), declared, "2026-08-25")
+
+        with self.assertRaises(unittest.SkipTest) as skipped:
+          getattr(test, self.METHOD)()
+
+        self.assertEqual(
+          skip_category(str(skipped.exception)), (NO_TRIGGER, needed)
+        )
 
 
 class ActAsTest(unittest.TestCase):

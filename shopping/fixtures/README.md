@@ -75,6 +75,10 @@ buyer's email alone, which is how the sample server answers. The two tests
 that send a new address (`fulfillment_test.test_known_customer_new_address`,
 `webhook_test.test_webhook_order_address_new_address`) expect nothing stored
 back, and run either way.
+`fulfillment_test.test_saved_addresses_need_a_user_authenticated_request`
+checks the rule itself against a server of 2026-08-25 or later: it names a
+`known_customer` with stored addresses by email, leaves the `headers` out,
+and fails if any of those addresses comes back.
 
 `DynamicFixtureContext.TRIGGERS` lists the keys with the getter that reads
 each (`get_known_customer` and so on); a getter returns `None` for a key

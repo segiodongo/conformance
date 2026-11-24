@@ -20,6 +20,7 @@ from absl.testing import absltest
 from framework.decorators import (
   no_rule,
   older_version,
+  outside_catalog,
   requires_capability,
   scenario,
   spec_assert,
@@ -669,6 +670,88 @@ class FulfillmentTest(ShoppingIntegrationTestBase):
       injected_id,
       match_ids,
       "Resubmitted stored address was not reused under its existing id",
+    )
+
+  @staticmethod
+  def _all_destinations(checkout_json: dict) -> list[dict]:
+    """Return every destination of every fulfillment method in a response."""
+    fulfillment = checkout_json.get("fulfillment") or {}
+    methods = fulfillment.get("root", fulfillment).get("methods") or []
+    return [
+      destination
+      for method in methods
+      if isinstance(method, dict)
+      for destination in method.get("destinations") or []
+      if isinstance(destination, dict)
+    ]
+
+  @outside_catalog(
+    "common/identity-linking/index.md, Business-Populated Response Values "
+    "(a page the catalog doesn't cover): 'Businesses MUST NOT return "
+    "stored user-specific state unless the request is user-authenticated "
+    "and authorized for the operation'"
+  )
+  def test_saved_addresses_need_a_user_authenticated_request(self) -> None:
+    """Test that an email alone brings back none of a buyer's saved addresses.
+
+    Given a known customer the business stores addresses for,
+    When a checkout names that customer's email on requests that carry no
+    user credentials,
+    Then none of the stored addresses is offered as a destination.
+
+    The rule is stated from 2026-08-25. The requests carry what every
+    request of the suite carries, the platform's own credentials among it;
+    the customer's `headers` are what would make them user-authenticated,
+    and they are left out.
+    """
+    customer = self.require_trigger("known_customer")
+    stored_addresses = customer.get("addresses") or []
+    if not stored_addresses:
+      self.skip_no_trigger("known_customer with stored addresses")
+    since = self.STORED_STATE_NEEDS_USER_AUTH_SINCE
+    capability = "dev.ucp.shopping.checkout"
+    if not self.server_implements(since, capability):
+      implemented = self.advertised_release(capability) or "no known release"
+      self.skip_not_applicable(
+        f"the server implements {implemented}, which doesn't state that "
+        "stored user state needs a user-authenticated request (introduced "
+        f"in {since})"
+      )
+
+    response_json = self.create_checkout_session(
+      buyer=self._build_buyer_payload(customer),
+      select_fulfillment=False,
+    )
+    offered = self._all_destinations(response_json)
+    checkout_obj = checkout.Checkout(**response_json)
+
+    # The update that makes a business fill in a buyer's addresses.
+    response_json = self.update_checkout_session(
+      checkout_obj,
+      fulfillment={
+        "methods": [
+          {
+            "id": "method_1",
+            "type": "shipping",
+            "line_item_ids": [checkout_obj.line_items[0].id],
+          }
+        ]
+      },
+    )
+    offered += self._all_destinations(response_json)
+
+    returned = [
+      address
+      for address in stored_addresses
+      if self._find_matching_destination(offered, address) is not None
+    ]
+    self.assertFalse(
+      returned,
+      "The business offered the buyer's stored addresses to a request that "
+      f"names the buyer by email and is not user-authenticated: {returned} "
+      "(identity-linking, Business-Populated Response Values: a business "
+      "MUST NOT return stored user-specific state unless the request is "
+      "user-authenticated and authorized for the operation)",
     )
 
   @scenario(

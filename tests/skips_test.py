@@ -27,6 +27,7 @@ from framework.base_test import BaseIntegrationTest
 from framework.outcomes import (
   ENVIRONMENT,
   NO_TRIGGER,
+  NOT_APPLICABLE,
   NOT_EXERCISED,
   SKIPPED,
   Outcome,
@@ -89,6 +90,33 @@ class SkipHelperTest(unittest.TestCase):
         "test_not_exercised": Outcome(
           SKIPPED, "the server emits no discount allocations[]", NOT_EXERCISED
         ),
+      },
+    )
+
+  def test_skip_not_applicable_is_its_own_outcome(self):
+    """Test that a test can say its rule isn't stated by the server's version.
+
+    A `spec_assert` test is skipped that way from the rules it cites. A
+    test of a rule the catalog doesn't cover says so itself, and is
+    recorded the same: not applicable, not a skip with a category.
+    """
+
+    class Example(BaseIntegrationTest):
+      def test_one(self):
+        """Skip for a rule a later release introduced."""
+        self.skip_not_applicable(
+          "the server implements 2026-04-08, which doesn't state the rule "
+          "(introduced in 2026-08-25)"
+        )
+
+    self.assertEqual(
+      run(Example, server_url="http://127.0.0.1:9"),
+      {
+        "test_one": Outcome(
+          NOT_APPLICABLE,
+          "the server implements 2026-04-08, which doesn't state the rule "
+          "(introduced in 2026-08-25)",
+        )
       },
     )
 

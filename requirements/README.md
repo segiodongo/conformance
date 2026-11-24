@@ -16,7 +16,7 @@
 | `catalog/extraction_report.json` | The extractor's diagnostics for the run                                               |
 | `releases.json`                  | The releases the history is read from, at pinned commits, and where their pages were  |
 | `review.json`                    | A person's decisions on 204 rules the automatic pass couldn't settle                  |
-| `findings.md`                    | What linking the 133 shopping tests to the catalog found: claims, spec and test gaps  |
+| `findings.md`                    | What linking the 134 shopping tests to the catalog found: claims, spec and test gaps  |
 | `tools/build_catalog.py`         | Regenerates the `catalog/` folder from the inputs below                               |
 | `tools/suggest_rules.py`         | Suggests rules for each test, in a worksheet under `reports/`, which isn't committed  |
 
