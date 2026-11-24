@@ -317,11 +317,9 @@ def provisional_discount_problems(
 
   totals = checkout_data.get("totals") or []
   discount_totals = [
-    t.get("amount")
-    for t in totals
-    if isinstance(t, dict)
-    and t.get("type") in ("discount", "items_discount")
-    and _is_int(t.get("amount"))
+    entry.get("amount")
+    for entry in discount_total_entries(totals)
+    if _is_int(entry.get("amount"))
   ]
   if not discount_totals or sum(discount_totals) >= 0:
     problems.append(
@@ -677,6 +675,48 @@ WELL_KNOWN_TOTAL_TYPES = frozenset(
     "total",
   }
 )
+
+# The `totals[]` types a discount is reported under (extensions/discount.md,
+# Impact on Line Items and Totals): "If a discount has `allocations`
+# pointing to line items, it contributes to `items_discount`. Discounts
+# without allocations, or with allocations to shipping/fees, contribute to
+# `discount`."
+DISCOUNT_TOTAL_TYPES = frozenset({"discount", "items_discount"})
+
+
+def discount_total_entries(totals: Any) -> list[dict[str, Any]]:
+  """Return the `totals[]` entries that report a discount, of either type.
+
+  A business reports a discount as `items_discount`, as `discount`, or as
+  both when it has several (see `DISCOUNT_TOTAL_TYPES`), so a check of
+  "the discount total" reads both types.
+  """
+  if not isinstance(totals, list):
+    return []
+  return [
+    entry
+    for entry in totals
+    if isinstance(entry, dict) and entry.get("type") in DISCOUNT_TOTAL_TYPES
+  ]
+
+
+def discount_amounts(totals: Any) -> list[tuple[str, Any]]:
+  """Return the discount entries of `totals[]` as sorted (type, amount) pairs.
+
+  For comparing the discounts of two responses: what a code added to a
+  checkout, and that nothing of it is left once the code is cleared. A
+  checkout may carry a discount of the business's own, which no code put
+  there, so a test compares with what the checkout carried before, not
+  with nothing.
+  """
+  return sorted(
+    (
+      (entry["type"], entry.get("amount"))
+      for entry in discount_total_entries(totals)
+    ),
+    key=lambda pair: (pair[0], str(pair[1])),
+  )
+
 
 _JSONPATH_IDENT_RE = re.compile(
   r"^[A-Za-z_\u0080-\uFFFF][A-Za-z0-9_\u0080-\uFFFF]*"
@@ -4373,9 +4413,7 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
       (t.amount for t in checkout_obj.totals if t.type == "subtotal"), 0
     )
     discount = sum(
-      t.amount
-      for t in checkout_obj.totals
-      if t.type in ["items_discount", "discount"]
+      t.amount for t in checkout_obj.totals if t.type in DISCOUNT_TOTAL_TYPES
     )
     total_entries = [t for t in checkout_obj.totals if t.type == "total"]
     self.assertLen(

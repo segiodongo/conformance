@@ -33,7 +33,11 @@ directly and do not presume a client uses the SDK's coercing model.
 
 from absl.testing import absltest
 from framework.decorators import no_rule, requires_capability, spec_assert
-from shopping.base import ShoppingIntegrationTestBase, WELL_KNOWN_TOTAL_TYPES
+from shopping.base import (
+  DISCOUNT_TOTAL_TYPES,
+  ShoppingIntegrationTestBase,
+  WELL_KNOWN_TOTAL_TYPES,
+)
 from ucp_sdk.models.schemas.shopping import checkout as checkout
 
 try:
@@ -50,7 +54,7 @@ checkout.Checkout.model_rebuild(_types_namespace={"Payment": Payment})
 _ADDITIVE_TYPES = frozenset({"subtotal", "fulfillment", "tax", "fee"})
 
 # Entry types whose amount MUST be negative (total.json: exclusiveMaximum 0).
-_NEGATIVE_TYPES = frozenset({"discount", "items_discount"})
+_NEGATIVE_TYPES = DISCOUNT_TOTAL_TYPES
 
 
 @requires_capability("dev.ucp.shopping.checkout")

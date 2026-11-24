@@ -40,7 +40,10 @@ what the spec allows. This store does otherwise:
   ships;
 * it updates an order through an admin route of its own,
   ``POST /admin/orders/{id}/update`` with an ``X-Admin-Secret`` header, and
-  keeps the order events it would deliver in ``StrictStore.deliveries``.
+  keeps the order events it would deliver in ``StrictStore.deliveries``;
+* it takes discount codes when given some, allocates each discount to the
+  line items and so reports it as an ``items_discount`` total, as
+  discount.md has it, where the sample server reports ``discount``.
 
 It serves ``httpx`` through a ``MockTransport``, so a test drives the suite's
 own helpers against it without a socket. ``StrictStore.requests`` keeps
@@ -173,6 +176,10 @@ class StrictStore:
     update_secret: str | None = "admin-secret",
     update_refusal: int = 403,
     update_delivery: str = "full",
+    discount_codes: dict[str, int] | None = None,
+    discount_total: str = "items_discount",
+    automatic_discount: int = 0,
+    discount_fault: str | None = None,
   ) -> None:
     """Configure the store.
 
@@ -217,6 +224,20 @@ class StrictStore:
         "full": the order as it now is. "stale": the order as it was.
         "delta": the order's id and the member that changed. "none": no
         delivery at all.
+      discount_codes: The codes the store takes, each with the amount it
+        takes off, in minor units; they match in any case. Without any the
+        store keeps the submitted codes and prices no discount.
+      discount_total: The `totals[]` type a code's discount is reported
+        under. "items_discount": the discount is allocated to the line
+        items. "discount": it has no allocations.
+      automatic_discount: An amount the store takes off every checkout on
+        its own account, with no code, reported as `items_discount`.
+      discount_fault: A way the store gets discounts wrong. "sticky": a
+        code's discount stays when the codes are cleared. "any_code": a
+        code it doesn't know is taken for one it does. "positive": a
+        code's discount total carries a positive amount. "case_sensitive":
+        a code in another case isn't matched. "unpriced": a code is listed
+        as applied and takes nothing off the totals.
 
     """
     self.needs_buyer = needs_buyer
@@ -234,6 +255,10 @@ class StrictStore:
     self.update_secret = update_secret
     self.update_refusal = update_refusal
     self.update_delivery = update_delivery
+    self.discount_codes = discount_codes
+    self.discount_total = discount_total
+    self.automatic_discount = automatic_discount
+    self.discount_fault = discount_fault
     self.checkouts: dict[str, dict[str, Any]] = {}
     self.orders: dict[str, dict[str, Any]] = {}
     self.requests: list[httpx.Request] = []
@@ -444,7 +469,9 @@ class StrictStore:
     if "fulfillment" in body:
       self._apply_fulfillment(checkout, body["fulfillment"])
     if body.get("discounts"):
-      checkout["discounts"] = {"codes": body["discounts"].get("codes", [])}
+      codes = body["discounts"].get("codes", [])
+      if codes or self.discount_fault != "sticky":
+        checkout["discounts"] = {"codes": codes}
     self._settle(checkout)
     return httpx.Response(200, json=self._view(checkout))
 
@@ -663,10 +690,31 @@ class StrictStore:
       )
     subtotal = sum(li["totals"][0]["amount"] for li in checkout["line_items"])
     shipping = option["totals"][0]["amount"] if option else 0
-    totals = [
-      {"type": "subtotal", "amount": subtotal},
-      {"type": "fulfillment", "amount": shipping},
+    totals = [{"type": "subtotal", "amount": subtotal}]
+    discounts = self._discounts(checkout)
+    priced = [
+      (of, entry)
+      for of, entry in discounts
+      if "code" not in entry or self.discount_fault != "unpriced"
     ]
+    for kind in ("items_discount", "discount"):
+      # The amount is negative; the faulty store gets a code's wrong.
+      amount = sum(
+        entry["amount"]
+        if "code" in entry and self.discount_fault == "positive"
+        else -entry["amount"]
+        for of, entry in priced
+        if of == kind
+      )
+      if amount:
+        totals.append({"type": kind, "amount": amount})
+    discounted = sum(entry["amount"] for _, entry in priced)
+    if self.discount_codes is not None or self.automatic_discount:
+      checkout["discounts"] = {
+        "codes": list((checkout.get("discounts") or {}).get("codes", [])),
+        "applied": [entry for _, entry in discounts],
+      }
+    totals.append({"type": "fulfillment", "amount": shipping})
     tax = self.tax or 0
     tax_lines = self._tax_lines(checkout)
     if tax_lines:
@@ -683,10 +731,56 @@ class StrictStore:
       )
     elif tax:
       totals.append({"type": "tax", "amount": tax})
-    totals.append({"type": "total", "amount": subtotal + shipping + tax})
+    totals.append(
+      {"type": "total", "amount": subtotal - discounted + shipping + tax}
+    )
     checkout["totals"] = totals
     checkout["messages"] = problems
     checkout["status"] = "incomplete" if problems else "ready_for_complete"
+
+  def _discounts(
+    self, checkout: dict[str, Any]
+  ) -> list[tuple[str, dict[str, Any]]]:
+    """Return a checkout's discounts: the totals type and applied entry of each.
+
+    The store's own discount comes first, then one for each submitted code
+    it takes. A discount reported as `items_discount` carries the
+    allocation to the line that makes it one.
+    """
+    line = "$.line_items[0]"
+    found: list[tuple[str, dict[str, Any]]] = []
+    if self.automatic_discount:
+      found.append(
+        (
+          "items_discount",
+          {
+            "title": "Sale",
+            "amount": self.automatic_discount,
+            "automatic": True,
+            "allocations": [{"path": line, "amount": self.automatic_discount}],
+          },
+        )
+      )
+    known = self.discount_codes or {}
+    if self.discount_fault != "case_sensitive":
+      known = {code.upper(): amount for code, amount in known.items()}
+    for code in (checkout.get("discounts") or {}).get("codes", []):
+      amount = known.get(
+        code if self.discount_fault == "case_sensitive" else code.upper()
+      )
+      if amount is None and self.discount_fault == "any_code" and known:
+        amount = next(iter(known.values()))
+      if amount is None:
+        continue
+      entry: dict[str, Any] = {
+        "code": code,
+        "title": f"Code {code}",
+        "amount": amount,
+      }
+      if self.discount_total == "items_discount":
+        entry["allocations"] = [{"path": line, "amount": amount}]
+      found.append((self.discount_total, entry))
+    return found
 
   def _tax_lines(self, checkout: dict[str, Any]) -> list[tuple[str, int]]:
     """Return the tax sub-lines of a checkout: by item, else by destination."""

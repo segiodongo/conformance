@@ -16,7 +16,7 @@
 
 from absl.testing import absltest
 from framework.decorators import no_rule, requires_capability
-from shopping.base import ShoppingIntegrationTestBase
+from shopping.base import ShoppingIntegrationTestBase, discount_amounts
 from ucp_sdk.models.schemas.shopping import checkout as checkout
 from ucp_sdk.models.schemas.shopping import discount as discount
 
@@ -264,12 +264,14 @@ class DiscountTest(ShoppingIntegrationTestBase):
     resp_json = self.update_checkout_session(
       checkout_obj, discounts={"codes": ["INVALID_CODE_123"]}
     )
-    updated_checkout = checkout.Checkout(**resp_json)
-    discount_total = next(
-      (t for t in updated_checkout.totals if t.type == "discount"), None
-    )
-    self.assertIsNone(
-      discount_total, "Unknown discount code should not apply discount"
+    # A discount is a `discount` or an `items_discount` entry (discount.md,
+    # Impact on Line Items and Totals), and a checkout may carry one of the
+    # business's own before any code: the unknown code must change neither.
+    self.assertEqual(
+      discount_amounts(resp_json.get("totals")),
+      discount_amounts(response_json.get("totals")),
+      "Unknown discount code should not apply discount: the discount and "
+      "items_discount entries of totals[] should be what they were before it",
     )
 
 

@@ -36,7 +36,7 @@
 Every rule a `spec_assert` marker cites was checked against the test's
 assertions. Each claim marked Partial below is cited with `partly`, with a
 gap taken from its note, so the report counts that test as checking the
-rule in part. CHECKOUT-0142 stays fully checked through `TotalsTest`.
+rule in part.
 
 - **Full:** the assertions check the rule as stated, for the case the test
   sets up. Where that rests on how the rule's scope is read, the note says
@@ -108,7 +108,7 @@ rule in part. CHECKOUT-0142 stays fully checked through `TotalsTest`.
 | CHECKOUT-0133       | MUST     | `TotalsTest.test_single_subtotal_entry`                                                                                                                                                                                          | Full    |                                                                                                                                                                                                                                                                                                                                            |
 | CHECKOUT-0134       | MUST     | `TotalsTest.test_single_total_entry`, and both `BusinessLogicTest` totals tests                                                                                                                                                  | Full    |                                                                                                                                                                                                                                                                                                                                            |
 | CHECKOUT-0142       | MUST     | `TotalsTest.test_discount_entry_is_negative`                                                                                                                                                                                     | Full    | Checks `discount` and `items_discount` entries; skips when there are none.                                                                                                                                                                                                                                                                 |
-| CHECKOUT-0142       | MUST     | `DiscountSemanticsTest.test_discount_total_is_negative`                                                                                                                                                                          | Partial | Checks only the `discount` entry.                                                                                                                                                                                                                                                                                                          |
+| CHECKOUT-0142       | MUST     | `DiscountSemanticsTest.test_discount_total_is_negative`                                                                                                                                                                          | Full    | Applies a valid code and checks every `discount` and `items_discount` entry that follows; fails when the code adds none.                                                                                                                                                                                                                   |
 | CHECKOUT-0143       | MUST     | `TotalsTest.test_additive_entries_non_negative`                                                                                                                                                                                  | Full    |                                                                                                                                                                                                                                                                                                                                            |
 | CHECKOUT-0145       | MUST     | `TotalsTest.test_unknown_total_types_include_display_text`                                                                                                                                                                       | Full    | Each unknown `totals[]` entry on a checkout with `custom_total_item_sku` carries a non-empty `display_text` and an integer `amount`; see [A rule stated twice](#a-rule-stated-twice).                                                                                                                                                      |
 | CHECKOUT-0148       | MUST     | `TotalsTest.test_sub_lines_sum_equals_parent_amount`                                                                                                                                                                             | Full    | Every `totals[]` entry with a non-empty `lines[]` array has `sum(lines[].amount)` equal to the parent entry's `amount` (on a checkout for `total_lines_item_sku` or shipped to `total_lines_destination` when declared, else on a default checkout that has a breakdown).                                                                  |
@@ -315,12 +315,18 @@ add them, and change the counts above.
 - **Accepts what the spec doesn't describe:** the 6 `ValidationTest` tests
   also accept a 4xx for a business outcome. `test_repeated_cancel` accepts a
   200 or an error, so it can't fail on CHECKOUT-0119.
-- **Looks only for `discount` entries:** `test_unknown_discount_code`,
+- **Discount totals of either type:** `test_unknown_discount_code`,
   `test_code_matches_case_insensitively`, `test_discount_total_is_negative`
-  and `test_empty_codes_removes_discount`. The discount page reports
-  line-item discounts as `items_discount`, so a business that allocates
-  discounts to line items fails three of them, and passes the fourth without
-  a real check.
+  and `test_empty_codes_removes_discount` looked only for `discount`
+  entries. The discount page reports a discount allocated to line items as
+  `items_discount`, so a business that allocates its discounts failed three
+  of them, and passed the fourth without a real check. They now read both
+  types. They also compare with the discount totals the checkout carried
+  before the code, rather than with none, so a discount of the business's
+  own, which no code put there, fails nothing: a valid code must change
+  those totals, clearing the codes must bring them back, and an unknown
+  code must leave them as they were. With both types read,
+  `test_discount_total_is_negative` cites CHECKOUT-0142 in full.
 - **Doesn't check rejection messages:** no test checks the `messages[]` entry
   for a rejected code (`discount_code_invalid`, with the `warning` type that
   DISCOUNT-0005 recommends).

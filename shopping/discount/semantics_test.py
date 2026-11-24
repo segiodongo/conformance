@@ -28,6 +28,10 @@ Server-agnostic: assertions are relative (a discount reduced the total; the
 applied code is echoed; the discount total is negative; an empty code set
 removes it; allocations reconcile) rather than tied to a specific discount
 value, so any conformant business passes regardless of the discount amount.
+A discount total is a `discount` or an `items_discount` entry of totals[]:
+discount.md reports a discount allocated to line items as the latter. And
+what a code did is read against the discount totals the checkout carried
+before it, since a business may discount a checkout on its own account.
 Configure the codes via conformance_input.json under test_fixtures
 (valid_discount_code / valid_discount_code_2); the tests skip honestly when no
 code is supplied or when the business does not advertise the capability.
@@ -36,11 +40,14 @@ code is supplied or when the business does not advertise the capability.
 from absl.testing import absltest
 from framework.decorators import (
   no_rule,
-  partly,
   requires_capability,
   spec_assert,
 )
-from shopping.base import ShoppingIntegrationTestBase
+from shopping.base import (
+  ShoppingIntegrationTestBase,
+  discount_amounts,
+  discount_total_entries,
+)
 from ucp_sdk.models.schemas.shopping import checkout as checkout
 
 
@@ -69,11 +76,14 @@ class DiscountSemanticsTest(ShoppingIntegrationTestBase):
     )
 
   @staticmethod
-  def _discount_total(raw):
-    return next(
-      (t for t in (raw.get("totals") or []) if t.get("type") == "discount"),
-      None,
-    )
+  def _discounts(raw):
+    """Return the discount totals of a response, as (type, amount) pairs.
+
+    Both `discount` and `items_discount` entries: a discount allocated to
+    line items is reported as the second (discount.md, Impact on Line Items
+    and Totals).
+    """
+    return discount_amounts(raw.get("totals"))
 
   @staticmethod
   def _total_amount(raw):
@@ -96,7 +106,7 @@ class DiscountSemanticsTest(ShoppingIntegrationTestBase):
   )
   def test_code_matches_case_insensitively(self):
     """A code submitted in a different case still matches and applies."""
-    base, _ = self._new_checkout()
+    base, base_raw = self._new_checkout()
     swapped = self._code.swapcase()
     self.assertNotEqual(
       swapped, self._code, "test code has no letters to change case on"
@@ -109,30 +119,43 @@ class DiscountSemanticsTest(ShoppingIntegrationTestBase):
       f"case-variant '{swapped}' of '{self._code}' should match and appear in "
       f"discounts.applied (got {applied})",
     )
-    self.assertIsNotNone(
-      self._discount_total(raw),
-      "a matched discount must produce a discount total",
+    self.assertNotEqual(
+      self._discounts(raw),
+      self._discounts(base_raw),
+      "a matched discount must produce a discount total: a discount or "
+      "items_discount entry in totals[] that was not there before the code "
+      f"(totals: {raw.get('totals')})",
     )
 
   # ── discount total is negative (discount.md / total.json) ───────────────
   @spec_assert(
-    partly(
-      "REQ-SHOPPING-CHECKOUT-0142",  # subtractive types MUST be negative
-      "the discount entry only, not items_discount",
-    ),
+    "REQ-SHOPPING-CHECKOUT-0142",  # subtractive types MUST be negative
   )
   def test_discount_total_is_negative(self):
-    """A discount's totals[] entry is negative (total.json exclusiveMax 0)."""
+    """A discount's totals[] entry is negative (total.json exclusiveMax 0).
+
+    Every `discount` and `items_discount` entry of the discounted checkout
+    is checked, and applying a valid code must have added one.
+    """
     base, base_raw = self._new_checkout()
     total_before = self._total_amount(base_raw)
     raw = self._apply_codes(base, [self._code])
-    dt = self._discount_total(raw)
-    self.assertIsNotNone(dt, "applying a valid code must add a discount total")
-    self.assertLess(
-      dt.get("amount"),
-      0,
-      f"discount totals[] entry must be negative, got {dt.get('amount')}",
+    self.assertNotEqual(
+      self._discounts(raw),
+      self._discounts(base_raw),
+      "applying a valid code must add a discount total: a discount or "
+      f"items_discount entry in totals[] (totals: {raw.get('totals')})",
     )
+    for entry in discount_total_entries(raw.get("totals")):
+      amount = entry.get("amount")
+      self.assertIsInstance(
+        amount, int, f"a discount totals[] entry needs an amount: {entry}"
+      )
+      self.assertLess(
+        amount,
+        0,
+        f"a {entry['type']} totals[] entry must be negative, got {amount}",
+      )
     if total_before is not None:
       self.assertLess(
         self._total_amount(raw),
@@ -223,15 +246,19 @@ class DiscountSemanticsTest(ShoppingIntegrationTestBase):
   )
   def test_empty_codes_removes_discount(self):
     """Sending codes:[] removes previously applied discounts."""
-    base, _ = self._new_checkout()
+    base, base_raw = self._new_checkout()
     applied_raw = self._apply_codes(base, [self._code])
-    self.assertIsNotNone(
-      self._discount_total(applied_raw), "precondition: code applied"
+    self.assertNotEqual(
+      self._discounts(applied_raw),
+      self._discounts(base_raw),
+      "precondition: code applied",
     )
     cleared = self._apply_codes(checkout.Checkout(**applied_raw), [])
-    self.assertIsNone(
-      self._discount_total(cleared),
-      "codes:[] must remove the discount (no discount total should remain)",
+    self.assertEqual(
+      self._discounts(cleared),
+      self._discounts(base_raw),
+      "codes:[] must remove the discount: the discount and items_discount "
+      "entries of totals[] should be what they were before the code",
     )
     self.assertEqual(
       self._applied_codes(cleared), [], "applied[] must be empty after clearing"
