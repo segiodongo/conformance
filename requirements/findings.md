@@ -312,6 +312,13 @@ add them, and change the counts above.
   replaced by that verification. `ucp-agent` coverage follows the normative
   table, which required it at 2026-04-08 already; the order page's example
   that omitted it was fixed by ucp#659.
+- **Agent profile:** the profile the suite serves is a valid platform
+  profile. It declares the capabilities the tests exercise, as conformance
+  PR #109 and PR #108 made upstream's copy do, and it carries the `services`
+  and `payment_handlers` registries, which `overview/index.md` (Profile
+  Structure) requires of every profile even when they are empty. Without
+  the two registries a business that validates the profile a request names
+  refuses every request of the suite.
 - **Names that don't match:** `test_complete_is_idempotent` checks that a
   second completion is refused.
 - **Skips that could hide a failure:** the signature tests used to skip when
