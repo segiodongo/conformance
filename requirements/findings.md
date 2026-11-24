@@ -324,6 +324,15 @@ add them, and change the counts above.
 - **Skips that could hide a failure:** the signature tests used to skip when
   deliveries carried no signature headers at all. Now both fail on an
   unsigned delivery (order.md: payloads MUST be signed).
+- **Stray webhook deliveries:** every test advertises the receiver's URL,
+  but only the webhook tests listen on it, so a business that retries is
+  still delivering earlier tests' orders when a webhook test starts. The
+  receiver counts `failures_before_success` for each order on its own, so
+  such a delivery can't use up the one refusal
+  `test_transient_failure_retries_preserve_event_identity` asks for, and
+  `test_webhook_order_address_known_customer` and
+  `test_webhook_order_address_new_address` wait for their own order's
+  delivery rather than for the first delivery of any kind.
 - **Catalog suite:** `shopping/catalog/lookup_test.py` and
   `shopping/catalog/search_test.py` cover the 18 testable MUST and MUST NOT
   rules in `catalog/` (16 for lookup, 2 for search, including the 7 shared
