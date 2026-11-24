@@ -27,7 +27,9 @@ what the spec allows. This store does otherwise:
 * it refuses calls on a terminal session in-band: HTTP 200, an Error
   Response with ``ucp.status: "error"`` and no resource;
 * it builds the fulfillment options itself from the destination the
-  platform sends, and reports an unknown ``selected_option_id`` as an error.
+  platform sends, and reports an unknown ``selected_option_id`` as an error;
+* it serves Get Order and, like the spec, defines no way to edit an order:
+  ``PUT /orders/{id}`` is answered 405.
 
 It serves ``httpx`` through a ``MockTransport``, so a test drives the suite's
 own helpers against it without a socket. ``StrictStore.requests`` keeps
@@ -77,6 +79,8 @@ class StrictStore:
     needs_buyer: bool = True,
     tax: int = 0,
     async_completion: bool = False,
+    order_get: int = 200,
+    order_put: int = 405,
   ) -> None:
     """Configure the store.
 
@@ -86,12 +90,21 @@ class StrictStore:
       tax: A tax amount (minor units) added to the totals when non-zero.
       async_completion: Answer Complete Checkout with
         `complete_in_progress` and place the order on the next Get.
+      order_get: The status Get Order answers with. Anything but 200 is a
+        refusal without the order, such as a 401.
+      order_put: The status `PUT /orders/{id}` answers with. 405 unless
+        told otherwise, since the spec defines only Get Order; with 200 the
+        store keeps the body and returns it, as the sample server's own
+        endpoint does.
 
     """
     self.needs_buyer = needs_buyer
     self.tax = tax
     self.async_completion = async_completion
+    self.order_get = order_get
+    self.order_put = order_put
     self.checkouts: dict[str, dict[str, Any]] = {}
+    self.orders: dict[str, dict[str, Any]] = {}
     self.requests: list[httpx.Request] = []
     self._pending: set[str] = set()
     self._counter = 0
@@ -129,6 +142,8 @@ class StrictStore:
         return self._complete(checkout, body)
       if route[2] == "cancel" and request.method == "POST":
         return self._cancel(checkout)
+    if len(route) == 2 and route[0] == "orders":
+      return self._order(request.method, route[1], body)
     return httpx.Response(404, json={"detail": f"no route {path}"})
 
     # -- what the store does ------------------------------------------------
@@ -136,6 +151,25 @@ class StrictStore:
   def _new_id(self, prefix: str) -> str:
     self._counter += 1
     return f"{prefix}_{self._counter}"
+
+  def _order(
+    self, method: str, order_id: str, body: dict[str, Any]
+  ) -> httpx.Response:
+    """Answer a request on an order: Get Order, and PUT as configured."""
+    if method == "GET":
+      if self.order_get != 200:
+        return httpx.Response(self.order_get, json={"detail": "Refused"})
+      if order_id not in self.orders:
+        return httpx.Response(404, json={"detail": "Order not found"})
+      return httpx.Response(200, json=copy.deepcopy(self.orders[order_id]))
+    if method != "PUT" or self.order_put == 405:
+      return httpx.Response(405, json={"detail": "Method Not Allowed"})
+    if self.order_put != 200:
+      return httpx.Response(self.order_put, json={"detail": "Refused"})
+    if order_id not in self.orders:
+      return httpx.Response(404, json={"detail": "Order not found"})
+    self.orders[order_id] = copy.deepcopy(body)
+    return httpx.Response(200, json=body)
 
   def _create(self, body: dict[str, Any]) -> httpx.Response:
     checkout: dict[str, Any] = {
@@ -246,9 +280,27 @@ class StrictStore:
   def _place(self, checkout: dict[str, Any]) -> None:
     checkout["status"] = "completed"
     checkout["messages"] = []
-    checkout["order"] = {
-      "id": self._new_id("ord"),
-      "permalink_url": f"https://store.example/orders/{checkout['id']}",
+    order_id = self._new_id("ord")
+    permalink_url = f"https://store.example/orders/{checkout['id']}"
+    checkout["order"] = {"id": order_id, "permalink_url": permalink_url}
+    self.orders[order_id] = {
+      "ucp": {"version": "2026-08-25"},
+      "id": order_id,
+      "checkout_id": checkout["id"],
+      "permalink_url": permalink_url,
+      "line_items": [
+        {
+          "id": li["id"],
+          "item": dict(li["item"]),
+          "quantity": {"total": li["quantity"], "fulfilled": 0},
+          "totals": copy.deepcopy(li["totals"]),
+          "status": "processing",
+        }
+        for li in checkout["line_items"]
+      ],
+      "fulfillment": {"expectations": [], "events": []},
+      "currency": checkout["currency"],
+      "totals": copy.deepcopy(checkout["totals"]),
     }
 
   def _apply_fulfillment(

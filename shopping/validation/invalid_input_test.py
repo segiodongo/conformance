@@ -42,6 +42,11 @@ class InvalidInputTest(ShoppingIntegrationTestBase):
   Validated Paths:
   - GET /orders/{id}
   - PUT /orders/{id}
+
+  `PUT /orders/{id}` is the sample server's own endpoint; the spec defines
+  only Get Order. A business without it answers 404 or 405, and these tests
+  skip as "no trigger declared" (see `put_order`) instead of counting
+  failures against a store that never had the endpoint.
   """
 
   @scenario(
@@ -62,6 +67,7 @@ class InvalidInputTest(ShoppingIntegrationTestBase):
     response = self.client.get(
       self.get_order_url(order_id), headers=self.get_headers()
     )
+    self.assert_response_status(response, 200)
     order_obj = order.Order(**response.json())
     order_dict = order_obj.model_dump(
       mode="json", by_alias=True, exclude_none=True
@@ -81,11 +87,7 @@ class InvalidInputTest(ShoppingIntegrationTestBase):
     order_dict["adjustments"].append(adj)
 
     # Update Order
-    resp = self.client.put(
-      self.get_order_url(order_id),
-      json=order_dict,
-      headers=self.get_headers(),
-    )
+    resp = self.put_order(order_id, order_dict)
     # Pydantic validation error should result in 422
     self.assert_response_status(resp, 422)
 
@@ -107,6 +109,7 @@ class InvalidInputTest(ShoppingIntegrationTestBase):
     response = self.client.get(
       self.get_order_url(order_id), headers=self.get_headers()
     )
+    self.assert_response_status(response, 200)
     order_obj = order.Order(**response.json())
     order_dict = order_obj.model_dump(
       mode="json", by_alias=True, exclude_none=True
@@ -116,11 +119,7 @@ class InvalidInputTest(ShoppingIntegrationTestBase):
     order_dict["adjustments"] = {"id": "adj_1", "amount": 100}
 
     # Update Order
-    resp = self.client.put(
-      self.get_order_url(order_id),
-      json=order_dict,
-      headers=self.get_headers(),
-    )
+    resp = self.put_order(order_id, order_dict)
 
     self.assert_response_status(resp, 422)
 

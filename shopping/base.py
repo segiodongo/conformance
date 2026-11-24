@@ -3697,6 +3697,36 @@ class ShoppingIntegrationTestBase(BaseIntegrationTest):
     """Construct a full URL for an order resource."""
     return self.get_shopping_url(f"/orders/{order_id}")
 
+  def put_order(self, order_id: str, body: Any) -> httpx.Response:
+    """Send `PUT /orders/{id}`, or skip the test on a server without it.
+
+    The spec defines only Get Order (order/index.md, Operations); editing
+    an order with PUT is the sample server's own endpoint. A business
+    without it answers 404 or 405, which fails nothing the spec states, so
+    the test skips as "no trigger declared", the way the tests that need
+    the /testing/simulate-shipping hook do. Any other answer is returned
+    for the test to judge.
+
+    Args:
+      order_id: The order to edit. The test has read it with Get Order, so
+        a 404 here is about the method, not the order.
+      body: The JSON body to send.
+
+    Returns:
+      The response, when the server has the endpoint.
+
+    """
+    response = self.client.put(
+      self.get_order_url(order_id), json=body, headers=self.get_headers()
+    )
+    if response.status_code in (404, 405):
+      self.skip_no_trigger(
+        "a PUT /orders/{id} endpoint that edits an order (the server "
+        f"answered {response.status_code}); the spec defines only GET "
+        "/orders/{id}"
+      )
+    return response
+
   def require_trigger(self, name: str) -> Any:
     """Return what the fixtures declare for a trigger, or skip the test.
 

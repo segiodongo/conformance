@@ -66,10 +66,12 @@ each (`get_known_customer` and so on); a getter returns `None` for a key
 that is absent or malformed, which is what makes `require_trigger` skip. A
 new trigger is one entry there, one getter, and a row in this table.
 
-One trigger is an endpoint rather than a key: `POST
-/testing/simulate-shipping/{order_id}`, with the `Simulation-Secret` header
-set to `--simulation_secret`, advances a completed order to shipped so that
-the webhook tests can observe an order update
+Two triggers are endpoints rather than keys. Both are the sample server's
+own; the specification describes neither.
+
+`POST /testing/simulate-shipping/{order_id}`, with the `Simulation-Secret`
+header set to `--simulation_secret`, advances a completed order to shipped so
+that the webhook tests can observe an order update
 (`webhook_test.test_webhook_event_stream`,
 `webhook_structure_test.test_update_event_is_full_order_entity`) and the
 `simulation_url_security_test` tests can check its access control. A server
@@ -77,6 +79,15 @@ without the hook answers 404 or 405 and those tests skip with `no trigger
 declared: a /testing/simulate-shipping/{order_id} hook ...`; a 403 to the
 configured secret skips them as an environment problem (`pass
 --simulation_secret matching the server under test`).
+
+`PUT /orders/{id}` edits an order; the specification defines only `GET
+/orders/{id}`. Four tests send it after reading the order with Get Order:
+`order_test.test_order_update`, `order_test.test_order_adjustments`,
+`invalid_input_test.test_invalid_adjustment_status` and
+`invalid_input_test.test_malformed_adjustment_payload`. A server without the
+endpoint answers 404 or 405 and they skip with `no trigger declared: a PUT
+/orders/{id} endpoint that edits an order ...`. Any other answer is the
+endpoint's, and the tests judge it.
 
 ## Keys every server declares
 

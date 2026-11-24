@@ -398,7 +398,9 @@ transport)` on REST-only servers).
   - `PUT /orders/{id}`, which neither the draft nor any release defines:
     `test_order_update`, `test_order_adjustments`,
     `test_invalid_adjustment_status` and `test_malformed_adjustment_payload`,
-    all marked `scenario`.
+    all marked `scenario`. Each reads the order with Get Order first and
+    skips, naming the endpoint as the trigger it lacks, when the server
+    answers the `PUT` with 404 or 405.
   - `POST /testing/simulate-shipping/{id}`:
     `test_update_event_is_full_order_entity` skips without it, naming the
     hook as the trigger it lacks.

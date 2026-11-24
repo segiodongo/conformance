@@ -59,6 +59,10 @@ class OrderTest(ShoppingIntegrationTestBase):
   Validated Paths:
   - GET /orders/{id}
   - PUT /orders/{id}
+
+  `PUT /orders/{id}` is the sample server's own endpoint; the spec defines
+  only Get Order. The two tests that use it skip as "no trigger declared"
+  on a business that answers it with 404 or 405 (see `put_order`).
   """
 
   @spec_assert(
@@ -434,10 +438,9 @@ class OrderTest(ShoppingIntegrationTestBase):
       order_obj.fulfillment.events = []
     order_obj.fulfillment.events.append(new_event)
 
-    resp = self.client.put(
-      self.get_order_url(order_id),
-      json=order_obj.model_dump(mode="json", by_alias=True, exclude_none=True),
-      headers=self.get_headers(),
+    resp = self.put_order(
+      order_id,
+      order_obj.model_dump(mode="json", by_alias=True, exclude_none=True),
     )
     self.assert_response_status(resp, 200)
 
@@ -484,10 +487,9 @@ class OrderTest(ShoppingIntegrationTestBase):
     order_obj.adjustments.append(adj)
 
     # Update Order
-    resp = self.client.put(
-      self.get_order_url(order_id),
-      json=order_obj.model_dump(mode="json", by_alias=True, exclude_none=True),
-      headers=self.get_headers(),
+    resp = self.put_order(
+      order_id,
+      order_obj.model_dump(mode="json", by_alias=True, exclude_none=True),
     )
     self.assert_response_status(resp, 200)
 
